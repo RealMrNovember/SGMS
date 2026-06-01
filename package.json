@@ -1,0 +1,17 @@
+{
+  "name": "sgms",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CiCiByte Smart Gym Management System — monorepo",
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "docker:up": "docker compose -f infra/docker/docker-compose.yml --env-file infra/docker/.env up -d",
+    "docker:down": "docker compose -f infra/docker/docker-compose.yml --env-file infra/docker/.env down",
+    "docker:logs": "docker compose -f infra/docker/docker-compose.yml --env-file infra/docker/.env logs -f",
+    "docker:ps": "docker compose -f infra/docker/docker-compose.yml --env-file infra/docker/.env ps"
+  }
+}

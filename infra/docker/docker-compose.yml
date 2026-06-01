@@ -1,0 +1,69 @@
+# SGMS — PostgreSQL 16 + Redis 7
+# Local:  infra/docker/.env  →  SGMS_DATA_DIR=infra/docker/data
+# VDS (aaPanel): /www/wwwroot/sgms.cicibyte.com/infra/docker/.env
+#                 SGMS_DATA_DIR=/www/wwwroot/sgms.cicibyte.com/data
+# Komşu site: license.cicibyte.com (ayrı dizin; bu stack yalnızca sgms altında)
+
+name: sgms
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: sgms-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-sgms}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-sgms_license}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "${POSTGRES_HOST_BIND:-127.0.0.1}:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sgms} -d ${POSTGRES_DB:-sgms_license}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - sgms-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: sgms-redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      --appendonly yes
+      --requirepass ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}
+    ports:
+      - "${REDIS_HOST_BIND:-127.0.0.1}:${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - sgms-net
+
+volumes:
+  postgres_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${SGMS_DATA_DIR:-./data}/postgres
+  redis_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${SGMS_DATA_DIR:-./data}/redis
+
+networks:
+  sgms-net:
+    driver: bridge

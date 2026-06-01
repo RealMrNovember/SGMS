@@ -1,0 +1,55 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+!**/.env.example
+*.pem
+*.key
+credentials.json
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# OS & editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json.example
+
+# Test & coverage
+coverage/
+.nyc_output/
+
+# Prisma (generated client in node_modules; local sqlite if any)
+*.db
+*.db-journal
+
+# Docker runtime data (bind mounts)
+infra/docker/data/
+**/data/postgres/
+**/data/redis/
+
+# Temp / local extracts
+blueprint-extract.txt
+git-log.txt
+*.local
+
+# NestJS / misc
+.temp/
+.cache/
