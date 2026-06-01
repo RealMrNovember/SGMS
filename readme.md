@@ -21,8 +21,8 @@ Strateji: **Local geliştir → Git push → VDS `git pull` (aaPanel `www:www`)*
 - [x] VDS volume yolu: `/www/wwwroot/sgms.cicibyte.com/data`
 - [x] `.gitignore` + `docs/deployment/vds-bootstrap.sh` (aaPanel `www:www`)
 - [x] `readme.md` Faz 1 checklist
-- [x] Git: `git init` (local)
-- [ ] **VDS: `/www/wwwroot/sgms.cicibyte.com` oluştur + `chown -R www:www`**
+- [x] Git: `git init` + ilk commit (local)
+- [ ] **VDS: `/www/wwwroot/sgms.cicibyte.com` oluştur + `chown -R www:www`** ← sizin Remote SSH adımınız
 - [ ] VDS: `data/postgres`, `data/redis` alt dizinleri
 - [ ] Git: ilk commit + remote + VDS `git clone`
 - [ ] VDS: `infra/docker/.env` (`.env.vds.example` kopyası)
