@@ -1,5 +1,6 @@
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 export default async function DashboardPage() {
@@ -32,8 +33,11 @@ export default async function DashboardPage() {
       <section className="card p-6">
         <h2 className="text-xl font-semibold">Hoş geldiniz</h2>
         <p className="muted mt-2 text-sm leading-6">
-          Web yönetim paneli auth iskeleti aktif. Sonraki adımda üye yönetimi, cihaz kaydı ve
-          merkezi lisans senkronizasyonu bu panele bağlanacak.
+          Tenant yönetim paneliniz aktif. Personel eklemek için{' '}
+          <Link href="/dashboard/team" className="text-sky-300 hover:underline">
+            Personel
+          </Link>{' '}
+          sayfasını kullanın.
         </p>
       </section>
 
@@ -74,7 +78,7 @@ export default async function DashboardPage() {
         <article className="card p-5">
           <h3 className="font-semibold">Ekip</h3>
           <ul className="muted mt-3 space-y-2 text-sm">
-            {organization?.members.map((member: (typeof organization.members)[number]) => (
+            {organization?.members.map((member) => (
               <li key={member.id}>
                 {member.user.name} · {member.role}
               </li>

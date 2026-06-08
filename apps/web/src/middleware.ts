@@ -4,8 +4,13 @@ import { NextResponse } from 'next/server';
 
 const { auth } = NextAuth(authConfig);
 
+function defaultDestination(isSuperAdmin: boolean) {
+  return isSuperAdmin ? '/admin' : '/dashboard';
+}
+
 export default auth((request) => {
   const isLoggedIn = !!request.auth;
+  const isSuperAdmin = request.auth?.user?.isSuperAdmin === true;
   const { pathname } = request.nextUrl;
 
   const isPublic =
@@ -20,7 +25,15 @@ export default auth((request) => {
   }
 
   if (isLoggedIn && pathname === '/login') {
+    return NextResponse.redirect(new URL(defaultDestination(isSuperAdmin), request.nextUrl.origin));
+  }
+
+  if (isLoggedIn && pathname.startsWith('/admin') && !isSuperAdmin) {
     return NextResponse.redirect(new URL('/dashboard', request.nextUrl.origin));
+  }
+
+  if (isLoggedIn && pathname.startsWith('/dashboard') && isSuperAdmin) {
+    return NextResponse.redirect(new URL('/admin', request.nextUrl.origin));
   }
 
   return NextResponse.next();

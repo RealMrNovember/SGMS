@@ -126,20 +126,10 @@ async function seedPlans() {
   console.log(`Seeded ${plans.length} plans (TRY / USD / AZN).`);
 }
 
-async function seedDemoTenant() {
-  if (process.env.SEED_DEMO_TENANT === 'false') {
-    return;
-  }
-
+async function seedSuperAdmin() {
   const adminEmail = process.env.SEED_ADMIN_EMAIL ?? 'admin@demo.sgms.local';
   const adminPassword = process.env.SEED_ADMIN_PASSWORD ?? 'Admin123!';
-
-  const starterPlan = await prisma.plan.findUniqueOrThrow({
-    where: { code_currency: { code: 'starter', currency: 'TRY' } },
-  });
-
   const passwordHash = await hash(adminPassword, 12);
-  const installationId = randomUUID();
 
   const user = await prisma.user.upsert({
     where: { email: adminEmail },
@@ -159,19 +149,60 @@ async function seedDemoTenant() {
     },
   });
 
+  await prisma.organizationMember.deleteMany({
+    where: { userId: user.id },
+  });
+
+  console.log(`Super Admin ready: ${adminEmail}`);
+}
+
+async function seedDemoTenant() {
+  if (process.env.SEED_DEMO_TENANT === 'false') {
+    return;
+  }
+
+  const ownerEmail = process.env.SEED_OWNER_EMAIL ?? 'owner@demo-gym.local';
+  const ownerPassword = process.env.SEED_OWNER_PASSWORD ?? 'Owner123!';
+
+  const starterPlan = await prisma.plan.findUniqueOrThrow({
+    where: { code_currency: { code: 'starter', currency: 'TRY' } },
+  });
+
+  const passwordHash = await hash(ownerPassword, 12);
+  const installationId = randomUUID();
+
   const organization = await prisma.organization.upsert({
     where: { slug: 'demo-gym' },
     update: {
       name: 'Demo Gym',
-      status: 'PENDING',
+      email: ownerEmail,
+      status: 'ACTIVE',
     },
     create: {
       name: 'Demo Gym',
       slug: 'demo-gym',
-      email: adminEmail,
+      email: ownerEmail,
       country: 'TR',
       installationId,
-      status: 'PENDING',
+      status: 'ACTIVE',
+    },
+  });
+
+  const owner = await prisma.user.upsert({
+    where: { email: ownerEmail },
+    update: {
+      name: 'Demo Gym Sahibi',
+      passwordHash,
+      status: 'ACTIVE',
+      isSuperAdmin: false,
+    },
+    create: {
+      email: ownerEmail,
+      name: 'Demo Gym Sahibi',
+      passwordHash,
+      status: 'ACTIVE',
+      isSuperAdmin: false,
+      locale: 'tr',
     },
   });
 
@@ -179,7 +210,7 @@ async function seedDemoTenant() {
     where: {
       organizationId_userId: {
         organizationId: organization.id,
-        userId: user.id,
+        userId: owner.id,
       },
     },
     update: {
@@ -189,7 +220,7 @@ async function seedDemoTenant() {
     },
     create: {
       organizationId: organization.id,
-      userId: user.id,
+      userId: owner.id,
       role: 'OWNER',
       isActive: true,
       joinedAt: new Date(),
@@ -220,11 +251,12 @@ async function seedDemoTenant() {
     });
   }
 
-  console.log(`Demo tenant ready: ${adminEmail}`);
+  console.log(`Demo gym owner ready: ${ownerEmail}`);
 }
 
 async function main() {
   await seedPlans();
+  await seedSuperAdmin();
   await seedDemoTenant();
 }
 

@@ -17,8 +17,9 @@ export default function LoginPage() {
         </Suspense>
 
         <p className="muted mt-6 text-xs leading-5">
-          Super Admin: <strong>admin@demo.sgms.local</strong> / <strong>Admin123!</strong> →{' '}
-          <strong>/admin</strong>
+          Super Admin: <strong>admin@demo.sgms.local</strong> / <strong>Admin123!</strong> → /admin
+          <br />
+          Gym Sahibi: <strong>owner@demo-gym.local</strong> / <strong>Owner123!</strong> → /dashboard
         </p>
       </div>
     </main>
