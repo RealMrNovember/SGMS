@@ -2,7 +2,12 @@ import { auth, signOut } from '@/lib/auth';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
-export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+const navItems = [
+  { href: '/dashboard', label: 'Özet' },
+  { href: '/dashboard/team', label: 'Personel' },
+];
+
+export default async function TenantDashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
   if (!session?.user) {
     redirect('/login');
@@ -12,22 +17,30 @@ export default async function DashboardLayout({ children }: { children: React.Re
     redirect('/admin');
   }
 
+  if (!session.user.organizationId) {
+    redirect('/login');
+  }
+
   return (
     <div className="min-h-screen">
       <header className="border-b border-[var(--border)] bg-[rgba(17,24,39,0.85)] backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
           <div>
             <p className="badge">CiCiByte SGMS</p>
-            <h1 className="mt-2 text-lg font-semibold">{session.user.organizationName ?? 'Organizasyon seçilmedi'}</h1>
+            <h1 className="mt-2 text-lg font-semibold">
+              {session.user.organizationName ?? 'Organizasyon seçilmedi'}
+            </h1>
             <p className="muted text-sm">
               {session.user.name} · {session.user.role ?? 'Rol yok'}
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <Link href="/dashboard" className="muted text-sm hover:text-white">
-              Dashboard
-            </Link>
+          <div className="flex items-center gap-4">
+            {navItems.map((item) => (
+              <Link key={item.href} href={item.href} className="muted text-sm hover:text-white">
+                {item.label}
+              </Link>
+            ))}
             <form
               action={async () => {
                 'use server';

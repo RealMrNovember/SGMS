@@ -17,8 +17,8 @@ export default function LoginPage() {
         </Suspense>
 
         <p className="muted mt-6 text-xs leading-5">
-          Demo hesap: <strong>admin@demo.sgms.local</strong> / seed parolası (varsayılan{' '}
-          <strong>Admin123!</strong>)
+          Super Admin: <strong>admin@demo.sgms.local</strong> / <strong>Admin123!</strong> →{' '}
+          <strong>/admin</strong>
         </p>
       </div>
     </main>

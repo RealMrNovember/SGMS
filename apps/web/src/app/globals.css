@@ -92,3 +92,51 @@ input {
   outline: 2px solid rgba(56, 189, 248, 0.35);
   outline-offset: 1px;
 }
+
+/* Super Admin — Quiet Luxury */
+.admin-shell {
+  --admin-gold: #c9a962;
+  --admin-gold-muted: rgba(201, 169, 98, 0.18);
+  --admin-surface: #0f1419;
+  --admin-elevated: #151b24;
+}
+
+.admin-sidebar {
+  background: linear-gradient(180deg, var(--admin-elevated), var(--admin-surface));
+  border-right: 1px solid var(--admin-gold-muted);
+}
+
+.admin-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  border-radius: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.admin-nav-link:hover,
+.admin-nav-link[data-active='true'] {
+  color: var(--foreground);
+  background: var(--admin-gold-muted);
+}
+
+.admin-kicker {
+  color: var(--admin-gold);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.admin-stat {
+  border: 1px solid var(--admin-gold-muted);
+  background: linear-gradient(145deg, rgba(21, 27, 36, 0.95), rgba(15, 20, 25, 0.95));
+}
+
+.button-gold {
+  background: linear-gradient(135deg, #c9a962, #a88b4a);
+  color: #0b1220;
+}

@@ -103,6 +103,7 @@ model User {
   email           String     @unique
   passwordHash    String     @map("password_hash")
   name            String
+  isSuperAdmin    Boolean    @default(false) @map("is_super_admin")
   status          UserStatus @default(ACTIVE)
   emailVerifiedAt DateTime?  @map("email_verified_at")
   lastLoginAt     DateTime?  @map("last_login_at")
@@ -115,6 +116,7 @@ model User {
   auditLogs   AuditLog[]           @relation("AuditLogActor")
 
   @@index([status])
+  @@index([isSuperAdmin])
   @@map("users")
 }
 

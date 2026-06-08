@@ -144,15 +144,17 @@ async function seedDemoTenant() {
   const user = await prisma.user.upsert({
     where: { email: adminEmail },
     update: {
-      name: 'Demo Admin',
+      name: 'CiCiByte Super Admin',
       passwordHash,
       status: 'ACTIVE',
+      isSuperAdmin: true,
     },
     create: {
       email: adminEmail,
-      name: 'Demo Admin',
+      name: 'CiCiByte Super Admin',
       passwordHash,
       status: 'ACTIVE',
+      isSuperAdmin: true,
       locale: 'tr',
     },
   });
