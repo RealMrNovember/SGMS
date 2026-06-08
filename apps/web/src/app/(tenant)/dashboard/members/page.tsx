@@ -70,17 +70,18 @@ export default async function MembersPage() {
           <table className="w-full min-w-[900px] text-left text-sm">
             <thead className="muted border-b border-[var(--border)] text-xs uppercase tracking-wide">
               <tr>
-                <th className="px-6 py-3 font-medium">Ad Soyad</th>
+                <th className="px-6 py-3 font-medium">Üye</th>
                 <th className="px-6 py-3 font-medium">TC / Tel</th>
                 <th className="px-6 py-3 font-medium">Plan</th>
                 <th className="px-6 py-3 font-medium">Durum</th>
                 <th className="px-6 py-3 font-medium">Üyelik Bitiş</th>
+                <th className="px-6 py-3 font-medium">Ölçümler</th>
               </tr>
             </thead>
             <tbody>
               {members.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="muted px-6 py-8 text-center">
+                  <td colSpan={6} className="muted px-6 py-8 text-center">
                     Henüz kayıtlı üye yok.
                   </td>
                 </tr>
@@ -88,9 +89,12 @@ export default async function MembersPage() {
                 members.map((member) => (
                   <tr key={member.id} className="border-b border-[var(--border)] last:border-none">
                     <td className="px-6 py-4">
-                      <p className="font-medium">
+                      <Link
+                        href={`/dashboard/members/${member.id}`}
+                        className="font-medium hover:text-white"
+                      >
                         {member.firstName} {member.lastName}
-                      </p>
+                      </Link>
                       <p className="muted text-xs">{member.email ?? '—'}</p>
                     </td>
                     <td className="px-6 py-4">
@@ -105,6 +109,14 @@ export default async function MembersPage() {
                       {member.membershipEndsAt
                         ? member.membershipEndsAt.toLocaleDateString('tr-TR')
                         : '—'}
+                    </td>
+                    <td className="px-6 py-4">
+                      <Link
+                        href={`/dashboard/members/${member.id}/measurements`}
+                        className="muted text-sm hover:text-white"
+                      >
+                        Görüntüle
+                      </Link>
                     </td>
                   </tr>
                 ))

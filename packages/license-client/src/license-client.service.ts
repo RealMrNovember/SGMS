@@ -4,7 +4,7 @@ import type {
   Prisma,
   PrismaClient,
 } from '@sgms/database';
-import { resolveLicenseClientConfig, licenseApiUrl } from './config.js';
+import { resolveLicenseClientConfig, licenseApiUrl, postJsonPreserveMethod, type LicenseEndpoint } from './config.js';
 import type {
   EnsureLicenseInput,
   EnsureLicenseResult,
@@ -14,6 +14,7 @@ import type {
   LicenseClientConfig,
 } from './types.js';
 
+/**
  * Merkezi lisans sunucusu (license.cicibyte.com) ile iletişim.
  *
  * Akış:
@@ -125,14 +126,27 @@ export class LicenseClientService {
     return result;
   }
 
-  /** Periyodik heartbeat — validate ile aynı endpoint (license sunucusu uyumluluğu). */
-  async heartbeat(installationId: string): Promise<LicenseCheckResult> {
-    const result = await this.validate(installationId);
+  /** Periyodik heartbeat — org kaydını günceller (cron). */
+  async refreshOrganizationLicense(organizationId: string): Promise<LicenseCheckResult> {
+    const organization = await this.prisma.organization.findUniqueOrThrow({
+      where: { id: organizationId },
+      select: { installationId: true },
+    });
 
-    if (result.ok) {
-      await this.writeAuditLog(null, 'LICENSE_HEARTBEAT', {
-        installationId,
-        expiresAt: result.payload?.expires_at,
+    const result = await this.validate(organization.installationId);
+
+    if (result.ok && result.payload) {
+      await this.syncOrganizationLicense(organizationId, result.payload);
+      await this.writeAuditLog(organizationId, 'LICENSE_HEARTBEAT', {
+        installationId: organization.installationId,
+        expiresAt: result.payload.expires_at,
+      });
+    } else {
+      await this.markLicenseExpired(organizationId, result.message);
+      await this.writeAuditLog(organizationId, 'LICENSE_EXPIRED', {
+        installationId: organization.installationId,
+        reason: result.message,
+        source: 'heartbeat',
       });
     }
 
@@ -140,14 +154,14 @@ export class LicenseClientService {
   }
 
   async startTrial(installationId: string): Promise<LicenseCheckResult & { licenseKey?: string }> {
-    return this.postLicenseEndpoint('/v1/license/trial', {
+    return this.postLicenseEndpoint('trial', {
       app_code: this.config.appCode,
       hwid: installationId,
     });
   }
 
   async activate(installationId: string, licenseKey: string): Promise<LicenseCheckResult> {
-    return this.postLicenseEndpoint('/v1/license/activate', {
+    return this.postLicenseEndpoint('activate', {
       app_code: this.config.appCode,
       license_key: licenseKey,
       hwid: installationId,
@@ -155,14 +169,14 @@ export class LicenseClientService {
   }
 
   async validate(installationId: string): Promise<LicenseCheckResult> {
-    return this.postLicenseEndpoint('/v1/license/check', {
+    return this.postLicenseEndpoint('check', {
       app_code: this.config.appCode,
       hwid: installationId,
     });
   }
 
   private async postLicenseEndpoint(
-    path: string,
+    endpoint: LicenseEndpoint,
     body: Record<string, string>,
   ): Promise<LicenseCheckResult & { licenseKey?: string }> {
     const controller = new AbortController();
@@ -175,23 +189,36 @@ export class LicenseClientService {
       };
 
       if (this.config.apiKey) {
-        headers['X-Api-Key'] = this.config.apiKey;
+        headers['X-Api-Key'] = this.config.apiKey.trim();
       }
 
-      const response = await fetch(licenseApiUrl(this.config.baseUrl, path), {
-        method: 'POST',
+      const response = await postJsonPreserveMethod(licenseApiUrl(this.config.baseUrl, endpoint), {
         headers,
         body: JSON.stringify(body),
         signal: controller.signal,
       });
 
-      const json = (await response.json()) as LicenseApiResponse;
+      const rawText = await response.text();
+      let json: LicenseApiResponse;
+      try {
+        json = JSON.parse(rawText) as LicenseApiResponse;
+      } catch {
+        return {
+          ok: false,
+          statusCode: response.status,
+          message: rawText.slice(0, 240) || `Lisans API hatası (${response.status}).`,
+        };
+      }
 
       if (!response.ok || !json.success || !json.data) {
         return {
           ok: false,
           statusCode: response.status,
-          message: json.message ?? `Lisans API hatası (${response.status}).`,
+          message:
+            json.message ??
+            (typeof json.data === 'object' && json.data !== null
+              ? JSON.stringify(json.data).slice(0, 200)
+              : `Lisans API hatası (${response.status}).`),
         };
       }
 

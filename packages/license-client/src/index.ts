@@ -1,5 +1,6 @@
 export { LicenseClientService } from './license-client.service.js';
-export { resolveLicenseClientConfig, licenseApiUrl } from './config.js';
+export { resolveLicenseClientConfig, licenseApiUrl, postJsonPreserveMethod, normalizeLicenseBaseUrl } from './config.js';
+export type { LicenseEndpoint } from './config.js';
 export type {
   LicenseClientConfig,
   LicenseApiPayload,

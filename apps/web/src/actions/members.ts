@@ -2,6 +2,7 @@
 
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { assertWithinMemberLimit, getTenantWriteBlockReason } from '@/lib/tenant-access';
 import type { Gender, GymMemberStatus, OrganizationRole } from '@sgms/database';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
@@ -69,6 +70,11 @@ export async function addGymMember(
     return { error: context.error };
   }
 
+  const writeBlock = await getTenantWriteBlockReason(context.organizationId);
+  if (writeBlock) {
+    return { error: writeBlock };
+  }
+
   const parsed = addGymMemberSchema.safeParse({
     firstName: formData.get('firstName'),
     lastName: formData.get('lastName'),
@@ -101,18 +107,7 @@ export async function addGymMember(
   const birthDate = parseOptionalDate(data.birthDate || undefined);
   const membershipStartsAt = parseOptionalDate(data.membershipStartsAt || undefined) ?? new Date();
 
-  const [memberCount, subscription, plan, nationalIdTaken] = await Promise.all([
-    prisma.gymMember.count({
-      where: { organizationId: context.organizationId, status: { not: 'INACTIVE' } },
-    }),
-    prisma.subscription.findFirst({
-      where: {
-        organizationId: context.organizationId,
-        status: { in: ['TRIALING', 'ACTIVE'] },
-      },
-      include: { plan: true },
-      orderBy: { createdAt: 'desc' },
-    }),
+  const [plan, nationalIdTaken] = await Promise.all([
     data.planId
       ? prisma.gymMembershipPlan.findFirst({
           where: {
@@ -142,9 +137,9 @@ export async function addGymMember(
     return { fieldErrors: { planId: 'Geçerli bir salon üyelik planı seçin.' } };
   }
 
-  const maxMembers = subscription?.plan.maxMembers ?? 0;
-  if (memberCount >= maxMembers) {
-    return { error: `SaaS plan üye limitine ulaşıldı (maks. ${maxMembers}).` };
+  const memberLimitError = await assertWithinMemberLimit(context.organizationId);
+  if (memberLimitError) {
+    return { error: memberLimitError };
   }
 
   let membershipEndsAt: Date | null = null;

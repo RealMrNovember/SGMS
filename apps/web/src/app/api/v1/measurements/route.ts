@@ -1,4 +1,4 @@
-import { canReadHealthData, requireTenantApiContext } from '@/lib/api/guard';
+import { canReadHealthData, requireTenantApiContext, requireTenantWriteAccess } from '@/lib/api/guard';
 import { apiError, apiOk } from '@/lib/api/response';
 import { prisma } from '@/lib/prisma';
 
@@ -35,6 +35,11 @@ export async function POST(request: Request) {
   }
 
   const { organizationId, role, userId } = authResult.context;
+
+  const writeBlock = await requireTenantWriteAccess(organizationId);
+  if (writeBlock) {
+    return writeBlock.response;
+  }
 
   if (!canReadHealthData(role)) {
     return apiError('Ölçüm eklemek için yetkiniz yok.', 403);

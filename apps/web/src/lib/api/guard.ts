@@ -1,4 +1,5 @@
 import { auth } from '@/lib/auth';
+import { getTenantWriteBlockReason } from '@/lib/tenant-access';
 import type { OrganizationRole } from '@sgms/database';
 import { apiError } from '@/lib/api/response';
 
@@ -63,4 +64,12 @@ export function canManagePrograms(role: OrganizationRole) {
 
 export function canReadHealthData(role: OrganizationRole) {
   return STAFF_ROLES.has(role);
+}
+
+export async function requireTenantWriteAccess(organizationId: string) {
+  const reason = await getTenantWriteBlockReason(organizationId);
+  if (reason) {
+    return { response: apiError(reason, 403) } as const;
+  }
+  return null;
 }

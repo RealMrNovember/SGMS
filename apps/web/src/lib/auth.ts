@@ -3,6 +3,7 @@ import Credentials from 'next-auth/providers/credentials';
 import { compare } from 'bcryptjs';
 import { z } from 'zod';
 import { authConfig } from '@/lib/auth.config';
+import { syncLicenseOnLogin } from '@/lib/license';
 import { prisma } from '@/lib/prisma';
 
 const credentialsSchema = z.object({
@@ -30,7 +31,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           include: {
             memberships: {
               where: { isActive: true },
-              include: { organization: true },
+              include: {
+                organization: {
+                  select: { id: true, name: true, installationId: true },
+                },
+              },
               orderBy: { createdAt: 'asc' },
               take: 1,
             },
@@ -62,6 +67,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             entityId: user.id,
           },
         });
+
+        if (!user.isSuperAdmin && membership?.organization) {
+          void syncLicenseOnLogin(membership.organization.id, membership.organization.installationId);
+        }
 
         return {
           id: user.id,

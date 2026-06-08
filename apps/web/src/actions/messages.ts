@@ -1,0 +1,126 @@
+'use server';
+
+import { auth } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
+import { getTenantWriteBlockReason } from '@/lib/tenant-access';
+import { revalidatePath } from 'next/cache';
+import { z } from 'zod';
+
+const sendMessageSchema = z.object({
+  receiverId: z.string().cuid(),
+  content: z.string().min(1).max(4000),
+});
+
+export type SendMessageState = {
+  error?: string;
+  success?: string;
+  fieldErrors?: Partial<Record<string, string>>;
+};
+
+async function getMessageContext() {
+  const session = await auth();
+  if (!session?.user || session.user.isSuperAdmin) {
+    return { error: 'Bu işlem için tenant oturumu gerekir.' as const };
+  }
+
+  const organizationId = session.user.organizationId;
+  const userId = session.user.id;
+
+  if (!organizationId) {
+    return { error: 'Aktif salon bulunamadı.' as const };
+  }
+
+  return { organizationId, userId };
+}
+
+export async function sendDirectMessage(
+  _prevState: SendMessageState,
+  formData: FormData,
+): Promise<SendMessageState> {
+  const context = await getMessageContext();
+  if ('error' in context) {
+    return { error: context.error };
+  }
+
+  const writeBlock = await getTenantWriteBlockReason(context.organizationId);
+  if (writeBlock) {
+    return { error: writeBlock };
+  }
+
+  const parsed = sendMessageSchema.safeParse({
+    receiverId: formData.get('receiverId'),
+    content: formData.get('content'),
+  });
+
+  if (!parsed.success) {
+    const fieldErrors: SendMessageState['fieldErrors'] = {};
+    for (const issue of parsed.error.issues) {
+      const field = issue.path[0];
+      if (typeof field === 'string') {
+        fieldErrors[field] = issue.message;
+      }
+    }
+    return { error: 'Lütfen form alanlarını kontrol edin.', fieldErrors };
+  }
+
+  const { receiverId, content } = parsed.data;
+
+  if (receiverId === context.userId) {
+    return { error: 'Kendinize mesaj gönderemezsiniz.' };
+  }
+
+  const [receiverMembership, receiverAthlete] = await Promise.all([
+    prisma.organizationMember.findFirst({
+      where: { organizationId: context.organizationId, userId: receiverId, isActive: true },
+    }),
+    prisma.gymMember.findFirst({
+      where: { organizationId: context.organizationId, userId: receiverId, status: 'ACTIVE' },
+    }),
+  ]);
+
+  if (!receiverMembership && !receiverAthlete) {
+    return { error: 'Alıcı bu salonda bulunamadı.' };
+  }
+
+  await prisma.directMessage.create({
+    data: {
+      organizationId: context.organizationId,
+      senderId: context.userId,
+      receiverId,
+      content: content.trim(),
+    },
+  });
+
+  revalidatePath('/dashboard/messages');
+
+  return { success: 'Mesaj gönderildi.' };
+}
+
+export async function markMessageRead(messageId: string): Promise<{ error?: string }> {
+  const context = await getMessageContext();
+  if ('error' in context) {
+    return { error: context.error };
+  }
+
+  const message = await prisma.directMessage.findFirst({
+    where: {
+      id: messageId,
+      organizationId: context.organizationId,
+      receiverId: context.userId,
+    },
+  });
+
+  if (!message) {
+    return { error: 'Mesaj bulunamadı.' };
+  }
+
+  if (!message.isRead) {
+    await prisma.directMessage.update({
+      where: { id: messageId },
+      data: { isRead: true },
+    });
+  }
+
+  revalidatePath('/dashboard/messages');
+  return {};
+}

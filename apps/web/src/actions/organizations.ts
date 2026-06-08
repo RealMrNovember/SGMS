@@ -1,6 +1,7 @@
 'use server';
 
 import { auth } from '@/lib/auth';
+import { bootstrapOrganizationLicense } from '@/lib/license';
 import { prisma } from '@/lib/prisma';
 import { slugify } from '@/lib/slug';
 import { hash } from 'bcryptjs';
@@ -141,6 +142,8 @@ export async function createOrganization(
 
     return org;
   });
+
+  await bootstrapOrganizationLicense(organization.id, organization.installationId);
 
   revalidatePath('/admin');
   redirect(`/admin?created=${organization.slug}`);

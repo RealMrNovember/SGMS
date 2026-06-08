@@ -2,6 +2,7 @@
 
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { assertWithinStaffLimit, getTenantWriteBlockReason } from '@/lib/tenant-access';
 import type { OrganizationRole } from '@sgms/database';
 import { hash } from 'bcryptjs';
 import { revalidatePath } from 'next/cache';
@@ -54,6 +55,11 @@ export async function inviteTeamMember(
     return { error: context.error };
   }
 
+  const writeBlock = await getTenantWriteBlockReason(context.organizationId);
+  if (writeBlock) {
+    return { error: writeBlock };
+  }
+
   const parsed = inviteTeamMemberSchema.safeParse({
     name: formData.get('name'),
     email: formData.get('email'),
@@ -74,39 +80,22 @@ export async function inviteTeamMember(
   const data = parsed.data;
   const email = data.email.toLowerCase();
 
-  const [existingUser, staffCount, subscription] = await Promise.all([
-    prisma.user.findUnique({
-      where: { email },
-      include: {
-        memberships: {
-          where: { organizationId: context.organizationId, isActive: true },
-        },
+  const existingUser = await prisma.user.findUnique({
+    where: { email },
+    include: {
+      memberships: {
+        where: { organizationId: context.organizationId, isActive: true },
       },
-    }),
-    prisma.organizationMember.count({
-      where: {
-        organizationId: context.organizationId,
-        isActive: true,
-        role: { in: [...INVITABLE_ROLES, 'ADMIN'] },
-      },
-    }),
-    prisma.subscription.findFirst({
-      where: {
-        organizationId: context.organizationId,
-        status: { in: ['TRIALING', 'ACTIVE'] },
-      },
-      include: { plan: true },
-      orderBy: { createdAt: 'desc' },
-    }),
-  ]);
+    },
+  });
 
   if (existingUser?.memberships.length) {
     return { fieldErrors: { email: 'Bu kullanıcı zaten organizasyonda kayıtlı.' } };
   }
 
-  const maxStaff = subscription?.plan.maxStaff ?? 0;
-  if (staffCount >= maxStaff) {
-    return { error: `Plan personel limitine ulaşıldı (maks. ${maxStaff}).` };
+  const staffLimitError = await assertWithinStaffLimit(context.organizationId);
+  if (staffLimitError) {
+    return { error: staffLimitError };
   }
 
   const passwordHash = await hash(DEFAULT_STAFF_PASSWORD, 12);

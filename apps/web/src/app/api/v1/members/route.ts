@@ -1,6 +1,7 @@
-import { canManageMembers, requireTenantApiContext } from '@/lib/api/guard';
+import { canManageMembers, requireTenantApiContext, requireTenantWriteAccess } from '@/lib/api/guard';
 import { apiError, apiOk } from '@/lib/api/response';
 import { prisma } from '@/lib/prisma';
+import { assertWithinMemberLimit } from '@/lib/tenant-access';
 
 export async function GET() {
   const authResult = await requireTenantApiContext();
@@ -32,8 +33,18 @@ export async function POST(request: Request) {
 
   const { organizationId, role, userId } = authResult.context;
 
+  const writeBlock = await requireTenantWriteAccess(organizationId);
+  if (writeBlock) {
+    return writeBlock.response;
+  }
+
   if (!canManageMembers(role)) {
     return apiError('Üye oluşturmak için OWNER, ADMIN veya STAFF rolü gerekir.', 403);
+  }
+
+  const memberLimitError = await assertWithinMemberLimit(organizationId);
+  if (memberLimitError) {
+    return apiError(memberLimitError, 403);
   }
 
   let body: Record<string, unknown>;

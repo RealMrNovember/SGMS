@@ -32,6 +32,9 @@ module.exports = {
       out_file: path.join(LOG_DIR, 'out.log'),
       merge_logs: true,
       time: true,
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+      max_size: '20M',
+      retain: 10,
     },
   ],
 };

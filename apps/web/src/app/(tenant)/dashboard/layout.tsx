@@ -1,10 +1,15 @@
+import { LicenseStatusBanner } from '@/components/license-status-banner';
 import { auth, signOut } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 const navItems = [
   { href: '/dashboard', label: 'Özet' },
   { href: '/dashboard/members', label: 'Üyeler' },
+  { href: '/dashboard/plans', label: 'Planlar' },
+  { href: '/dashboard/programs', label: 'Programlar' },
+  { href: '/dashboard/messages', label: 'Mesajlar' },
   { href: '/dashboard/team', label: 'Personel' },
 ];
 
@@ -22,8 +27,27 @@ export default async function TenantDashboardLayout({ children }: { children: Re
     redirect('/login');
   }
 
+  const organization = await prisma.organization.findUnique({
+    where: { id: session.user.organizationId },
+    select: {
+      centralLicenseStatus: true,
+      licenseExpiresAt: true,
+      status: true,
+      lastLicenseCheckAt: true,
+    },
+  });
+
   return (
     <div className="min-h-screen">
+      {organization ? (
+        <LicenseStatusBanner
+          status={organization.centralLicenseStatus}
+          licenseExpiresAt={organization.licenseExpiresAt}
+          organizationStatus={organization.status}
+          lastLicenseCheckAt={organization.lastLicenseCheckAt}
+        />
+      ) : null}
+
       <header className="border-b border-[var(--border)] bg-[rgba(17,24,39,0.85)] backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
           <div>

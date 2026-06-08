@@ -1,4 +1,4 @@
-import { requireTenantApiContext } from '@/lib/api/guard';
+import { requireTenantApiContext, requireTenantWriteAccess } from '@/lib/api/guard';
 import { apiError, apiOk } from '@/lib/api/response';
 import { prisma } from '@/lib/prisma';
 
@@ -40,6 +40,11 @@ export async function POST(request: Request) {
   }
 
   const { organizationId, userId } = authResult.context;
+
+  const writeBlock = await requireTenantWriteAccess(organizationId);
+  if (writeBlock) {
+    return writeBlock.response;
+  }
 
   let body: Record<string, unknown>;
   try {

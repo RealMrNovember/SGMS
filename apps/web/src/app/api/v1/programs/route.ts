@@ -1,4 +1,4 @@
-import { canManagePrograms, requireTenantApiContext } from '@/lib/api/guard';
+import { canManagePrograms, requireTenantApiContext, requireTenantWriteAccess } from '@/lib/api/guard';
 import { apiError, apiOk } from '@/lib/api/response';
 import { prisma } from '@/lib/prisma';
 import type { ProgramType } from '@sgms/database';
@@ -38,6 +38,11 @@ export async function POST(request: Request) {
   }
 
   const { organizationId, role, userId } = authResult.context;
+
+  const writeBlock = await requireTenantWriteAccess(organizationId);
+  if (writeBlock) {
+    return writeBlock.response;
+  }
 
   if (!canManagePrograms(role)) {
     return apiError('Program atamak için TRAINER, ADMIN veya OWNER rolü gerekir.', 403);
