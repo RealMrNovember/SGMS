@@ -254,6 +254,180 @@ async function seedDemoTenant() {
   console.log(`Demo gym owner ready: ${ownerEmail}`);
 
   await seedGymMembershipPlans(organization.id);
+  await seedDemoGymEcosystem(organization.id);
+}
+
+async function seedDemoGymEcosystem(organizationId: string) {
+  const trainerEmail = process.env.SEED_TRAINER_EMAIL ?? 'trainer@demo-gym.local';
+  const trainerPassword = process.env.SEED_TRAINER_PASSWORD ?? 'Trainer123!';
+  const athleteEmail = process.env.SEED_ATHLETE_EMAIL ?? 'athlete@demo-gym.local';
+  const athletePassword = process.env.SEED_ATHLETE_PASSWORD ?? 'Athlete123!';
+
+  const trainerPasswordHash = await hash(trainerPassword, 12);
+  const athletePasswordHash = await hash(athletePassword, 12);
+
+  const trainer = await prisma.user.upsert({
+    where: { email: trainerEmail },
+    update: {
+      name: 'Demo PT Antrenör',
+      passwordHash: trainerPasswordHash,
+      status: 'ACTIVE',
+      isSuperAdmin: false,
+    },
+    create: {
+      email: trainerEmail,
+      name: 'Demo PT Antrenör',
+      passwordHash: trainerPasswordHash,
+      status: 'ACTIVE',
+      isSuperAdmin: false,
+      locale: 'tr',
+    },
+  });
+
+  await prisma.organizationMember.upsert({
+    where: {
+      organizationId_userId: {
+        organizationId,
+        userId: trainer.id,
+      },
+    },
+    update: {
+      role: 'TRAINER',
+      isActive: true,
+      joinedAt: new Date(),
+    },
+    create: {
+      organizationId,
+      userId: trainer.id,
+      role: 'TRAINER',
+      isActive: true,
+      joinedAt: new Date(),
+    },
+  });
+
+  const athleteUser = await prisma.user.upsert({
+    where: { email: athleteEmail },
+    update: {
+      name: 'Ayşe Yılmaz',
+      passwordHash: athletePasswordHash,
+      status: 'ACTIVE',
+      isSuperAdmin: false,
+    },
+    create: {
+      email: athleteEmail,
+      name: 'Ayşe Yılmaz',
+      passwordHash: athletePasswordHash,
+      status: 'ACTIVE',
+      isSuperAdmin: false,
+      locale: 'tr',
+    },
+  });
+
+  const membershipPlan = await prisma.gymMembershipPlan.findFirstOrThrow({
+    where: { organizationId, name: '1 Aylık Sınırsız' },
+  });
+
+  const gymMember = await prisma.gymMember.upsert({
+    where: {
+      organizationId_nationalId: {
+        organizationId,
+        nationalId: '12345678901',
+      },
+    },
+    update: {
+      firstName: 'Ayşe',
+      lastName: 'Yılmaz',
+      email: athleteEmail,
+      phone: '+905551112233',
+      trainerId: trainer.id,
+      userId: athleteUser.id,
+      planId: membershipPlan.id,
+      status: 'ACTIVE',
+      gender: 'FEMALE',
+      birthDate: new Date('1998-04-12'),
+      membershipStartsAt: new Date(),
+      membershipEndsAt: new Date(Date.now() + membershipPlan.durationDays * 24 * 60 * 60 * 1000),
+    },
+    create: {
+      organizationId,
+      firstName: 'Ayşe',
+      lastName: 'Yılmaz',
+      nationalId: '12345678901',
+      email: athleteEmail,
+      phone: '+905551112233',
+      trainerId: trainer.id,
+      userId: athleteUser.id,
+      planId: membershipPlan.id,
+      status: 'ACTIVE',
+      gender: 'FEMALE',
+      birthDate: new Date('1998-04-12'),
+      membershipStartsAt: new Date(),
+      membershipEndsAt: new Date(Date.now() + membershipPlan.durationDays * 24 * 60 * 60 * 1000),
+    },
+  });
+
+  const existingMeasurement = await prisma.healthMeasurement.findFirst({
+    where: { organizationId, gymMemberId: gymMember.id },
+    orderBy: { measuredAt: 'desc' },
+  });
+
+  if (!existingMeasurement) {
+    await prisma.healthMeasurement.create({
+      data: {
+        organizationId,
+        gymMemberId: gymMember.id,
+        weight: 62.5,
+        bodyFatPercentage: 24.2,
+        muscleMass: 28.4,
+        height: 168,
+        notes: 'İlk demo ölçüm — seed',
+        measuredAt: new Date(),
+      },
+    });
+  }
+
+  const existingProgram = await prisma.trainingProgram.findFirst({
+    where: {
+      organizationId,
+      gymMemberId: gymMember.id,
+      title: 'Haftalık Üst Vücut Programı',
+    },
+  });
+
+  if (!existingProgram) {
+    await prisma.trainingProgram.create({
+      data: {
+        organizationId,
+        gymMemberId: gymMember.id,
+        trainerId: trainer.id,
+        title: 'Haftalık Üst Vücut Programı',
+        type: 'WORKOUT',
+        content: {
+          days: [
+            {
+              name: 'Pazartesi',
+              exercises: [
+                { name: 'Bench Press', sets: 4, reps: 10 },
+                { name: 'Lat Pulldown', sets: 3, reps: 12 },
+              ],
+            },
+            {
+              name: 'Çarşamba',
+              exercises: [
+                { name: 'Shoulder Press', sets: 3, reps: 10 },
+                { name: 'Dumbbell Row', sets: 3, reps: 12 },
+              ],
+            },
+          ],
+        },
+        startDate: new Date(),
+        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        isActive: true,
+      },
+    });
+  }
+
+  console.log(`Demo ecosystem ready: trainer=${trainerEmail}, athlete=${athleteEmail}`);
 }
 
 async function seedGymMembershipPlans(organizationId: string) {

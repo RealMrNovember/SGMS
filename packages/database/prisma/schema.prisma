@@ -1,5 +1,8 @@
-// SGMS — Faz 1 veritabanı şeması
+// SGMS — Core ekosistem veritabanı şeması
 // PostgreSQL 16 — infra/docker/docker-compose.yml
+//
+// Multi-tenant kuralı: tenant-scoped modeller organizationId taşır.
+// gymMemberId / trainerId / userId erişimleri API katmanında aynı org ile doğrulanır.
 
 generator client {
   provider = "prisma-client-js"
@@ -108,6 +111,11 @@ enum Gender {
   UNSPECIFIED
 }
 
+enum ProgramType {
+  WORKOUT
+  NUTRITION
+}
+
 // ---------------------------------------------------------------------------
 // User — platform kullanıcıları (web panel girişi)
 // ---------------------------------------------------------------------------
@@ -126,8 +134,13 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  memberships OrganizationMember[]
-  auditLogs   AuditLog[]           @relation("AuditLogActor")
+  memberships        OrganizationMember[]
+  auditLogs          AuditLog[]           @relation("AuditLogActor")
+  gymMemberProfile   GymMember?           @relation("GymMemberAccount")
+  assignedAthletes   GymMember[]          @relation("GymMemberTrainer")
+  trainingPrograms   TrainingProgram[]    @relation("TrainingProgramTrainer")
+  sentMessages       DirectMessage[]      @relation("DirectMessageSender")
+  receivedMessages   DirectMessage[]      @relation("DirectMessageReceiver")
 
   @@index([status])
   @@index([isSuperAdmin])
@@ -169,6 +182,9 @@ model Organization {
   auditLogs          AuditLog[]
   gymMembershipPlans GymMembershipPlan[]
   gymMembers         GymMember[]
+  healthMeasurements HealthMeasurement[]
+  trainingPrograms   TrainingProgram[]
+  directMessages     DirectMessage[]
 
   @@index([status])
   @@index([centralLicenseStatus])
@@ -323,6 +339,8 @@ model GymMember {
   id             String          @id @default(cuid())
   organizationId String          @map("organization_id")
   planId         String?         @map("plan_id")
+  userId         String?         @unique @map("user_id")
+  trainerId      String?         @map("trainer_id")
   firstName      String          @map("first_name")
   lastName       String          @map("last_name")
   nationalId     String?         @map("national_id")
@@ -338,15 +356,101 @@ model GymMember {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  organization Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  plan         GymMembershipPlan? @relation(fields: [planId], references: [id], onDelete: SetNull)
+  organization       Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  plan               GymMembershipPlan?  @relation(fields: [planId], references: [id], onDelete: SetNull)
+  user               User?               @relation("GymMemberAccount", fields: [userId], references: [id], onDelete: SetNull)
+  trainer            User?               @relation("GymMemberTrainer", fields: [trainerId], references: [id], onDelete: SetNull)
+  healthMeasurements HealthMeasurement[]
+  trainingPrograms   TrainingProgram[]
 
   @@unique([organizationId, nationalId])
   @@index([organizationId, status])
   @@index([organizationId, lastName, firstName])
+  @@index([organizationId, trainerId])
+  @@index([trainerId])
+  @@index([userId])
   @@index([phone])
   @@index([email])
   @@map("gym_members")
+}
+
+// ---------------------------------------------------------------------------
+// HealthMeasurement — sağlık ve performans ölçümleri
+// ---------------------------------------------------------------------------
+
+model HealthMeasurement {
+  id                 String   @id @default(cuid())
+  organizationId     String   @map("organization_id")
+  gymMemberId        String   @map("gym_member_id")
+  weight             Decimal? @db.Decimal(5, 2)
+  bodyFatPercentage  Decimal? @map("body_fat_percentage") @db.Decimal(5, 2)
+  muscleMass         Decimal? @map("muscle_mass") @db.Decimal(5, 2)
+  height             Decimal? @db.Decimal(5, 2)
+  notes              String?  @db.Text
+  measuredAt         DateTime @map("measured_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  gymMember    GymMember    @relation(fields: [gymMemberId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, gymMemberId, measuredAt])
+  @@index([gymMemberId, measuredAt])
+  @@map("health_measurements")
+}
+
+// ---------------------------------------------------------------------------
+// TrainingProgram — antrenörün sporculara atadığı programlar
+// ---------------------------------------------------------------------------
+
+model TrainingProgram {
+  id             String      @id @default(cuid())
+  organizationId String      @map("organization_id")
+  gymMemberId    String      @map("gym_member_id")
+  trainerId      String      @map("trainer_id")
+  title          String
+  type           ProgramType
+  content        Json        @default("{}")
+  startDate      DateTime    @map("start_date") @db.Date
+  endDate        DateTime?   @map("end_date") @db.Date
+  isActive       Boolean     @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  gymMember    GymMember    @relation(fields: [gymMemberId], references: [id], onDelete: Cascade)
+  trainer      User         @relation("TrainingProgramTrainer", fields: [trainerId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, gymMemberId, isActive])
+  @@index([organizationId, trainerId, isActive])
+  @@index([gymMemberId, type, isActive])
+  @@index([trainerId, startDate])
+  @@map("training_programs")
+}
+
+// ---------------------------------------------------------------------------
+// DirectMessage — tenant içi mesajlaşma (PT ↔ sporcu ↔ yönetim)
+// ---------------------------------------------------------------------------
+
+model DirectMessage {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  senderId       String   @map("sender_id")
+  receiverId     String   @map("receiver_id")
+  content        String   @db.Text
+  isRead         Boolean  @default(false) @map("is_read")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  sender       User         @relation("DirectMessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver     User         @relation("DirectMessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, receiverId, isRead, createdAt])
+  @@index([organizationId, senderId, createdAt])
+  @@index([organizationId, senderId, receiverId, createdAt])
+  @@map("direct_messages")
 }
 
 // ---------------------------------------------------------------------------

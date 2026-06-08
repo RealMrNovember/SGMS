@@ -18,6 +18,12 @@ export default auth((request) => {
     pathname.startsWith('/api/auth') ||
     pathname === '/';
 
+  const isApiV1 = pathname.startsWith('/api/v1');
+
+  if (!isLoggedIn && isApiV1) {
+    return NextResponse.json({ ok: false, error: 'Kimlik doğrulama gerekli.' }, { status: 401 });
+  }
+
   if (!isLoggedIn && !isPublic) {
     const loginUrl = new URL('/login', request.nextUrl.origin);
     loginUrl.searchParams.set('callbackUrl', pathname);
