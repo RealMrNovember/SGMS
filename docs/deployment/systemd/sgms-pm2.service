@@ -1,0 +1,19 @@
+[Unit]
+Description=SGMS Next.js via PM2 (sgms.cicibyte.com only)
+After=network.target
+
+[Service]
+Type=forking
+User=www
+Group=www
+Environment=PATH=/www/wwwroot/sgms.cicibyte.com/.tools/node/bin:/usr/local/bin:/usr/bin:/bin
+Environment=PM2_HOME=/www/wwwroot/sgms.cicibyte.com/.pm2
+WorkingDirectory=/www/wwwroot/sgms.cicibyte.com
+ExecStart=/www/wwwroot/sgms.cicibyte.com/node_modules/.bin/pm2 resurrect
+ExecReload=/www/wwwroot/sgms.cicibyte.com/node_modules/.bin/pm2 reload sgms-web
+ExecStop=/www/wwwroot/sgms.cicibyte.com/node_modules/.bin/pm2 stop sgms-web
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

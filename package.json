@@ -12,6 +12,17 @@
     "docker:up": "docker compose -f infra/docker/docker-compose.yml --env-file infra/docker/.env up -d",
     "docker:down": "docker compose -f infra/docker/docker-compose.yml --env-file infra/docker/.env down",
     "docker:logs": "docker compose -f infra/docker/docker-compose.yml --env-file infra/docker/.env logs -f",
-    "docker:ps": "docker compose -f infra/docker/docker-compose.yml --env-file infra/docker/.env ps"
+    "docker:ps": "docker compose -f infra/docker/docker-compose.yml --env-file infra/docker/.env ps",
+    "db:generate": "pnpm --filter @sgms/database db:generate",
+    "db:migrate": "pnpm --filter @sgms/database db:migrate",
+    "db:seed": "pnpm --filter @sgms/database db:seed",
+    "build:packages": "pnpm --filter @sgms/database build && pnpm --filter @sgms/license-client build",
+    "web:dev": "pnpm --filter @sgms/web dev",
+    "web:build": "pnpm --filter @sgms/web build",
+    "web:start": "pnpm --filter @sgms/web start",
+    "pm2:start": "PM2_HOME=.pm2 PATH=\"$PWD/.tools/node/bin:$PATH\" node_modules/.bin/pm2 start ecosystem.config.cjs --update-env",
+    "pm2:reload": "PM2_HOME=.pm2 PATH=\"$PWD/.tools/node/bin:$PATH\" node_modules/.bin/pm2 reload sgms-web --update-env",
+    "pm2:logs": "PM2_HOME=.pm2 node_modules/.bin/pm2 logs sgms-web",
+    "pm2:status": "PM2_HOME=.pm2 node_modules/.bin/pm2 status"
   }
 }

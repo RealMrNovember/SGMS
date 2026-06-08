@@ -1,0 +1,37 @@
+/** @type {import('pm2').StartOptions[]} */
+const path = require('path');
+
+const APP_ROOT = __dirname;
+const NODE_BIN = path.join(APP_ROOT, '.tools/node/bin/node');
+const LOG_DIR = path.join(APP_ROOT, 'logs/pm2');
+
+module.exports = {
+  apps: [
+    {
+      name: 'sgms-web',
+      cwd: path.join(APP_ROOT, 'apps/web'),
+      script: path.join(APP_ROOT, 'node_modules/next/dist/bin/next'),
+      args: 'start --port 3100 --hostname 127.0.0.1',
+      interpreter: NODE_BIN,
+      env: {
+        NODE_ENV: 'production',
+        PORT: '3100',
+        HOSTNAME: '127.0.0.1',
+      },
+      instances: 1,
+      exec_mode: 'fork',
+      autorestart: true,
+      watch: false,
+      max_restarts: 20,
+      min_uptime: '10s',
+      restart_delay: 3000,
+      max_memory_restart: '768M',
+      kill_timeout: 5000,
+      listen_timeout: 10000,
+      error_file: path.join(LOG_DIR, 'error.log'),
+      out_file: path.join(LOG_DIR, 'out.log'),
+      merge_logs: true,
+      time: true,
+    },
+  ],
+};

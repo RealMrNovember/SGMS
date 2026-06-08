@@ -1,0 +1,298 @@
+// SGMS — Faz 1 veritabanı şeması
+// PostgreSQL 16 — infra/docker/docker-compose.yml
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum OrganizationStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  EXPIRED
+}
+
+enum BillingCycle {
+  MONTHLY
+  YEARLY
+}
+
+enum DeviceType {
+  TURNSTILE
+  KIOSK
+  SCANNER
+  TABLET
+  OTHER
+}
+
+enum DeviceStatus {
+  PENDING
+  ONLINE
+  OFFLINE
+  DISABLED
+}
+
+enum CentralLicenseStatus {
+  UNKNOWN
+  TRIAL
+  ACTIVE
+  EXPIRED
+  REVOKED
+}
+
+enum UserStatus {
+  ACTIVE
+  INVITED
+  DISABLED
+}
+
+enum OrganizationRole {
+  OWNER
+  ADMIN
+  STAFF
+  TRAINER
+  VIEWER
+}
+
+enum AuditAction {
+  ORGANIZATION_CREATED
+  ORGANIZATION_UPDATED
+  SUBSCRIPTION_STARTED
+  SUBSCRIPTION_CHANGED
+  SUBSCRIPTION_CANCELED
+  DEVICE_REGISTERED
+  DEVICE_UPDATED
+  DEVICE_DISABLED
+  LICENSE_TRIAL_STARTED
+  LICENSE_ACTIVATED
+  LICENSE_VALIDATED
+  LICENSE_HEARTBEAT
+  LICENSE_EXPIRED
+  USER_CREATED
+  USER_UPDATED
+  USER_LOGIN
+  MEMBER_INVITED
+  MEMBER_UPDATED
+  MEMBER_REMOVED
+  SETTINGS_CHANGED
+}
+
+// ---------------------------------------------------------------------------
+// User — platform kullanıcıları (web panel girişi)
+// ---------------------------------------------------------------------------
+
+model User {
+  id              String     @id @default(cuid())
+  email           String     @unique
+  passwordHash    String     @map("password_hash")
+  name            String
+  status          UserStatus @default(ACTIVE)
+  emailVerifiedAt DateTime?  @map("email_verified_at")
+  lastLoginAt     DateTime?  @map("last_login_at")
+  locale          String     @default("tr")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  memberships OrganizationMember[]
+  auditLogs   AuditLog[]           @relation("AuditLogActor")
+
+  @@index([status])
+  @@map("users")
+}
+
+// ---------------------------------------------------------------------------
+// Organization — spor salonu / tenant
+// ---------------------------------------------------------------------------
+
+model Organization {
+  id        String             @id @default(cuid())
+  name      String
+  slug      String             @unique
+  email     String?
+  phone     String?
+  address   String?
+  city      String?
+  country   String             @default("TR")
+  timezone  String             @default("Europe/Istanbul")
+  status    OrganizationStatus @default(PENDING)
+  settings  Json               @default("{}")
+
+  // Org düzeyinde merkezi lisans kimliği (license.cicibyte.com hwid)
+  installationId       String               @unique @map("installation_id")
+  centralLicenseKey    String?              @unique @map("central_license_key")
+  centralLicenseStatus CentralLicenseStatus @default(UNKNOWN) @map("central_license_status")
+  centralLicenseType   String?              @map("central_license_type")
+  licenseExpiresAt     DateTime?            @map("license_expires_at")
+  trialStartedAt       DateTime?            @map("trial_started_at")
+  lastLicenseCheckAt   DateTime?            @map("last_license_check_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  members       OrganizationMember[]
+  subscriptions Subscription[]
+  devices       Device[]
+  auditLogs     AuditLog[]
+
+  @@index([status])
+  @@index([centralLicenseStatus])
+  @@map("organizations")
+}
+
+// ---------------------------------------------------------------------------
+// OrganizationMember — kullanıcı ↔ salon köprüsü
+// ---------------------------------------------------------------------------
+
+model OrganizationMember {
+  id             String           @id @default(cuid())
+  organizationId String           @map("organization_id")
+  userId         String           @map("user_id")
+  role           OrganizationRole @default(STAFF)
+  isActive       Boolean          @default(true) @map("is_active")
+  invitedAt      DateTime?        @map("invited_at")
+  joinedAt       DateTime?        @map("joined_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([userId, isActive])
+  @@index([organizationId, role])
+  @@map("organization_members")
+}
+
+// ---------------------------------------------------------------------------
+// Plan — SaaS paket tanımları (çoklu para birimi destekli)
+// ---------------------------------------------------------------------------
+
+model Plan {
+  id          String  @id @default(cuid())
+  code        String
+  name        String
+  description String?
+  sortOrder   Int     @default(0) @map("sort_order")
+  isActive    Boolean @default(true) @map("is_active")
+
+  priceMonthly Decimal @default(0) @map("price_monthly") @db.Decimal(10, 2)
+  priceYearly  Decimal @default(0) @map("price_yearly") @db.Decimal(10, 2)
+  currency     String  @default("TRY")
+
+  maxMembers Int @default(100) @map("max_members")
+  maxDevices Int @default(2) @map("max_devices")
+  maxStaff   Int @default(5) @map("max_staff")
+
+  features Json @default("[]")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  subscriptions Subscription[]
+
+  @@unique([code, currency])
+  @@index([isActive, sortOrder])
+  @@index([currency])
+  @@map("plans")
+}
+
+// ---------------------------------------------------------------------------
+// Subscription — organizasyon ↔ plan ilişkisi
+// ---------------------------------------------------------------------------
+
+model Subscription {
+  id             String             @id @default(cuid())
+  organizationId String             @map("organization_id")
+  planId         String             @map("plan_id")
+  status         SubscriptionStatus @default(TRIALING)
+  billingCycle   BillingCycle       @default(MONTHLY) @map("billing_cycle")
+
+  trialEndsAt        DateTime? @map("trial_ends_at")
+  currentPeriodStart DateTime? @map("current_period_start")
+  currentPeriodEnd   DateTime? @map("current_period_end")
+  canceledAt         DateTime? @map("canceled_at")
+  cancelAtPeriodEnd  Boolean   @default(false) @map("cancel_at_period_end")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  plan         Plan         @relation(fields: [planId], references: [id])
+
+  @@index([organizationId, status])
+  @@index([planId])
+  @@map("subscriptions")
+}
+
+// ---------------------------------------------------------------------------
+// Device — turnike, kiosk (limitler yerel Plan tablosundan denetlenir)
+// ---------------------------------------------------------------------------
+
+model Device {
+  id             String       @id @default(cuid())
+  organizationId String       @map("organization_id")
+  name           String
+  type           DeviceType   @default(TURNSTILE)
+  status         DeviceStatus @default(PENDING)
+
+  hardwareId String  @map("hardware_id")
+  location   String?
+  metadata   Json    @default("{}")
+
+  lastSeenAt DateTime? @map("last_seen_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, hardwareId])
+  @@index([organizationId, status])
+  @@index([hardwareId])
+  @@map("devices")
+}
+
+// ---------------------------------------------------------------------------
+// AuditLog — denetim izi
+// ---------------------------------------------------------------------------
+
+model AuditLog {
+  id             String      @id @default(cuid())
+  organizationId String?     @map("organization_id")
+  actorId        String?     @map("actor_id")
+  action         AuditAction
+  entityType     String?     @map("entity_type")
+  entityId       String?     @map("entity_id")
+  metadata       Json        @default("{}")
+  ipAddress      String?     @map("ip_address")
+  userAgent      String?     @map("user_agent") @db.Text
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  actor        User?         @relation("AuditLogActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+  @@index([actorId, createdAt])
+  @@index([action, createdAt])
+  @@index([entityType, entityId])
+  @@map("audit_logs")
+}

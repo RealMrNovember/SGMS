@@ -54,3 +54,7 @@ git-log.txt
 # NestJS / misc
 .temp/
 .cache/
+
+# SGMS runtime (proje içi — VDS)
+.tools/node/
+.pm2/

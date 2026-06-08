@@ -25,7 +25,7 @@ Strateji: **Local geliştir → Git push → VDS `git pull` (aaPanel `www:www`)*
 - [x] VDS: `/www/wwwroot/sgms.cicibyte.com` + `www:www`
 - [x] VDS: `data/postgres`, `data/redis`
 - [x] Git: remote + VDS `git clone`
-- [x] VDS: `infra/docker/.env` (`.env.vds.example` kopyası)
+- [x] VDS: `infra/docker/.env` (güçlü şifreler, `SGMS_DATA_DIR` ayarlı)
 - [x] VDS: Docker kurulu + `docker compose up -d`
 - [x] VDS: `sgms-postgres` + `sgms-redis` Up (Redis port **6380** — sistem 6379 kullanımda)
 
