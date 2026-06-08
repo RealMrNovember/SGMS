@@ -24,5 +24,8 @@
     "pm2:reload": "PM2_HOME=.pm2 PATH=\"$PWD/.tools/node/bin:$PATH\" node_modules/.bin/pm2 reload sgms-web --update-env",
     "pm2:logs": "PM2_HOME=.pm2 node_modules/.bin/pm2 logs sgms-web",
     "pm2:status": "PM2_HOME=.pm2 node_modules/.bin/pm2 status"
+  },
+  "devDependencies": {
+    "pm2": "5"
   }
 }

@@ -10,7 +10,7 @@ module.exports = {
     {
       name: 'sgms-web',
       cwd: path.join(APP_ROOT, 'apps/web'),
-      script: path.join(APP_ROOT, 'node_modules/next/dist/bin/next'),
+      script: path.join(APP_ROOT, 'apps/web/node_modules/next/dist/bin/next'),
       args: 'start --port 3100 --hostname 127.0.0.1',
       interpreter: NODE_BIN,
       env: {
