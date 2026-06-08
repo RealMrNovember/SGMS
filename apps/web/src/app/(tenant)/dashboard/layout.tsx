@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 
 const navItems = [
   { href: '/dashboard', label: 'Özet' },
+  { href: '/dashboard/members', label: 'Üyeler' },
   { href: '/dashboard/team', label: 'Personel' },
 ];
 

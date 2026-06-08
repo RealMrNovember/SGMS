@@ -91,7 +91,21 @@ enum AuditAction {
   MEMBER_INVITED
   MEMBER_UPDATED
   MEMBER_REMOVED
+  MEMBER_REGISTERED
   SETTINGS_CHANGED
+}
+
+enum GymMemberStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  UNSPECIFIED
 }
 
 // ---------------------------------------------------------------------------
@@ -149,10 +163,12 @@ model Organization {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  members       OrganizationMember[]
-  subscriptions Subscription[]
-  devices       Device[]
-  auditLogs     AuditLog[]
+  members            OrganizationMember[]
+  subscriptions      Subscription[]
+  devices            Device[]
+  auditLogs          AuditLog[]
+  gymMembershipPlans GymMembershipPlan[]
+  gymMembers         GymMember[]
 
   @@index([status])
   @@index([centralLicenseStatus])
@@ -270,6 +286,67 @@ model Device {
   @@index([organizationId, status])
   @@index([hardwareId])
   @@map("devices")
+}
+
+// ---------------------------------------------------------------------------
+// GymMembershipPlan — salonun müşterilerine sattığı yerel üyelik paketleri
+// (SGMS SaaS Plan tablosundan bağımsız)
+// ---------------------------------------------------------------------------
+
+model GymMembershipPlan {
+  id             String  @id @default(cuid())
+  organizationId String  @map("organization_id")
+  name           String
+  description    String?
+  durationDays   Int     @map("duration_days")
+  price          Decimal @default(0) @db.Decimal(10, 2)
+  currency       String  @default("TRY")
+  isActive       Boolean @default(true) @map("is_active")
+  sortOrder      Int     @default(0) @map("sort_order")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  gymMembers   GymMember[]
+
+  @@unique([organizationId, name])
+  @@index([organizationId, isActive, sortOrder])
+  @@map("gym_membership_plans")
+}
+
+// ---------------------------------------------------------------------------
+// GymMember — salonun sporcu / üye kaydı (tenant müşterisi)
+// ---------------------------------------------------------------------------
+
+model GymMember {
+  id             String          @id @default(cuid())
+  organizationId String          @map("organization_id")
+  planId         String?         @map("plan_id")
+  firstName      String          @map("first_name")
+  lastName       String          @map("last_name")
+  nationalId     String?         @map("national_id")
+  phone          String?
+  email          String?
+  birthDate      DateTime?       @map("birth_date") @db.Date
+  gender         Gender          @default(UNSPECIFIED)
+  status         GymMemberStatus @default(ACTIVE)
+  membershipStartsAt DateTime?   @map("membership_starts_at")
+  membershipEndsAt   DateTime?   @map("membership_ends_at")
+  notes          String?         @db.Text
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  organization Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  plan         GymMembershipPlan? @relation(fields: [planId], references: [id], onDelete: SetNull)
+
+  @@unique([organizationId, nationalId])
+  @@index([organizationId, status])
+  @@index([organizationId, lastName, firstName])
+  @@index([phone])
+  @@index([email])
+  @@map("gym_members")
 }
 
 // ---------------------------------------------------------------------------

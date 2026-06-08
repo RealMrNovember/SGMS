@@ -252,6 +252,63 @@ async function seedDemoTenant() {
   }
 
   console.log(`Demo gym owner ready: ${ownerEmail}`);
+
+  await seedGymMembershipPlans(organization.id);
+}
+
+async function seedGymMembershipPlans(organizationId: string) {
+  const plans = [
+    {
+      name: '1 Aylık Sınırsız',
+      description: 'Tüm alanlara 30 gün sınırsız erişim.',
+      durationDays: 30,
+      price: 999,
+      sortOrder: 1,
+    },
+    {
+      name: '3 Aylık Standart',
+      description: '90 günlük standart salon üyeliği.',
+      durationDays: 90,
+      price: 2499,
+      sortOrder: 2,
+    },
+    {
+      name: '6 Aylık VIP',
+      description: '180 günlük VIP paket — grup dersleri dahil.',
+      durationDays: 180,
+      price: 4499,
+      sortOrder: 3,
+    },
+  ];
+
+  for (const plan of plans) {
+    await prisma.gymMembershipPlan.upsert({
+      where: {
+        organizationId_name: {
+          organizationId,
+          name: plan.name,
+        },
+      },
+      update: {
+        description: plan.description,
+        durationDays: plan.durationDays,
+        price: plan.price,
+        sortOrder: plan.sortOrder,
+        isActive: true,
+      },
+      create: {
+        organizationId,
+        name: plan.name,
+        description: plan.description,
+        durationDays: plan.durationDays,
+        price: plan.price,
+        sortOrder: plan.sortOrder,
+        currency: 'TRY',
+      },
+    });
+  }
+
+  console.log(`Seeded ${plans.length} gym membership plans for demo-gym.`);
 }
 
 async function main() {
