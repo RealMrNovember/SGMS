@@ -1,11 +1,12 @@
+import { AddMeasurementForm } from '@/components/add-measurement-form';
+import { MemberHealthHistoryTable } from '@/components/member-health-history-table';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import type { OrganizationRole } from '@sgms/database';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
-function formatDecimal(value: { toString: () => string } | null | undefined) {
-  return value != null ? value.toString() : '—';
-}
+const MEASUREMENT_ROLES = new Set<OrganizationRole>(['OWNER', 'ADMIN', 'STAFF', 'TRAINER']);
 
 export default async function MemberDetailPage({
   params,
@@ -14,38 +15,38 @@ export default async function MemberDetailPage({
 }) {
   const { id } = await params;
   const session = await auth();
+
   if (!session?.user?.organizationId) {
     redirect('/login');
   }
 
   const organizationId = session.user.organizationId;
+  const role = session.user.role;
+  const canManageMeasurements = role ? MEASUREMENT_ROLES.has(role) : false;
 
+  // Tenant izolasyonu: organizationId eşleşmesi zorunlu
   const member = await prisma.gymMember.findFirst({
     where: { id, organizationId },
     include: {
       plan: true,
       trainer: { select: { id: true, name: true, email: true } },
       user: { select: { id: true, name: true, email: true } },
+      healthMeasurements: {
+        orderBy: { measuredAt: 'desc' },
+      },
+      trainingPrograms: {
+        where: { isActive: true },
+        orderBy: { startDate: 'desc' },
+        include: {
+          trainer: { select: { name: true, email: true } },
+        },
+      },
     },
   });
 
   if (!member) {
     notFound();
   }
-
-  const [recentMeasurements, activePrograms] = await Promise.all([
-    prisma.healthMeasurement.findMany({
-      where: { organizationId, gymMemberId: id },
-      orderBy: { measuredAt: 'desc' },
-      take: 5,
-    }),
-    prisma.trainingProgram.findMany({
-      where: { organizationId, gymMemberId: id, isActive: true },
-      include: { trainer: { select: { name: true } } },
-      orderBy: { startDate: 'desc' },
-      take: 5,
-    }),
-  ]);
 
   return (
     <div className="space-y-8">
@@ -59,6 +60,7 @@ export default async function MemberDetailPage({
         <p className="muted mt-2 text-sm">
           <span className="badge">{member.status}</span>
           {member.gender !== 'UNSPECIFIED' ? ` · ${member.gender}` : ''}
+          {role ? ` · görüntüleyen: ${role}` : ''}
         </p>
       </div>
 
@@ -126,79 +128,42 @@ export default async function MemberDetailPage({
 
       {member.notes ? (
         <section className="card p-6">
-          <h3 className="text-lg font-semibold">Notlar</h3>
+          <h3 className="text-lg font-semibold">Sporcu Notları</h3>
           <p className="muted mt-3 whitespace-pre-wrap text-sm">{member.notes}</p>
         </section>
       ) : null}
 
-      <section className="card overflow-hidden">
-        <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-4">
-          <div>
-            <h3 className="text-lg font-semibold">Son Ölçümler</h3>
-            <p className="muted mt-1 text-sm">{recentMeasurements.length} kayıt</p>
-          </div>
-          <Link
-            href={`/dashboard/members/${id}/measurements`}
-            className="muted text-sm hover:text-white"
-          >
-            Tümünü gör →
-          </Link>
-        </div>
+      <AddMeasurementForm gymMemberId={member.id} canManage={canManageMeasurements} />
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="muted border-b border-[var(--border)] text-xs uppercase">
-              <tr>
-                <th className="px-6 py-3">Tarih</th>
-                <th className="px-6 py-3">Kilo</th>
-                <th className="px-6 py-3">Yağ %</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentMeasurements.length === 0 ? (
-                <tr>
-                  <td colSpan={3} className="muted px-6 py-6 text-center">
-                    Henüz ölçüm yok.
-                  </td>
-                </tr>
-              ) : (
-                recentMeasurements.map((m) => (
-                  <tr key={m.id} className="border-b border-[var(--border)] last:border-none">
-                    <td className="px-6 py-3">{m.measuredAt.toLocaleDateString('tr-TR')}</td>
-                    <td className="px-6 py-3">{formatDecimal(m.weight)}</td>
-                    <td className="px-6 py-3">{formatDecimal(m.bodyFatPercentage)}</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </section>
+      <MemberHealthHistoryTable measurements={member.healthMeasurements} />
 
       <section className="card overflow-hidden">
         <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-4">
           <div>
-            <h3 className="text-lg font-semibold">Aktif Programlar</h3>
-            <p className="muted mt-1 text-sm">{activePrograms.length} program</p>
+            <h3 className="text-lg font-semibold">Aktif Antrenman Programları</h3>
+            <p className="muted mt-1 text-sm">{member.trainingPrograms.length} program</p>
           </div>
           <Link
-            href={`/dashboard/programs?member=${id}`}
+            href={`/dashboard/programs?member=${member.id}`}
             className="muted text-sm hover:text-white"
           >
-            Programlara git →
+            Tüm programlar →
           </Link>
         </div>
 
         <div className="divide-y divide-[var(--border)]">
-          {activePrograms.length === 0 ? (
-            <p className="muted px-6 py-6 text-center text-sm">Aktif program yok.</p>
+          {member.trainingPrograms.length === 0 ? (
+            <p className="muted px-6 py-6 text-center text-sm">Aktif program atanmamış.</p>
           ) : (
-            activePrograms.map((p) => (
-              <article key={p.id} className="px-6 py-4">
-                <p className="font-medium">{p.title}</p>
+            member.trainingPrograms.map((program) => (
+              <article key={program.id} className="px-6 py-4">
+                <p className="font-medium">{program.title}</p>
                 <p className="muted text-sm">
-                  {p.type} · {p.trainer.name ?? '—'} ·{' '}
-                  {p.startDate.toLocaleDateString('tr-TR')}
+                  {program.type} · {program.trainer.name ?? program.trainer.email ?? '—'} ·{' '}
+                  {program.startDate.toLocaleDateString('tr-TR')}
+                  {program.endDate
+                    ? ` → ${program.endDate.toLocaleDateString('tr-TR')}`
+                    : ''}
                 </p>
               </article>
             ))

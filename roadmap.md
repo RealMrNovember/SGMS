@@ -152,9 +152,12 @@
 - [x] `actions/plans.ts` — oluştur, güncelle, aktif/pasif toggle
 - [x] Üye formunda plan seçimi aktif listeden (`/dashboard/members`)
 
-### 4.5 Sporcu detay sayfası
-- [x] `/dashboard/members/[id]` — profil, PT, plan, son ölçümler, aktif programlar
-- [x] Ölçüm alt sayfası + üye listesinden profil linki
+### 4.5 Sporcu detay sayfası (CRM çekirdeği)
+- [x] `/dashboard/members/[id]` — tek Prisma sorgusu (`include`: ölçümler + aktif programlar)
+- [x] Tenant izolasyonu (`organizationId` eşleşmesi → `notFound`)
+- [x] `AddMeasurementForm` + tam ölçüm geçmişi tablosu (`MemberHealthHistoryTable`)
+- [x] `MEASUREMENT_ADDED` audit + transaction (`actions/measurements.ts`)
+- [x] Ölçüm alt sayfası (`/measurements`) + üye listesinden profil linki
 
 **Kabul kriteri:** ✅ OWNER/TRAINER ile ölçüm → program → mesaj → plan akışı panelden mümkün
 

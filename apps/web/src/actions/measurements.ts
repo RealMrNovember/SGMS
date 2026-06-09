@@ -110,30 +110,43 @@ export async function addHealthMeasurement(
     return { fieldErrors: { measuredAt: 'Geçerli bir tarih girin.' } };
   }
 
-  const measurement = await prisma.healthMeasurement.create({
-    data: {
-      organizationId: context.organizationId,
-      gymMemberId: data.gymMemberId,
-      weight,
-      bodyFatPercentage,
-      muscleMass,
-      height,
-      notes: data.notes || null,
-      measuredAt,
-    },
+  const measurement = await prisma.$transaction(async (tx) => {
+    const created = await tx.healthMeasurement.create({
+      data: {
+        organizationId: context.organizationId,
+        gymMemberId: data.gymMemberId,
+        weight,
+        bodyFatPercentage,
+        muscleMass,
+        height,
+        notes: data.notes || null,
+        measuredAt,
+      },
+    });
+
+    await tx.auditLog.create({
+      data: {
+        actorId: context.actorId,
+        organizationId: context.organizationId,
+        action: 'MEASUREMENT_ADDED',
+        entityType: 'health_measurement',
+        entityId: created.id,
+        metadata: {
+          gymMemberId: data.gymMemberId,
+          measuredAt: measuredAt.toISOString(),
+          weight,
+          bodyFatPercentage,
+          muscleMass,
+          height,
+          source: 'dashboard',
+        },
+      },
+    });
+
+    return created;
   });
 
-  await prisma.auditLog.create({
-    data: {
-      actorId: context.actorId,
-      organizationId: context.organizationId,
-      action: 'MEMBER_UPDATED',
-      entityType: 'health_measurement',
-      entityId: measurement.id,
-      metadata: { gymMemberId: data.gymMemberId, source: 'dashboard' },
-    },
-  });
-
+  revalidatePath(`/dashboard/members/${data.gymMemberId}`);
   revalidatePath(`/dashboard/members/${data.gymMemberId}/measurements`);
 
   return { success: 'Ölçüm kaydedildi.' };
