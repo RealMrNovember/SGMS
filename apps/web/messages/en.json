@@ -1,0 +1,37 @@
+{
+  "common": {
+    "appName": "CiCiByte SGMS",
+    "settings": "Settings",
+    "loading": "Loading…",
+    "panel": "Dashboard"
+  },
+  "nav": {
+    "overview": "Overview",
+    "members": "Members",
+    "plans": "Plans",
+    "programs": "Programs",
+    "messages": "Messages",
+    "team": "Staff",
+    "adminOverview": "System Overview",
+    "newCustomer": "New Customer"
+  },
+  "auth": {
+    "login": "Sign In",
+    "logout": "Sign Out",
+    "email": "Email",
+    "password": "Password",
+    "loginTitle": "Management Panel",
+    "loginSubtitle": "Sign in to the gym management panel. Central license validation runs at the organization level.",
+    "loggingIn": "Signing in…",
+    "invalidCredentials": "Invalid email or password.",
+    "badgeAdmin": "SGMS Admin",
+    "session": "Session",
+    "superAdmin": "Super Admin",
+    "platformTagline": "Multi-tenant B2B SaaS control center",
+    "adminPlatform": "CiCiByte Platform",
+    "adminTitle": "System Management",
+    "adminSubtitle": "Centrally manage gym companies and SaaS tenants.",
+    "noOrganization": "No organization selected",
+    "noRole": "No role"
+  }
+}

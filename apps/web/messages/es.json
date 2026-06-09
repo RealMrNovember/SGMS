@@ -1,0 +1,37 @@
+{
+  "common": {
+    "appName": "CiCiByte SGMS",
+    "settings": "Ajustes",
+    "loading": "Cargando…",
+    "panel": "Panel"
+  },
+  "nav": {
+    "overview": "Resumen",
+    "members": "Miembros",
+    "plans": "Planes",
+    "programs": "Programas",
+    "messages": "Mensajes",
+    "team": "Personal",
+    "adminOverview": "Resumen del sistema",
+    "newCustomer": "Nuevo cliente"
+  },
+  "auth": {
+    "login": "Iniciar sesión",
+    "logout": "Cerrar sesión",
+    "email": "Correo",
+    "password": "Contraseña",
+    "loginTitle": "Panel de gestión",
+    "loginSubtitle": "Inicie sesión en el panel de gestión del gimnasio. La validación central de licencias se realiza a nivel de organización.",
+    "loggingIn": "Iniciando sesión…",
+    "invalidCredentials": "Correo o contraseña incorrectos.",
+    "badgeAdmin": "SGMS Admin",
+    "session": "Sesión",
+    "superAdmin": "Super Admin",
+    "platformTagline": "Centro de control SaaS B2B multiinquilino",
+    "adminPlatform": "CiCiByte Platform",
+    "adminTitle": "Gestión del sistema",
+    "adminSubtitle": "Gestione centralmente gimnasios y inquilinos SaaS.",
+    "noOrganization": "Ninguna organización seleccionada",
+    "noRole": "Sin rol"
+  }
+}

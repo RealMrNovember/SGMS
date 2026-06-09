@@ -1,8 +1,11 @@
-import NextAuth from 'next-auth';
+import { routing } from '@/i18n/routing';
 import { authConfig } from '@/lib/auth.config';
+import createIntlMiddleware from 'next-intl/middleware';
+import NextAuth from 'next-auth';
 import { NextResponse } from 'next/server';
 
 const { auth } = NextAuth(authConfig);
+const handleI18nRouting = createIntlMiddleware(routing);
 
 function defaultDestination(isSuperAdmin: boolean) {
   return isSuperAdmin ? '/admin' : '/dashboard';
@@ -19,12 +22,15 @@ export default auth((request) => {
     pathname === '/';
 
   const isApiV1 = pathname.startsWith('/api/v1');
+  const isApi = pathname.startsWith('/api');
 
   if (!isLoggedIn && isApiV1) {
     return NextResponse.json({ ok: false, error: 'Kimlik doğrulama gerekli.' }, { status: 401 });
   }
 
-  if (!isLoggedIn && !isPublic) {
+  const intlResponse = isApi ? NextResponse.next() : handleI18nRouting(request);
+
+  if (!isLoggedIn && !isPublic && !isApi) {
     const loginUrl = new URL('/login', request.nextUrl.origin);
     loginUrl.searchParams.set('callbackUrl', pathname);
     return NextResponse.redirect(loginUrl);
@@ -42,9 +48,9 @@ export default auth((request) => {
     return NextResponse.redirect(new URL('/admin', request.nextUrl.origin));
   }
 
-  return NextResponse.next();
+  return intlResponse;
 });
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)'],
 };

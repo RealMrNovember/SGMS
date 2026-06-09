@@ -80,6 +80,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           organizationId: membership?.organizationId ?? null,
           organizationName: membership?.organization.name ?? null,
           role: membership?.role ?? null,
+          locale: user.locale,
         };
       },
     }),

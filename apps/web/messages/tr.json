@@ -1,0 +1,37 @@
+{
+  "common": {
+    "appName": "CiCiByte SGMS",
+    "settings": "Ayarlar",
+    "loading": "Yükleniyor…",
+    "panel": "Panel"
+  },
+  "nav": {
+    "overview": "Özet",
+    "members": "Üyeler",
+    "plans": "Planlar",
+    "programs": "Programlar",
+    "messages": "Mesajlar",
+    "team": "Personel",
+    "adminOverview": "Sistem Özeti",
+    "newCustomer": "Yeni Müşteri"
+  },
+  "auth": {
+    "login": "Giriş Yap",
+    "logout": "Çıkış",
+    "email": "E-posta",
+    "password": "Parola",
+    "loginTitle": "Yönetim Paneli",
+    "loginSubtitle": "Spor salonu yönetim paneline giriş yapın. Merkezi lisans doğrulaması organizasyon düzeyinde yürütülür.",
+    "loggingIn": "Giriş yapılıyor…",
+    "invalidCredentials": "E-posta veya parola hatalı.",
+    "badgeAdmin": "SGMS Admin",
+    "session": "Oturum",
+    "superAdmin": "Super Admin",
+    "platformTagline": "Multi-tenant B2B SaaS kontrol merkezi",
+    "adminPlatform": "CiCiByte Platform",
+    "adminTitle": "System Management",
+    "adminSubtitle": "GYM firmalarını ve SaaS kiracılarını merkezi olarak yönetin.",
+    "noOrganization": "Organizasyon seçilmedi",
+    "noRole": "Rol yok"
+  }
+}

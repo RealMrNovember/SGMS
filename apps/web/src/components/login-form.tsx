@@ -1,10 +1,12 @@
 'use client';
 
 import { signIn } from 'next-auth/react';
+import { useTranslations } from 'next-intl';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FormEvent, useState } from 'react';
 
 export function LoginForm() {
+  const t = useTranslations('auth');
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') ?? '/dashboard';
@@ -29,7 +31,7 @@ export function LoginForm() {
     setLoading(false);
 
     if (result?.error) {
-      setError('E-posta veya parola hatalı.');
+      setError(t('invalidCredentials'));
       return;
     }
 
@@ -41,7 +43,7 @@ export function LoginForm() {
     <form onSubmit={onSubmit} className="space-y-4">
       <div className="space-y-2">
         <label htmlFor="email" className="muted text-sm">
-          E-posta
+          {t('email')}
         </label>
         <input
           id="email"
@@ -57,7 +59,7 @@ export function LoginForm() {
 
       <div className="space-y-2">
         <label htmlFor="password" className="muted text-sm">
-          Parola
+          {t('password')}
         </label>
         <input
           id="password"
@@ -74,7 +76,7 @@ export function LoginForm() {
       {error ? <p className="text-sm text-rose-400">{error}</p> : null}
 
       <button type="submit" className="button w-full" disabled={loading}>
-        {loading ? 'Giriş yapılıyor…' : 'Giriş Yap'}
+        {loading ? t('loggingIn') : t('login')}
       </button>
     </form>
   );

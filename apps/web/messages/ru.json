@@ -1,0 +1,37 @@
+{
+  "common": {
+    "appName": "CiCiByte SGMS",
+    "settings": "Настройки",
+    "loading": "Загрузка…",
+    "panel": "Панель"
+  },
+  "nav": {
+    "overview": "Обзор",
+    "members": "Участники",
+    "plans": "Планы",
+    "programs": "Программы",
+    "messages": "Сообщения",
+    "team": "Персонал",
+    "adminOverview": "Обзор системы",
+    "newCustomer": "Новый клиент"
+  },
+  "auth": {
+    "login": "Войти",
+    "logout": "Выйти",
+    "email": "Эл. почта",
+    "password": "Пароль",
+    "loginTitle": "Панель управления",
+    "loginSubtitle": "Войдите в панель управления спортзалом. Центральная проверка лицензии выполняется на уровне организации.",
+    "loggingIn": "Вход…",
+    "invalidCredentials": "Неверный email или пароль.",
+    "badgeAdmin": "SGMS Admin",
+    "session": "Сессия",
+    "superAdmin": "Супер-админ",
+    "platformTagline": "Центр управления мультитенантным B2B SaaS",
+    "adminPlatform": "CiCiByte Platform",
+    "adminTitle": "Управление системой",
+    "adminSubtitle": "Централизованное управление спортзалами и SaaS-арендаторами.",
+    "noOrganization": "Организация не выбрана",
+    "noRole": "Нет роли"
+  }
+}

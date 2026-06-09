@@ -1,18 +1,23 @@
-import { Suspense } from 'react';
+import { LocaleSwitcher } from '@/components/locale-switcher';
 import { LoginForm } from '@/components/login-form';
+import { getTranslations } from 'next-intl/server';
+import { Suspense } from 'react';
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const t = await getTranslations('auth');
+  const tCommon = await getTranslations('common');
+
   return (
     <main className="grid min-h-screen place-items-center p-6">
       <div className="card w-full max-w-md p-8">
-        <span className="badge">SGMS Admin</span>
-        <h1 className="mt-4 text-2xl font-semibold">Yönetim Paneli</h1>
-        <p className="muted mt-2 mb-6 text-sm leading-6">
-          Spor salonu yönetim paneline giriş yapın. Merkezi lisans doğrulaması organizasyon
-          düzeyinde yürütülür.
-        </p>
+        <div className="mb-4 flex items-center justify-between gap-4">
+          <span className="badge">{t('badgeAdmin')}</span>
+          <LocaleSwitcher />
+        </div>
+        <h1 className="mt-4 text-2xl font-semibold">{t('loginTitle')}</h1>
+        <p className="muted mt-2 mb-6 text-sm leading-6">{t('loginSubtitle')}</p>
 
-        <Suspense fallback={<div className="muted text-sm">Form yükleniyor…</div>}>
+        <Suspense fallback={<div className="muted text-sm">{tCommon('loading')}</div>}>
           <LoginForm />
         </Suspense>
 

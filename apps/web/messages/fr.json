@@ -1,0 +1,37 @@
+{
+  "common": {
+    "appName": "CiCiByte SGMS",
+    "settings": "Paramètres",
+    "loading": "Chargement…",
+    "panel": "Tableau de bord"
+  },
+  "nav": {
+    "overview": "Aperçu",
+    "members": "Membres",
+    "plans": "Forfaits",
+    "programs": "Programmes",
+    "messages": "Messages",
+    "team": "Personnel",
+    "adminOverview": "Vue système",
+    "newCustomer": "Nouveau client"
+  },
+  "auth": {
+    "login": "Connexion",
+    "logout": "Déconnexion",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "loginTitle": "Panneau de gestion",
+    "loginSubtitle": "Connectez-vous au panneau de gestion de la salle de sport. La validation de licence centrale s'effectue au niveau de l'organisation.",
+    "loggingIn": "Connexion…",
+    "invalidCredentials": "E-mail ou mot de passe incorrect.",
+    "badgeAdmin": "SGMS Admin",
+    "session": "Session",
+    "superAdmin": "Super Admin",
+    "platformTagline": "Centre de contrôle SaaS B2B multi-locataire",
+    "adminPlatform": "CiCiByte Platform",
+    "adminTitle": "Gestion système",
+    "adminSubtitle": "Gérez centralement les salles de sport et les locataires SaaS.",
+    "noOrganization": "Aucune organisation sélectionnée",
+    "noRole": "Aucun rôle"
+  }
+}

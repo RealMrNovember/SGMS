@@ -11,6 +11,7 @@ declare module 'next-auth' {
       organizationId: string | null;
       organizationName: string | null;
       role: OrganizationRole | null;
+      locale: string;
     };
   }
 
@@ -19,6 +20,7 @@ declare module 'next-auth' {
     organizationId?: string | null;
     organizationName?: string | null;
     role?: OrganizationRole | null;
+    locale?: string;
   }
 }
 
@@ -37,6 +39,7 @@ export const authConfig = {
         token.organizationId = user.organizationId ?? null;
         token.organizationName = user.organizationName ?? null;
         token.role = user.role ?? null;
+        token.locale = user.locale ?? 'tr';
       }
 
       return token;
@@ -48,6 +51,7 @@ export const authConfig = {
         session.user.organizationId = (token.organizationId as string | null | undefined) ?? null;
         session.user.organizationName = (token.organizationName as string | null | undefined) ?? null;
         session.user.role = (token.role as OrganizationRole | null | undefined) ?? null;
+        session.user.locale = (token.locale as string | undefined) ?? 'tr';
       }
 
       return session;

@@ -1,0 +1,37 @@
+{
+  "common": {
+    "appName": "CiCiByte SGMS",
+    "settings": "Parametrlər",
+    "loading": "Yüklənir…",
+    "panel": "Panel"
+  },
+  "nav": {
+    "overview": "İcmal",
+    "members": "Üzvlər",
+    "plans": "Planlar",
+    "programs": "Proqramlar",
+    "messages": "Mesajlar",
+    "team": "Personal",
+    "adminOverview": "Sistem icmalı",
+    "newCustomer": "Yeni müştəri"
+  },
+  "auth": {
+    "login": "Daxil ol",
+    "logout": "Çıxış",
+    "email": "E-poçt",
+    "password": "Şifrə",
+    "loginTitle": "İdarəetmə paneli",
+    "loginSubtitle": "İdman zalı idarəetmə panelinə daxil olun. Mərkəzi lisenziya yoxlaması təşkilat səviyyəsində aparılır.",
+    "loggingIn": "Daxil olunur…",
+    "invalidCredentials": "E-poçt və ya şifrə səhvdir.",
+    "badgeAdmin": "SGMS Admin",
+    "session": "Sessiya",
+    "superAdmin": "Super Admin",
+    "platformTagline": "Multi-tenant B2B SaaS idarəetmə mərkəzi",
+    "adminPlatform": "CiCiByte Platform",
+    "adminTitle": "Sistem idarəetməsi",
+    "adminSubtitle": "İdman zallarını və SaaS icarəçilərini mərkəzləşdirilmiş idarə edin.",
+    "noOrganization": "Təşkilat seçilməyib",
+    "noRole": "Rol yoxdur"
+  }
+}
