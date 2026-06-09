@@ -1,11 +1,26 @@
-import { routing } from '@/i18n/routing';
+import { detectLocale } from '@/i18n/detect-locale';
 import { authConfig } from '@/lib/auth.config';
-import createIntlMiddleware from 'next-intl/middleware';
 import NextAuth from 'next-auth';
 import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
 const { auth } = NextAuth(authConfig);
-const handleI18nRouting = createIntlMiddleware(routing);
+
+const LOCALE_COOKIE = 'NEXT_LOCALE';
+const LOCALE_MAX_AGE = 60 * 60 * 24 * 365;
+
+function withLocaleCookie(request: NextRequest, response: NextResponse) {
+  if (!request.cookies.get(LOCALE_COOKIE)) {
+    const locale = detectLocale(request.headers.get('accept-language'));
+    response.cookies.set(LOCALE_COOKIE, locale, {
+      path: '/',
+      maxAge: LOCALE_MAX_AGE,
+      sameSite: 'lax',
+    });
+  }
+
+  return response;
+}
 
 function defaultDestination(isSuperAdmin: boolean) {
   return isSuperAdmin ? '/admin' : '/dashboard';
@@ -28,27 +43,34 @@ export default auth((request) => {
     return NextResponse.json({ ok: false, error: 'Kimlik doğrulama gerekli.' }, { status: 401 });
   }
 
-  const intlResponse = isApi ? NextResponse.next() : handleI18nRouting(request);
-
   if (!isLoggedIn && !isPublic && !isApi) {
     const loginUrl = new URL('/login', request.nextUrl.origin);
     loginUrl.searchParams.set('callbackUrl', pathname);
-    return NextResponse.redirect(loginUrl);
+    return withLocaleCookie(request, NextResponse.redirect(loginUrl));
   }
 
   if (isLoggedIn && pathname === '/login') {
-    return NextResponse.redirect(new URL(defaultDestination(isSuperAdmin), request.nextUrl.origin));
+    return withLocaleCookie(
+      request,
+      NextResponse.redirect(new URL(defaultDestination(isSuperAdmin), request.nextUrl.origin)),
+    );
   }
 
   if (isLoggedIn && pathname.startsWith('/admin') && !isSuperAdmin) {
-    return NextResponse.redirect(new URL('/dashboard', request.nextUrl.origin));
+    return withLocaleCookie(
+      request,
+      NextResponse.redirect(new URL('/dashboard', request.nextUrl.origin)),
+    );
   }
 
   if (isLoggedIn && pathname.startsWith('/dashboard') && isSuperAdmin) {
-    return NextResponse.redirect(new URL('/admin', request.nextUrl.origin));
+    return withLocaleCookie(
+      request,
+      NextResponse.redirect(new URL('/admin', request.nextUrl.origin)),
+    );
   }
 
-  return intlResponse;
+  return withLocaleCookie(request, NextResponse.next());
 });
 
 export const config = {
