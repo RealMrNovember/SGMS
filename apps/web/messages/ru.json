@@ -33,5 +33,15 @@
     "adminSubtitle": "Централизованное управление спортзалами и SaaS-арендаторами.",
     "noOrganization": "Организация не выбрана",
     "noRole": "Нет роли"
+  },
+  "login": {
+    "brandKicker": "CiCiByte · SGMS",
+    "brandTitle": "Тихая роскошь,\nчёткие операции.",
+    "brandSubtitle": "Центральная платформа для премиального управления залом.",
+    "demoSection": "Демо-доступ",
+    "demoAdmin": "Админ платформы",
+    "demoOwner": "Владелец зала",
+    "demoStaff": "Ресепшн",
+    "demoAthlete": "Спортсмен"
   }
 }

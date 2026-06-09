@@ -58,3 +58,7 @@ git-log.txt
 # SGMS runtime (proje içi — VDS)
 .tools/node/
 .pm2/
+
+# User-uploaded media (local storage)
+apps/web/public/uploads/avatars/**
+!apps/web/public/uploads/avatars/.gitkeep

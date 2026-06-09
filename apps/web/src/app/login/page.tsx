@@ -5,28 +5,38 @@ import { Suspense } from 'react';
 
 export default async function LoginPage() {
   const t = await getTranslations('auth');
+  const tLogin = await getTranslations('login');
   const tCommon = await getTranslations('common');
 
   return (
-    <main className="grid min-h-screen place-items-center p-6">
-      <div className="card w-full max-w-md p-8">
-        <div className="mb-4 flex items-center justify-between gap-4">
-          <span className="badge">{t('badgeAdmin')}</span>
+    <main className="login-shell">
+      <section className="login-brand">
+        <div className="relative z-10 flex items-center justify-between gap-4">
+          <p className="login-kicker">{tLogin('brandKicker')}</p>
           <LocaleSwitcher />
         </div>
-        <h1 className="mt-4 text-2xl font-semibold">{t('loginTitle')}</h1>
-        <p className="muted mt-2 mb-6 text-sm leading-6">{t('loginSubtitle')}</p>
 
-        <Suspense fallback={<div className="muted text-sm">{tCommon('loading')}</div>}>
-          <LoginForm />
-        </Suspense>
+        <div className="relative z-10 mt-auto pt-16">
+          <h1 className="login-title">{tLogin('brandTitle')}</h1>
+          <p className="muted mt-5 max-w-md text-sm leading-7">{tLogin('brandSubtitle')}</p>
+        </div>
 
-        <p className="muted mt-6 text-xs leading-5">
-          Super Admin: <strong>admin@demo.sgms.local</strong> / <strong>Admin123!</strong> → /admin
-          <br />
-          Gym Sahibi: <strong>owner@demo-gym.local</strong> / <strong>Owner123!</strong> → /dashboard
+        <p className="relative z-10 mt-10 text-xs tracking-[0.2em] text-[rgba(201,169,98,0.55)] uppercase">
+          {tCommon('appName')}
         </p>
-      </div>
+      </section>
+
+      <section className="login-panel">
+        <div className="login-card">
+          <span className="badge">{t('badgeAdmin')}</span>
+          <h2 className="mt-5 text-2xl font-medium tracking-tight">{t('loginTitle')}</h2>
+          <p className="muted mt-2 mb-6 text-sm leading-6">{t('loginSubtitle')}</p>
+
+          <Suspense fallback={<div className="muted text-sm">{tCommon('loading')}</div>}>
+            <LoginForm />
+          </Suspense>
+        </div>
+      </section>
     </main>
   );
 }

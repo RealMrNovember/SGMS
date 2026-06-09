@@ -33,5 +33,15 @@
     "adminSubtitle": "GYM firmalarını ve SaaS kiracılarını merkezi olarak yönetin.",
     "noOrganization": "Organizasyon seçilmedi",
     "noRole": "Rol yok"
+  },
+  "login": {
+    "brandKicker": "CiCiByte · SGMS",
+    "brandTitle": "Sessiz lüks,\nkeskin operasyon.",
+    "brandSubtitle": "Premium spor salonu yönetimi için tasarlanmış merkezi platform.",
+    "demoSection": "Demo Giriş",
+    "demoAdmin": "Platform Admin",
+    "demoOwner": "Salon Sahibi",
+    "demoStaff": "Resepsiyon",
+    "demoAthlete": "Sporcu"
   }
 }

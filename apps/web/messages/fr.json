@@ -33,5 +33,15 @@
     "adminSubtitle": "Gérez centralement les salles de sport et les locataires SaaS.",
     "noOrganization": "Aucune organisation sélectionnée",
     "noRole": "Aucun rôle"
+  },
+  "login": {
+    "brandKicker": "CiCiByte · SGMS",
+    "brandTitle": "Luxe discret,\noperations précises.",
+    "brandSubtitle": "Plateforme centrale conçue pour la gestion premium de salles.",
+    "demoSection": "Accès démo",
+    "demoAdmin": "Admin plateforme",
+    "demoOwner": "Propriétaire",
+    "demoStaff": "Accueil",
+    "demoAthlete": "Athlète"
   }
 }

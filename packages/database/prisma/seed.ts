@@ -253,8 +253,56 @@ async function seedDemoTenant() {
 
   console.log(`Demo gym owner ready: ${ownerEmail}`);
 
+  await seedDemoStaff(organization.id);
   await seedGymMembershipPlans(organization.id);
   await seedDemoGymEcosystem(organization.id);
+}
+
+async function seedDemoStaff(organizationId: string) {
+  const staffEmail = process.env.SEED_STAFF_EMAIL ?? 'staff@demo-gym.local';
+  const staffPassword = process.env.SEED_STAFF_PASSWORD ?? 'Staff123!';
+  const passwordHash = await hash(staffPassword, 12);
+
+  const staff = await prisma.user.upsert({
+    where: { email: staffEmail },
+    update: {
+      name: 'Demo Resepsiyon Personeli',
+      passwordHash,
+      status: 'ACTIVE',
+      isSuperAdmin: false,
+    },
+    create: {
+      email: staffEmail,
+      name: 'Demo Resepsiyon Personeli',
+      passwordHash,
+      status: 'ACTIVE',
+      isSuperAdmin: false,
+      locale: 'tr',
+    },
+  });
+
+  await prisma.organizationMember.upsert({
+    where: {
+      organizationId_userId: {
+        organizationId,
+        userId: staff.id,
+      },
+    },
+    update: {
+      role: 'STAFF',
+      isActive: true,
+      joinedAt: new Date(),
+    },
+    create: {
+      organizationId,
+      userId: staff.id,
+      role: 'STAFF',
+      isActive: true,
+      joinedAt: new Date(),
+    },
+  });
+
+  console.log(`Demo staff ready: ${staffEmail}`);
 }
 
 async function seedDemoGymEcosystem(organizationId: string) {
@@ -320,6 +368,27 @@ async function seedDemoGymEcosystem(organizationId: string) {
       status: 'ACTIVE',
       isSuperAdmin: false,
       locale: 'tr',
+    },
+  });
+
+  await prisma.organizationMember.upsert({
+    where: {
+      organizationId_userId: {
+        organizationId,
+        userId: athleteUser.id,
+      },
+    },
+    update: {
+      role: 'VIEWER',
+      isActive: true,
+      joinedAt: new Date(),
+    },
+    create: {
+      organizationId,
+      userId: athleteUser.id,
+      role: 'VIEWER',
+      isActive: true,
+      joinedAt: new Date(),
     },
   });
 

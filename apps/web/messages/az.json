@@ -33,5 +33,15 @@
     "adminSubtitle": "İdman zallarını və SaaS icarəçilərini mərkəzləşdirilmiş idarə edin.",
     "noOrganization": "Təşkilat seçilməyib",
     "noRole": "Rol yoxdur"
+  },
+  "login": {
+    "brandKicker": "CiCiByte · SGMS",
+    "brandTitle": "Sakit lüks,\ndəqiq əməliyyat.",
+    "brandSubtitle": "Premium idman zalı idarəetməsi üçün mərkəzi platforma.",
+    "demoSection": "Demo giriş",
+    "demoAdmin": "Platform Admin",
+    "demoOwner": "Salon sahibi",
+    "demoStaff": "Resepsiya",
+    "demoAthlete": "İdmançı"
   }
 }

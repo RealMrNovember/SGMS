@@ -33,5 +33,15 @@
     "adminSubtitle": "Centrally manage gym companies and SaaS tenants.",
     "noOrganization": "No organization selected",
     "noRole": "No role"
+  },
+  "login": {
+    "brandKicker": "CiCiByte · SGMS",
+    "brandTitle": "Quiet luxury,\nsharp operations.",
+    "brandSubtitle": "A central platform crafted for premium gym management.",
+    "demoSection": "Demo Access",
+    "demoAdmin": "Platform Admin",
+    "demoOwner": "Gym Owner",
+    "demoStaff": "Front Desk",
+    "demoAthlete": "Athlete"
   }
 }
