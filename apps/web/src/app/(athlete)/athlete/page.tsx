@@ -1,3 +1,4 @@
+import { CheckInQrPanel } from '@/components/check-in-qr-panel';
 import Link from 'next/link';
 import { UserAvatar } from '@/components/user-avatar';
 import { auth } from '@/lib/auth';
@@ -81,6 +82,8 @@ export default async function AthleteHomePage() {
           <p className="muted mt-1 text-xs">{t('stats.messages')}</p>
         </Link>
       </section>
+
+      <CheckInQrPanel />
 
       <section className="card overflow-hidden">
         <div className="flex items-center justify-between border-b border-[var(--border)] px-5 py-4">

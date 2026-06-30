@@ -95,6 +95,7 @@ enum AuditAction {
   MEMBER_UPDATED
   MEMBER_REMOVED
   MEMBER_REGISTERED
+  MEMBER_CHECK_IN
   MEASUREMENT_ADDED
   EXPENSE_ADDED
   EXPENSE_VOIDED
@@ -123,6 +124,13 @@ enum ProgramType {
 enum ApiTokenScope {
   STAFF
   ATHLETE
+}
+
+enum CheckInMethod {
+  QR
+  RFID
+  MANUAL
+  DEVICE
 }
 
 enum ExpenseStatus {
@@ -221,6 +229,7 @@ model Organization {
   expenseCategories  ExpenseCategory[]
   expenses           Expense[]
   transactions       Transaction[]
+  checkIns           CheckIn[]
 
   @@index([status])
   @@index([centralLicenseStatus])
@@ -325,6 +334,7 @@ model Device {
   status         DeviceStatus @default(PENDING)
 
   hardwareId String  @map("hardware_id")
+  apiKeyHash String? @unique @map("api_key_hash")
   location   String?
   metadata   Json    @default("{}")
 
@@ -333,6 +343,7 @@ model Device {
   updatedAt  DateTime  @updatedAt @map("updated_at")
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  checkIns     CheckIn[]
 
   @@unique([organizationId, hardwareId])
   @@index([organizationId, status])
@@ -393,6 +404,7 @@ model GymMember {
   notes          String?         @db.Text
   locale         String          @default("tr")
   avatarUrl      String?         @map("avatar_url")
+  rfidTag        String?         @map("rfid_tag")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -406,9 +418,11 @@ model GymMember {
   apiTokens          ApiToken[]
   expenses           Expense[]
   transactions       Transaction[]
+  checkIns           CheckIn[]
 
   @@unique([organizationId, nationalId])
   @@unique([organizationId, passportNumber])
+  @@unique([organizationId, rfidTag])
   @@index([organizationId, status])
   @@index([organizationId, lastName, firstName])
   @@index([organizationId, trainerId])
@@ -637,4 +651,27 @@ model ApiToken {
   @@index([organizationId, scope])
   @@index([expiresAt])
   @@map("api_tokens")
+}
+
+// ---------------------------------------------------------------------------
+// CheckIn — salon giriş kaydı (QR, RFID, turnike, manuel)
+// ---------------------------------------------------------------------------
+
+model CheckIn {
+  id             String        @id @default(cuid())
+  organizationId String        @map("organization_id")
+  gymMemberId    String        @map("gym_member_id")
+  deviceId       String?       @map("device_id")
+  method         CheckInMethod
+  checkedInAt    DateTime      @default(now()) @map("checked_in_at")
+  metadata       Json          @default("{}")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  gymMember    GymMember    @relation(fields: [gymMemberId], references: [id], onDelete: Cascade)
+  device       Device?      @relation(fields: [deviceId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, checkedInAt])
+  @@index([gymMemberId, checkedInAt])
+  @@index([deviceId, checkedInAt])
+  @@map("check_ins")
 }

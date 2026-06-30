@@ -2,6 +2,7 @@ import { AddMeasurementForm } from '@/components/add-measurement-form';
 import { AvatarUpload } from '@/components/avatar-upload';
 import { MemberAccountPanel } from '@/components/member-account-panel';
 import { MemberHealthHistoryTable } from '@/components/member-health-history-table';
+import { MemberRfidForm } from '@/components/member-rfid-form';
 import { ProgramContentView } from '@/components/program-content-view';
 import { auth } from '@/lib/auth';
 import { intlLocaleFor } from '@/lib/format-locale';
@@ -16,6 +17,7 @@ import { notFound, redirect } from 'next/navigation';
 const MEASUREMENT_ROLES = new Set<OrganizationRole>(['OWNER', 'ADMIN', 'STAFF', 'TRAINER']);
 const AVATAR_MANAGER_ROLES = new Set<OrganizationRole>(['OWNER', 'ADMIN', 'STAFF', 'TRAINER']);
 const ACCOUNT_ROLES = new Set<OrganizationRole>(['OWNER', 'ADMIN', 'STAFF']);
+const MEMBER_MANAGER_ROLES = new Set<OrganizationRole>(['OWNER', 'ADMIN', 'STAFF']);
 const VOID_ROLES = new Set<OrganizationRole>(['OWNER', 'ADMIN']);
 
 export default async function MemberDetailPage({
@@ -36,6 +38,7 @@ export default async function MemberDetailPage({
   const canUploadAvatar = role ? AVATAR_MANAGER_ROLES.has(role) : false;
   const canManageAccount = role ? ACCOUNT_ROLES.has(role) : false;
   const canVoidExpenses = role ? VOID_ROLES.has(role) : false;
+  const canManageMember = role ? MEMBER_MANAGER_ROLES.has(role) : false;
 
   const t = await getTranslations('members');
   const locale = await getLocale();
@@ -142,6 +145,11 @@ export default async function MemberDetailPage({
               <dd className="text-white">{member.user?.email ?? t('detail.notLinked')}</dd>
             </div>
           </dl>
+          <MemberRfidForm
+            memberId={member.id}
+            currentRfid={member.rfidTag}
+            canManage={canManageMember}
+          />
         </section>
 
         <section className="card p-6">

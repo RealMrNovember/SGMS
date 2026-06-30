@@ -56,6 +56,7 @@ export default async function TenantDashboardLayout({ children }: { children: Re
         { href: '/dashboard/plans', label: t('plans') },
         { href: '/dashboard/programs', label: t('programs') },
         { href: '/dashboard/messages', label: t('messages'), badge: unreadMessages },
+        { href: '/dashboard/check-in', label: t('checkIn') },
         { href: '/dashboard/pos', label: t('pos') },
         { href: '/dashboard/team', label: t('team') },
         { href: '/dashboard/billing', label: tBilling('nav') },

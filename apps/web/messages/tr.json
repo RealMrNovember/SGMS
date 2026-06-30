@@ -26,6 +26,7 @@
     "plans": "Planlar",
     "programs": "Programlar",
     "messages": "Mesajlar",
+    "checkIn": "Giriş",
     "team": "Personel",
     "pos": "Kasa",
     "adminOverview": "Sistem Özeti",
@@ -689,6 +690,71 @@
       "licenseExpired": "Merkezi lisans süresi doldu. Ödeme veya iletişim ile devam edin.",
       "orgSuspended": "Hesap askıda. Destek ile iletişime geçin.",
       "noSubscription": "Aktif abonelik bulunamadı."
+    }
+  },
+  "checkIn": {
+    "title": "Salon Girişi",
+    "subtitle": "Turnike, QR ve RFID ile giriş kayıtları — resepsiyon canlı takip.",
+    "stats": {
+      "today": "Bugün giriş",
+      "scenario": "Gerçek senaryo",
+      "scenarioText": "Sporcu telefonundaki QR kodu turnikeden okutur veya RFID kartını yaklaştırır. Resepsiyon bu ekranda anlık giriş listesini görür; üyelik süresi dolmuşsa sistem girişi reddeder."
+    },
+    "feed": {
+      "title": "Bugünkü girişler",
+      "subtitle": "Son 50 kayıt (yenilemek için sayfayı yenileyin)",
+      "empty": "Henüz bugün giriş kaydı yok."
+    },
+    "methods": {
+      "qr": "QR kod",
+      "rfid": "RFID kart",
+      "manual": "Manuel (resepsiyon)",
+      "device": "Cihaz"
+    },
+    "manual": {
+      "title": "Manuel giriş",
+      "subtitle": "Kart veya QR çalışmıyorsa resepsiyon tek tıkla giriş kaydı oluşturur.",
+      "selectMember": "Üye seçin…",
+      "submit": "Giriş kaydet",
+      "submitting": "Kaydediliyor…",
+      "success": "Giriş kaydedildi.",
+      "successDuplicate": "Giriş kaydedildi (son 1 saat içinde de giriş yapmıştı).",
+      "error": "Giriş kaydedilemedi."
+    },
+    "devices": {
+      "title": "Turnike & cihazlar",
+      "subtitle": "Her turnike için bir API anahtarı üretin; masaüstü istemci bu anahtarla check-in API'sini çağırır.",
+      "viewOnly": "Cihaz listesi (yönetim için OWNER/ADMIN gerekir).",
+      "empty": "Kayıtlı cihaz yok.",
+      "name": "Cihaz adı",
+      "namePlaceholder": "Ana giriş turnikesi",
+      "hardwareId": "Donanım kimliği",
+      "location": "Konum",
+      "locationPlaceholder": "Ana giriş",
+      "type": "Tür",
+      "types": {
+        "turnstile": "Turnike",
+        "kiosk": "Kiosk",
+        "scanner": "QR okuyucu"
+      },
+      "register": "Cihaz kaydet",
+      "registering": "Kaydediliyor…",
+      "disable": "Devre dışı"
+    },
+    "rfid": {
+      "label": "RFID kart",
+      "placeholder": "Kart UID veya numara",
+      "save": "Kaydet",
+      "saving": "Kaydediliyor…",
+      "hint": "Turnike RFID okuyucusu bu değeri check-in isteğinde rfidTag olarak gönderir."
+    },
+    "athleteQr": {
+      "title": "Salona giriş QR",
+      "subtitle": "Turnikeden okutun — kod birkaç dakikada bir yenilenir.",
+      "loading": "QR hazırlanıyor…",
+      "loadError": "QR kodu alınamadı.",
+      "expires": "Geçerlilik: {time}",
+      "refresh": "Yenile"
     }
   }
 }

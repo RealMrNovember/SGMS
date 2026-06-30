@@ -387,19 +387,21 @@ Organization ─┬─ ExpenseCategory
 
 ---
 
-## 🔲 Faz 10 — IoT, Kapı & Turnike Sistemleri (Gelecek Vizyon — Öncelik: P3)
+## 🔄 Faz 10 — IoT, Kapı & Turnike Sistemleri (Öncelik: P3) — DEVAM
 
 > **Hedef:** Masaüstü offline/online turnike; QR ve RFID entegrasyonu.
 
 ### 10.1 Cihaz & kayıt (`Device` modeli mevcut)
-- [ ] `POST /api/v1/devices/register` — `hardwareId`, org pairing
-- [ ] Device-scoped API key (org + device)
-- [ ] `Device.lastSeenAt`, `status`: ONLINE | OFFLINE | DISABLED
+- [x] `POST /api/v1/devices` + dashboard cihaz kaydı — `hardwareId`, org pairing, tek seferlik `apiKey`
+- [x] Device-scoped API key (`X-Device-Key` / `Authorization: Device`)
+- [x] `Device.lastSeenAt`, `status`: ONLINE | OFFLINE | DISABLED | PENDING
 
 ### 10.2 Check-in & erişim
-- [ ] `POST /api/v1/check-in` — payload: `gymMemberId` | QR token | RFID tag
-- [ ] QR: zaman sınırlı signed token (JWT veya HMAC)
-- [ ] RFID: `GymMember.rfidTag` veya harici kart eşlemesi
+- [x] `POST /api/v1/check-in` — `gymMemberId` | QR token | RFID tag
+- [x] QR: HMAC imzalı kısa ömürlü token (`lib/check-in/qr-token.ts`)
+- [x] RFID: `GymMember.rfidTag` + üye detay formu
+- [x] Dashboard `/dashboard/check-in` — canlı giriş listesi + manuel giriş
+- [x] Sporcu paneli — giriş QR kartı
 - [ ] Webhook: `POST /api/v1/webhooks/turnstile` — üçüncü parti turnike yazılımı
 
 ### 10.3 Offline sync
@@ -408,7 +410,7 @@ Organization ─┬─ ExpenseCategory
 - [ ] Çakışma: last-write-wins + `AuditLog`
 
 ### 10.4 Dokümantasyon & istemci
-- [ ] `docs/api/turnstile-protocol.md`
+- [x] `docs/api/turnstile-protocol.md`
 - [ ] Masaüstü referans istemci (Electron/Tauri — ayrı repo)
 - [ ] Emülatör script (CI)
 

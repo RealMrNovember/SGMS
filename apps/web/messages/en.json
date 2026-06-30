@@ -26,6 +26,7 @@
     "plans": "Plans",
     "programs": "Programs",
     "messages": "Messages",
+    "checkIn": "Check-in",
     "team": "Staff",
     "pos": "POS",
     "adminOverview": "System Overview",
@@ -689,6 +690,71 @@
       "licenseExpired": "Central license expired. Continue via payment or contact.",
       "orgSuspended": "Account suspended. Contact support.",
       "noSubscription": "No active subscription found."
+    }
+  },
+  "checkIn": {
+    "title": "Gym Check-in",
+    "subtitle": "Turnstile, QR and RFID entry log — live front-desk view.",
+    "stats": {
+      "today": "Today's entries",
+      "scenario": "Real-world flow",
+      "scenarioText": "Athletes scan the QR on their phone or tap an RFID card. Reception sees live entries here; expired memberships are denied automatically."
+    },
+    "feed": {
+      "title": "Today's check-ins",
+      "subtitle": "Latest 50 records (refresh page to update)",
+      "empty": "No check-ins today yet."
+    },
+    "methods": {
+      "qr": "QR code",
+      "rfid": "RFID card",
+      "manual": "Manual (desk)",
+      "device": "Device"
+    },
+    "manual": {
+      "title": "Manual check-in",
+      "subtitle": "When card or QR fails, reception can log entry in one click.",
+      "selectMember": "Select member…",
+      "submit": "Log entry",
+      "submitting": "Saving…",
+      "success": "Check-in recorded.",
+      "successDuplicate": "Check-in recorded (also checked in within the last hour).",
+      "error": "Could not record check-in."
+    },
+    "devices": {
+      "title": "Turnstiles & devices",
+      "subtitle": "Generate an API key per turnstile; desktop client calls check-in API with it.",
+      "viewOnly": "Device list (OWNER/ADMIN required to manage).",
+      "empty": "No devices registered.",
+      "name": "Device name",
+      "namePlaceholder": "Main entrance turnstile",
+      "hardwareId": "Hardware ID",
+      "location": "Location",
+      "locationPlaceholder": "Main entrance",
+      "type": "Type",
+      "types": {
+        "turnstile": "Turnstile",
+        "kiosk": "Kiosk",
+        "scanner": "QR scanner"
+      },
+      "register": "Register device",
+      "registering": "Saving…",
+      "disable": "Disable"
+    },
+    "rfid": {
+      "label": "RFID card",
+      "placeholder": "Card UID or number",
+      "save": "Save",
+      "saving": "Saving…",
+      "hint": "Turnstile RFID reader sends this value as rfidTag in check-in requests."
+    },
+    "athleteQr": {
+      "title": "Gym entry QR",
+      "subtitle": "Scan at the turnstile — code refreshes every few minutes.",
+      "loading": "Preparing QR…",
+      "loadError": "Could not load QR code.",
+      "expires": "Valid until {time}",
+      "refresh": "Refresh"
     }
   }
 }
