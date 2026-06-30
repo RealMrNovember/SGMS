@@ -1,6 +1,6 @@
 import Pusher from 'pusher';
-import { userMessageChannel } from '@/lib/realtime/channels';
-import type { MessageCreatedEvent } from '@/lib/realtime/hub';
+import { orgStaffChannel, userMessageChannel } from '@/lib/realtime/channels';
+import type { CheckInCreatedEvent, MessageCreatedEvent } from '@/lib/realtime/hub';
 
 let cached: Pusher | null | undefined;
 
@@ -46,27 +46,50 @@ export function parseUserMessageChannel(channelName: string): { organizationId: 
   return { organizationId: match[1]!, userId: match[2]! };
 }
 
-export function authorizeUserChannel(
+export function parseOrgStaffChannel(channelName: string): string | null {
+  const match = /^private-org\.([^.]+)\.staff$/.exec(channelName);
+  return match?.[1] ?? null;
+}
+
+export function authorizeRealtimeChannel(
   socketId: string,
   channelName: string,
   organizationId: string,
   userId: string,
+  isStaff: boolean,
 ): { auth: string } | null {
   const pusher = getPusherServer();
   if (!pusher) {
     return null;
   }
 
-  const parsed = parseUserMessageChannel(channelName);
-  if (!parsed) {
-    return null;
+  const userChannel = parseUserMessageChannel(channelName);
+  if (userChannel) {
+    if (userChannel.organizationId !== organizationId || userChannel.userId !== userId) {
+      return null;
+    }
+    return pusher.authorizeChannel(socketId, channelName);
   }
 
-  if (parsed.organizationId !== organizationId || parsed.userId !== userId) {
-    return null;
+  const staffOrgId = parseOrgStaffChannel(channelName);
+  if (staffOrgId) {
+    if (!isStaff || staffOrgId !== organizationId) {
+      return null;
+    }
+    return pusher.authorizeChannel(socketId, channelName);
   }
 
-  return pusher.authorizeChannel(socketId, channelName);
+  return null;
+}
+
+/** @deprecated Use authorizeRealtimeChannel */
+export function authorizeUserChannel(
+  socketId: string,
+  channelName: string,
+  organizationId: string,
+  userId: string,
+): { auth: string } | null {
+  return authorizeRealtimeChannel(socketId, channelName, organizationId, userId, false);
 }
 
 export async function publishMessageEventToSoketi(event: MessageCreatedEvent): Promise<void> {
@@ -84,4 +107,17 @@ export async function publishMessageEventToSoketi(event: MessageCreatedEvent): P
       }),
     ),
   );
+}
+
+export async function publishCheckInEventToSoketi(event: CheckInCreatedEvent): Promise<void> {
+  const pusher = getPusherServer();
+  if (!pusher) {
+    return;
+  }
+
+  await pusher.trigger(orgStaffChannel(event.organizationId), event.type, {
+    type: event.type,
+    checkIn: event.checkIn,
+    organizationId: event.organizationId,
+  });
 }

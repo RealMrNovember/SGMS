@@ -400,19 +400,19 @@ Organization ─┬─ ExpenseCategory
 - [x] `POST /api/v1/check-in` — `gymMemberId` | QR token | RFID tag
 - [x] QR: HMAC imzalı kısa ömürlü token (`lib/check-in/qr-token.ts`)
 - [x] RFID: `GymMember.rfidTag` + üye detay formu
-- [x] Dashboard `/dashboard/check-in` — canlı giriş listesi + manuel giriş
+- [x] Dashboard `/dashboard/check-in` — canlı giriş listesi + manuel giriş + **Soketi canlı yenileme**
 - [x] Sporcu paneli — giriş QR kartı
 - [ ] Webhook: `POST /api/v1/webhooks/turnstile` — üçüncü parti turnike yazılımı
 
 ### 10.3 Offline sync
-- [ ] `SyncBatch` modeli — `deviceId`, queued events, `syncedAt`
-- [ ] `POST /api/v1/sync/push` + `GET /api/v1/sync/pull`
-- [ ] Çakışma: last-write-wins + `AuditLog`
+- [x] `SyncBatch` modeli — `deviceId`, queued events, `syncedAt`
+- [x] `POST /api/v1/sync/push` + `GET /api/v1/sync/pull`
+- [x] Idempotent `clientEventId` + `AuditLog`
+- [ ] Çakışma politikası genişletmesi (last-write-wins dışı senaryolar)
 
 ### 10.4 Dokümantasyon & istemci
 - [x] `docs/api/turnstile-protocol.md`
-- [ ] Masaüstü referans istemci (Electron/Tauri — ayrı repo)
-- [ ] Emülatör script (CI)
+- [x] Emülatör script (`scripts/turnstile-emulator.sh`)
 
 **Kabul kriteri:** Offline check-in kuyruğu → online sync → `AuditLog` + üye giriş kaydı
 

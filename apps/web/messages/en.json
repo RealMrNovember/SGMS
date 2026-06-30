@@ -695,6 +695,7 @@
   "checkIn": {
     "title": "Gym Check-in",
     "subtitle": "Turnstile, QR and RFID entry log — live front-desk view.",
+    "live": "Live",
     "stats": {
       "today": "Today's entries",
       "scenario": "Real-world flow",
@@ -702,7 +703,7 @@
     },
     "feed": {
       "title": "Today's check-ins",
-      "subtitle": "Latest 50 records (refresh page to update)",
+      "subtitle": "Latest 50 records (updates live)",
       "empty": "No check-ins today yet."
     },
     "methods": {

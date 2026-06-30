@@ -133,6 +133,13 @@ enum CheckInMethod {
   DEVICE
 }
 
+enum SyncBatchStatus {
+  PENDING
+  COMPLETED
+  PARTIAL
+  FAILED
+}
+
 enum ExpenseStatus {
   OPEN
   PAID
@@ -230,6 +237,7 @@ model Organization {
   expenses           Expense[]
   transactions       Transaction[]
   checkIns           CheckIn[]
+  syncBatches        SyncBatch[]
 
   @@index([status])
   @@index([centralLicenseStatus])
@@ -344,6 +352,7 @@ model Device {
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   checkIns     CheckIn[]
+  syncBatches  SyncBatch[]
 
   @@unique([organizationId, hardwareId])
   @@index([organizationId, status])
@@ -662,6 +671,7 @@ model CheckIn {
   organizationId String        @map("organization_id")
   gymMemberId    String        @map("gym_member_id")
   deviceId       String?       @map("device_id")
+  clientEventId  String?       @map("client_event_id")
   method         CheckInMethod
   checkedInAt    DateTime      @default(now()) @map("checked_in_at")
   metadata       Json          @default("{}")
@@ -673,5 +683,30 @@ model CheckIn {
   @@index([organizationId, checkedInAt])
   @@index([gymMemberId, checkedInAt])
   @@index([deviceId, checkedInAt])
+  @@unique([deviceId, clientEventId])
   @@map("check_ins")
+}
+
+// ---------------------------------------------------------------------------
+// SyncBatch — turnike offline kuyruk senkronizasyonu
+// ---------------------------------------------------------------------------
+
+model SyncBatch {
+  id             String          @id @default(cuid())
+  organizationId String          @map("organization_id")
+  deviceId       String          @map("device_id")
+  eventCount     Int             @map("event_count")
+  successCount   Int             @default(0) @map("success_count")
+  failedCount    Int             @default(0) @map("failed_count")
+  status         SyncBatchStatus @default(PENDING)
+  result         Json            @default("[]")
+  syncedAt       DateTime?       @map("synced_at")
+  createdAt      DateTime        @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  device       Device       @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, createdAt])
+  @@index([deviceId, createdAt])
+  @@map("sync_batches")
 }

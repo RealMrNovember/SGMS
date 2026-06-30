@@ -46,6 +46,7 @@ export async function POST(request: Request) {
     const qrToken = typeof body.qrToken === 'string' ? body.qrToken : undefined;
     const rfidTag = typeof body.rfidTag === 'string' ? body.rfidTag : undefined;
     const gymMemberId = typeof body.gymMemberId === 'string' ? body.gymMemberId : undefined;
+    const clientEventId = typeof body.clientEventId === 'string' ? body.clientEventId : undefined;
 
     if (!qrToken && !rfidTag && !gymMemberId) {
       return apiErrorI18n('checkInPayloadRequired', 400, request);
@@ -61,6 +62,7 @@ export async function POST(request: Request) {
       gymMemberId,
       qrToken,
       rfidTag,
+      clientEventId,
       ...meta,
     });
 

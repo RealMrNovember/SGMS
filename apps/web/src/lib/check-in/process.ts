@@ -1,4 +1,5 @@
 import { verifyCheckInQrToken } from '@/lib/check-in/qr-token';
+import { publishCheckInEvent } from '@/lib/realtime/hub';
 import { prisma } from '@/lib/prisma';
 import type { CheckInMethod } from '@sgms/database';
 
@@ -10,8 +11,11 @@ export type ProcessCheckInInput = {
   gymMemberId?: string;
   qrToken?: string;
   rfidTag?: string;
+  clientEventId?: string | null;
+  checkedInAt?: Date | null;
   ipAddress?: string | null;
   userAgent?: string | null;
+  skipRealtime?: boolean;
 };
 
 export type ProcessCheckInResult =
@@ -25,6 +29,7 @@ export type ProcessCheckInResult =
         memberName: string;
       };
       duplicateWithinHour: boolean;
+      idempotent: boolean;
     }
   | { ok: false; code: 'member_not_found' | 'member_inactive' | 'membership_expired' | 'invalid_qr' | 'org_mismatch' };
 
@@ -65,6 +70,32 @@ async function resolveMemberId(input: ProcessCheckInInput): Promise<
 }
 
 export async function processCheckIn(input: ProcessCheckInInput): Promise<ProcessCheckInResult> {
+  if (input.clientEventId && input.deviceId) {
+    const existing = await prisma.checkIn.findFirst({
+      where: {
+        deviceId: input.deviceId,
+        clientEventId: input.clientEventId,
+      },
+      include: {
+        gymMember: { select: { firstName: true, lastName: true } },
+      },
+    });
+    if (existing) {
+      return {
+        ok: true,
+        checkIn: {
+          id: existing.id,
+          gymMemberId: existing.gymMemberId,
+          method: existing.method,
+          checkedInAt: existing.checkedInAt,
+          memberName: `${existing.gymMember.firstName} ${existing.gymMember.lastName}`,
+        },
+        duplicateWithinHour: true,
+        idempotent: true,
+      };
+    }
+  }
+
   const resolved = await resolveMemberId(input);
   if ('error' in resolved) {
     return { ok: false, code: resolved.error };
@@ -92,16 +123,17 @@ export async function processCheckIn(input: ProcessCheckInInput): Promise<Proces
     return { ok: false, code: 'member_inactive' };
   }
 
-  if (member.membershipEndsAt && member.membershipEndsAt.getTime() < Date.now()) {
+  const checkedInAt = input.checkedInAt ?? new Date();
+  if (member.membershipEndsAt && member.membershipEndsAt.getTime() < checkedInAt.getTime()) {
     return { ok: false, code: 'membership_expired' };
   }
 
-  const hourAgo = new Date(Date.now() - 60 * 60 * 1000);
+  const hourBefore = new Date(checkedInAt.getTime() - 60 * 60 * 1000);
   const recent = await prisma.checkIn.findFirst({
     where: {
       organizationId: input.organizationId,
       gymMemberId: member.id,
-      checkedInAt: { gte: hourAgo },
+      checkedInAt: { gte: hourBefore, lte: checkedInAt },
     },
     orderBy: { checkedInAt: 'desc' },
   });
@@ -111,7 +143,9 @@ export async function processCheckIn(input: ProcessCheckInInput): Promise<Proces
       organizationId: input.organizationId,
       gymMemberId: member.id,
       deviceId: input.deviceId ?? null,
+      clientEventId: input.clientEventId ?? null,
       method: input.method,
+      checkedInAt,
       metadata: {},
     },
   });
@@ -127,6 +161,7 @@ export async function processCheckIn(input: ProcessCheckInInput): Promise<Proces
         gymMemberId: member.id,
         method: input.method,
         deviceId: input.deviceId ?? null,
+        clientEventId: input.clientEventId ?? null,
       },
       ipAddress: input.ipAddress ?? null,
       userAgent: input.userAgent ?? null,
@@ -140,6 +175,23 @@ export async function processCheckIn(input: ProcessCheckInInput): Promise<Proces
     });
   }
 
+  const memberName = `${member.firstName} ${member.lastName}`;
+
+  if (!input.skipRealtime) {
+    publishCheckInEvent({
+      type: 'checkin.created',
+      organizationId: input.organizationId,
+      checkIn: {
+        id: checkIn.id,
+        gymMemberId: member.id,
+        memberName,
+        method: checkIn.method,
+        checkedInAt: checkIn.checkedInAt.toISOString(),
+        deviceId: input.deviceId ?? null,
+      },
+    });
+  }
+
   return {
     ok: true,
     checkIn: {
@@ -147,8 +199,9 @@ export async function processCheckIn(input: ProcessCheckInInput): Promise<Proces
       gymMemberId: member.id,
       method: checkIn.method,
       checkedInAt: checkIn.checkedInAt,
-      memberName: `${member.firstName} ${member.lastName}`,
+      memberName,
     },
     duplicateWithinHour: Boolean(recent),
+    idempotent: false,
   };
 }

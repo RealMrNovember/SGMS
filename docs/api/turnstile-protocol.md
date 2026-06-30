@@ -124,7 +124,65 @@ curl -sS -X POST https://sgms.cicibyte.com/api/v1/check-in \
   -d '{"rfidTag":"04A1B2C3D4"}'
 ```
 
-## Sonraki adımlar (Faz 10.3)
+## Canlı resepsiyon (WebSocket)
 
-- Offline kuyruk: `POST /api/v1/sync/push`
+Turnike girişi sonrası dashboard **Giriş** sayfası otomatik yenilenir.
+
+- Soketi kanal: `private-org.{organizationId}.staff`
+- Olay: `checkin.created`
+- Yedek: `GET /api/v1/check-ins/events` (SSE, personel oturumu)
+
+## Offline senkronizasyon
+
+**Senaryo:** İnternet kesildi → turnike girişleri yerel kuyruğa alınır → bağlantı gelince toplu gönderilir.
+
+### Üye önbelleği (çevrimdışı RFID eşlemesi)
+
+`GET /api/v1/sync/pull` + `X-Device-Key`
+
+```json
+{
+  "ok": true,
+  "data": {
+    "syncedAt": "2026-06-30T10:00:00.000Z",
+    "memberCount": 120,
+    "members": [
+      { "id": "...", "name": "Elif Yılmaz", "rfidTag": "04A1...", "membershipEndsAt": "...", "status": "ACTIVE" }
+    ]
+  }
+}
+```
+
+### Kuyruk gönderimi
+
+`POST /api/v1/sync/push`
+
+```json
+{
+  "events": [
+    {
+      "clientEventId": "550e8400-e29b-41d4-a716-446655440000",
+      "method": "RFID",
+      "rfidTag": "04A1B2C3D4",
+      "checkedInAt": "2026-06-30T07:12:00.000Z"
+    }
+  ]
+}
+```
+
+- `clientEventId` zorunlu — tekrar gönderimde idempotent (aynı kayıt döner)
+- Offline için `gymMemberId` veya `rfidTag` kullanın (QR token süresi dolabilir)
+- Maks. 500 olay / istek
+
+Yanıt: `batchId`, `status` (`COMPLETED` | `PARTIAL` | `FAILED`), `results[]`
+
+## Emülatör
+
+```bash
+DEVICE_KEY=sgms_dev_xxx bash scripts/turnstile-emulator.sh
+```
+
+## Sonraki adımlar
+
 - Üçüncü parti webhook: `POST /api/v1/webhooks/turnstile`
+- Masaüstü referans istemci (Electron/Tauri)

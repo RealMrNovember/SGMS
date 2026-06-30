@@ -1,4 +1,4 @@
-import { publishMessageEventToSoketi } from '@/lib/realtime/pusher-server';
+import { publishCheckInEventToSoketi, publishMessageEventToSoketi } from '@/lib/realtime/pusher-server';
 
 export type RealtimeMessagePayload = {
   id: string;
@@ -15,21 +15,37 @@ export type MessageCreatedEvent = {
   message: RealtimeMessagePayload;
 };
 
+export type CheckInCreatedPayload = {
+  id: string;
+  gymMemberId: string;
+  memberName: string;
+  method: string;
+  checkedInAt: string;
+  deviceId: string | null;
+};
+
+export type CheckInCreatedEvent = {
+  type: 'checkin.created';
+  organizationId: string;
+  checkIn: CheckInCreatedPayload;
+};
+
 type Listener = (chunk: string) => void;
 
 const userListeners = new Map<string, Set<Listener>>();
+const orgListeners = new Map<string, Set<Listener>>();
 
-function listenersFor(userId: string) {
-  let set = userListeners.get(userId);
+function listenersFor(map: Map<string, Set<Listener>>, key: string) {
+  let set = map.get(key);
   if (!set) {
     set = new Set();
-    userListeners.set(userId, set);
+    map.set(key, set);
   }
   return set;
 }
 
 export function subscribeUserMessages(userId: string, listener: Listener) {
-  listenersFor(userId).add(listener);
+  listenersFor(userListeners, userId).add(listener);
   return () => {
     const set = userListeners.get(userId);
     if (!set) {
@@ -42,20 +58,47 @@ export function subscribeUserMessages(userId: string, listener: Listener) {
   };
 }
 
+export function subscribeOrgCheckIns(organizationId: string, listener: Listener) {
+  listenersFor(orgListeners, organizationId).add(listener);
+  return () => {
+    const set = orgListeners.get(organizationId);
+    if (!set) {
+      return;
+    }
+    set.delete(listener);
+    if (set.size === 0) {
+      orgListeners.delete(organizationId);
+    }
+  };
+}
+
+function broadcast(map: Map<string, Set<Listener>>, key: string, payload: string) {
+  const set = map.get(key);
+  if (!set) {
+    return;
+  }
+  for (const listener of set) {
+    listener(payload);
+  }
+}
+
 export function publishMessageEvent(event: MessageCreatedEvent) {
   const payload = `data: ${JSON.stringify(event)}\n\n`;
   for (const userId of event.userIds) {
-    const set = userListeners.get(userId);
-    if (!set) {
-      continue;
-    }
-    for (const listener of set) {
-      listener(payload);
-    }
+    broadcast(userListeners, userId, payload);
   }
 
   void publishMessageEventToSoketi(event).catch(() => {
     // Soketi optional — SSE remains primary fallback
+  });
+}
+
+export function publishCheckInEvent(event: CheckInCreatedEvent) {
+  const payload = `data: ${JSON.stringify(event)}\n\n`;
+  broadcast(orgListeners, event.organizationId, payload);
+
+  void publishCheckInEventToSoketi(event).catch(() => {
+    // Soketi optional
   });
 }
 

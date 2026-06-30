@@ -1,3 +1,4 @@
+import { CheckInLiveRefresh } from '@/components/check-in-live-refresh';
 import { DeviceManagementPanel } from '@/components/device-management-panel';
 import { ManualCheckInForm } from '@/components/manual-check-in-form';
 import { UserAvatar } from '@/components/user-avatar';
@@ -64,8 +65,15 @@ export default async function CheckInDashboardPage() {
 
   return (
     <div className="space-y-8">
+      <CheckInLiveRefresh organizationId={organizationId} />
+
       <div>
-        <h2 className="text-2xl font-semibold">{t('title')}</h2>
+        <div className="flex flex-wrap items-center gap-3">
+          <h2 className="text-2xl font-semibold">{t('title')}</h2>
+          <span className="badge border-emerald-500/40 bg-emerald-500/10 text-emerald-200">
+            {t('live')}
+          </span>
+        </div>
         <p className="muted mt-2 text-sm">{t('subtitle')}</p>
       </div>
 

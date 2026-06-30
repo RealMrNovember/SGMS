@@ -1,7 +1,8 @@
 import { requireMemberScopedApiContext } from '@/lib/api/guard';
+import { isStaffContext } from '@/lib/api/auth-context';
 import { apiErrorI18n } from '@/lib/api/i18n-errors';
 import { apiError } from '@/lib/api/response';
-import { authorizeUserChannel, getPusherServer } from '@/lib/realtime/pusher-server';
+import { authorizeRealtimeChannel, getPusherServer } from '@/lib/realtime/pusher-server';
 
 export const runtime = 'nodejs';
 
@@ -35,7 +36,13 @@ export async function POST(request: Request) {
   }
 
   const { organizationId, userId } = authResult.context;
-  const authorized = authorizeUserChannel(socketId, channelName, organizationId, userId);
+  const authorized = authorizeRealtimeChannel(
+    socketId,
+    channelName,
+    organizationId,
+    userId,
+    isStaffContext(authResult.context),
+  );
 
   if (!authorized) {
     return apiErrorI18n('forbidden', 403, request);

@@ -695,6 +695,7 @@
   "checkIn": {
     "title": "Salon Girişi",
     "subtitle": "Turnike, QR ve RFID ile giriş kayıtları — resepsiyon canlı takip.",
+    "live": "Canlı",
     "stats": {
       "today": "Bugün giriş",
       "scenario": "Gerçek senaryo",
@@ -702,7 +703,7 @@
     },
     "feed": {
       "title": "Bugünkü girişler",
-      "subtitle": "Son 50 kayıt (yenilemek için sayfayı yenileyin)",
+      "subtitle": "Son 50 kayıt (canlı güncellenir)",
       "empty": "Henüz bugün giriş kaydı yok."
     },
     "methods": {
