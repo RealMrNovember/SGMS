@@ -9,9 +9,9 @@ export const siteConfig = {
     email: 'info@cicibyte.com',
     support: 'support@cicibyte.com',
     website: 'https://cicibyte.com',
-    phone: '+90 (850) 000 00 00',
+    phone: '+90 535 489 50 50',
     /** wa.me link için ülke kodu dahil, + işareti olmadan */
-    whatsapp: '905325667788',
+    whatsapp: '905354895050',
     address: 'İstanbul, Türkiye',
   },
   social: {
