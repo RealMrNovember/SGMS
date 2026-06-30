@@ -5,6 +5,8 @@ import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { Suspense } from 'react';
 
+export const dynamic = 'force-dynamic';
+
 export default async function LoginPage() {
   const t = await getTranslations('auth');
   const tLogin = await getTranslations('login');
