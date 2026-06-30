@@ -45,12 +45,20 @@ export default async function AthleteAccountPage() {
         ) : (
           <p className="muted mt-3 text-sm">{t('payAtDesk')}</p>
         )}
-        <a
-          href={`/api/v1/members/${session.user.gymMemberId}/statement`}
-          className="muted mt-4 inline-block text-sm hover:text-white"
-        >
-          {t('exportCsv')}
-        </a>
+        <div className="muted mt-4 flex flex-wrap justify-center gap-4 text-sm">
+          <a
+            href={`/api/v1/members/${session.user.gymMemberId}/statement?format=pdf`}
+            className="hover:text-white"
+          >
+            {t('exportPdf')}
+          </a>
+          <a
+            href={`/api/v1/members/${session.user.gymMemberId}/statement`}
+            className="hover:text-white"
+          >
+            {t('exportCsv')}
+          </a>
+        </div>
       </section>
 
       <section className="card overflow-hidden">

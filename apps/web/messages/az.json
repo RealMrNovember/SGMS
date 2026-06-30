@@ -451,6 +451,7 @@
     "noPermission": "Hesab idarəetmə icazəniz yoxdur.",
     "void": "Ləğv",
     "exportCsv": "CSV çıxarışı endir",
+    "exportPdf": "PDF çıxarışı endir",
     "methods": {
       "cash": "Nağd",
       "card": "Kart",

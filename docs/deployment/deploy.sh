@@ -47,6 +47,7 @@ sudo -u "${WEB_USER}" env PATH="${NODE_DIR}/bin:${PATH}" PM2_HOME="${PM2_HOME}" 
   "${PM2_BIN}" reload sgms-web --update-env
 
 echo "==> [7/7] Smoke test"
+sleep 3
 bash "${APP_ROOT}/docs/deployment/verify-production.sh"
 
 echo ""

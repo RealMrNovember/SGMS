@@ -452,6 +452,7 @@
     "noPermission": "Cari hesap yönetimi için yetkiniz yok.",
     "void": "İptal",
     "exportCsv": "CSV ekstre indir",
+    "exportPdf": "PDF ekstre indir",
     "methods": {
       "cash": "Nakit",
       "card": "Kart",

@@ -451,6 +451,7 @@
     "noPermission": "Sin permiso para gestionar la cuenta.",
     "void": "Anular",
     "exportCsv": "Descargar extracto CSV",
+    "exportPdf": "Descargar extracto PDF",
     "methods": {
       "cash": "Efectivo",
       "card": "Tarjeta",

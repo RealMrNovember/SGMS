@@ -452,6 +452,7 @@
     "noPermission": "You do not have permission to manage accounts.",
     "void": "Void",
     "exportCsv": "Download CSV statement",
+    "exportPdf": "Download PDF statement",
     "methods": {
       "cash": "Cash",
       "card": "Card",

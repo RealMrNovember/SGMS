@@ -1,7 +1,9 @@
 import { isAthleteContext } from '@/lib/api/auth-context';
 import { requireMemberScopedApiContext } from '@/lib/api/guard';
 import { apiErrorI18n } from '@/lib/api/i18n-errors';
-import { buildMemberStatementCsv } from '@/lib/member-statement';
+import { buildMemberStatementCsv, loadMemberStatementData } from '@/lib/member-statement';
+import { buildMemberStatementPdf } from '@/lib/member-statement-pdf';
+import { intlLocaleFor } from '@/lib/format-locale';
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -16,6 +18,28 @@ export async function GET(request: Request, { params }: RouteParams) {
 
   if (isAthleteContext(context) && context.gymMemberId !== gymMemberId) {
     return apiErrorI18n('ownRecordsOnly', 403, request);
+  }
+
+  const format = new URL(request.url).searchParams.get('format')?.toLowerCase();
+
+  if (format === 'pdf') {
+    const data = await loadMemberStatementData(context.organizationId, gymMemberId);
+    if (!data) {
+      return apiErrorI18n('memberNotFound', 404, request);
+    }
+
+    const acceptLanguage = request.headers.get('accept-language') ?? 'tr';
+    const locale = intlLocaleFor(acceptLanguage.split(',')[0]?.trim() || 'tr');
+    const pdf = await buildMemberStatementPdf(data, locale);
+
+    return new Response(Buffer.from(pdf.bytes), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="${pdf.filename}"`,
+        'Cache-Control': 'no-store',
+      },
+    });
   }
 
   const statement = await buildMemberStatementCsv(context.organizationId, gymMemberId);

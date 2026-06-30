@@ -75,12 +75,17 @@ export function MemberAccountPanel({
         <div className="text-right">
           <p className="muted text-xs">{t('openBalance')}</p>
           <p className="text-2xl font-semibold text-amber-200">{formatter.format(openBalance)}</p>
-          <a
-            href={`/api/v1/members/${gymMemberId}/statement`}
-            className="muted mt-2 inline-block text-xs hover:text-white"
-          >
-            {t('exportCsv')}
-          </a>
+          <div className="muted mt-2 flex flex-wrap justify-end gap-3 text-xs">
+            <a
+              href={`/api/v1/members/${gymMemberId}/statement?format=pdf`}
+              className="hover:text-white"
+            >
+              {t('exportPdf')}
+            </a>
+            <a href={`/api/v1/members/${gymMemberId}/statement`} className="hover:text-white">
+              {t('exportCsv')}
+            </a>
+          </div>
         </div>
       </div>
 

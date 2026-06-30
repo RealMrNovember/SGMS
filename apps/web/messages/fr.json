@@ -451,6 +451,7 @@
     "noPermission": "Pas d'autorisation pour gérer le compte.",
     "void": "Annuler",
     "exportCsv": "Télécharger le relevé CSV",
+    "exportPdf": "Télécharger le relevé PDF",
     "methods": {
       "cash": "Espèces",
       "card": "Carte",

@@ -1,5 +1,11 @@
 import { mkdir, unlink, writeFile } from 'fs/promises';
 import path from 'path';
+import {
+  deleteAvatarFromR2,
+  isR2PublicUrl,
+  relativeKeyFromR2Url,
+  uploadAvatarToR2,
+} from '@/lib/storage-r2';
 
 export type AvatarEntityType = 'user' | 'gym_member';
 
@@ -35,7 +41,7 @@ function buildAvatarKey(input: AvatarUploadInput): string {
   return `${input.organizationId}/${input.entityType}_${input.entityId}.${extension}`;
 }
 
-function buildPublicUrl(key: string): string {
+function buildLocalPublicUrl(key: string): string {
   return `/uploads/avatars/${key}`;
 }
 
@@ -47,7 +53,7 @@ class LocalStorageAdapter implements StorageAdapter {
     const absolutePath = path.join(this.baseDir, key);
     await mkdir(path.dirname(absolutePath), { recursive: true });
     await writeFile(absolutePath, input.buffer);
-    return { key, url: buildPublicUrl(key) };
+    return { key, url: buildLocalPublicUrl(key) };
   }
 
   async deleteAvatar(key: string): Promise<void> {
@@ -60,20 +66,20 @@ class LocalStorageAdapter implements StorageAdapter {
   }
 }
 
-class S3StorageAdapter implements StorageAdapter {
-  async uploadAvatar(): Promise<AvatarUploadResult> {
-    throw new Error('S3 storage is not configured yet. Set STORAGE_PROVIDER=local or implement S3 adapter.');
+class R2StorageAdapter implements StorageAdapter {
+  async uploadAvatar(input: AvatarUploadInput): Promise<AvatarUploadResult> {
+    return uploadAvatarToR2(input);
   }
 
-  async deleteAvatar(): Promise<void> {
-    throw new Error('S3 storage is not configured yet.');
+  async deleteAvatar(key: string): Promise<void> {
+    return deleteAvatarFromR2(key);
   }
 }
 
 function getStorageAdapter(): StorageAdapter {
-  const provider = process.env.STORAGE_PROVIDER ?? 'local';
-  if (provider === 's3') {
-    return new S3StorageAdapter();
+  const provider = (process.env.STORAGE_PROVIDER ?? 'local').toLowerCase();
+  if (provider === 'r2' || provider === 's3') {
+    return new R2StorageAdapter();
   }
   return new LocalStorageAdapter();
 }
@@ -119,8 +125,22 @@ export async function uploadAvatar(input: AvatarUploadInput): Promise<AvatarUplo
 }
 
 export function avatarKeyFromUrl(url: string | null | undefined): string | null {
-  if (!url?.startsWith('/uploads/avatars/')) {
+  if (!url) {
     return null;
   }
-  return url.replace('/uploads/avatars/', '');
+
+  if (url.startsWith('/uploads/avatars/')) {
+    return url.replace('/uploads/avatars/', '');
+  }
+
+  if (isR2PublicUrl(url)) {
+    return relativeKeyFromR2Url(url);
+  }
+
+  return null;
+}
+
+export function getStorageProvider(): 'local' | 'r2' {
+  const provider = (process.env.STORAGE_PROVIDER ?? 'local').toLowerCase();
+  return provider === 'r2' || provider === 's3' ? 'r2' : 'local';
 }
