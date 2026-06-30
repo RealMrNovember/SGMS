@@ -10,7 +10,7 @@
 | **Komşu (dokunulmaz)** | `license.cicibyte.com` |
 | **Kaynak doküman** | `sgms.cicibyte.com - readme.md`, `CiCiByte_SGMS_Ultimate_Enterprise_Blueprint.docx` |
 
-**Son güncelleme:** 2026-06-09 · **HEAD:** `76f5097`
+**Son güncelleme:** 2026-06-30 · **HEAD:** `cbe0983` (Faz 6 devam)
 
 ---
 
@@ -38,11 +38,12 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 3 | Production & Operasyon | ✅ Tamamlandı | 100% |
 | 4 | Tenant UI — Core İş Mantığı (CRM) | ✅ Tamamlandı | 100% |
 | 5 | Merkezi Lisans Entegrasyonu | ✅ Tamamlandı | 100% |
-| 6 | Uluslararasılaşma (i18n) & Medya/Kimlik | 🔲 Sırada | 0% |
-| 7 | Mobil & Sporcu Auth (API-First) | 🔲 Planlandı | 0% |
-| 8 | POS, Kasa & Cari Hesap Yönetimi | 🔲 Planlandı | 0% |
-| 9 | Gerçek Zamanlı İletişim (Real-time Chat) | 🔲 Planlandı | 0% |
+| 6 | Uluslararasılaşma (i18n) & Medya/Kimlik | 🔄 Devam ediyor | ~92% |
+| 7 | Mobil & Sporcu Auth (API-First) | ✅ Tamamlandı | 100% |
+| 8 | POS, Kasa & Cari Hesap Yönetimi | 🔄 Devam ediyor | ~85% |
+| 9 | Gerçek Zamanlı İletişim (Real-time Chat) | 🔄 Devam ediyor | ~40% |
 | 10 | IoT, Kapı & Turnike Sistemleri | 🔲 Gelecek Vizyon | 0% |
+| 11 | Marketing & Showcase Sitesi | ✅ Tamamlandı | 100% |
 
 > **Öncelik mantığı:** Önce uluslararası ve görsel kimlik (Faz 6) → sporcu/mobil erişim (Faz 7) → salon içi finans (Faz 8) → anlık mesajlaşma (Faz 9) → fiziksel cihazlar (Faz 10).
 
@@ -86,7 +87,8 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 ### Seed hesapları (demo-gym)
 | Rol | E-posta | Parola |
 |-----|---------|--------|
-| Super Admin | `admin@demo.sgms.local` | `Admin123!` |
+| **Master Admin** | `admin@cicibyte.com` | `SEED_ADMIN_PASSWORD` (varsayılan seed) |
+| Super Admin (eski demo) | `admin@demo.sgms.local` | `Admin123!` (yalnızca `SEED_ADMIN_EMAIL` override yoksa değişir) |
 | Gym OWNER | `owner@demo-gym.local` | `Owner123!` |
 | TRAINER | `trainer@demo-gym.local` | `Trainer123!` |
 | Sporcu (User) | `athlete@demo-gym.local` | `Athlete123!` |
@@ -162,8 +164,12 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ## ✅ Faz 5 — Merkezi Lisans Entegrasyonu (Tamamlandı)
 
-- [x] `packages/license-client` → `license.cicibyte.com`
-- [x] Trial / check / heartbeat + `LICENSE_API_KEY` (shared key, `app_code=sgms`)
+- [x] `packages/license-client` → `license.cicibyte.com` (`app_code=sgms`)
+- [x] Trial / check / activate + `LICENSE_API_KEY` (paylaşımlı anahtar, VDS doğrulandı)
+- [x] Org oluşturma / public trial kayıt / giriş / heartbeat senkronu
+- [x] **Müşteri görünürlüğü:** `client_name` + `email` trial/check gövdesine eklendi → [license.cicibyte.com/admin](https://license.cicibyte.com/admin) panelinde Client kaydı
+- [x] Trial kayıt strict mod: lisans sunucusu başarısızsa org geri alınır
+- [x] `pnpm license:heartbeat` — org adı + OWNER e-posta ile metadata senkronu
 - [x] `lib/tenant-access.ts` — limit + salt okunur mod
 - [x] Dashboard lisans özet kartları + `LicenseStatusBanner`
 
@@ -203,9 +209,9 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 **Kapsam (aşamalı çeviri)**
 - [x] Faz 6a (kısmi): Auth, dashboard nav, admin nav
-- [ ] Faz 6a (devam): CRM, ölçüm formları
-- [ ] Faz 6b: Mesajlar, planlar, lisans uyarıları
-- [ ] Faz 6c: E-posta şablonları, hata mesajları API v1
+- [x] Faz 6a (devam): CRM üyeler, ölçüm formları, personel listesi
+- [x] Faz 6b: Mesajlar, planlar, programlar, lisans uyarıları, dashboard özeti
+- [x] Faz 6c: API v1 hata mesajları — `lib/api/i18n-errors.ts` + tüm `/api/v1/*` route'lar (`Accept-Language`)
 
 **Teknik notlar**
 - Server Component: `getTranslations()` · Client: `useTranslations()`
@@ -220,22 +226,22 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 - [ ] Migration + seed placeholder avatarları (opsiyonel)
 
 **UI / UX**
-- [ ] Üye listesi: avatar + isim (resepsiyon tanıma)
-- [ ] Sporcu detay CRM: büyük profil fotoğrafı
-- [ ] PT / personel listesi: avatar
-- [ ] Varsayılan avatar: initials veya generic silhouette
+- [x] Üye listesi: avatar + isim (resepsiyon tanıma)
+- [x] Sporcu detay CRM: büyük profil fotoğrafı + yükleme
+- [x] PT / personel listesi: avatar
+- [x] Varsayılan avatar: initials veya generic silhouette
 
 **Depolama (aşamalı)**
-- [ ] **Faz 6.2a:** Harici URL veya base64 geçici (MVP)
+- [x] **Faz 6.2a:** Local storage abstraction (`lib/storage.ts`) + `POST /api/v1/upload/avatar`
 - [ ] **Faz 6.2b:** Object storage — **Cloudflare R2** (tercih) veya AWS S3
-  - [ ] `packages/storage` veya `lib/storage.ts` abstraction
-  - [ ] Upload API: `POST /api/v1/media/avatar` (tenant + rol guard)
+  - [x] `lib/storage.ts` abstraction (local + S3 stub)
+  - [x] Upload API: `POST /api/v1/upload/avatar` (tenant + rol guard)
   - [ ] Signed URL / public CDN path
-  - [ ] Max boyut, MIME whitelist (`image/jpeg`, `image/png`, `image/webp`)
+  - [x] Max boyut, MIME whitelist (`image/jpeg`, `image/png`, `image/webp`)
 
 **Güvenlik**
-- [ ] Yalnızca kendi avatarı veya yetkili personel (OWNER/ADMIN/STAFF/PT) yükleyebilir
-- [ ] Tenant prefix: `{organizationId}/avatars/{entityId}.webp`
+- [x] Yalnızca kendi avatarı veya yetkili personel (OWNER/ADMIN/STAFF/PT) yükleyebilir
+- [x] Tenant prefix: `{organizationId}/avatars/{entityId}.webp`
 
 **Kabul kriteri:** 6 dilde login + dashboard · üye listesinde avatar görünür · dil profilden değiştirilebilir
 
@@ -243,51 +249,56 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ---
 
-## 🔲 Faz 7 — Mobil & Sporcu Auth — API-First (Öncelik: P1)
+## 🔄 Faz 7 — Mobil & Sporcu Auth — API-First (Öncelik: P1) — DEVAM
 
 > **Hedef:** Sporcu mobil uygulaması ve self-service; borç görüntüleme (Faz 8) için ön koşul.
 
 ### 7.1 API token katmanı
-- [ ] `ApiToken` modeli veya JWT Bearer export
-- [ ] `POST /api/v1/auth/login` → `{ accessToken, expiresAt }`
-- [ ] `lib/api/guard.ts` — `Authorization: Bearer`
-- [ ] Token revoke (Redis)
+- [x] `ApiToken` modeli (Prisma migration `20260630120000_add_api_tokens`)
+- [x] `POST /api/v1/auth/login` → `{ accessToken, expiresAt, scope }`
+- [x] `POST /api/v1/auth/logout` — token revoke (DB `revokedAt`)
+- [x] `lib/api/token.ts` + `lib/api/auth-context.ts` — Bearer doğrulama
+- [x] `lib/api/guard.ts` — session + Bearer birleşik context
+- [ ] Token revoke Redis cache (opsiyonel — P2)
 
 ### 7.2 Sporcu oturumu
-- [ ] `GymMember.userId` → session `gymMemberId` claim
-- [ ] Sporcu scope: yalnızca kendi ölçüm/program/mesaj/borç
-- [ ] `GET /api/v1/me` — profil + üyelik + locale
+- [x] `GymMember.userId` → JWT session `gymMemberId` claim
+- [x] Sporcu scope: ölçüm/program/mesaj yalnızca kendi kayıtları
+- [x] `GET /api/v1/me` — profil + üyelik + locale + istatistikler
 
 ### 7.3 API tamamlama
-- [ ] `PATCH`/`DELETE` — üyeler, ölçümler, programlar
-- [ ] Cursor sayfalama tüm listelerde
-- [ ] OpenAPI 3.1 (`docs/api/openapi.yaml`)
+- [x] `PATCH`/`DELETE` — üyeler, ölçümler, programlar (`/api/v1/{resource}/{id}`)
+- [x] Cursor sayfalama tüm listelerde (`limit`, `cursor`, `nextCursor`, `hasMore`)
+- [x] OpenAPI 3.1 (`docs/api/openapi.yaml`) — çekirdek uçlar
 
 ### 7.4 Sporcu web portalı
-- [ ] `/athlete` veya `/app` — mobil uyumlu route group
-- [ ] i18n entegre (Faz 6)
-- [ ] Aktif program, son ölçüm, mesajlar, cari bakiye (Faz 8)
+- [x] `/athlete` — mobil uyumlu route group (özet, ölçüm, program)
+- [x] `/athlete/measurements` · `/athlete/programs` · `/athlete/messages` detay sayfaları
+- [x] Alt navigasyon (`AthleteNav`) — mobil-first UX
+- [x] i18n entegre (Faz 6) — `athlete` namespace (6 dil)
+- [x] Middleware: VIEWER sporcu → `/athlete` (dashboard yerine)
+- [x] Cari bakiye görünümü (`/athlete/account`) — Faz 8 ile entegre
 
-**Kabul kriteri:** `athlete@demo-gym.local` Bearer ile curl/Postman tam akış
+**Kabul kriteri:** `athlete@demo-gym.local` Bearer ile curl/Postman tam akış — ✅ login + me + measurements
 
-**Bağımlılık:** Faz 4 ✅ · Faz 6 (tercih edilen) · Faz 5 ✅
+**Bağımlılık:** Faz 4 ✅ · Faz 6 ✅ · Faz 5 ✅
 
 ---
 
-## 🔲 Faz 8 — POS, Kasa & Cari Hesap Yönetimi (Öncelik: P1)
+## 🔄 Faz 8 — POS, Kasa & Cari Hesap Yönetimi (Öncelik: P1) — DEVAM
 
 > **Hedef:** Salon içi market, kafe, ekstra PT dersi vb. **Extra Expenses** — üye cari hesabı.
 
 ### 8.1 Veri modeli
 
-**Yeni modeller (Prisma)**
+**Yeni modeller (Prisma)** — migration `20260630180000_add_expense_models`
 
-| Model | Amaç |
-|-------|------|
-| `ExpenseCategory` | Su, protein, PT ek ders, havlu kiralama… (org bazlı) |
-| `Expense` | Tek kalem borç/harcama kaydı (`gymMemberId`, tutar, açıklama) |
-| `Invoice` | Dönemsel veya toplu fatura (opsiyonel gruplama) |
-| `Transaction` | Ödeme / tahsilat / iptal (`type`: CHARGE, PAYMENT, REFUND, ADJUSTMENT) |
+| Model | Durum |
+|-------|--------|
+| `ExpenseCategory` | ✅ |
+| `Expense` | ✅ |
+| `Transaction` | ✅ |
+| `Invoice` | 🔲 (opsiyonel — sonraki iterasyon) |
 
 **İlişkiler**
 ```
@@ -304,27 +315,29 @@ Organization ─┬─ ExpenseCategory
 
 ### 8.2 İş mantığı (Server Actions + API)
 
-- [ ] `actions/expenses.ts` — `addMemberExpense` (tek tuş: "Su - 15 TL")
-- [ ] Hızlı ekleme şablonları: sık kullanılan kalemler (org ayarı)
-- [ ] `recordPayment` — kasa tahsilatı
-- [ ] `voidExpense` — iptal (OWNER/ADMIN; audit zorunlu)
-- [ ] API v1: `GET/POST /api/v1/expenses`, `GET/POST /api/v1/transactions`
-- [ ] Tenant izolasyonu + `getTenantWriteBlockReason` guard
+- [x] `actions/expenses.ts` — `addMemberExpense`, `quickAddCategoryExpense`, `recordPayment`, `voidExpense`
+- [x] Hızlı ekleme şablonları: org `ExpenseCategory` (Su 15₺, Protein 50₺ seed)
+- [x] `recordPayment` — kasa tahsilatı (FIFO borç kapatma)
+- [x] `voidExpense` — iptal (OWNER/ADMIN; audit zorunlu)
+- [x] API v1: `GET/POST /api/v1/expenses`, `PATCH/DELETE /api/v1/expenses/{id}`, `GET/POST /api/v1/transactions`
+- [x] Tenant izolasyonu + `getTenantWriteBlockReason` guard
+- [x] Org ayarlarından kategori yönetimi UI (`/dashboard/pos` — OWNER/ADMIN)
 
 ### 8.3 UI
 
 **Personel (resepsiyon / PT)**
-- [ ] Sporcu detay CRM: **Cari Hesap** sekmesi — bakiye, son hareketler
-- [ ] Hızlı ekleme butonları: `+ Su 15₺` · `+ Protein 50₺` · özel tutar
-- [ ] `/dashboard/pos` veya modal tabanlı mini POS ekranı
+- [x] Sporcu detay CRM: **Cari Hesap** paneli — bakiye, hızlı ekleme, tahsilat
+- [x] Hızlı ekleme butonları: `+ Su 15₺` · `+ Protein 50₺` · özel tutar
+- [x] `/dashboard/pos` — resepsiyon mini POS terminali
 
 **Sporcu (Faz 7 portal)**
-- [ ] Borç listesi + ödeme geçmişi (read-only veya online ödeme — sonraki faz)
-- [ ] i18n + para birimi formatı
+- [x] Borç listesi + ödeme geçmişi (read-only)
+- [x] i18n + para birimi formatı (`expenses` namespace, 6 dil)
 
 ### 8.4 Raporlama (minimal)
-- [ ] Günlük kasa özeti (OWNER/ADMIN)
-- [ ] Üye bazlı ekstre export (CSV/PDF — P2)
+- [x] Günlük kasa özeti (OWNER/ADMIN — POS üst panel)
+- [x] Üye bazlı ekstre export CSV — `GET /api/v1/members/{id}/statement`
+- [ ] Üye bazlı ekstre PDF (P2)
 
 **Kabul kriteri:** Resepsiyon "Su - 15 TL" ekler → sporcu panelinde borç görünür → tahsilat sonrası bakiye sıfırlanır
 
@@ -332,7 +345,7 @@ Organization ─┬─ ExpenseCategory
 
 ---
 
-## 🔲 Faz 9 — Gerçek Zamanlı İletişim (Real-time Chat) (Öncelik: P2)
+## 🔄 Faz 9 — Gerçek Zamanlı İletişim (Real-time Chat) (Öncelik: P2) — DEVAM
 
 > **Hedef:** Mevcut `DirectMessage` üzerine WhatsApp benzeri anlık mesajlaşma.
 
@@ -349,17 +362,17 @@ Organization ─┬─ ExpenseCategory
 
 ### 9.2 Teknik gereksinimler
 
-- [ ] `DirectMessage` modeli korunur; ek: `deliveredAt`, `readAt` (opsiyonel `isRead` yerine)
-- [ ] Kanal adlandırma: `private-org.{organizationId}.user.{userId}`
-- [ ] Presence: PT çevrimiçi / sporcu çevrimiçi (opsiyonel)
-- [ ] `POST /api/v1/messages` → DB + broadcast event
-- [ ] Client: thread görünümü, typing indicator (P2), unread badge
-- [ ] Fallback: mevcut polling/inbox (bağlantı kopunca)
+- [x] `DirectMessage` — `deliveredAt`, `readAt` (migration `20260630190000_add_message_delivery_fields`)
+- [x] Kanal adlandırma: `lib/realtime/channels.ts` — `private-org.{organizationId}.user.{userId}`
+- [x] `POST /api/v1/messages` → DB + in-process broadcast (`lib/realtime/hub.ts`)
+- [x] SSE fallback: `GET /api/v1/messages/events` + `MessageLiveRefresh` (dashboard + sporcu)
+- [ ] Soketi / Socket.io + Redis adapter (production çoklu instance)
 
 ### 9.3 UI
-- [ ] `/dashboard/messages` → konuşma listesi + aktif thread
-- [ ] Sporcu portal mesajları (Faz 7)
-- [ ] Push bildirim hook (Faz 9b — FCM/APNs abstraction)
+- [x] `/dashboard/messages` — SSE ile anlık yenileme
+- [x] Sporcu portal mesajları — SSE ile anlık yenileme
+- [ ] Konuşma thread görünümü (1:1 aktif sohbet)
+- [ ] Typing indicator (P2), unread badge
 
 ### 9.4 Güvenlik
 - [ ] Kanal yetkisi: yalnızca aynı `organizationId` üyeleri
@@ -403,6 +416,37 @@ Organization ─┬─ ExpenseCategory
 
 ---
 
+## ✅ Faz 11 — Marketing & Showcase Sitesi (Öncelik: P1) — TAMAMLANDI
+
+> **Hedef:** `sgms.cicibyte.com` ziyaretçileri doğrudan login'e değil; profesyonel tanıtım sitesine yönlensin. 14 günlük deneme kaydı ve marka kimliği.
+
+### 11.1 Showcase ana sayfa
+- [x] `/` — premium marketing landing (hero, istatistik, özellikler, neden SGMS, nasıl çalışır, CTA)
+- [x] Oturum açık kullanıcı → dashboard/athlete/admin yönlendirmesi korunur
+- [x] Giriş butonu → `/login` · Deneme CTA → `/trial`
+
+### 11.2 14 günlük deneme kaydı
+- [x] `/trial` — public self-service kayıt formu
+- [x] `actions/trial-registration.ts` — org + OWNER + Starter TRIALING (14 gün) + lisans bootstrap
+- [x] Başarı sonrası → `/login?email=...` ile panele geçiş
+
+### 11.3 Marka & iletişim
+- [x] Logo SVG (`public/logo.svg`) + favicon (`app/icon.svg`)
+- [x] `SgmsLogo` bileşeni — login, marketing header/footer
+- [x] `lib/site-config.ts` — iletişim (info@, support@, cicibyte.com)
+- [x] Footer: ürün linkleri + iletişim bilgileri
+
+### 11.4 i18n & teknik
+- [x] `marketing` namespace — 6 dil (TR/EN tam, diğerleri EN tabanlı genişletilebilir)
+- [x] Middleware: `/`, `/trial` public route
+- [x] OpenGraph metadata + layout güncellemesi
+
+**Kabul kriteri:** `sgms.cicibyte.com` açıldığında showcase görünür · 14 gün deneme ile salon oluşturulur · login showcase'den erişilir
+
+**Bağımlılık:** Faz 1 (auth) ✅ · Faz 5 (lisans trial) ✅
+
+---
+
 ## Teknik Borç & Paralel İyileştirmeler
 
 | Öğe | Öncelik | Faz |
@@ -424,11 +468,12 @@ Tamamlanan:
   Faz 0–5  Altyapı → CRM → Lisans                    ✅
 
 Sıradaki (Digital Boutique SaaS):
-  Faz 6    i18n (6 dil) + Avatar / Medya             ← DEVAM (6a altyapı ✅)
-  Faz 7    Mobil API + Sporcu portal
+  Faz 6    i18n (6 dil) + Avatar / Medya             ← DEVAM (~90%, 6c API mesajları)
+  Faz 7    Mobil API + Sporcu portal                 ← DEVAM (~55%)
   Faz 8    POS & Cari hesap (Invoice/Expense/Transaction)
   Faz 9    Real-time chat (WebSocket)
   Faz 10   Turnike / QR / RFID / IoT
+  Faz 11   Marketing & Showcase sitesi               ✅
 ```
 
 ---

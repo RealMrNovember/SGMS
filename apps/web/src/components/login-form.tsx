@@ -19,8 +19,9 @@ export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') ?? '/dashboard';
+  const prefilledEmail = searchParams.get('email') ?? '';
 
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(prefilledEmail);
   const [password, setPassword] = useState('');
   const [activeDemo, setActiveDemo] = useState<DemoAccountKey | null>(null);
   const [error, setError] = useState<string | null>(null);

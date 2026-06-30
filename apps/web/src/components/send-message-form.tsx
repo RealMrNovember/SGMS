@@ -1,6 +1,7 @@
 'use client';
 
 import { sendDirectMessage, type SendMessageState } from '@/actions/messages';
+import { useTranslations } from 'next-intl';
 import { useActionState } from 'react';
 
 const initialState: SendMessageState = {};
@@ -8,13 +9,15 @@ const initialState: SendMessageState = {};
 type RecipientOption = { id: string; label: string };
 
 export function SendMessageForm({ recipients }: { recipients: RecipientOption[] }) {
+  const t = useTranslations('messages.compose');
+  const tCommon = useTranslations('common');
   const [state, formAction, pending] = useActionState(sendDirectMessage, initialState);
 
   return (
     <section className="card space-y-4 p-6">
       <div>
-        <h3 className="text-lg font-semibold">Yeni Mesaj</h3>
-        <p className="muted mt-1 text-sm">Personel veya sporcu ile mesajlaşın.</p>
+        <h3 className="text-lg font-semibold">{t('title')}</h3>
+        <p className="muted mt-1 text-sm">{t('subtitle')}</p>
       </div>
 
       {state.error ? (
@@ -32,10 +35,10 @@ export function SendMessageForm({ recipients }: { recipients: RecipientOption[] 
       <form action={formAction} className="space-y-4">
         <div className="space-y-2">
           <label htmlFor="receiverId" className="muted text-sm">
-            Alıcı
+            {t('receiver')}
           </label>
           <select id="receiverId" name="receiverId" className="input" required>
-            <option value="">Seçin</option>
+            <option value="">{tCommon('select')}</option>
             {recipients.map((r) => (
               <option key={r.id} value={r.id}>
                 {r.label}
@@ -46,13 +49,13 @@ export function SendMessageForm({ recipients }: { recipients: RecipientOption[] 
 
         <div className="space-y-2">
           <label htmlFor="content" className="muted text-sm">
-            Mesaj
+            {t('content')}
           </label>
           <textarea id="content" name="content" rows={4} className="input" required />
         </div>
 
         <button type="submit" className="button px-5 py-2.5" disabled={pending}>
-          {pending ? 'Gönderiliyor…' : 'Gönder'}
+          {pending ? t('sending') : t('submit')}
         </button>
       </form>
     </section>

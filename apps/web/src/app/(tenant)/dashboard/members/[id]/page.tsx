@@ -1,12 +1,20 @@
 import { AddMeasurementForm } from '@/components/add-measurement-form';
+import { AvatarUpload } from '@/components/avatar-upload';
+import { MemberAccountPanel } from '@/components/member-account-panel';
 import { MemberHealthHistoryTable } from '@/components/member-health-history-table';
 import { auth } from '@/lib/auth';
+import { intlLocaleFor } from '@/lib/format-locale';
+import { decimalToNumber, getMemberAccountSummary } from '@/lib/member-balance';
 import { prisma } from '@/lib/prisma';
 import type { OrganizationRole } from '@sgms/database';
+import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
 const MEASUREMENT_ROLES = new Set<OrganizationRole>(['OWNER', 'ADMIN', 'STAFF', 'TRAINER']);
+const AVATAR_MANAGER_ROLES = new Set<OrganizationRole>(['OWNER', 'ADMIN', 'STAFF', 'TRAINER']);
+const ACCOUNT_ROLES = new Set<OrganizationRole>(['OWNER', 'ADMIN', 'STAFF']);
+const VOID_ROLES = new Set<OrganizationRole>(['OWNER', 'ADMIN']);
 
 export default async function MemberDetailPage({
   params,
@@ -23,103 +31,128 @@ export default async function MemberDetailPage({
   const organizationId = session.user.organizationId;
   const role = session.user.role;
   const canManageMeasurements = role ? MEASUREMENT_ROLES.has(role) : false;
+  const canUploadAvatar = role ? AVATAR_MANAGER_ROLES.has(role) : false;
+  const canManageAccount = role ? ACCOUNT_ROLES.has(role) : false;
+  const canVoidExpenses = role ? VOID_ROLES.has(role) : false;
 
-  // Tenant izolasyonu: organizationId eşleşmesi zorunlu
-  const member = await prisma.gymMember.findFirst({
-    where: { id, organizationId },
-    include: {
-      plan: true,
-      trainer: { select: { id: true, name: true, email: true } },
-      user: { select: { id: true, name: true, email: true } },
-      healthMeasurements: {
-        orderBy: { measuredAt: 'desc' },
-      },
-      trainingPrograms: {
-        where: { isActive: true },
-        orderBy: { startDate: 'desc' },
-        include: {
-          trainer: { select: { name: true, email: true } },
+  const t = await getTranslations('members');
+  const locale = await getLocale();
+  const dateLocale = intlLocaleFor(locale);
+
+  const [member, accountSummary, expenseCategories] = await Promise.all([
+    prisma.gymMember.findFirst({
+      where: { id, organizationId },
+      include: {
+        plan: true,
+        trainer: { select: { id: true, name: true, email: true } },
+        user: { select: { id: true, name: true, email: true } },
+        healthMeasurements: {
+          orderBy: { measuredAt: 'desc' },
+        },
+        trainingPrograms: {
+          where: { isActive: true },
+          orderBy: { startDate: 'desc' },
+          include: {
+            trainer: { select: { name: true, email: true } },
+          },
         },
       },
-    },
-  });
+    }),
+    getMemberAccountSummary(organizationId, id),
+    prisma.expenseCategory.findMany({
+      where: { organizationId, isActive: true },
+      orderBy: { sortOrder: 'asc' },
+      select: { id: true, name: true, defaultAmount: true },
+    }),
+  ]);
 
   if (!member) {
     notFound();
   }
 
+  const fullName = `${member.firstName} ${member.lastName}`;
+
   return (
     <div className="space-y-8">
-      <div>
-        <Link href="/dashboard/members" className="muted text-sm hover:text-white">
-          ← Üyeler
-        </Link>
-        <h2 className="mt-4 text-2xl font-semibold">
-          {member.firstName} {member.lastName}
-        </h2>
-        <p className="muted mt-2 text-sm">
-          <span className="badge">{member.status}</span>
-          {member.gender !== 'UNSPECIFIED' ? ` · ${member.gender}` : ''}
-          {role ? ` · görüntüleyen: ${role}` : ''}
-        </p>
+      <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+        <div>
+          <Link href="/dashboard/members" className="muted text-sm hover:text-white">
+            {t('backToMembers')}
+          </Link>
+          <h2 className="mt-4 text-2xl font-semibold">{fullName}</h2>
+          <p className="muted mt-2 text-sm">
+            <span className="badge">{member.status}</span>
+            {member.gender !== 'UNSPECIFIED' ? ` · ${member.gender}` : ''}
+            {role ? ` · ${t('viewingAs', { role })}` : ''}
+          </p>
+        </div>
+
+        <AvatarUpload
+          name={fullName}
+          currentUrl={member.avatarUrl}
+          targetType="gym_member"
+          gymMemberId={member.id}
+          canUpload={canUploadAvatar}
+          size="xl"
+        />
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         <section className="card p-6">
-          <h3 className="text-lg font-semibold">Profil</h3>
+          <h3 className="text-lg font-semibold">{t('detail.profile')}</h3>
           <dl className="muted mt-4 space-y-2 text-sm">
             <div className="flex justify-between gap-4">
-              <dt>E-posta</dt>
+              <dt>{t('detail.fields.email')}</dt>
               <dd className="text-white">{member.email ?? '—'}</dd>
             </div>
             <div className="flex justify-between gap-4">
-              <dt>Telefon</dt>
+              <dt>{t('detail.fields.phone')}</dt>
               <dd className="text-white">{member.phone ?? '—'}</dd>
             </div>
             <div className="flex justify-between gap-4">
-              <dt>TC Kimlik</dt>
+              <dt>{t('detail.fields.nationalId')}</dt>
               <dd className="text-white">{member.nationalId ?? '—'}</dd>
             </div>
             <div className="flex justify-between gap-4">
-              <dt>Doğum Tarihi</dt>
+              <dt>{t('detail.fields.birthDate')}</dt>
               <dd className="text-white">
-                {member.birthDate ? member.birthDate.toLocaleDateString('tr-TR') : '—'}
+                {member.birthDate ? member.birthDate.toLocaleDateString(dateLocale) : '—'}
               </dd>
             </div>
             <div className="flex justify-between gap-4">
-              <dt>Hesap</dt>
-              <dd className="text-white">{member.user?.email ?? 'Bağlı değil'}</dd>
+              <dt>{t('detail.fields.account')}</dt>
+              <dd className="text-white">{member.user?.email ?? t('detail.notLinked')}</dd>
             </div>
           </dl>
         </section>
 
         <section className="card p-6">
-          <h3 className="text-lg font-semibold">Üyelik & PT</h3>
+          <h3 className="text-lg font-semibold">{t('detail.membership')}</h3>
           <dl className="muted mt-4 space-y-2 text-sm">
             <div className="flex justify-between gap-4">
-              <dt>Salon Planı</dt>
+              <dt>{t('detail.fields.gymPlan')}</dt>
               <dd className="text-white">{member.plan?.name ?? '—'}</dd>
             </div>
             <div className="flex justify-between gap-4">
-              <dt>Üyelik Başlangıç</dt>
+              <dt>{t('detail.fields.membershipStart')}</dt>
               <dd className="text-white">
                 {member.membershipStartsAt
-                  ? member.membershipStartsAt.toLocaleDateString('tr-TR')
+                  ? member.membershipStartsAt.toLocaleDateString(dateLocale)
                   : '—'}
               </dd>
             </div>
             <div className="flex justify-between gap-4">
-              <dt>Üyelik Bitiş</dt>
+              <dt>{t('detail.fields.membershipEnd')}</dt>
               <dd className="text-white">
                 {member.membershipEndsAt
-                  ? member.membershipEndsAt.toLocaleDateString('tr-TR')
+                  ? member.membershipEndsAt.toLocaleDateString(dateLocale)
                   : '—'}
               </dd>
             </div>
             <div className="flex justify-between gap-4">
-              <dt>Antrenör (PT)</dt>
+              <dt>{t('detail.fields.trainer')}</dt>
               <dd className="text-white">
-                {member.trainer?.name ?? member.trainer?.email ?? 'Atanmamış'}
+                {member.trainer?.name ?? member.trainer?.email ?? t('detail.unassigned')}
               </dd>
             </div>
           </dl>
@@ -128,10 +161,38 @@ export default async function MemberDetailPage({
 
       {member.notes ? (
         <section className="card p-6">
-          <h3 className="text-lg font-semibold">Sporcu Notları</h3>
+          <h3 className="text-lg font-semibold">{t('detail.notes')}</h3>
           <p className="muted mt-3 whitespace-pre-wrap text-sm">{member.notes}</p>
         </section>
       ) : null}
+
+      <MemberAccountPanel
+        gymMemberId={member.id}
+        canManage={canManageAccount}
+        canVoid={canVoidExpenses}
+        currency="TRY"
+        openBalance={decimalToNumber(accountSummary.openBalance)}
+        categories={expenseCategories.map((c) => ({
+          id: c.id,
+          name: c.name,
+          defaultAmount: c.defaultAmount?.toString() ?? null,
+        }))}
+        expenses={accountSummary.recentExpenses.map((e) => ({
+          id: e.id,
+          description: e.description,
+          amount: e.amount.toString(),
+          status: e.status,
+          createdAt: e.createdAt.toISOString(),
+          category: e.category,
+        }))}
+        transactions={accountSummary.recentTransactions.map((tx) => ({
+          id: tx.id,
+          amount: tx.amount.toString(),
+          type: tx.type,
+          paymentMethod: tx.paymentMethod,
+          createdAt: tx.createdAt.toISOString(),
+        }))}
+      />
 
       <AddMeasurementForm gymMemberId={member.id} canManage={canManageMeasurements} />
 
@@ -140,29 +201,31 @@ export default async function MemberDetailPage({
       <section className="card overflow-hidden">
         <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-4">
           <div>
-            <h3 className="text-lg font-semibold">Aktif Antrenman Programları</h3>
-            <p className="muted mt-1 text-sm">{member.trainingPrograms.length} program</p>
+            <h3 className="text-lg font-semibold">{t('detail.activePrograms')}</h3>
+            <p className="muted mt-1 text-sm">
+              {t('detail.programCount', { count: member.trainingPrograms.length })}
+            </p>
           </div>
           <Link
             href={`/dashboard/programs?member=${member.id}`}
             className="muted text-sm hover:text-white"
           >
-            Tüm programlar →
+            {t('detail.allPrograms')}
           </Link>
         </div>
 
         <div className="divide-y divide-[var(--border)]">
           {member.trainingPrograms.length === 0 ? (
-            <p className="muted px-6 py-6 text-center text-sm">Aktif program atanmamış.</p>
+            <p className="muted px-6 py-6 text-center text-sm">{t('detail.noPrograms')}</p>
           ) : (
             member.trainingPrograms.map((program) => (
               <article key={program.id} className="px-6 py-4">
                 <p className="font-medium">{program.title}</p>
                 <p className="muted text-sm">
                   {program.type} · {program.trainer.name ?? program.trainer.email ?? '—'} ·{' '}
-                  {program.startDate.toLocaleDateString('tr-TR')}
+                  {program.startDate.toLocaleDateString(dateLocale)}
                   {program.endDate
-                    ? ` → ${program.endDate.toLocaleDateString('tr-TR')}`
+                    ? ` → ${program.endDate.toLocaleDateString(dateLocale)}`
                     : ''}
                 </p>
               </article>

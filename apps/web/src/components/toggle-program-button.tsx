@@ -1,6 +1,7 @@
 'use client';
 
 import { toggleTrainingProgramActive } from '@/actions/programs';
+import { useTranslations } from 'next-intl';
 import { useTransition } from 'react';
 
 export function ToggleProgramButton({
@@ -10,6 +11,7 @@ export function ToggleProgramButton({
   programId: string;
   isActive: boolean;
 }) {
+  const tCommon = useTranslations('common');
   const [pending, startTransition] = useTransition();
 
   return (
@@ -23,7 +25,11 @@ export function ToggleProgramButton({
         });
       }}
     >
-      {pending ? '…' : isActive ? 'Pasifleştir' : 'Aktifleştir'}
+      {pending
+        ? tCommon('ellipsis')
+        : isActive
+          ? tCommon('deactivate')
+          : tCommon('activate')}
     </button>
   );
 }

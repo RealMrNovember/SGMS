@@ -1,6 +1,8 @@
 import { LocaleSwitcher } from '@/components/locale-switcher';
+import { SgmsLogo } from '@/components/brand/sgms-logo';
 import { LoginForm } from '@/components/login-form';
 import { getTranslations } from 'next-intl/server';
+import Link from 'next/link';
 import { Suspense } from 'react';
 
 export default async function LoginPage() {
@@ -12,13 +14,18 @@ export default async function LoginPage() {
     <main className="login-shell">
       <section className="login-brand">
         <div className="relative z-10 flex items-center justify-between gap-4">
-          <p className="login-kicker">{tLogin('brandKicker')}</p>
+          <Link href="/" className="transition-opacity hover:opacity-90">
+            <SgmsLogo size="sm" href={null} showWordmark />
+          </Link>
           <LocaleSwitcher />
         </div>
 
         <div className="relative z-10 mt-auto pt-16">
           <h1 className="login-title">{tLogin('brandTitle')}</h1>
           <p className="muted mt-5 max-w-md text-sm leading-7">{tLogin('brandSubtitle')}</p>
+          <Link href="/" className="muted mt-6 inline-block text-sm hover:text-white">
+            ← {tLogin('backToSite')}
+          </Link>
         </div>
 
         <p className="relative z-10 mt-10 text-xs tracking-[0.2em] text-[rgba(201,169,98,0.55)] uppercase">

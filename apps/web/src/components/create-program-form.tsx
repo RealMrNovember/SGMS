@@ -1,6 +1,7 @@
 'use client';
 
 import { createTrainingProgram, type CreateProgramState } from '@/actions/programs';
+import { useTranslations } from 'next-intl';
 import { useActionState } from 'react';
 
 const initialState: CreateProgramState = {};
@@ -19,14 +20,15 @@ export function CreateProgramForm({
   trainers: TrainerOption[];
   showTrainerSelect: boolean;
 }) {
+  const t = useTranslations('programs.add');
+  const tTypes = useTranslations('programs.types');
+  const tCommon = useTranslations('common');
   const [state, formAction, pending] = useActionState(createTrainingProgram, initialState);
 
   if (!canManage) {
     return (
       <section className="card p-6">
-        <p className="muted text-sm">
-          Program oluşturmak için TRAINER, ADMIN veya OWNER rolü gerekir.
-        </p>
+        <p className="muted text-sm">{t('noPermission')}</p>
       </section>
     );
   }
@@ -34,8 +36,8 @@ export function CreateProgramForm({
   return (
     <section className="card space-y-4 p-6">
       <div>
-        <h3 className="text-lg font-semibold">Yeni Program</h3>
-        <p className="muted mt-1 text-sm">Antrenman veya beslenme programı atayın.</p>
+        <h3 className="text-lg font-semibold">{t('title')}</h3>
+        <p className="muted mt-1 text-sm">{t('subtitle')}</p>
       </div>
 
       {state.error ? (
@@ -53,10 +55,10 @@ export function CreateProgramForm({
       <form action={formAction} className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <label htmlFor="gymMemberId" className="muted text-sm">
-            Sporcu
+            {t('athlete')}
           </label>
           <select id="gymMemberId" name="gymMemberId" className="input" required>
-            <option value="">Seçin</option>
+            <option value="">{tCommon('select')}</option>
             {members.map((m) => (
               <option key={m.id} value={m.id}>
                 {m.label}
@@ -67,17 +69,17 @@ export function CreateProgramForm({
 
         <div className="space-y-2">
           <label htmlFor="type" className="muted text-sm">
-            Program Türü
+            {t('type')}
           </label>
           <select id="type" name="type" className="input" required>
-            <option value="WORKOUT">Antrenman</option>
-            <option value="NUTRITION">Beslenme</option>
+            <option value="WORKOUT">{tTypes('workout')}</option>
+            <option value="NUTRITION">{tTypes('nutrition')}</option>
           </select>
         </div>
 
         <div className="space-y-2 md:col-span-2">
           <label htmlFor="title" className="muted text-sm">
-            Başlık
+            {t('programTitle')}
           </label>
           <input id="title" name="title" className="input" required />
         </div>
@@ -85,13 +87,13 @@ export function CreateProgramForm({
         {showTrainerSelect ? (
           <div className="space-y-2">
             <label htmlFor="trainerId" className="muted text-sm">
-              Antrenör
+              {t('trainer')}
             </label>
             <select id="trainerId" name="trainerId" className="input">
-              <option value="">Varsayılan</option>
-              {trainers.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.label}
+              <option value="">{t('trainerDefault')}</option>
+              {trainers.map((tr) => (
+                <option key={tr.id} value={tr.id}>
+                  {tr.label}
                 </option>
               ))}
             </select>
@@ -100,34 +102,34 @@ export function CreateProgramForm({
 
         <div className="space-y-2">
           <label htmlFor="startDate" className="muted text-sm">
-            Başlangıç
+            {t('startDate')}
           </label>
           <input id="startDate" name="startDate" type="date" className="input" />
         </div>
 
         <div className="space-y-2">
           <label htmlFor="endDate" className="muted text-sm">
-            Bitiş (opsiyonel)
+            {t('endDate')}
           </label>
           <input id="endDate" name="endDate" type="date" className="input" />
         </div>
 
         <div className="space-y-2 md:col-span-2">
           <label htmlFor="content" className="muted text-sm">
-            İçerik (JSON veya metin)
+            {t('content')}
           </label>
           <textarea
             id="content"
             name="content"
             rows={4}
             className="input font-mono text-xs"
-            placeholder='{"days":[{"name":"Pazartesi","exercises":["Squat"]}]}'
+            placeholder={t('contentPlaceholder')}
           />
         </div>
 
         <div className="md:col-span-2">
           <button type="submit" className="button px-5 py-2.5" disabled={pending}>
-            {pending ? 'Oluşturuluyor…' : 'Program Oluştur'}
+            {pending ? t('saving') : t('submit')}
           </button>
         </div>
       </form>

@@ -1,7 +1,10 @@
 import { MarkReadButton } from '@/components/mark-read-button';
+import { MessageLiveRefresh } from '@/components/message-live-refresh';
 import { SendMessageForm } from '@/components/send-message-form';
 import { auth } from '@/lib/auth';
+import { intlLocaleFor } from '@/lib/format-locale';
 import { prisma } from '@/lib/prisma';
+import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
@@ -19,6 +22,10 @@ export default async function MessagesPage({
   const userId = session.user.id;
   const { box: boxParam } = await searchParams;
   const box = boxParam === 'sent' ? 'sent' : 'inbox';
+
+  const t = await getTranslations('messages');
+  const locale = await getLocale();
+  const dateLocale = intlLocaleFor(locale);
 
   const [staffMembers, athleteMembers, messages] = await Promise.all([
     prisma.organizationMember.findMany({
@@ -51,15 +58,15 @@ export default async function MessagesPage({
   const recipientMap = new Map<string, string>();
 
   for (const m of staffMembers) {
-    recipientMap.set(
-      m.user.id,
-      `${m.user.name ?? m.user.email} (${m.role})`,
-    );
+    recipientMap.set(m.user.id, `${m.user.name ?? m.user.email} (${m.role})`);
   }
 
   for (const a of athleteMembers) {
     if (a.user) {
-      recipientMap.set(a.user.id, `${a.user.name ?? a.user.email} (Sporcu)`);
+      recipientMap.set(
+        a.user.id,
+        `${a.user.name ?? a.user.email} (${t('recipientAthlete')})`,
+      );
     }
   }
 
@@ -67,12 +74,13 @@ export default async function MessagesPage({
 
   return (
     <div className="space-y-8">
+      <MessageLiveRefresh />
       <div>
         <Link href="/dashboard" className="muted text-sm hover:text-white">
-          ← Özet
+          {t('backToOverview')}
         </Link>
-        <h2 className="mt-4 text-2xl font-semibold">Mesajlar</h2>
-        <p className="muted mt-2 text-sm">Gelen ve giden mesajlar.</p>
+        <h2 className="mt-4 text-2xl font-semibold">{t('title')}</h2>
+        <p className="muted mt-2 text-sm">{t('subtitle')}</p>
       </div>
 
       <div className="flex gap-4">
@@ -80,13 +88,13 @@ export default async function MessagesPage({
           href="/dashboard/messages"
           className={box === 'inbox' ? 'text-white' : 'muted hover:text-white'}
         >
-          Gelen Kutusu
+          {t('inbox')}
         </Link>
         <Link
           href="/dashboard/messages?box=sent"
           className={box === 'sent' ? 'text-white' : 'muted hover:text-white'}
         >
-          Giden
+          {t('sent')}
         </Link>
       </div>
 
@@ -95,14 +103,14 @@ export default async function MessagesPage({
       <section className="card overflow-hidden">
         <div className="border-b border-[var(--border)] px-6 py-4">
           <h3 className="text-lg font-semibold">
-            {box === 'sent' ? 'Giden Mesajlar' : 'Gelen Kutusu'}
+            {box === 'sent' ? t('sentListTitle') : t('inboxListTitle')}
           </h3>
-          <p className="muted mt-1 text-sm">{messages.length} mesaj</p>
+          <p className="muted mt-1 text-sm">{t('messageCount', { count: messages.length })}</p>
         </div>
 
         <div className="divide-y divide-[var(--border)]">
           {messages.length === 0 ? (
-            <p className="muted px-6 py-8 text-center text-sm">Henüz mesaj yok.</p>
+            <p className="muted px-6 py-8 text-center text-sm">{t('empty')}</p>
           ) : (
             messages.map((msg) => {
               const peer =
@@ -119,8 +127,8 @@ export default async function MessagesPage({
                         {box === 'sent' ? `→ ${peerLabel}` : `← ${peerLabel}`}
                       </p>
                       <p className="muted text-xs">
-                        {msg.createdAt.toLocaleString('tr-TR')}
-                        {!msg.isRead && box === 'inbox' ? ' · Okunmadı' : ''}
+                        {msg.createdAt.toLocaleString(dateLocale)}
+                        {!msg.isRead && box === 'inbox' ? ` · ${t('unread')}` : ''}
                       </p>
                     </div>
                     {box === 'inbox' && !msg.isRead ? (

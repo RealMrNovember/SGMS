@@ -127,21 +127,21 @@ async function seedPlans() {
 }
 
 async function seedSuperAdmin() {
-  const adminEmail = process.env.SEED_ADMIN_EMAIL ?? 'admin@demo.sgms.local';
-  const adminPassword = process.env.SEED_ADMIN_PASSWORD ?? 'Admin123!';
+  const adminEmail = process.env.SEED_ADMIN_EMAIL ?? 'admin@cicibyte.com';
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD ?? 'Alfa2020+*';
   const passwordHash = await hash(adminPassword, 12);
 
   const user = await prisma.user.upsert({
     where: { email: adminEmail },
     update: {
-      name: 'CiCiByte Super Admin',
+      name: 'CiCiByte Master Admin',
       passwordHash,
       status: 'ACTIVE',
       isSuperAdmin: true,
     },
     create: {
       email: adminEmail,
-      name: 'CiCiByte Super Admin',
+      name: 'CiCiByte Master Admin',
       passwordHash,
       status: 'ACTIVE',
       isSuperAdmin: true,
@@ -497,6 +497,72 @@ async function seedDemoGymEcosystem(organizationId: string) {
   }
 
   console.log(`Demo ecosystem ready: trainer=${trainerEmail}, athlete=${athleteEmail}`);
+  const staffUser = await prisma.user.findFirst({
+    where: { email: process.env.SEED_STAFF_EMAIL ?? 'staff@demo-gym.local' },
+    select: { id: true },
+  });
+  await seedDemoExpenseData(organizationId, gymMember.id, staffUser?.id ?? trainer.id);
+}
+
+async function seedDemoExpenseData(
+  organizationId: string,
+  gymMemberId: string,
+  staffUserId: string,
+) {
+  const categories = [
+    { name: 'Su', defaultAmount: 15, sortOrder: 1 },
+    { name: 'Protein', defaultAmount: 50, sortOrder: 2 },
+    { name: 'Havlu', defaultAmount: 25, sortOrder: 3 },
+  ];
+
+  for (const category of categories) {
+    await prisma.expenseCategory.upsert({
+      where: {
+        organizationId_name: { organizationId, name: category.name },
+      },
+      update: {
+        defaultAmount: category.defaultAmount,
+        sortOrder: category.sortOrder,
+        isActive: true,
+      },
+      create: {
+        organizationId,
+        name: category.name,
+        defaultAmount: category.defaultAmount,
+        sortOrder: category.sortOrder,
+      },
+    });
+  }
+
+  const existingDemoExpense = await prisma.expense.findFirst({
+    where: {
+      organizationId,
+      gymMemberId,
+      description: 'Demo — Su (seed)',
+      status: 'OPEN',
+    },
+  });
+
+  if (!existingDemoExpense) {
+    const waterCategory = await prisma.expenseCategory.findFirst({
+      where: { organizationId, name: 'Su' },
+    });
+
+    await prisma.expense.create({
+      data: {
+        organizationId,
+        gymMemberId,
+        categoryId: waterCategory?.id ?? null,
+        amount: 15,
+        currency: 'TRY',
+        description: 'Demo — Su (seed)',
+        status: 'OPEN',
+        createdById: staffUserId,
+      },
+    });
+  }
+
+  console.log('Demo expense categories and sample charge seeded.');
 }
 
 async function seedGymMembershipPlans(organizationId: string) {

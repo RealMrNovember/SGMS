@@ -1,8 +1,10 @@
 import { CreateProgramForm } from '@/components/create-program-form';
 import { ToggleProgramButton } from '@/components/toggle-program-button';
 import { auth } from '@/lib/auth';
+import { intlLocaleFor } from '@/lib/format-locale';
 import { prisma } from '@/lib/prisma';
 import type { OrganizationRole } from '@sgms/database';
+import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
@@ -23,6 +25,11 @@ export default async function ProgramsPage({
   const userId = session.user.id;
   const canManage = role ? PROGRAM_MANAGER_ROLES.has(role) : false;
   const { member: memberFilter } = await searchParams;
+
+  const t = await getTranslations('programs');
+  const tCommon = await getTranslations('common');
+  const locale = await getLocale();
+  const dateLocale = intlLocaleFor(locale);
 
   const [members, trainers, programs] = await Promise.all([
     prisma.gymMember.findMany({
@@ -59,21 +66,25 @@ export default async function ProgramsPage({
     label: `${m.firstName} ${m.lastName}`,
   }));
 
-  const trainerOptions = trainers.map((t) => ({
-    id: t.user.id,
-    label: t.user.name ?? t.user.email,
+  const trainerOptions = trainers.map((tr) => ({
+    id: tr.user.id,
+    label: tr.user.name ?? tr.user.email,
   }));
+
+  function programTypeLabel(type: string) {
+    if (type === 'WORKOUT') return t('types.workout');
+    if (type === 'NUTRITION') return t('types.nutrition');
+    return type;
+  }
 
   return (
     <div className="space-y-8">
       <div>
         <Link href="/dashboard" className="muted text-sm hover:text-white">
-          ← Özet
+          {t('backToOverview')}
         </Link>
-        <h2 className="mt-4 text-2xl font-semibold">Antrenman & Beslenme Programları</h2>
-        <p className="muted mt-2 max-w-2xl text-sm leading-6">
-          PT program atamaları ve sporcu bazlı filtreleme.
-        </p>
+        <h2 className="mt-4 text-2xl font-semibold">{t('title')}</h2>
+        <p className="muted mt-2 max-w-2xl text-sm leading-6">{t('subtitle')}</p>
       </div>
 
       <CreateProgramForm
@@ -85,10 +96,10 @@ export default async function ProgramsPage({
 
       <section className="card overflow-hidden">
         <div className="border-b border-[var(--border)] px-6 py-4">
-          <h3 className="text-lg font-semibold">Program Listesi</h3>
+          <h3 className="text-lg font-semibold">{t('listTitle')}</h3>
           <p className="muted mt-1 text-sm">
-            {programs.length} kayıt
-            {memberFilter ? ' · sporcu filtresi aktif' : ''}
+            {t('listCount', { count: programs.length })}
+            {memberFilter ? t('memberFilterActive') : ''}
           </p>
         </div>
 
@@ -96,20 +107,22 @@ export default async function ProgramsPage({
           <table className="w-full min-w-[900px] text-left text-sm">
             <thead className="muted border-b border-[var(--border)] text-xs uppercase tracking-wide">
               <tr>
-                <th className="px-6 py-3 font-medium">Başlık</th>
-                <th className="px-6 py-3 font-medium">Sporcu</th>
-                <th className="px-6 py-3 font-medium">Tür</th>
-                <th className="px-6 py-3 font-medium">Antrenör</th>
-                <th className="px-6 py-3 font-medium">Dönem</th>
-                <th className="px-6 py-3 font-medium">Durum</th>
-                {canManage ? <th className="px-6 py-3 font-medium">İşlem</th> : null}
+                <th className="px-6 py-3 font-medium">{t('columns.title')}</th>
+                <th className="px-6 py-3 font-medium">{t('columns.athlete')}</th>
+                <th className="px-6 py-3 font-medium">{t('columns.type')}</th>
+                <th className="px-6 py-3 font-medium">{t('columns.trainer')}</th>
+                <th className="px-6 py-3 font-medium">{t('columns.period')}</th>
+                <th className="px-6 py-3 font-medium">{t('columns.status')}</th>
+                {canManage ? (
+                  <th className="px-6 py-3 font-medium">{tCommon('action')}</th>
+                ) : null}
               </tr>
             </thead>
             <tbody>
               {programs.length === 0 ? (
                 <tr>
                   <td colSpan={canManage ? 7 : 6} className="muted px-6 py-8 text-center">
-                    Henüz program yok.
+                    {t('empty')}
                   </td>
                 </tr>
               ) : (
@@ -125,16 +138,16 @@ export default async function ProgramsPage({
                       </Link>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="badge">{p.type}</span>
+                      <span className="badge">{programTypeLabel(p.type)}</span>
                     </td>
                     <td className="muted px-6 py-4">{p.trainer.name ?? '—'}</td>
                     <td className="muted px-6 py-4">
-                      {p.startDate.toLocaleDateString('tr-TR')}
-                      {p.endDate ? ` → ${p.endDate.toLocaleDateString('tr-TR')}` : ''}
+                      {p.startDate.toLocaleDateString(dateLocale)}
+                      {p.endDate ? ` → ${p.endDate.toLocaleDateString(dateLocale)}` : ''}
                     </td>
                     <td className="px-6 py-4">
                       <span className={`badge ${p.isActive ? '' : 'opacity-50'}`}>
-                        {p.isActive ? 'Aktif' : 'Pasif'}
+                        {p.isActive ? tCommon('active') : tCommon('inactive')}
                       </span>
                     </td>
                     {canManage ? (

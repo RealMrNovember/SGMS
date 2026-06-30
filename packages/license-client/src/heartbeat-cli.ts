@@ -2,6 +2,7 @@ import { PrismaClient } from '@sgms/database';
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { LicenseClientService } from './license-client.service.js';
+import type { LicenseClientMetadata } from './types.js';
 
 function loadWebEnv(): void {
   const candidates = [
@@ -41,6 +42,35 @@ function loadWebEnv(): void {
   }
 }
 
+async function resolveOrgMetadata(
+  prisma: PrismaClient,
+  organizationId: string,
+): Promise<LicenseClientMetadata> {
+  const org = await prisma.organization.findUnique({
+    where: { id: organizationId },
+    select: {
+      name: true,
+      email: true,
+      members: {
+        where: { role: 'OWNER', isActive: true },
+        take: 1,
+        select: { user: { select: { email: true } } },
+      },
+    },
+  });
+
+  if (!org) {
+    return { platform: 'web', deviceName: 'SGMS Heartbeat' };
+  }
+
+  return {
+    clientName: org.name,
+    email: org.members[0]?.user.email ?? org.email ?? null,
+    deviceName: 'SGMS Heartbeat',
+    platform: 'web',
+  };
+}
+
 async function main() {
   loadWebEnv();
 
@@ -48,7 +78,7 @@ async function main() {
   const client = new LicenseClientService(prisma, { appCode: 'sgms' });
 
   const organizations = await prisma.organization.findMany({
-    where: { status: { in: ['ACTIVE', 'SUSPENDED'] } },
+    where: { status: { in: ['ACTIVE', 'SUSPENDED', 'PENDING'] } },
     select: { id: true, slug: true },
   });
 
@@ -61,8 +91,11 @@ async function main() {
       select: { id: true, slug: true, installationId: true },
     });
 
+    const metadata = await resolveOrgMetadata(prisma, fullOrg.id);
+
     const result = await client.ensureOrganizationLicense(fullOrg.id, {
       installationId: fullOrg.installationId,
+      ...metadata,
     });
 
     if (result.ok) {

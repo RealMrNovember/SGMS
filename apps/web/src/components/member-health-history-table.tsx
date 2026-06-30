@@ -1,3 +1,6 @@
+import { intlLocaleFor } from '@/lib/format-locale';
+import { getLocale, getTranslations } from 'next-intl/server';
+
 type MeasurementRow = {
   id: string;
   measuredAt: Date;
@@ -12,17 +15,21 @@ function formatDecimal(value: { toString: () => string } | null | undefined) {
   return value != null ? value.toString() : '—';
 }
 
-export function MemberHealthHistoryTable({
+export async function MemberHealthHistoryTable({
   measurements,
 }: {
   measurements: MeasurementRow[];
 }) {
+  const t = await getTranslations('measurements');
+  const locale = await getLocale();
+  const dateLocale = intlLocaleFor(locale);
+
   return (
     <section className="card overflow-hidden">
       <div className="border-b border-[var(--border)] px-6 py-4">
-        <h3 className="text-lg font-semibold">Sağlık Ölçüm Geçmişi</h3>
+        <h3 className="text-lg font-semibold">{t('historyTitle')}</h3>
         <p className="muted mt-1 text-sm">
-          {measurements.length} kayıt · en güncel üstte
+          {t('historyCount', { count: measurements.length })}
         </p>
       </div>
 
@@ -30,25 +37,25 @@ export function MemberHealthHistoryTable({
         <table className="w-full min-w-[800px] text-left text-sm">
           <thead className="muted border-b border-[var(--border)] text-xs uppercase tracking-wide">
             <tr>
-              <th className="px-6 py-3 font-medium">Tarih</th>
-              <th className="px-6 py-3 font-medium">Kilo (kg)</th>
-              <th className="px-6 py-3 font-medium">Yağ %</th>
-              <th className="px-6 py-3 font-medium">Kas (kg)</th>
-              <th className="px-6 py-3 font-medium">Boy (cm)</th>
-              <th className="px-6 py-3 font-medium">Not</th>
+              <th className="px-6 py-3 font-medium">{t('columns.date')}</th>
+              <th className="px-6 py-3 font-medium">{t('columns.weight')}</th>
+              <th className="px-6 py-3 font-medium">{t('columns.bodyFat')}</th>
+              <th className="px-6 py-3 font-medium">{t('columns.muscle')}</th>
+              <th className="px-6 py-3 font-medium">{t('columns.height')}</th>
+              <th className="px-6 py-3 font-medium">{t('columns.notes')}</th>
             </tr>
           </thead>
           <tbody>
             {measurements.length === 0 ? (
               <tr>
                 <td colSpan={6} className="muted px-6 py-8 text-center">
-                  Henüz ölçüm kaydı yok. Yukarıdaki formdan ilk ölçümü ekleyin.
+                  {t('historyEmpty')}
                 </td>
               </tr>
             ) : (
               measurements.map((m) => (
                 <tr key={m.id} className="border-b border-[var(--border)] last:border-none">
-                  <td className="px-6 py-4">{m.measuredAt.toLocaleString('tr-TR')}</td>
+                  <td className="px-6 py-4">{m.measuredAt.toLocaleString(dateLocale)}</td>
                   <td className="px-6 py-4">{formatDecimal(m.weight)}</td>
                   <td className="px-6 py-4">{formatDecimal(m.bodyFatPercentage)}</td>
                   <td className="px-6 py-4">{formatDecimal(m.muscleMass)}</td>

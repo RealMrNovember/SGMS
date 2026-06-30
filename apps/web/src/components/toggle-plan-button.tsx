@@ -1,9 +1,11 @@
 'use client';
 
 import { toggleGymMembershipPlanActive } from '@/actions/plans';
+import { useTranslations } from 'next-intl';
 import { useTransition } from 'react';
 
 export function TogglePlanButton({ planId, isActive }: { planId: string; isActive: boolean }) {
+  const tCommon = useTranslations('common');
   const [pending, startTransition] = useTransition();
 
   return (
@@ -17,7 +19,11 @@ export function TogglePlanButton({ planId, isActive }: { planId: string; isActiv
         });
       }}
     >
-      {pending ? '…' : isActive ? 'Pasifleştir' : 'Aktifleştir'}
+      {pending
+        ? tCommon('ellipsis')
+        : isActive
+          ? tCommon('deactivate')
+          : tCommon('activate')}
     </button>
   );
 }

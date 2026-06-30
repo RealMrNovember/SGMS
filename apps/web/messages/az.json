@@ -3,7 +3,22 @@
     "appName": "CiCiByte SGMS",
     "settings": "Parametrlər",
     "loading": "Yüklənir…",
-    "panel": "Panel"
+    "panel": "Panel",
+    "backToOverview": "← İcmal",
+    "active": "Aktiv",
+    "inactive": "Passiv",
+    "activate": "Aktivləşdir",
+    "deactivate": "Deaktiv et",
+    "save": "Saxla",
+    "select": "Seçin",
+    "description": "Təsvir",
+    "action": "Əməliyyat",
+    "daysShort": "gün",
+    "daysCount": "{count} gün",
+    "noPlan": "Plan yoxdur",
+    "noEmail": "E-poçt yoxdur",
+    "ellipsis": "…",
+    "membersLinked": "Bu planda {count} üzv"
   },
   "nav": {
     "overview": "İcmal",
@@ -12,6 +27,7 @@
     "programs": "Proqramlar",
     "messages": "Mesajlar",
     "team": "Personal",
+    "pos": "Kassa",
     "adminOverview": "Sistem icmalı",
     "newCustomer": "Yeni müştəri"
   },
@@ -42,6 +58,588 @@
     "demoAdmin": "Platform Admin",
     "demoOwner": "Salon sahibi",
     "demoStaff": "Resepsiya",
-    "demoAthlete": "İdmançı"
+    "demoAthlete": "İdmançı",
+    "backToSite": "Sayta qayıt"
+  },
+  "avatar": {
+    "uploadPhoto": "Şəkil yüklə",
+    "changePhoto": "Şəkli dəyiş",
+    "uploading": "Yüklənir…",
+    "uploadFailed": "Yükləmə uğursuz oldu. Fayl növü və ya ölçüsünü yoxlayın.",
+    "hint": "JPEG, PNG və ya WebP · maks. 2 MB"
+  },
+  "members": {
+    "backToOverview": "← İcmal",
+    "title": "Üzv idarəetməsi",
+    "subtitle": "{orgName} salonunun idmançı və üzv qeydləri.",
+    "listTitle": "Üzv siyahısı",
+    "listCount": "{count} qeyd göstərilir",
+    "empty": "Hələ qeydiyyatdan keçmiş üzv yoxdur.",
+    "viewMeasurements": "Bax",
+    "backToMembers": "← Üzvlər",
+    "viewingAs": "baxış: {role}",
+    "columns": {
+      "member": "Üzv",
+      "identity": "ID / Tel.",
+      "plan": "Plan",
+      "status": "Status",
+      "membershipEnd": "Üzvlük bitişi",
+      "measurements": "Ölçümlər"
+    },
+    "detail": {
+      "profile": "Profil",
+      "membership": "Üzvlük və PT",
+      "notes": "İdmançı qeydləri",
+      "activePrograms": "Aktiv proqramlar",
+      "programCount": "{count} proqram",
+      "allPrograms": "Bütün proqramlar →",
+      "noPrograms": "Aktiv proqram təyin edilməyib.",
+      "notLinked": "Bağlı deyil",
+      "unassigned": "Təyin edilməyib",
+      "fields": {
+        "email": "E-poçt",
+        "phone": "Telefon",
+        "nationalId": "Milli ID",
+        "birthDate": "Doğum tarixi",
+        "account": "Hesab",
+        "gymPlan": "Salon planı",
+        "membershipStart": "Üzvlük başlanğıcı",
+        "membershipEnd": "Üzvlük bitişi",
+        "trainer": "Məşqçi (PT)"
+      }
+    },
+    "add": {
+      "noPermission": "Üzv əlavə etmək üçün OWNER, ADMIN və ya STAFF rolu lazımdır.",
+      "title": "Yeni idmançı / üzv",
+      "subtitle": "Qeyd yaradın və salon üzvlük planı təyin edin.",
+      "firstName": "Ad",
+      "lastName": "Soyad",
+      "nationalId": "Milli ID",
+      "nationalIdPlaceholder": "11 rəqəm",
+      "phone": "Telefon",
+      "email": "E-poçt",
+      "birthDate": "Doğum tarixi",
+      "gender": "Cins",
+      "genderUnspecified": "Göstərilməyib",
+      "genderMale": "Kişi",
+      "genderFemale": "Qadın",
+      "genderOther": "Digər",
+      "status": "Qeydiyyat statusu",
+      "statusActive": "Aktiv",
+      "statusInactive": "Passiv",
+      "statusSuspended": "Dayandırılıb",
+      "plan": "Salon üzvlük planı",
+      "noPlan": "Plan seçilməyib",
+      "planOption": "{name} — {days} gün — {price} TRY",
+      "membershipStart": "Üzvlük başlanğıcı",
+      "notes": "Qeydlər (istəyə bağlı)",
+      "saving": "Saxlanılır…",
+      "submit": "Üzvü saxla"
+    }
+  },
+  "measurements": {
+    "noPermission": "Ölçüm əlavə etmək icazəniz yoxdur.",
+    "title": "Yeni ölçüm",
+    "subtitle": "Çəki, yağ faizi, əzələ kütləsi və ya boy.",
+    "weight": "Çəki (kq)",
+    "bodyFat": "Yağ faizi (%)",
+    "muscleMass": "Əzələ kütləsi (kq)",
+    "height": "Boy (sm)",
+    "measuredAt": "Ölçüm tarixi",
+    "notes": "Qeyd",
+    "saving": "Saxlanılır…",
+    "submit": "Ölçümü saxla",
+    "historyTitle": "Sağlamlıq ölçüm tarixçəsi",
+    "historyCount": "{count} qeyd · ən yeni yuxarıda",
+    "historyEmpty": "Hələ ölçüm yoxdur. Yuxarıdakı formdan ilk ölçümü əlavə edin.",
+    "pageTitle": "{name} — Sağlamlıq ölçümləri",
+    "backToProfile": "← Üzv profili",
+    "weightTrend": "Çəki dinamikası (son {count} ölçüm)",
+    "recordCount": "{count} qeyd",
+    "emptyShort": "Hələ ölçüm yoxdur.",
+    "columns": {
+      "date": "Tarix",
+      "weight": "Çəki (kq)",
+      "bodyFat": "Yağ %",
+      "muscle": "Əzələ (kq)",
+      "height": "Boy (sm)",
+      "notes": "Qeyd"
+    }
+  },
+  "team": {
+    "backToOverview": "← İcmal",
+    "title": "Personal idarəetməsi",
+    "subtitle": "{orgName} ({slug}) təşkilatının komandası.",
+    "listTitle": "Komanda siyahısı",
+    "listCount": "{count} aktiv üzv",
+    "columns": {
+      "name": "Ad",
+      "email": "E-poçt",
+      "role": "Rol",
+      "joined": "Qoşulma"
+    },
+    "invite": {
+      "noPermission": "Personal dəvət etmək üçün OWNER və ya ADMIN rolu lazımdır.",
+      "title": "Yeni personal dəvət et",
+      "subtitle": "STAFF, TRAINER və ya VIEWER rolu ilə yeni istifadəçi yaradılır.",
+      "name": "Ad Soyad",
+      "email": "E-poçt",
+      "role": "Rol",
+      "roleStaff": "Personal (STAFF)",
+      "roleTrainer": "Məşqçi (TRAINER)",
+      "roleViewer": "Baxıcı (VIEWER)",
+      "saving": "Əlavə edilir…",
+      "submit": "Personal əlavə et",
+      "tempPassword": "Müvəqqəti şifrə: {password}"
+    }
+  },
+  "dashboard": {
+    "welcome": "Xoş gəlmisiniz, {name}",
+    "subtitleOperational": "{role} · {orgName} idarəetmə paneli.",
+    "subtitleReadOnly": "{role} · {orgName} idarəetmə paneli. Mərkəzi lisenziya etibarsızdır — yalnız oxuma rejimi.",
+    "cards": {
+      "organization": "Təşkilat",
+      "activeMembersDevices": "{members} aktiv üzv · {devices} cihaz",
+      "saasPlan": "SaaS planı",
+      "centralLicense": "Mərkəzi lisenziya",
+      "expiresAt": "bitiş {date}",
+      "daysRemaining": "{days} gün qaldı",
+      "noExpiryInfo": "Müddət məlumatı yoxdur",
+      "lastCheck": "son yoxlama {date}",
+      "installation": "Quraşdırma (HWID)",
+      "trialStarted": "Sınaq başlanğıcı: {date}"
+    },
+    "limits": {
+      "title": "Salon limitləri",
+      "maxMembers": "Maks. üzv: {count}",
+      "maxDevices": "Maks. cihaz: {count}",
+      "maxStaff": "Maks. personal: {count}",
+      "planLimit": "Limit: {members} üzv / {staff} personal"
+    },
+    "teamSummary": {
+      "title": "Komanda xülasəsi",
+      "empty": "Hələ personal qeydiyyatı yoxdur.",
+      "manageLink": "Personal idarəetməsi →"
+    }
+  },
+  "messages": {
+    "backToOverview": "← İcmal",
+    "title": "Mesajlar",
+    "subtitle": "Gələn və gedən mesajlar.",
+    "inbox": "Gələnlər",
+    "sent": "Gedənlər",
+    "sentListTitle": "Gedən mesajlar",
+    "inboxListTitle": "Gələnlər",
+    "messageCount": "{count} mesaj",
+    "empty": "Hələ mesaj yoxdur.",
+    "unread": "Oxunmayıb",
+    "recipientAthlete": "İdmançı",
+    "compose": {
+      "title": "Yeni mesaj",
+      "subtitle": "Personal və ya idmançı ilə mesajlaşın.",
+      "receiver": "Alıcı",
+      "content": "Mesaj",
+      "sending": "Göndərilir…",
+      "submit": "Göndər"
+    },
+    "markRead": "Oxunmuş kimi işarələ"
+  },
+  "plans": {
+    "backToOverview": "← İcmal",
+    "title": "Salon üzvlük planları",
+    "subtitle": "İdmançılara təyin olunan yerli paketlər (SaaS abunəliyindən asılı deyil).",
+    "listTitle": "Plan siyahısı",
+    "listCount": "{count} plan",
+    "empty": "Hələ plan təyin edilməyib.",
+    "planMeta": "{days} gün · {price} {currency}",
+    "add": {
+      "noPermission": "Plan idarəetməsi üçün OWNER və ya ADMIN rolu lazımdır.",
+      "title": "Yeni salon üzvlük planı",
+      "subtitle": "İdmançılara təyin olunacaq yerli paket təyin edin.",
+      "name": "Plan adı",
+      "description": "Təsvir",
+      "durationDays": "Müddət (gün)",
+      "price": "Qiymət",
+      "currency": "Valyuta",
+      "sortOrder": "Sıra",
+      "saving": "Saxlanılır…",
+      "submit": "Plan yarat"
+    }
+  },
+  "programs": {
+    "backToOverview": "← İcmal",
+    "title": "Məşq və qidalanma proqramları",
+    "subtitle": "PT proqram təyinləri və idmançı filtri.",
+    "listTitle": "Proqram siyahısı",
+    "listCount": "{count} qeyd",
+    "memberFilterActive": " · idmançı filtri aktiv",
+    "empty": "Hələ proqram yoxdur.",
+    "columns": {
+      "title": "Başlıq",
+      "athlete": "İdmançı",
+      "type": "Növ",
+      "trainer": "Məşqçi",
+      "period": "Dövr",
+      "status": "Status"
+    },
+    "types": {
+      "workout": "Məşq",
+      "nutrition": "Qidalanma"
+    },
+    "add": {
+      "noPermission": "Proqram yaratmaq üçün TRAINER, ADMIN və ya OWNER rolu lazımdır.",
+      "title": "Yeni proqram",
+      "subtitle": "Məşq və ya qidalanma proqramı təyin edin.",
+      "athlete": "İdmançı",
+      "type": "Proqram növü",
+      "programTitle": "Başlıq",
+      "trainer": "Məşqçi",
+      "trainerDefault": "Varsayılan",
+      "startDate": "Başlanğıc",
+      "endDate": "Bitiş (istəyə bağlı)",
+      "content": "Məzmun (JSON və ya mətn)",
+      "contentPlaceholder": "{\"days\":[{\"name\":\"Bazar ertəsi\",\"exercises\":[\"Squat\"]}]}",
+      "saving": "Yaradılır…",
+      "submit": "Proqram yarat"
+    }
+  },
+  "license": {
+    "status": {
+      "unknown": "Naməlum",
+      "trial": "Sınaq",
+      "active": "Aktiv",
+      "expired": "Müddəti bitib",
+      "revoked": "Ləğv edilib"
+    },
+    "banner": {
+      "blocked": "Mərkəzi lisenziya etibarsızdır və ya müddəti bitib. Panel yalnız oxuma rejimindədir; yeni qeyd və yeniləmə mümkün deyil.",
+      "blockedWithDate": "Mərkəzi lisenziya etibarsızdır və ya müddəti bitib ({date}). Panel yalnız oxuma rejimindədir; yeni qeyd və yeniləmə mümkün deyil.",
+      "lastCheck": "Son yoxlama: {date}",
+      "trial": "Sınaq lisenziyası aktivdir. Müddət bitməzdən əvvəl istehsal lisenziyası təyin edin.",
+      "trialWithDate": "Sınaq lisenziyası aktivdir — bitiş: {date}. Müddət bitməzdən əvvəl istehsal lisenziyası təyin edin."
+    },
+    "hint": {
+      "adminBlocked": "Mərkəzi lisenziya etibarsızdır — yazma əməliyyatları məhdudlaşdırılıb.",
+      "adminTrial": "Sınaq müddəti: {days} gün qaldı.",
+      "adminSynced": "Mərkəzi lisenziya serveri ilə sinxronlaşdırılıb.",
+      "staffBlocked": "Salon lisenziyası etibarsızdır — administratorunuza müraciət edin.",
+      "staffTrial": "Salon sınaq lisenziyasındadır.",
+      "staffActive": "Salon lisenziyası aktivdir."
+    }
+  },
+  "athlete": {
+    "badge": "İdmançı portalı",
+    "backHome": "← Ana səhifə",
+    "viewAll": "Hamısı",
+    "nav": {
+      "home": "Xülasə",
+      "measurements": "Ölçüm",
+      "programs": "Proqram",
+      "messages": "Mesaj",
+      "account": "Hesab"
+    },
+    "pages": {
+      "measurements": "Ölçüm tarixçəsi",
+      "programs": "Proqramlarım",
+      "messages": "Mesajlarım",
+      "account": "Cari hesabım"
+    },
+    "measurementsCount": "{count} qeyd",
+    "programsCount": "{count} proqram",
+    "unreadCount": "{count} oxunmamış mesaj",
+    "allRead": "Bütün mesajlar oxunub.",
+    "noMessages": "Hələ mesaj yoxdur.",
+    "statusActive": "Aktiv",
+    "statusInactive": "Passiv",
+    "membershipEnds": "Üzvlük bitişi: {date}",
+    "stats": {
+      "programs": "Proqram",
+      "weight": "Çəki (kq)",
+      "messages": "Oxunmamış"
+    },
+    "latestMeasurement": "Son ölçüm",
+    "noMeasurements": "Hələ ölçüm yoxdur.",
+    "activePrograms": "Aktiv proqramlar",
+    "noPrograms": "Aktiv proqram təyin edilməyib.",
+    "trainer": "Məşqçiniz",
+    "noTrainer": "Təyin edilməyib",
+    "apiHint": "Mobil tətbiq üçün POST /api/v1/auth/login ilə Bearer token alın.",
+    "fields": {
+      "date": "Tarix",
+      "weight": "Çəki",
+      "bodyFat": "Yağ",
+      "muscle": "Əzələ",
+      "notes": "Qeyd"
+    }
+  },
+  "expenses": {
+    "title": "Cari hesab",
+    "subtitle": "Salon xərcləri və ödənişlər.",
+    "openBalance": "Açıq balans",
+    "noDebt": "Açıq borcunuz yoxdur.",
+    "payAtDesk": "Ödənişi resepsiyadan edin.",
+    "addExpense": "Borc əlavə et",
+    "recordPayment": "Ödəniş qeyd et",
+    "customDescription": "Təsvir (istəyə bağlı)",
+    "amount": "Məbləğ",
+    "paymentAmount": "Ödəniş məbləği",
+    "paymentNotes": "Qeyd (istəyə bağlı)",
+    "recentExpenses": "Son xərclər",
+    "recentPayments": "Son ödənişlər",
+    "emptyExpenses": "Hələ xərc yoxdur.",
+    "emptyPayments": "Hələ ödəniş yoxdur.",
+    "noPermission": "Hesab idarəetmə icazəniz yoxdur.",
+    "void": "Ləğv",
+    "exportCsv": "CSV çıxarışı endir",
+    "methods": {
+      "cash": "Nağd",
+      "card": "Kart",
+      "transfer": "Köçürmə"
+    }
+  },
+  "pos": {
+    "title": "Mini POS / Kassa",
+    "subtitle": "Resepsiyada sürətli satış və ödəniş.",
+    "backToOverview": "← Xülasə",
+    "terminalTitle": "Satış terminalı",
+    "terminalSubtitle": "Üzv seçin, sürətli kalem əlavə edin və ya ödəniş alın.",
+    "selectMember": "Üzv",
+    "selectMemberPlaceholder": "Üzv seçin…",
+    "selectMemberHint": "Əməliyyat üçün əvvəl üzv seçin.",
+    "recentActivity": "Son hərəkətlər",
+    "recentActivityHint": "Seçilmiş üzvün son qeydləri.",
+    "categoriesTitle": "Sürətli kalemlər",
+    "categoriesSubtitle": "POS kateqoriya idarəetməsi (OWNER/ADMIN).",
+    "categoryName": "Kateqoriya adı",
+    "categoryAmount": "Varsayılan məbləğ",
+    "categorySort": "Sıra",
+    "addCategory": "Kateqoriya əlavə et",
+    "noCategories": "Hələ kateqoriya yoxdur.",
+    "inactive": "Passiv",
+    "noDefaultAmount": "Varsayılan məbləğ yoxdur",
+    "deactivate": "Passiv et",
+    "activate": "Aktiv et",
+    "summary": {
+      "chargesToday": "Bu gün satışlar",
+      "paymentsToday": "Bu gün ödənişlər",
+      "openBalance": "Ümumi açıq balans",
+      "byMethod": "Ödəniş üsulu",
+      "count": "{count} əməliyyat",
+      "openCount": "{count} açıq kalem",
+      "noPayments": "Bu gün ödəniş yoxdur"
+    }
+  },
+  "marketing": {
+    "nav": {
+      "features": "Features",
+      "howItWorks": "How it works",
+      "why": "Why SGMS",
+      "contact": "Contact",
+      "login": "Sign in",
+      "trial": "14-Day Trial"
+    },
+    "hero": {
+      "kicker": "Digital Gym Operating System",
+      "title": "Run your gym on one platform.",
+      "subtitle": "CiCiByte SGMS brings member CRM, PT programs, POS & accounts, and athlete mobile experience into a premium, international, scalable SaaS.",
+      "ctaTrial": "Start {days}-Day Free Trial",
+      "ctaLogin": "Sign in to console"
+    },
+    "stats": {
+      "members": {
+        "value": "CRM+",
+        "label": "Members & PT ops"
+      },
+      "languages": {
+        "value": "6 Lang",
+        "label": "Global gym experience"
+      },
+      "uptime": {
+        "value": "Cloud",
+        "label": "SaaS-ready infrastructure"
+      },
+      "trial": {
+        "value": "14 Days",
+        "label": "No credit card"
+      }
+    },
+    "features": {
+      "kicker": "Platform capabilities",
+      "title": "Physical gym + digital operations together",
+      "subtitle": "From front desk to coach to athlete app — one shared data layer for your team.",
+      "items": {
+        "crm": {
+          "icon": "👥",
+          "title": "Member CRM & Metrics",
+          "description": "Profiles, avatars, health measurements and membership plans with a clear staff view."
+        },
+        "programs": {
+          "icon": "🏋",
+          "title": "Workout & Nutrition",
+          "description": "PT assignments, workout and nutrition programs with instant athlete portal access."
+        },
+        "pos": {
+          "icon": "💳",
+          "title": "POS & Member Accounts",
+          "description": "Market, café and extra session charges. Collections, daily cash summary and balances."
+        },
+        "i18n": {
+          "icon": "🌍",
+          "title": "6 Languages",
+          "description": "TR, EN, RU, FR, ES, AZ — ready for expat members and international chains."
+        },
+        "mobile": {
+          "icon": "📱",
+          "title": "Mobile API & Athlete Portal",
+          "description": "Bearer token API and self-service for measurements, programs and messages."
+        },
+        "realtime": {
+          "icon": "⚡",
+          "title": "Real-time Messaging",
+          "description": "Coach ↔ athlete communication with SSE live updates and tenant-safe channels."
+        }
+      }
+    },
+    "why": {
+      "kicker": "Why you need it",
+      "title": "Spreadsheets and WhatsApp don't scale a gym",
+      "items": {
+        "fragmented": {
+          "title": "Fragmented tools",
+          "description": "Members in one place, debts elsewhere, programs lost in chat. SGMS unifies everything under one tenant."
+        },
+        "international": {
+          "title": "International members",
+          "description": "Multilingual UI and locale-aware API. Your gym meets global expectations."
+        },
+        "finance": {
+          "title": "Invisible debt",
+          "description": "Water, supplements, extra sessions — member accounts track it all. Balances update after payment."
+        },
+        "athlete": {
+          "title": "Athlete expectations",
+          "description": "Members expect digital access to programs, metrics and balance. SGMS delivers via the athlete portal."
+        }
+      }
+    },
+    "how": {
+      "kicker": "Getting started",
+      "title": "Go digital in 3 steps",
+      "steps": {
+        "register": {
+          "title": "Open your 14-day trial",
+          "description": "Register with your gym name and owner account. No card required — instant OWNER console."
+        },
+        "setup": {
+          "title": "Add team and members",
+          "description": "Staff roles, plans, POS categories. Explore quickly with demo data."
+        },
+        "operate": {
+          "title": "Run daily operations",
+          "description": "Check-in, metrics, programs, payments and messaging — one platform, any device."
+        }
+      }
+    },
+    "cta": {
+      "title": "Try every feature for {days} days",
+      "subtitle": "Register as gym owner, invite your team and test real workflows.",
+      "buttonTrial": "Start free trial",
+      "buttonLogin": "I already have an account"
+    },
+    "footer": {
+      "description": "CiCiByte SGMS — premium gym management platform. Multi-tenant SaaS with central licensing.",
+      "productTitle": "Product",
+      "features": "Features",
+      "trial": "Free trial",
+      "login": "Sign in",
+      "contactTitle": "Contact",
+      "rights": "All rights reserved."
+    },
+    "trialPage": {
+      "backHome": "Home",
+      "kicker": "14-day trial",
+      "title": "{days} days free — set up your gym",
+      "subtitle": "You get a real organization, OWNER role and full management console — not just a demo.",
+      "includes": {
+        "item1": "Full CRM, metrics and programs on Starter plan limits",
+        "item2": "POS / member accounts and front-desk terminal",
+        "item3": "Athlete portal and mobile API access",
+        "item4": "Central license validation (license.cicibyte.com)"
+      },
+      "disclaimer": "After the trial, write operations may be restricted until you choose a plan. Your data is preserved."
+    },
+    "trialForm": {
+      "title": "Create gym account",
+      "subtitle": "{days}-day trial — sign in right after registration.",
+      "gymName": "Gym / business name",
+      "gymNamePlaceholder": "e.g. FitZone Downtown",
+      "ownerName": "Owner full name",
+      "phone": "Phone (optional)",
+      "ownerEmail": "Owner email",
+      "ownerPassword": "Password",
+      "passwordHint": "At least 8 characters",
+      "benefit1": "{days} days full access, no credit card",
+      "benefit2": "OWNER role — you manage your team",
+      "benefit3": "Sign in anytime to continue",
+      "submit": "Start trial",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Sign in",
+      "successTitle": "Your account is ready!",
+      "goToLogin": "Go to sign in"
+    }
+  },
+  "admin": {
+    "masterTitle": "Master Admin",
+    "masterSubtitle": "All customers, subscriptions, and license operations.",
+    "controlCenter": "Operations Center",
+    "customers": "Customers",
+    "communicationsNav": "Email Templates",
+    "auditNav": "Audit Log",
+    "dashboardTitle": "Operations Overview",
+    "dashboardSubtitle": "Trials, paid subscriptions, license issues, and new signups in one view.",
+    "viewAllCustomers": "All customers",
+    "addCustomer": "New customer",
+    "orgCreatedBanner": "Organization created: {slug}",
+    "statCustomers": "Total customers",
+    "statTrials": "Trial subscriptions",
+    "statPaid": "Paid subscriptions",
+    "statExpiringTrials": "Trials ending in 7 days",
+    "statLicenseIssues": "License issues",
+    "statNewWeek": "New this week",
+    "statPastDue": "Past due",
+    "statSuspended": "Suspended",
+    "recentCustomers": "Recent customers",
+    "recentCustomersHint": "Latest registrations for quick access",
+    "colSalon": "Gym",
+    "colOwner": "Owner",
+    "colBilling": "Subscription",
+    "colLicense": "Central license",
+    "colMembers": "Members",
+    "colUsage": "Usage",
+    "colCreated": "Created",
+    "daysLeft": "{count} days left",
+    "customersTitle": "Customer Management",
+    "customersSubtitle": "Filter all gym tenants, reach out, and take operational action.",
+    "customerCount": "Showing {count} customers",
+    "noCustomers": "No customers match filters",
+    "noCustomersHint": "Try different filters or add a new customer.",
+    "backToCustomers": "Back to customers",
+    "cardOwner": "Gym owner",
+    "cardSubscription": "SaaS subscription",
+    "cardLicense": "Central license",
+    "usageMembers": "Athletes",
+    "usageStaff": "Panel users",
+    "usageDevices": "Devices",
+    "usageMessages": "Messages",
+    "actionsTitle": "Operational actions",
+    "supportNotesTitle": "Support notes",
+    "noSupportNotes": "No support notes yet.",
+    "quickEmailTitle": "Quick email (welcome)",
+    "noOwnerEmail": "No owner email on file.",
+    "teamTitle": "Team",
+    "auditTitle": "Audit log",
+    "auditSubtitle": "Recent platform and customer events.",
+    "communicationsTitle": "Communication templates",
+    "communicationsSubtitle": "Ready email copy for customer outreach. Customer detail pages use personalized versions."
   }
 }

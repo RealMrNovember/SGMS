@@ -1,6 +1,9 @@
 import { AddMemberForm } from '@/components/add-member-form';
+import { UserAvatar } from '@/components/user-avatar';
 import { auth } from '@/lib/auth';
+import { intlLocaleFor } from '@/lib/format-locale';
 import { prisma } from '@/lib/prisma';
+import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
@@ -13,6 +16,9 @@ export default async function MembersPage() {
   }
 
   const organizationId = session.user.organizationId;
+  const t = await getTranslations('members');
+  const locale = await getLocale();
+  const dateLocale = intlLocaleFor(locale);
 
   const [organization, plans, members] = await Promise.all([
     prisma.organization.findUnique({
@@ -50,11 +56,11 @@ export default async function MembersPage() {
     <div className="space-y-8">
       <div>
         <Link href="/dashboard" className="muted text-sm hover:text-white">
-          ← Özet
+          {t('backToOverview')}
         </Link>
-        <h2 className="mt-4 text-2xl font-semibold">Üye Yönetimi</h2>
+        <h2 className="mt-4 text-2xl font-semibold">{t('title')}</h2>
         <p className="muted mt-2 max-w-2xl text-sm leading-6">
-          {organization?.name} salonundaki sporcu ve üye kayıtları.
+          {t('subtitle', { orgName: organization?.name ?? '—' })}
         </p>
       </div>
 
@@ -62,64 +68,76 @@ export default async function MembersPage() {
 
       <section className="card overflow-hidden">
         <div className="border-b border-[var(--border)] px-6 py-4">
-          <h3 className="text-lg font-semibold">Üye Listesi</h3>
-          <p className="muted mt-1 text-sm">{members.length} kayıt gösteriliyor</p>
+          <h3 className="text-lg font-semibold">{t('listTitle')}</h3>
+          <p className="muted mt-1 text-sm">{t('listCount', { count: members.length })}</p>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full min-w-[900px] text-left text-sm">
             <thead className="muted border-b border-[var(--border)] text-xs uppercase tracking-wide">
               <tr>
-                <th className="px-6 py-3 font-medium">Üye</th>
-                <th className="px-6 py-3 font-medium">TC / Tel</th>
-                <th className="px-6 py-3 font-medium">Plan</th>
-                <th className="px-6 py-3 font-medium">Durum</th>
-                <th className="px-6 py-3 font-medium">Üyelik Bitiş</th>
-                <th className="px-6 py-3 font-medium">Ölçümler</th>
+                <th className="px-6 py-3 font-medium">{t('columns.member')}</th>
+                <th className="px-6 py-3 font-medium">{t('columns.identity')}</th>
+                <th className="px-6 py-3 font-medium">{t('columns.plan')}</th>
+                <th className="px-6 py-3 font-medium">{t('columns.status')}</th>
+                <th className="px-6 py-3 font-medium">{t('columns.membershipEnd')}</th>
+                <th className="px-6 py-3 font-medium">{t('columns.measurements')}</th>
               </tr>
             </thead>
             <tbody>
               {members.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="muted px-6 py-8 text-center">
-                    Henüz kayıtlı üye yok.
+                    {t('empty')}
                   </td>
                 </tr>
               ) : (
-                members.map((member) => (
-                  <tr key={member.id} className="border-b border-[var(--border)] last:border-none">
-                    <td className="px-6 py-4">
-                      <Link
-                        href={`/dashboard/members/${member.id}`}
-                        className="font-medium hover:text-white"
-                      >
-                        {member.firstName} {member.lastName}
-                      </Link>
-                      <p className="muted text-xs">{member.email ?? '—'}</p>
-                    </td>
-                    <td className="px-6 py-4">
-                      <p>{member.nationalId ?? '—'}</p>
-                      <p className="muted text-xs">{member.phone ?? '—'}</p>
-                    </td>
-                    <td className="px-6 py-4">{member.plan?.name ?? '—'}</td>
-                    <td className="px-6 py-4">
-                      <span className="badge">{member.status}</span>
-                    </td>
-                    <td className="muted px-6 py-4">
-                      {member.membershipEndsAt
-                        ? member.membershipEndsAt.toLocaleDateString('tr-TR')
-                        : '—'}
-                    </td>
-                    <td className="px-6 py-4">
-                      <Link
-                        href={`/dashboard/members/${member.id}/measurements`}
-                        className="muted text-sm hover:text-white"
-                      >
-                        Görüntüle
-                      </Link>
-                    </td>
-                  </tr>
-                ))
+                members.map((member) => {
+                  const fullName = `${member.firstName} ${member.lastName}`;
+                  return (
+                    <tr key={member.id} className="border-b border-[var(--border)] last:border-none">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <UserAvatar
+                            name={fullName}
+                            avatarUrl={member.avatarUrl}
+                            size="sm"
+                          />
+                          <div>
+                            <Link
+                              href={`/dashboard/members/${member.id}`}
+                              className="font-medium hover:text-white"
+                            >
+                              {fullName}
+                            </Link>
+                            <p className="muted text-xs">{member.email ?? '—'}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <p>{member.nationalId ?? '—'}</p>
+                        <p className="muted text-xs">{member.phone ?? '—'}</p>
+                      </td>
+                      <td className="px-6 py-4">{member.plan?.name ?? '—'}</td>
+                      <td className="px-6 py-4">
+                        <span className="badge">{member.status}</span>
+                      </td>
+                      <td className="muted px-6 py-4">
+                        {member.membershipEndsAt
+                          ? member.membershipEndsAt.toLocaleDateString(dateLocale)
+                          : '—'}
+                      </td>
+                      <td className="px-6 py-4">
+                        <Link
+                          href={`/dashboard/members/${member.id}/measurements`}
+                          className="muted text-sm hover:text-white"
+                        >
+                          {t('viewMeasurements')}
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

@@ -3,7 +3,22 @@
     "appName": "CiCiByte SGMS",
     "settings": "Настройки",
     "loading": "Загрузка…",
-    "panel": "Панель"
+    "panel": "Панель",
+    "backToOverview": "← Обзор",
+    "active": "Активен",
+    "inactive": "Неактивен",
+    "activate": "Активировать",
+    "deactivate": "Деактивировать",
+    "save": "Сохранить",
+    "select": "Выбрать",
+    "description": "Описание",
+    "action": "Действие",
+    "daysShort": "дн.",
+    "daysCount": "{count} дн.",
+    "noPlan": "Без плана",
+    "noEmail": "Нет email",
+    "ellipsis": "…",
+    "membersLinked": "{count} участников на этом плане"
   },
   "nav": {
     "overview": "Обзор",
@@ -12,6 +27,7 @@
     "programs": "Программы",
     "messages": "Сообщения",
     "team": "Персонал",
+    "pos": "Касса",
     "adminOverview": "Обзор системы",
     "newCustomer": "Новый клиент"
   },
@@ -42,6 +58,588 @@
     "demoAdmin": "Админ платформы",
     "demoOwner": "Владелец зала",
     "demoStaff": "Ресепшн",
-    "demoAthlete": "Спортсмен"
+    "demoAthlete": "Спортсмен",
+    "backToSite": "На главную"
+  },
+  "avatar": {
+    "uploadPhoto": "Загрузить фото",
+    "changePhoto": "Изменить фото",
+    "uploading": "Загрузка…",
+    "uploadFailed": "Ошибка загрузки. Проверьте тип или размер файла.",
+    "hint": "JPEG, PNG или WebP · до 2 МБ"
+  },
+  "members": {
+    "backToOverview": "← Обзор",
+    "title": "Управление участниками",
+    "subtitle": "Записи спортсменов и участников зала {orgName}.",
+    "listTitle": "Список участников",
+    "listCount": "Показано записей: {count}",
+    "empty": "Участники ещё не зарегистрированы.",
+    "viewMeasurements": "Открыть",
+    "backToMembers": "← Участники",
+    "viewingAs": "просмотр: {role}",
+    "columns": {
+      "member": "Участник",
+      "identity": "ID / Тел.",
+      "plan": "План",
+      "status": "Статус",
+      "membershipEnd": "Окончание",
+      "measurements": "Измерения"
+    },
+    "detail": {
+      "profile": "Профиль",
+      "membership": "Абонемент и PT",
+      "notes": "Заметки спортсмена",
+      "activePrograms": "Активные программы",
+      "programCount": "{count} программ",
+      "allPrograms": "Все программы →",
+      "noPrograms": "Активная программа не назначена.",
+      "notLinked": "Не привязан",
+      "unassigned": "Не назначен",
+      "fields": {
+        "email": "Эл. почта",
+        "phone": "Телефон",
+        "nationalId": "Национальный ID",
+        "birthDate": "Дата рождения",
+        "account": "Аккаунт",
+        "gymPlan": "План зала",
+        "membershipStart": "Начало абонемента",
+        "membershipEnd": "Окончание абонемента",
+        "trainer": "Тренер (PT)"
+      }
+    },
+    "add": {
+      "noPermission": "Для добавления участников нужна роль OWNER, ADMIN или STAFF.",
+      "title": "Новый спортсмен / участник",
+      "subtitle": "Создайте запись и назначьте план абонемента.",
+      "firstName": "Имя",
+      "lastName": "Фамилия",
+      "nationalId": "Национальный ID",
+      "nationalIdPlaceholder": "11 цифр",
+      "phone": "Телефон",
+      "email": "Эл. почта",
+      "birthDate": "Дата рождения",
+      "gender": "Пол",
+      "genderUnspecified": "Не указан",
+      "genderMale": "Мужской",
+      "genderFemale": "Женский",
+      "genderOther": "Другое",
+      "status": "Статус регистрации",
+      "statusActive": "Активен",
+      "statusInactive": "Неактивен",
+      "statusSuspended": "Приостановлен",
+      "plan": "План абонемента",
+      "noPlan": "План не выбран",
+      "planOption": "{name} — {days} дн. — {price} TRY",
+      "membershipStart": "Начало абонемента",
+      "notes": "Заметки (необязательно)",
+      "saving": "Сохранение…",
+      "submit": "Сохранить участника"
+    }
+  },
+  "measurements": {
+    "noPermission": "Нет прав на добавление измерений.",
+    "title": "Новое измерение",
+    "subtitle": "Вес, процент жира, мышечная масса или рост.",
+    "weight": "Вес (кг)",
+    "bodyFat": "Жир (%)",
+    "muscleMass": "Мышцы (кг)",
+    "height": "Рост (см)",
+    "measuredAt": "Дата измерения",
+    "notes": "Заметка",
+    "saving": "Сохранение…",
+    "submit": "Сохранить измерение",
+    "historyTitle": "История измерений",
+    "historyCount": "{count} записей · новые сверху",
+    "historyEmpty": "Измерений пока нет. Добавьте первое через форму выше.",
+    "pageTitle": "{name} — Измерения здоровья",
+    "backToProfile": "← Профиль участника",
+    "weightTrend": "Динамика веса (последние {count} измерений)",
+    "recordCount": "{count} записей",
+    "emptyShort": "Измерений пока нет.",
+    "columns": {
+      "date": "Дата",
+      "weight": "Вес (кг)",
+      "bodyFat": "Жир %",
+      "muscle": "Мышцы (кг)",
+      "height": "Рост (см)",
+      "notes": "Заметка"
+    }
+  },
+  "team": {
+    "backToOverview": "← Обзор",
+    "title": "Управление персоналом",
+    "subtitle": "Команда организации {orgName} ({slug}).",
+    "listTitle": "Список команды",
+    "listCount": "{count} активных",
+    "columns": {
+      "name": "Имя",
+      "email": "Эл. почта",
+      "role": "Роль",
+      "joined": "Вступление"
+    },
+    "invite": {
+      "noPermission": "Для приглашения персонала нужна роль OWNER или ADMIN.",
+      "title": "Пригласить сотрудника",
+      "subtitle": "Создаёт нового пользователя с ролью STAFF, TRAINER или VIEWER.",
+      "name": "Полное имя",
+      "email": "Эл. почта",
+      "role": "Роль",
+      "roleStaff": "Персонал (STAFF)",
+      "roleTrainer": "Тренер (TRAINER)",
+      "roleViewer": "Наблюдатель (VIEWER)",
+      "saving": "Добавление…",
+      "submit": "Добавить сотрудника",
+      "tempPassword": "Временный пароль: {password}"
+    }
+  },
+  "dashboard": {
+    "welcome": "Добро пожаловать, {name}",
+    "subtitleOperational": "{role} · панель управления {orgName}.",
+    "subtitleReadOnly": "{role} · панель управления {orgName}. Центральная лицензия недействительна — режим только для чтения.",
+    "cards": {
+      "organization": "Организация",
+      "activeMembersDevices": "{members} активных участников · {devices} устройств",
+      "saasPlan": "SaaS-план",
+      "centralLicense": "Центральная лицензия",
+      "expiresAt": "истекает {date}",
+      "daysRemaining": "осталось {days} дн.",
+      "noExpiryInfo": "Нет данных о сроке",
+      "lastCheck": "последняя проверка {date}",
+      "installation": "Установка (HWID)",
+      "trialStarted": "Начало пробного периода: {date}"
+    },
+    "limits": {
+      "title": "Лимиты зала",
+      "maxMembers": "Макс. участников: {count}",
+      "maxDevices": "Макс. устройств: {count}",
+      "maxStaff": "Макс. персонала: {count}",
+      "planLimit": "Лимит: {members} участников / {staff} сотрудников"
+    },
+    "teamSummary": {
+      "title": "Сводка по команде",
+      "empty": "Персонал ещё не зарегистрирован.",
+      "manageLink": "Управление персоналом →"
+    }
+  },
+  "messages": {
+    "backToOverview": "← Обзор",
+    "title": "Сообщения",
+    "subtitle": "Входящие и исходящие сообщения.",
+    "inbox": "Входящие",
+    "sent": "Исходящие",
+    "sentListTitle": "Исходящие сообщения",
+    "inboxListTitle": "Входящие",
+    "messageCount": "{count} сообщений",
+    "empty": "Сообщений пока нет.",
+    "unread": "Не прочитано",
+    "recipientAthlete": "Спортсмен",
+    "compose": {
+      "title": "Новое сообщение",
+      "subtitle": "Сообщение персоналу или спортсменам.",
+      "receiver": "Получатель",
+      "content": "Сообщение",
+      "sending": "Отправка…",
+      "submit": "Отправить"
+    },
+    "markRead": "Отметить прочитанным"
+  },
+  "plans": {
+    "backToOverview": "← Обзор",
+    "title": "Планы абонемента",
+    "subtitle": "Локальные пакеты для спортсменов (независимо от SaaS-подписки).",
+    "listTitle": "Список планов",
+    "listCount": "{count} планов",
+    "empty": "Планы ещё не определены.",
+    "planMeta": "{days} дн. · {price} {currency}",
+    "add": {
+      "noPermission": "Для управления планами нужна роль OWNER или ADMIN.",
+      "title": "Новый план абонемента",
+      "subtitle": "Определите локальный пакет для назначения спортсменам.",
+      "name": "Название плана",
+      "description": "Описание",
+      "durationDays": "Срок (дней)",
+      "price": "Цена",
+      "currency": "Валюта",
+      "sortOrder": "Порядок сортировки",
+      "saving": "Сохранение…",
+      "submit": "Создать план"
+    }
+  },
+  "programs": {
+    "backToOverview": "← Обзор",
+    "title": "Программы тренировок и питания",
+    "subtitle": "Назначение PT-программ и фильтрация по спортсменам.",
+    "listTitle": "Список программ",
+    "listCount": "{count} записей",
+    "memberFilterActive": " · фильтр по спортсмену активен",
+    "empty": "Программ пока нет.",
+    "columns": {
+      "title": "Название",
+      "athlete": "Спортсмен",
+      "type": "Тип",
+      "trainer": "Тренер",
+      "period": "Период",
+      "status": "Статус"
+    },
+    "types": {
+      "workout": "Тренировка",
+      "nutrition": "Питание"
+    },
+    "add": {
+      "noPermission": "Для создания программ нужна роль TRAINER, ADMIN или OWNER.",
+      "title": "Новая программа",
+      "subtitle": "Назначьте программу тренировок или питания.",
+      "athlete": "Спортсмен",
+      "type": "Тип программы",
+      "programTitle": "Название",
+      "trainer": "Тренер",
+      "trainerDefault": "По умолчанию",
+      "startDate": "Начало",
+      "endDate": "Окончание (необязательно)",
+      "content": "Содержание (JSON или текст)",
+      "contentPlaceholder": "{\"days\":[{\"name\":\"Понедельник\",\"exercises\":[\"Присед\"]}]}",
+      "saving": "Создание…",
+      "submit": "Создать программу"
+    }
+  },
+  "license": {
+    "status": {
+      "unknown": "Неизвестно",
+      "trial": "Пробный",
+      "active": "Активна",
+      "expired": "Истекла",
+      "revoked": "Отозвана"
+    },
+    "banner": {
+      "blocked": "Центральная лицензия недействительна или истекла. Панель в режиме только для чтения; новые записи и обновления недоступны.",
+      "blockedWithDate": "Центральная лицензия недействительна или истекла ({date}). Панель в режиме только для чтения; новые записи и обновления недоступны.",
+      "lastCheck": "Последняя проверка: {date}",
+      "trial": "Активна пробная лицензия. Назначьте производственную лицензию до истечения срока.",
+      "trialWithDate": "Активна пробная лицензия — истекает: {date}. Назначьте производственную лицензию до истечения срока."
+    },
+    "hint": {
+      "adminBlocked": "Центральная лицензия недействительна — операции записи ограничены.",
+      "adminTrial": "Пробный период: осталось {days} дн.",
+      "adminSynced": "Синхронизировано с центральным сервером лицензий.",
+      "staffBlocked": "Лицензия зала недействительна — обратитесь к администратору.",
+      "staffTrial": "Зал на пробной лицензии.",
+      "staffActive": "Лицензия зала активна."
+    }
+  },
+  "athlete": {
+    "badge": "Портал спортсмена",
+    "backHome": "← Главная",
+    "viewAll": "Все",
+    "nav": {
+      "home": "Обзор",
+      "measurements": "Измерения",
+      "programs": "Программы",
+      "messages": "Сообщения",
+      "account": "Счёт"
+    },
+    "pages": {
+      "measurements": "История измерений",
+      "programs": "Мои программы",
+      "messages": "Мои сообщения",
+      "account": "Мой счёт"
+    },
+    "measurementsCount": "{count} записей",
+    "programsCount": "{count} программ",
+    "unreadCount": "{count} непрочитанных",
+    "allRead": "Все сообщения прочитаны.",
+    "noMessages": "Сообщений пока нет.",
+    "statusActive": "Активна",
+    "statusInactive": "Неактивна",
+    "membershipEnds": "Окончание абонемента: {date}",
+    "stats": {
+      "programs": "Программы",
+      "weight": "Вес (кг)",
+      "messages": "Непрочит."
+    },
+    "latestMeasurement": "Последнее измерение",
+    "noMeasurements": "Измерений пока нет.",
+    "activePrograms": "Активные программы",
+    "noPrograms": "Активная программа не назначена.",
+    "trainer": "Ваш тренер",
+    "noTrainer": "Не назначен",
+    "apiHint": "Для мобильного приложения получите Bearer token через POST /api/v1/auth/login.",
+    "fields": {
+      "date": "Дата",
+      "weight": "Вес",
+      "bodyFat": "Жир",
+      "muscle": "Мышцы",
+      "notes": "Заметки"
+    }
+  },
+  "expenses": {
+    "title": "Лицевой счёт",
+    "subtitle": "Расходы и оплаты в зале.",
+    "openBalance": "Открытый баланс",
+    "noDebt": "Задолженности нет.",
+    "payAtDesk": "Оплатите на ресепшене.",
+    "addExpense": "Добавить долг",
+    "recordPayment": "Записать оплату",
+    "customDescription": "Описание (необяз.)",
+    "amount": "Сумма",
+    "paymentAmount": "Сумма оплаты",
+    "paymentNotes": "Примечание",
+    "recentExpenses": "Последние расходы",
+    "recentPayments": "Последние оплаты",
+    "emptyExpenses": "Расходов пока нет.",
+    "emptyPayments": "Оплат пока нет.",
+    "noPermission": "Нет прав на управление счётом.",
+    "void": "Отмена",
+    "exportCsv": "Скачать CSV выписку",
+    "methods": {
+      "cash": "Наличные",
+      "card": "Карта",
+      "transfer": "Перевод"
+    }
+  },
+  "pos": {
+    "title": "Мини-POS / Касса",
+    "subtitle": "Быстрые продажи и оплата на ресепшене.",
+    "backToOverview": "← Обзор",
+    "terminalTitle": "Терминал продаж",
+    "terminalSubtitle": "Выберите участника, добавьте позицию или примите оплату.",
+    "selectMember": "Участник",
+    "selectMemberPlaceholder": "Выберите участника…",
+    "selectMemberHint": "Сначала выберите участника.",
+    "recentActivity": "Последние операции",
+    "recentActivityHint": "Последние записи по выбранному участнику.",
+    "categoriesTitle": "Быстрые позиции",
+    "categoriesSubtitle": "Управление категориями POS (OWNER/ADMIN).",
+    "categoryName": "Название",
+    "categoryAmount": "Сумма по умолчанию",
+    "categorySort": "Порядок",
+    "addCategory": "Добавить категорию",
+    "noCategories": "Категорий пока нет.",
+    "inactive": "Неактивна",
+    "noDefaultAmount": "Без суммы",
+    "deactivate": "Отключить",
+    "activate": "Включить",
+    "summary": {
+      "chargesToday": "Продажи сегодня",
+      "paymentsToday": "Оплаты сегодня",
+      "openBalance": "Общий открытый баланс",
+      "byMethod": "По способу оплаты",
+      "count": "{count} операций",
+      "openCount": "{count} открытых",
+      "noPayments": "Сегодня оплат нет"
+    }
+  },
+  "marketing": {
+    "nav": {
+      "features": "Features",
+      "howItWorks": "How it works",
+      "why": "Why SGMS",
+      "contact": "Contact",
+      "login": "Sign in",
+      "trial": "14-Day Trial"
+    },
+    "hero": {
+      "kicker": "Digital Gym Operating System",
+      "title": "Run your gym on one platform.",
+      "subtitle": "CiCiByte SGMS brings member CRM, PT programs, POS & accounts, and athlete mobile experience into a premium, international, scalable SaaS.",
+      "ctaTrial": "Start {days}-Day Free Trial",
+      "ctaLogin": "Sign in to console"
+    },
+    "stats": {
+      "members": {
+        "value": "CRM+",
+        "label": "Members & PT ops"
+      },
+      "languages": {
+        "value": "6 Lang",
+        "label": "Global gym experience"
+      },
+      "uptime": {
+        "value": "Cloud",
+        "label": "SaaS-ready infrastructure"
+      },
+      "trial": {
+        "value": "14 Days",
+        "label": "No credit card"
+      }
+    },
+    "features": {
+      "kicker": "Platform capabilities",
+      "title": "Physical gym + digital operations together",
+      "subtitle": "From front desk to coach to athlete app — one shared data layer for your team.",
+      "items": {
+        "crm": {
+          "icon": "👥",
+          "title": "Member CRM & Metrics",
+          "description": "Profiles, avatars, health measurements and membership plans with a clear staff view."
+        },
+        "programs": {
+          "icon": "🏋",
+          "title": "Workout & Nutrition",
+          "description": "PT assignments, workout and nutrition programs with instant athlete portal access."
+        },
+        "pos": {
+          "icon": "💳",
+          "title": "POS & Member Accounts",
+          "description": "Market, café and extra session charges. Collections, daily cash summary and balances."
+        },
+        "i18n": {
+          "icon": "🌍",
+          "title": "6 Languages",
+          "description": "TR, EN, RU, FR, ES, AZ — ready for expat members and international chains."
+        },
+        "mobile": {
+          "icon": "📱",
+          "title": "Mobile API & Athlete Portal",
+          "description": "Bearer token API and self-service for measurements, programs and messages."
+        },
+        "realtime": {
+          "icon": "⚡",
+          "title": "Real-time Messaging",
+          "description": "Coach ↔ athlete communication with SSE live updates and tenant-safe channels."
+        }
+      }
+    },
+    "why": {
+      "kicker": "Why you need it",
+      "title": "Spreadsheets and WhatsApp don't scale a gym",
+      "items": {
+        "fragmented": {
+          "title": "Fragmented tools",
+          "description": "Members in one place, debts elsewhere, programs lost in chat. SGMS unifies everything under one tenant."
+        },
+        "international": {
+          "title": "International members",
+          "description": "Multilingual UI and locale-aware API. Your gym meets global expectations."
+        },
+        "finance": {
+          "title": "Invisible debt",
+          "description": "Water, supplements, extra sessions — member accounts track it all. Balances update after payment."
+        },
+        "athlete": {
+          "title": "Athlete expectations",
+          "description": "Members expect digital access to programs, metrics and balance. SGMS delivers via the athlete portal."
+        }
+      }
+    },
+    "how": {
+      "kicker": "Getting started",
+      "title": "Go digital in 3 steps",
+      "steps": {
+        "register": {
+          "title": "Open your 14-day trial",
+          "description": "Register with your gym name and owner account. No card required — instant OWNER console."
+        },
+        "setup": {
+          "title": "Add team and members",
+          "description": "Staff roles, plans, POS categories. Explore quickly with demo data."
+        },
+        "operate": {
+          "title": "Run daily operations",
+          "description": "Check-in, metrics, programs, payments and messaging — one platform, any device."
+        }
+      }
+    },
+    "cta": {
+      "title": "Try every feature for {days} days",
+      "subtitle": "Register as gym owner, invite your team and test real workflows.",
+      "buttonTrial": "Start free trial",
+      "buttonLogin": "I already have an account"
+    },
+    "footer": {
+      "description": "CiCiByte SGMS — premium gym management platform. Multi-tenant SaaS with central licensing.",
+      "productTitle": "Product",
+      "features": "Features",
+      "trial": "Free trial",
+      "login": "Sign in",
+      "contactTitle": "Contact",
+      "rights": "All rights reserved."
+    },
+    "trialPage": {
+      "backHome": "Home",
+      "kicker": "14-day trial",
+      "title": "{days} days free — set up your gym",
+      "subtitle": "You get a real organization, OWNER role and full management console — not just a demo.",
+      "includes": {
+        "item1": "Full CRM, metrics and programs on Starter plan limits",
+        "item2": "POS / member accounts and front-desk terminal",
+        "item3": "Athlete portal and mobile API access",
+        "item4": "Central license validation (license.cicibyte.com)"
+      },
+      "disclaimer": "After the trial, write operations may be restricted until you choose a plan. Your data is preserved."
+    },
+    "trialForm": {
+      "title": "Create gym account",
+      "subtitle": "{days}-day trial — sign in right after registration.",
+      "gymName": "Gym / business name",
+      "gymNamePlaceholder": "e.g. FitZone Downtown",
+      "ownerName": "Owner full name",
+      "phone": "Phone (optional)",
+      "ownerEmail": "Owner email",
+      "ownerPassword": "Password",
+      "passwordHint": "At least 8 characters",
+      "benefit1": "{days} days full access, no credit card",
+      "benefit2": "OWNER role — you manage your team",
+      "benefit3": "Sign in anytime to continue",
+      "submit": "Start trial",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Sign in",
+      "successTitle": "Your account is ready!",
+      "goToLogin": "Go to sign in"
+    }
+  },
+  "admin": {
+    "masterTitle": "Master Admin",
+    "masterSubtitle": "All customers, subscriptions, and license operations.",
+    "controlCenter": "Operations Center",
+    "customers": "Customers",
+    "communicationsNav": "Email Templates",
+    "auditNav": "Audit Log",
+    "dashboardTitle": "Operations Overview",
+    "dashboardSubtitle": "Trials, paid subscriptions, license issues, and new signups in one view.",
+    "viewAllCustomers": "All customers",
+    "addCustomer": "New customer",
+    "orgCreatedBanner": "Organization created: {slug}",
+    "statCustomers": "Total customers",
+    "statTrials": "Trial subscriptions",
+    "statPaid": "Paid subscriptions",
+    "statExpiringTrials": "Trials ending in 7 days",
+    "statLicenseIssues": "License issues",
+    "statNewWeek": "New this week",
+    "statPastDue": "Past due",
+    "statSuspended": "Suspended",
+    "recentCustomers": "Recent customers",
+    "recentCustomersHint": "Latest registrations for quick access",
+    "colSalon": "Gym",
+    "colOwner": "Owner",
+    "colBilling": "Subscription",
+    "colLicense": "Central license",
+    "colMembers": "Members",
+    "colUsage": "Usage",
+    "colCreated": "Created",
+    "daysLeft": "{count} days left",
+    "customersTitle": "Customer Management",
+    "customersSubtitle": "Filter all gym tenants, reach out, and take operational action.",
+    "customerCount": "Showing {count} customers",
+    "noCustomers": "No customers match filters",
+    "noCustomersHint": "Try different filters or add a new customer.",
+    "backToCustomers": "Back to customers",
+    "cardOwner": "Gym owner",
+    "cardSubscription": "SaaS subscription",
+    "cardLicense": "Central license",
+    "usageMembers": "Athletes",
+    "usageStaff": "Panel users",
+    "usageDevices": "Devices",
+    "usageMessages": "Messages",
+    "actionsTitle": "Operational actions",
+    "supportNotesTitle": "Support notes",
+    "noSupportNotes": "No support notes yet.",
+    "quickEmailTitle": "Quick email (welcome)",
+    "noOwnerEmail": "No owner email on file.",
+    "teamTitle": "Team",
+    "auditTitle": "Audit log",
+    "auditSubtitle": "Recent platform and customer events.",
+    "communicationsTitle": "Communication templates",
+    "communicationsSubtitle": "Ready email copy for customer outreach. Customer detail pages use personalized versions."
   }
 }

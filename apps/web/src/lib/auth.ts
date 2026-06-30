@@ -39,6 +39,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               orderBy: { createdAt: 'asc' },
               take: 1,
             },
+            gymMemberProfile: {
+              select: {
+                id: true,
+                organizationId: true,
+                status: true,
+                organization: { select: { name: true } },
+              },
+            },
           },
         });
 
@@ -52,6 +60,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
 
         const membership = user.memberships[0] ?? null;
+        const gymMember =
+          user.gymMemberProfile?.status === 'ACTIVE' ? user.gymMemberProfile : null;
 
         await prisma.user.update({
           where: { id: user.id },
@@ -69,7 +79,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         });
 
         if (!user.isSuperAdmin && membership?.organization) {
-          void syncLicenseOnLogin(membership.organization.id, membership.organization.installationId);
+          void syncLicenseOnLogin(
+            membership.organization.id,
+            membership.organization.installationId,
+            {
+              clientName: membership.organization.name,
+              email: user.email,
+              deviceName: 'SGMS Web Login',
+              platform: 'web',
+            },
+          );
         }
 
         return {
@@ -77,10 +96,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           email: user.email,
           name: user.name,
           isSuperAdmin: user.isSuperAdmin,
-          organizationId: membership?.organizationId ?? null,
-          organizationName: membership?.organization.name ?? null,
+          organizationId: membership?.organizationId ?? gymMember?.organizationId ?? null,
+          organizationName:
+            membership?.organization.name ?? gymMember?.organization.name ?? null,
           role: membership?.role ?? null,
           locale: user.locale,
+          gymMemberId: gymMember?.id ?? null,
         };
       },
     }),

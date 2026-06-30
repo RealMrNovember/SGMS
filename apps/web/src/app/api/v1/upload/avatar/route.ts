@@ -1,3 +1,4 @@
+import { apiErrorI18n } from '@/lib/api/i18n-errors';
 import { apiError, apiOk } from '@/lib/api/response';
 import { canManageMembers, canReadHealthData, requireTenantApiContext } from '@/lib/api/guard';
 import { auth } from '@/lib/auth';
@@ -7,14 +8,14 @@ import type { OrganizationRole } from '@sgms/database';
 
 const SELF_AVATAR_ROLES = new Set<OrganizationRole>(['OWNER', 'ADMIN', 'STAFF', 'TRAINER', 'VIEWER']);
 
-async function resolveUserAvatarTarget(userId: string, organizationId: string | null) {
+async function resolveUserAvatarTarget(userId: string, organizationId: string | null, request?: Request) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { id: true, avatarUrl: true, isSuperAdmin: true },
   });
 
   if (!user) {
-    return { error: apiError('Kullanıcı bulunamadı.', 404) } as const;
+    return { error: apiErrorI18n('userNotFound', 404, request) } as const;
   }
 
   return {
@@ -36,6 +37,7 @@ async function resolveGymMemberAvatarTarget(
   organizationId: string,
   actorUserId: string,
   role: OrganizationRole,
+  request?: Request,
 ) {
   const member = await prisma.gymMember.findFirst({
     where: { id: gymMemberId, organizationId },
@@ -43,14 +45,14 @@ async function resolveGymMemberAvatarTarget(
   });
 
   if (!member) {
-    return { error: apiError('Üye kaydı bulunamadı veya bu organizasyona ait değil.', 404) } as const;
+    return { error: apiErrorI18n('memberRecordNotFound', 404, request) } as const;
   }
 
   const isSelf = member.userId === actorUserId;
   const canManage = canManageMembers(role) || (role === 'TRAINER' && canReadHealthData(role));
 
   if (!isSelf && !canManage) {
-    return { error: apiError('Bu üyenin avatarını güncelleme yetkiniz yok.', 403) } as const;
+    return { error: apiErrorI18n('avatarUpdateForbidden', 403, request) } as const;
   }
 
   return {
@@ -70,19 +72,19 @@ async function resolveGymMemberAvatarTarget(
 export async function POST(request: Request) {
   const session = await auth();
   if (!session?.user) {
-    return apiError('Kimlik doğrulama gerekli.', 401);
+    return apiErrorI18n('unauthorized', 401, request);
   }
 
   let formData: FormData;
   try {
     formData = await request.formData();
   } catch {
-    return apiError('Geçersiz multipart form verisi.', 400);
+    return apiErrorI18n('invalidMultipart', 400, request);
   }
 
   const file = formData.get('file');
   if (!(file instanceof File)) {
-    return apiError('file alanı zorunludur.', 400);
+    return apiErrorI18n('fileRequired', 400, request);
   }
 
   const fileResult = await readAvatarBuffer(file);
@@ -106,21 +108,21 @@ export async function POST(request: Request) {
 
   if (targetType === 'gym_member') {
     if (typeof gymMemberId !== 'string' || !gymMemberId) {
-      return apiError('gymMemberId zorunludur.', 400);
+      return apiErrorI18n('gymMemberIdRequired', 400, request);
     }
 
-    const tenantAuth = await requireTenantApiContext();
+    const tenantAuth = await requireTenantApiContext(request);
     if ('response' in tenantAuth) {
       return tenantAuth.response;
     }
 
     const { organizationId, role, userId } = tenantAuth.context;
-    target = await resolveGymMemberAvatarTarget(gymMemberId, organizationId, userId, role);
+    target = await resolveGymMemberAvatarTarget(gymMemberId, organizationId, userId, role, request);
   } else {
-    const tenantAuth = await requireTenantApiContext();
+    const tenantAuth = await requireTenantApiContext(request);
     if ('response' in tenantAuth) {
       if (session.user.isSuperAdmin) {
-        target = await resolveUserAvatarTarget(session.user.id, null);
+        target = await resolveUserAvatarTarget(session.user.id, null, request);
       } else {
         return tenantAuth.response;
       }
@@ -132,14 +134,14 @@ export async function POST(request: Request) {
           : userId;
 
       if (targetUserId !== userId && !canManageMembers(role)) {
-        return apiError('Başka bir kullanıcının avatarını yalnızca OWNER, ADMIN veya STAFF güncelleyebilir.', 403);
+        return apiErrorI18n('avatarStaffOnly', 403, request);
       }
 
       if (targetUserId === userId && !SELF_AVATAR_ROLES.has(role)) {
-        return apiError('Avatar yükleme yetkiniz yok.', 403);
+        return apiErrorI18n('avatarUploadForbidden', 403, request);
       }
 
-      target = await resolveUserAvatarTarget(targetUserId, organizationId);
+      target = await resolveUserAvatarTarget(targetUserId, organizationId, request);
     }
   }
 

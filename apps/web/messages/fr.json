@@ -3,7 +3,22 @@
     "appName": "CiCiByte SGMS",
     "settings": "Paramètres",
     "loading": "Chargement…",
-    "panel": "Tableau de bord"
+    "panel": "Tableau de bord",
+    "backToOverview": "← Aperçu",
+    "active": "Actif",
+    "inactive": "Inactif",
+    "activate": "Activer",
+    "deactivate": "Désactiver",
+    "save": "Enregistrer",
+    "select": "Sélectionner",
+    "description": "Description",
+    "action": "Action",
+    "daysShort": "j",
+    "daysCount": "{count} jours",
+    "noPlan": "Aucun forfait",
+    "noEmail": "Pas d'e-mail",
+    "ellipsis": "…",
+    "membersLinked": "{count} membres sur ce forfait"
   },
   "nav": {
     "overview": "Aperçu",
@@ -12,6 +27,7 @@
     "programs": "Programmes",
     "messages": "Messages",
     "team": "Personnel",
+    "pos": "Caisse",
     "adminOverview": "Vue système",
     "newCustomer": "Nouveau client"
   },
@@ -42,6 +58,588 @@
     "demoAdmin": "Admin plateforme",
     "demoOwner": "Propriétaire",
     "demoStaff": "Accueil",
-    "demoAthlete": "Athlète"
+    "demoAthlete": "Athlète",
+    "backToSite": "Retour au site"
+  },
+  "avatar": {
+    "uploadPhoto": "Télécharger une photo",
+    "changePhoto": "Changer la photo",
+    "uploading": "Téléchargement…",
+    "uploadFailed": "Échec du téléchargement. Vérifiez le type ou la taille.",
+    "hint": "JPEG, PNG ou WebP · max 2 Mo"
+  },
+  "members": {
+    "backToOverview": "← Aperçu",
+    "title": "Gestion des membres",
+    "subtitle": "Athlètes et membres de {orgName}.",
+    "listTitle": "Liste des membres",
+    "listCount": "{count} enregistrements affichés",
+    "empty": "Aucun membre enregistré.",
+    "viewMeasurements": "Voir",
+    "backToMembers": "← Membres",
+    "viewingAs": "affiché en tant que : {role}",
+    "columns": {
+      "member": "Membre",
+      "identity": "ID / Tél.",
+      "plan": "Forfait",
+      "status": "Statut",
+      "membershipEnd": "Fin d'abonnement",
+      "measurements": "Mesures"
+    },
+    "detail": {
+      "profile": "Profil",
+      "membership": "Abonnement & PT",
+      "notes": "Notes athlète",
+      "activePrograms": "Programmes actifs",
+      "programCount": "{count} programmes",
+      "allPrograms": "Tous les programmes →",
+      "noPrograms": "Aucun programme actif assigné.",
+      "notLinked": "Non lié",
+      "unassigned": "Non assigné",
+      "fields": {
+        "email": "E-mail",
+        "phone": "Téléphone",
+        "nationalId": "ID national",
+        "birthDate": "Date de naissance",
+        "account": "Compte",
+        "gymPlan": "Forfait salle",
+        "membershipStart": "Début abonnement",
+        "membershipEnd": "Fin abonnement",
+        "trainer": "Coach (PT)"
+      }
+    },
+    "add": {
+      "noPermission": "Rôle OWNER, ADMIN ou STAFF requis pour ajouter des membres.",
+      "title": "Nouvel athlète / membre",
+      "subtitle": "Créez un enregistrement et assignez un forfait.",
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "nationalId": "ID national",
+      "nationalIdPlaceholder": "11 chiffres",
+      "phone": "Téléphone",
+      "email": "E-mail",
+      "birthDate": "Date de naissance",
+      "gender": "Genre",
+      "genderUnspecified": "Non précisé",
+      "genderMale": "Homme",
+      "genderFemale": "Femme",
+      "genderOther": "Autre",
+      "status": "Statut d'inscription",
+      "statusActive": "Actif",
+      "statusInactive": "Inactif",
+      "statusSuspended": "Suspendu",
+      "plan": "Forfait d'abonnement",
+      "noPlan": "Aucun forfait",
+      "planOption": "{name} — {days} j — {price} TRY",
+      "membershipStart": "Début abonnement",
+      "notes": "Notes (optionnel)",
+      "saving": "Enregistrement…",
+      "submit": "Enregistrer le membre"
+    }
+  },
+  "measurements": {
+    "noPermission": "Vous n'avez pas la permission d'ajouter des mesures.",
+    "title": "Nouvelle mesure",
+    "subtitle": "Poids, masse grasse, masse musculaire ou taille.",
+    "weight": "Poids (kg)",
+    "bodyFat": "Masse grasse (%)",
+    "muscleMass": "Masse musculaire (kg)",
+    "height": "Taille (cm)",
+    "measuredAt": "Date de mesure",
+    "notes": "Note",
+    "saving": "Enregistrement…",
+    "submit": "Enregistrer la mesure",
+    "historyTitle": "Historique des mesures",
+    "historyCount": "{count} enregistrements · plus récent en haut",
+    "historyEmpty": "Aucune mesure. Ajoutez la première via le formulaire ci-dessus.",
+    "pageTitle": "{name} — Mesures de santé",
+    "backToProfile": "← Profil du membre",
+    "weightTrend": "Évolution du poids (dernières {count} mesures)",
+    "recordCount": "{count} enregistrements",
+    "emptyShort": "Aucune mesure pour le moment.",
+    "columns": {
+      "date": "Date",
+      "weight": "Poids (kg)",
+      "bodyFat": "Graisse %",
+      "muscle": "Muscle (kg)",
+      "height": "Taille (cm)",
+      "notes": "Note"
+    }
+  },
+  "team": {
+    "backToOverview": "← Aperçu",
+    "title": "Gestion du personnel",
+    "subtitle": "Équipe de {orgName} ({slug}).",
+    "listTitle": "Liste de l'équipe",
+    "listCount": "{count} membres actifs",
+    "columns": {
+      "name": "Nom",
+      "email": "E-mail",
+      "role": "Rôle",
+      "joined": "Arrivée"
+    },
+    "invite": {
+      "noPermission": "Le rôle OWNER ou ADMIN est requis pour inviter du personnel.",
+      "title": "Inviter un membre du personnel",
+      "subtitle": "Crée un nouvel utilisateur avec le rôle STAFF, TRAINER ou VIEWER.",
+      "name": "Nom complet",
+      "email": "E-mail",
+      "role": "Rôle",
+      "roleStaff": "Personnel (STAFF)",
+      "roleTrainer": "Coach (TRAINER)",
+      "roleViewer": "Lecteur (VIEWER)",
+      "saving": "Ajout…",
+      "submit": "Ajouter le personnel",
+      "tempPassword": "Mot de passe temporaire : {password}"
+    }
+  },
+  "dashboard": {
+    "welcome": "Bienvenue, {name}",
+    "subtitleOperational": "{role} · panneau de gestion {orgName}.",
+    "subtitleReadOnly": "{role} · panneau de gestion {orgName}. Licence centrale invalide — mode lecture seule.",
+    "cards": {
+      "organization": "Organisation",
+      "activeMembersDevices": "{members} membres actifs · {devices} appareils",
+      "saasPlan": "Forfait SaaS",
+      "centralLicense": "Licence centrale",
+      "expiresAt": "expire le {date}",
+      "daysRemaining": "{days} jours restants",
+      "noExpiryInfo": "Aucune info d'expiration",
+      "lastCheck": "dernière vérification {date}",
+      "installation": "Installation (HWID)",
+      "trialStarted": "Essai commencé : {date}"
+    },
+    "limits": {
+      "title": "Limites de la salle",
+      "maxMembers": "Membres max. : {count}",
+      "maxDevices": "Appareils max. : {count}",
+      "maxStaff": "Personnel max. : {count}",
+      "planLimit": "Limite : {members} membres / {staff} personnel"
+    },
+    "teamSummary": {
+      "title": "Résumé de l'équipe",
+      "empty": "Aucun personnel enregistré.",
+      "manageLink": "Gestion du personnel →"
+    }
+  },
+  "messages": {
+    "backToOverview": "← Aperçu",
+    "title": "Messages",
+    "subtitle": "Boîte de réception et messages envoyés.",
+    "inbox": "Boîte de réception",
+    "sent": "Envoyés",
+    "sentListTitle": "Messages envoyés",
+    "inboxListTitle": "Boîte de réception",
+    "messageCount": "{count} messages",
+    "empty": "Aucun message pour le moment.",
+    "unread": "Non lu",
+    "recipientAthlete": "Athlète",
+    "compose": {
+      "title": "Nouveau message",
+      "subtitle": "Message au personnel ou aux athlètes.",
+      "receiver": "Destinataire",
+      "content": "Message",
+      "sending": "Envoi…",
+      "submit": "Envoyer"
+    },
+    "markRead": "Marquer comme lu"
+  },
+  "plans": {
+    "backToOverview": "← Aperçu",
+    "title": "Forfaits d'abonnement",
+    "subtitle": "Forfaits locaux assignés aux athlètes (indépendants de l'abonnement SaaS).",
+    "listTitle": "Liste des forfaits",
+    "listCount": "{count} forfaits",
+    "empty": "Aucun forfait défini.",
+    "planMeta": "{days} j · {price} {currency}",
+    "add": {
+      "noPermission": "Rôle OWNER ou ADMIN requis pour la gestion des forfaits.",
+      "title": "Nouveau forfait d'abonnement",
+      "subtitle": "Définissez un forfait local à assigner aux athlètes.",
+      "name": "Nom du forfait",
+      "description": "Description",
+      "durationDays": "Durée (jours)",
+      "price": "Prix",
+      "currency": "Devise",
+      "sortOrder": "Ordre de tri",
+      "saving": "Enregistrement…",
+      "submit": "Créer le forfait"
+    }
+  },
+  "programs": {
+    "backToOverview": "← Aperçu",
+    "title": "Programmes d'entraînement et nutrition",
+    "subtitle": "Attributions de programmes PT et filtrage par athlète.",
+    "listTitle": "Liste des programmes",
+    "listCount": "{count} enregistrements",
+    "memberFilterActive": " · filtre athlète actif",
+    "empty": "Aucun programme pour le moment.",
+    "columns": {
+      "title": "Titre",
+      "athlete": "Athlète",
+      "type": "Type",
+      "trainer": "Coach",
+      "period": "Période",
+      "status": "Statut"
+    },
+    "types": {
+      "workout": "Entraînement",
+      "nutrition": "Nutrition"
+    },
+    "add": {
+      "noPermission": "Rôle TRAINER, ADMIN ou OWNER requis pour créer des programmes.",
+      "title": "Nouveau programme",
+      "subtitle": "Assignez un programme d'entraînement ou de nutrition.",
+      "athlete": "Athlète",
+      "type": "Type de programme",
+      "programTitle": "Titre",
+      "trainer": "Coach",
+      "trainerDefault": "Par défaut",
+      "startDate": "Début",
+      "endDate": "Fin (optionnel)",
+      "content": "Contenu (JSON ou texte)",
+      "contentPlaceholder": "{\"days\":[{\"name\":\"Lundi\",\"exercises\":[\"Squat\"]}]}",
+      "saving": "Création…",
+      "submit": "Créer le programme"
+    }
+  },
+  "license": {
+    "status": {
+      "unknown": "Inconnu",
+      "trial": "Essai",
+      "active": "Active",
+      "expired": "Expirée",
+      "revoked": "Révoquée"
+    },
+    "banner": {
+      "blocked": "La licence centrale est invalide ou expirée. Le panneau est en lecture seule ; aucune nouvelle donnée ni mise à jour.",
+      "blockedWithDate": "La licence centrale est invalide ou expirée ({date}). Le panneau est en lecture seule ; aucune nouvelle donnée ni mise à jour.",
+      "lastCheck": "Dernière vérification : {date}",
+      "trial": "Licence d'essai active. Attribuez une licence de production avant expiration.",
+      "trialWithDate": "Licence d'essai active — expire le : {date}. Attribuez une licence de production avant expiration."
+    },
+    "hint": {
+      "adminBlocked": "Licence centrale invalide — opérations d'écriture restreintes.",
+      "adminTrial": "Période d'essai : {days} jours restants.",
+      "adminSynced": "Synchronisé avec le serveur de licences central.",
+      "staffBlocked": "Licence de la salle invalide — contactez votre administrateur.",
+      "staffTrial": "La salle est en licence d'essai.",
+      "staffActive": "La licence de la salle est active."
+    }
+  },
+  "athlete": {
+    "badge": "Portail athlète",
+    "backHome": "← Accueil",
+    "viewAll": "Tout voir",
+    "nav": {
+      "home": "Accueil",
+      "measurements": "Mesures",
+      "programs": "Programmes",
+      "messages": "Messages",
+      "account": "Compte"
+    },
+    "pages": {
+      "measurements": "Historique des mesures",
+      "programs": "Mes programmes",
+      "messages": "Mes messages",
+      "account": "Mon compte"
+    },
+    "measurementsCount": "{count} enregistrements",
+    "programsCount": "{count} programmes",
+    "unreadCount": "{count} messages non lus",
+    "allRead": "Tous les messages sont lus.",
+    "noMessages": "Aucun message pour le moment.",
+    "statusActive": "Actif",
+    "statusInactive": "Inactif",
+    "membershipEnds": "Fin d'abonnement : {date}",
+    "stats": {
+      "programs": "Programmes",
+      "weight": "Poids (kg)",
+      "messages": "Non lus"
+    },
+    "latestMeasurement": "Dernière mesure",
+    "noMeasurements": "Aucune mesure pour le moment.",
+    "activePrograms": "Programmes actifs",
+    "noPrograms": "Aucun programme actif assigné.",
+    "trainer": "Votre coach",
+    "noTrainer": "Non assigné",
+    "apiHint": "Pour l'app mobile, obtenez un Bearer token via POST /api/v1/auth/login.",
+    "fields": {
+      "date": "Date",
+      "weight": "Poids",
+      "bodyFat": "Graisse",
+      "muscle": "Muscle",
+      "notes": "Notes"
+    }
+  },
+  "expenses": {
+    "title": "Compte courant",
+    "subtitle": "Dépenses et paiements au club.",
+    "openBalance": "Solde ouvert",
+    "noDebt": "Aucune dette en cours.",
+    "payAtDesk": "Réglez à l'accueil.",
+    "addExpense": "Ajouter une charge",
+    "recordPayment": "Enregistrer un paiement",
+    "customDescription": "Description (optionnel)",
+    "amount": "Montant",
+    "paymentAmount": "Montant du paiement",
+    "paymentNotes": "Notes (optionnel)",
+    "recentExpenses": "Dernières charges",
+    "recentPayments": "Derniers paiements",
+    "emptyExpenses": "Aucune charge pour le moment.",
+    "emptyPayments": "Aucun paiement pour le moment.",
+    "noPermission": "Pas d'autorisation pour gérer le compte.",
+    "void": "Annuler",
+    "exportCsv": "Télécharger le relevé CSV",
+    "methods": {
+      "cash": "Espèces",
+      "card": "Carte",
+      "transfer": "Virement"
+    }
+  },
+  "pos": {
+    "title": "Mini POS / Caisse",
+    "subtitle": "Ventes rapides et encaissements à l'accueil.",
+    "backToOverview": "← Accueil",
+    "terminalTitle": "Terminal de vente",
+    "terminalSubtitle": "Sélectionnez un membre, ajoutez un article ou encaissez.",
+    "selectMember": "Membre",
+    "selectMemberPlaceholder": "Choisir un membre…",
+    "selectMemberHint": "Sélectionnez d'abord un membre.",
+    "recentActivity": "Activité récente",
+    "recentActivityHint": "Dernières écritures du membre sélectionné.",
+    "categoriesTitle": "Articles rapides",
+    "categoriesSubtitle": "Gestion des catégories POS (OWNER/ADMIN).",
+    "categoryName": "Nom de catégorie",
+    "categoryAmount": "Montant par défaut",
+    "categorySort": "Ordre",
+    "addCategory": "Ajouter une catégorie",
+    "noCategories": "Aucune catégorie.",
+    "inactive": "Inactif",
+    "noDefaultAmount": "Sans montant",
+    "deactivate": "Désactiver",
+    "activate": "Activer",
+    "summary": {
+      "chargesToday": "Ventes du jour",
+      "paymentsToday": "Encaissements du jour",
+      "openBalance": "Solde ouvert total",
+      "byMethod": "Par mode de paiement",
+      "count": "{count} opérations",
+      "openCount": "{count} ouverts",
+      "noPayments": "Aucun encaissement aujourd'hui"
+    }
+  },
+  "marketing": {
+    "nav": {
+      "features": "Features",
+      "howItWorks": "How it works",
+      "why": "Why SGMS",
+      "contact": "Contact",
+      "login": "Sign in",
+      "trial": "14-Day Trial"
+    },
+    "hero": {
+      "kicker": "Digital Gym Operating System",
+      "title": "Run your gym on one platform.",
+      "subtitle": "CiCiByte SGMS brings member CRM, PT programs, POS & accounts, and athlete mobile experience into a premium, international, scalable SaaS.",
+      "ctaTrial": "Start {days}-Day Free Trial",
+      "ctaLogin": "Sign in to console"
+    },
+    "stats": {
+      "members": {
+        "value": "CRM+",
+        "label": "Members & PT ops"
+      },
+      "languages": {
+        "value": "6 Lang",
+        "label": "Global gym experience"
+      },
+      "uptime": {
+        "value": "Cloud",
+        "label": "SaaS-ready infrastructure"
+      },
+      "trial": {
+        "value": "14 Days",
+        "label": "No credit card"
+      }
+    },
+    "features": {
+      "kicker": "Platform capabilities",
+      "title": "Physical gym + digital operations together",
+      "subtitle": "From front desk to coach to athlete app — one shared data layer for your team.",
+      "items": {
+        "crm": {
+          "icon": "👥",
+          "title": "Member CRM & Metrics",
+          "description": "Profiles, avatars, health measurements and membership plans with a clear staff view."
+        },
+        "programs": {
+          "icon": "🏋",
+          "title": "Workout & Nutrition",
+          "description": "PT assignments, workout and nutrition programs with instant athlete portal access."
+        },
+        "pos": {
+          "icon": "💳",
+          "title": "POS & Member Accounts",
+          "description": "Market, café and extra session charges. Collections, daily cash summary and balances."
+        },
+        "i18n": {
+          "icon": "🌍",
+          "title": "6 Languages",
+          "description": "TR, EN, RU, FR, ES, AZ — ready for expat members and international chains."
+        },
+        "mobile": {
+          "icon": "📱",
+          "title": "Mobile API & Athlete Portal",
+          "description": "Bearer token API and self-service for measurements, programs and messages."
+        },
+        "realtime": {
+          "icon": "⚡",
+          "title": "Real-time Messaging",
+          "description": "Coach ↔ athlete communication with SSE live updates and tenant-safe channels."
+        }
+      }
+    },
+    "why": {
+      "kicker": "Why you need it",
+      "title": "Spreadsheets and WhatsApp don't scale a gym",
+      "items": {
+        "fragmented": {
+          "title": "Fragmented tools",
+          "description": "Members in one place, debts elsewhere, programs lost in chat. SGMS unifies everything under one tenant."
+        },
+        "international": {
+          "title": "International members",
+          "description": "Multilingual UI and locale-aware API. Your gym meets global expectations."
+        },
+        "finance": {
+          "title": "Invisible debt",
+          "description": "Water, supplements, extra sessions — member accounts track it all. Balances update after payment."
+        },
+        "athlete": {
+          "title": "Athlete expectations",
+          "description": "Members expect digital access to programs, metrics and balance. SGMS delivers via the athlete portal."
+        }
+      }
+    },
+    "how": {
+      "kicker": "Getting started",
+      "title": "Go digital in 3 steps",
+      "steps": {
+        "register": {
+          "title": "Open your 14-day trial",
+          "description": "Register with your gym name and owner account. No card required — instant OWNER console."
+        },
+        "setup": {
+          "title": "Add team and members",
+          "description": "Staff roles, plans, POS categories. Explore quickly with demo data."
+        },
+        "operate": {
+          "title": "Run daily operations",
+          "description": "Check-in, metrics, programs, payments and messaging — one platform, any device."
+        }
+      }
+    },
+    "cta": {
+      "title": "Try every feature for {days} days",
+      "subtitle": "Register as gym owner, invite your team and test real workflows.",
+      "buttonTrial": "Start free trial",
+      "buttonLogin": "I already have an account"
+    },
+    "footer": {
+      "description": "CiCiByte SGMS — premium gym management platform. Multi-tenant SaaS with central licensing.",
+      "productTitle": "Product",
+      "features": "Features",
+      "trial": "Free trial",
+      "login": "Sign in",
+      "contactTitle": "Contact",
+      "rights": "All rights reserved."
+    },
+    "trialPage": {
+      "backHome": "Home",
+      "kicker": "14-day trial",
+      "title": "{days} days free — set up your gym",
+      "subtitle": "You get a real organization, OWNER role and full management console — not just a demo.",
+      "includes": {
+        "item1": "Full CRM, metrics and programs on Starter plan limits",
+        "item2": "POS / member accounts and front-desk terminal",
+        "item3": "Athlete portal and mobile API access",
+        "item4": "Central license validation (license.cicibyte.com)"
+      },
+      "disclaimer": "After the trial, write operations may be restricted until you choose a plan. Your data is preserved."
+    },
+    "trialForm": {
+      "title": "Create gym account",
+      "subtitle": "{days}-day trial — sign in right after registration.",
+      "gymName": "Gym / business name",
+      "gymNamePlaceholder": "e.g. FitZone Downtown",
+      "ownerName": "Owner full name",
+      "phone": "Phone (optional)",
+      "ownerEmail": "Owner email",
+      "ownerPassword": "Password",
+      "passwordHint": "At least 8 characters",
+      "benefit1": "{days} days full access, no credit card",
+      "benefit2": "OWNER role — you manage your team",
+      "benefit3": "Sign in anytime to continue",
+      "submit": "Start trial",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Sign in",
+      "successTitle": "Your account is ready!",
+      "goToLogin": "Go to sign in"
+    }
+  },
+  "admin": {
+    "masterTitle": "Master Admin",
+    "masterSubtitle": "All customers, subscriptions, and license operations.",
+    "controlCenter": "Operations Center",
+    "customers": "Customers",
+    "communicationsNav": "Email Templates",
+    "auditNav": "Audit Log",
+    "dashboardTitle": "Operations Overview",
+    "dashboardSubtitle": "Trials, paid subscriptions, license issues, and new signups in one view.",
+    "viewAllCustomers": "All customers",
+    "addCustomer": "New customer",
+    "orgCreatedBanner": "Organization created: {slug}",
+    "statCustomers": "Total customers",
+    "statTrials": "Trial subscriptions",
+    "statPaid": "Paid subscriptions",
+    "statExpiringTrials": "Trials ending in 7 days",
+    "statLicenseIssues": "License issues",
+    "statNewWeek": "New this week",
+    "statPastDue": "Past due",
+    "statSuspended": "Suspended",
+    "recentCustomers": "Recent customers",
+    "recentCustomersHint": "Latest registrations for quick access",
+    "colSalon": "Gym",
+    "colOwner": "Owner",
+    "colBilling": "Subscription",
+    "colLicense": "Central license",
+    "colMembers": "Members",
+    "colUsage": "Usage",
+    "colCreated": "Created",
+    "daysLeft": "{count} days left",
+    "customersTitle": "Customer Management",
+    "customersSubtitle": "Filter all gym tenants, reach out, and take operational action.",
+    "customerCount": "Showing {count} customers",
+    "noCustomers": "No customers match filters",
+    "noCustomersHint": "Try different filters or add a new customer.",
+    "backToCustomers": "Back to customers",
+    "cardOwner": "Gym owner",
+    "cardSubscription": "SaaS subscription",
+    "cardLicense": "Central license",
+    "usageMembers": "Athletes",
+    "usageStaff": "Panel users",
+    "usageDevices": "Devices",
+    "usageMessages": "Messages",
+    "actionsTitle": "Operational actions",
+    "supportNotesTitle": "Support notes",
+    "noSupportNotes": "No support notes yet.",
+    "quickEmailTitle": "Quick email (welcome)",
+    "noOwnerEmail": "No owner email on file.",
+    "teamTitle": "Team",
+    "auditTitle": "Audit log",
+    "auditSubtitle": "Recent platform and customer events.",
+    "communicationsTitle": "Communication templates",
+    "communicationsSubtitle": "Ready email copy for customer outreach. Customer detail pages use personalized versions."
   }
 }

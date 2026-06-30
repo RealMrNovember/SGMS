@@ -1,0 +1,147 @@
+import { ExpenseCategoryManager } from '@/components/expense-category-manager';
+import { PosTerminal } from '@/components/pos-terminal';
+import { auth } from '@/lib/auth';
+import { intlLocaleFor } from '@/lib/format-locale';
+import { getDailyPosSummary } from '@/lib/pos-summary';
+import { prisma } from '@/lib/prisma';
+import { getLocale, getTranslations } from 'next-intl/server';
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
+
+const POS_ROLES = new Set(['OWNER', 'ADMIN', 'STAFF']);
+const SUMMARY_ROLES = new Set(['OWNER', 'ADMIN']);
+const CATEGORY_ROLES = new Set(['OWNER', 'ADMIN']);
+
+export default async function PosPage() {
+  const session = await auth();
+  if (!session?.user?.organizationId) {
+    redirect('/login');
+  }
+
+  const role = session.user.role;
+  if (!role || !POS_ROLES.has(role)) {
+    redirect('/dashboard');
+  }
+
+  const organizationId = session.user.organizationId;
+  const canViewSummary = SUMMARY_ROLES.has(role);
+  const canManageCategories = CATEGORY_ROLES.has(role);
+
+  const t = await getTranslations('pos');
+  const locale = await getLocale();
+  const dateLocale = intlLocaleFor(locale);
+
+  const [members, categories, allCategories, summary] = await Promise.all([
+    prisma.gymMember.findMany({
+      where: { organizationId, status: 'ACTIVE' },
+      orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
+      take: 200,
+      select: { id: true, firstName: true, lastName: true },
+    }),
+    prisma.expenseCategory.findMany({
+      where: { organizationId, isActive: true },
+      orderBy: { sortOrder: 'asc' },
+      select: { id: true, name: true, defaultAmount: true },
+    }),
+    canManageCategories
+      ? prisma.expenseCategory.findMany({
+          where: { organizationId },
+          orderBy: { sortOrder: 'asc' },
+          select: {
+            id: true,
+            name: true,
+            defaultAmount: true,
+            sortOrder: true,
+            isActive: true,
+          },
+        })
+      : Promise.resolve([]),
+    canViewSummary ? getDailyPosSummary(organizationId) : Promise.resolve(null),
+  ]);
+
+  const currency = 'TRY';
+  const formatter = new Intl.NumberFormat(dateLocale, {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: 2,
+  });
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <Link href="/dashboard" className="muted text-sm hover:text-white">
+          {t('backToOverview')}
+        </Link>
+        <h2 className="mt-4 text-2xl font-semibold">{t('title')}</h2>
+        <p className="muted mt-2 text-sm">{t('subtitle')}</p>
+      </div>
+
+      {summary ? (
+        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <article className="card p-5">
+            <p className="muted text-xs">{t('summary.chargesToday')}</p>
+            <p className="mt-2 text-xl font-semibold">{formatter.format(summary.chargesTotal)}</p>
+            <p className="muted mt-1 text-xs">{t('summary.count', { count: summary.chargesCount })}</p>
+          </article>
+          <article className="card p-5">
+            <p className="muted text-xs">{t('summary.paymentsToday')}</p>
+            <p className="mt-2 text-xl font-semibold text-emerald-200">
+              {formatter.format(summary.paymentsTotal)}
+            </p>
+            <p className="muted mt-1 text-xs">{t('summary.count', { count: summary.paymentsCount })}</p>
+          </article>
+          <article className="card p-5">
+            <p className="muted text-xs">{t('summary.openBalance')}</p>
+            <p className="mt-2 text-xl font-semibold text-amber-200">
+              {formatter.format(summary.openBalanceTotal)}
+            </p>
+            <p className="muted mt-1 text-xs">
+              {t('summary.openCount', { count: summary.openChargesCount })}
+            </p>
+          </article>
+          <article className="card p-5">
+            <p className="muted text-xs">{t('summary.byMethod')}</p>
+            <ul className="muted mt-2 space-y-1 text-xs">
+              {summary.paymentsByMethod.length === 0 ? (
+                <li>{t('summary.noPayments')}</li>
+              ) : (
+                summary.paymentsByMethod.map((row) => (
+                  <li key={row.method} className="flex justify-between gap-2">
+                    <span>{row.method}</span>
+                    <span className="text-white">{formatter.format(row.total)}</span>
+                  </li>
+                ))
+              )}
+            </ul>
+          </article>
+        </section>
+      ) : null}
+
+      <PosTerminal
+        members={members.map((m) => ({
+          id: m.id,
+          label: `${m.firstName} ${m.lastName}`,
+        }))}
+        categories={categories.map((c) => ({
+          id: c.id,
+          name: c.name,
+          defaultAmount: c.defaultAmount?.toString() ?? null,
+        }))}
+        currency={currency}
+      />
+
+      {canManageCategories ? (
+        <ExpenseCategoryManager
+          currency={currency}
+          categories={allCategories.map((c) => ({
+            id: c.id,
+            name: c.name,
+            defaultAmount: c.defaultAmount?.toString() ?? null,
+            sortOrder: c.sortOrder,
+            isActive: c.isActive,
+          }))}
+        />
+      ) : null}
+    </div>
+  );
+}

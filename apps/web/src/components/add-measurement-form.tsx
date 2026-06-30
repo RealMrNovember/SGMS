@@ -1,6 +1,7 @@
 'use client';
 
 import { addHealthMeasurement, type AddMeasurementState } from '@/actions/measurements';
+import { useTranslations } from 'next-intl';
 import { useActionState } from 'react';
 
 const initialState: AddMeasurementState = {};
@@ -12,12 +13,13 @@ export function AddMeasurementForm({
   gymMemberId: string;
   canManage: boolean;
 }) {
+  const t = useTranslations('measurements');
   const [state, formAction, pending] = useActionState(addHealthMeasurement, initialState);
 
   if (!canManage) {
     return (
       <section className="card p-6">
-        <p className="muted text-sm">Ölçüm ekleme yetkiniz yok.</p>
+        <p className="muted text-sm">{t('noPermission')}</p>
       </section>
     );
   }
@@ -25,8 +27,8 @@ export function AddMeasurementForm({
   return (
     <section className="card space-y-4 p-6">
       <div>
-        <h3 className="text-lg font-semibold">Yeni Ölçüm</h3>
-        <p className="muted mt-1 text-sm">Kilo, yağ oranı, kas kütlesi veya boy kaydı.</p>
+        <h3 className="text-lg font-semibold">{t('title')}</h3>
+        <p className="muted mt-1 text-sm">{t('subtitle')}</p>
       </div>
 
       {state.error ? (
@@ -46,14 +48,14 @@ export function AddMeasurementForm({
 
         <div className="space-y-2">
           <label htmlFor="weight" className="muted text-sm">
-            Kilo (kg)
+            {t('weight')}
           </label>
           <input id="weight" name="weight" type="number" step="0.1" className="input" />
         </div>
 
         <div className="space-y-2">
           <label htmlFor="bodyFatPercentage" className="muted text-sm">
-            Yağ Oranı (%)
+            {t('bodyFat')}
           </label>
           <input
             id="bodyFatPercentage"
@@ -66,35 +68,35 @@ export function AddMeasurementForm({
 
         <div className="space-y-2">
           <label htmlFor="muscleMass" className="muted text-sm">
-            Kas Kütlesi (kg)
+            {t('muscleMass')}
           </label>
           <input id="muscleMass" name="muscleMass" type="number" step="0.1" className="input" />
         </div>
 
         <div className="space-y-2">
           <label htmlFor="height" className="muted text-sm">
-            Boy (cm)
+            {t('height')}
           </label>
           <input id="height" name="height" type="number" step="0.1" className="input" />
         </div>
 
         <div className="space-y-2">
           <label htmlFor="measuredAt" className="muted text-sm">
-            Ölçüm Tarihi
+            {t('measuredAt')}
           </label>
           <input id="measuredAt" name="measuredAt" type="datetime-local" className="input" />
         </div>
 
         <div className="space-y-2 md:col-span-2">
           <label htmlFor="notes" className="muted text-sm">
-            Not
+            {t('notes')}
           </label>
           <textarea id="notes" name="notes" rows={2} className="input" />
         </div>
 
         <div className="md:col-span-2">
           <button type="submit" className="button px-5 py-2.5" disabled={pending}>
-            {pending ? 'Kaydediliyor…' : 'Ölçüm Kaydet'}
+            {pending ? t('saving') : t('submit')}
           </button>
         </div>
       </form>

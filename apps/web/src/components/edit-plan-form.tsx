@@ -1,6 +1,7 @@
 'use client';
 
 import { updateGymMembershipPlan, type PlanFormState } from '@/actions/plans';
+import { useTranslations } from 'next-intl';
 import { useActionState } from 'react';
 
 const initialState: PlanFormState = {};
@@ -16,6 +17,7 @@ type PlanRow = {
 };
 
 export function EditPlanForm({ plan }: { plan: PlanRow }) {
+  const tCommon = useTranslations('common');
   const [state, formAction, pending] = useActionState(updateGymMembershipPlan, initialState);
 
   return (
@@ -53,13 +55,13 @@ export function EditPlanForm({ plan }: { plan: PlanRow }) {
         className="input text-sm"
       />
       <button type="submit" className="button px-3 py-2 text-xs" disabled={pending}>
-        {pending ? '…' : 'Kaydet'}
+        {pending ? tCommon('ellipsis') : tCommon('save')}
       </button>
 
       <input
         name="description"
         defaultValue={plan.description ?? ''}
-        placeholder="Açıklama"
+        placeholder={tCommon('description')}
         className="input text-sm md:col-span-5"
       />
 

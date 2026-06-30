@@ -12,6 +12,7 @@ import type {
   LicenseApiResponse,
   LicenseCheckResult,
   LicenseClientConfig,
+  LicenseClientMetadata,
 } from './types.js';
 
 /**
@@ -41,10 +42,13 @@ export class LicenseClientService {
       where: { id: organizationId },
     });
 
+    const metadata = pickLicenseMetadata(input);
+
     if (input.licenseKey ?? organization.centralLicenseKey) {
       const activateResult = await this.activate(
         input.installationId,
         input.licenseKey ?? organization.centralLicenseKey!,
+        metadata,
       );
 
       if (activateResult.ok && activateResult.payload) {
@@ -62,7 +66,7 @@ export class LicenseClientService {
       }
     }
 
-    const validateResult = await this.validate(input.installationId);
+    const validateResult = await this.validate(input.installationId, metadata);
 
     if (validateResult.ok && validateResult.payload) {
       await this.syncOrganizationLicense(organization.id, validateResult.payload);
@@ -76,7 +80,7 @@ export class LicenseClientService {
       };
     }
 
-    const trialResult = await this.startTrial(input.installationId);
+    const trialResult = await this.startTrial(input.installationId, metadata);
 
     if (trialResult.ok && trialResult.payload) {
       await this.syncOrganizationLicense(organization.id, trialResult.payload, {
@@ -106,8 +110,12 @@ export class LicenseClientService {
   }
 
   /** Oturum açılışında periyodik doğrulama (check / heartbeat). */
-  async validateOnLogin(organizationId: string, installationId: string): Promise<LicenseCheckResult> {
-    const result = await this.validate(installationId);
+  async validateOnLogin(
+    organizationId: string,
+    installationId: string,
+    metadata?: LicenseClientMetadata,
+  ): Promise<LicenseCheckResult> {
+    const result = await this.validate(installationId, metadata);
 
     if (result.ok && result.payload) {
       await this.syncOrganizationLicense(organizationId, result.payload);
@@ -127,13 +135,16 @@ export class LicenseClientService {
   }
 
   /** Periyodik heartbeat — org kaydını günceller (cron). */
-  async refreshOrganizationLicense(organizationId: string): Promise<LicenseCheckResult> {
+  async refreshOrganizationLicense(
+    organizationId: string,
+    metadata?: LicenseClientMetadata,
+  ): Promise<LicenseCheckResult> {
     const organization = await this.prisma.organization.findUniqueOrThrow({
       where: { id: organizationId },
       select: { installationId: true },
     });
 
-    const result = await this.validate(organization.installationId);
+    const result = await this.validate(organization.installationId, metadata);
 
     if (result.ok && result.payload) {
       await this.syncOrganizationLicense(organizationId, result.payload);
@@ -153,26 +164,56 @@ export class LicenseClientService {
     return result;
   }
 
-  async startTrial(installationId: string): Promise<LicenseCheckResult & { licenseKey?: string }> {
-    return this.postLicenseEndpoint('trial', {
-      app_code: this.config.appCode,
-      hwid: installationId,
-    });
+  async startTrial(
+    installationId: string,
+    metadata?: LicenseClientMetadata,
+  ): Promise<LicenseCheckResult & { licenseKey?: string }> {
+    return this.postLicenseEndpoint('trial', this.buildLicenseBody(installationId, metadata));
   }
 
-  async activate(installationId: string, licenseKey: string): Promise<LicenseCheckResult> {
-    return this.postLicenseEndpoint('activate', {
-      app_code: this.config.appCode,
-      license_key: licenseKey,
-      hwid: installationId,
-    });
+  async activate(
+    installationId: string,
+    licenseKey: string,
+    metadata?: LicenseClientMetadata,
+  ): Promise<LicenseCheckResult> {
+    return this.postLicenseEndpoint(
+      'activate',
+      this.buildLicenseBody(installationId, metadata, { license_key: licenseKey }),
+    );
   }
 
-  async validate(installationId: string): Promise<LicenseCheckResult> {
-    return this.postLicenseEndpoint('check', {
+  async validate(
+    installationId: string,
+    metadata?: LicenseClientMetadata,
+  ): Promise<LicenseCheckResult> {
+    return this.postLicenseEndpoint('check', this.buildLicenseBody(installationId, metadata));
+  }
+
+  private buildLicenseBody(
+    installationId: string,
+    metadata?: LicenseClientMetadata,
+    extras?: Record<string, string>,
+  ): Record<string, string> {
+    const body: Record<string, string> = {
       app_code: this.config.appCode,
       hwid: installationId,
-    });
+      ...extras,
+    };
+
+    if (metadata?.clientName?.trim()) {
+      body.client_name = metadata.clientName.trim();
+    }
+    if (metadata?.email?.trim()) {
+      body.email = metadata.email.trim().toLowerCase();
+    }
+    if (metadata?.deviceName?.trim()) {
+      body.device_name = metadata.deviceName.trim();
+    }
+    if (metadata?.platform) {
+      body.platform = metadata.platform;
+    }
+
+    return body;
   }
 
   private async postLicenseEndpoint(
@@ -310,4 +351,13 @@ function mapCentralLicenseStatus(payload: LicenseApiPayload): CentralLicenseStat
   }
 
   return 'ACTIVE';
+}
+
+function pickLicenseMetadata(input: EnsureLicenseInput): LicenseClientMetadata {
+  return {
+    clientName: input.clientName,
+    email: input.email,
+    deviceName: input.deviceName,
+    platform: input.platform,
+  };
 }

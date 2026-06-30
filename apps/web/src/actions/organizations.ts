@@ -143,7 +143,14 @@ export async function createOrganization(
     return org;
   });
 
-  await bootstrapOrganizationLicense(organization.id, organization.installationId);
+  await bootstrapOrganizationLicense(organization.id, organization.installationId, {
+    metadata: {
+      clientName: data.organizationName,
+      email: ownerEmail,
+      deviceName: 'SGMS Admin Provisioning',
+      platform: 'web',
+    },
+  });
 
   revalidatePath('/admin');
   redirect(`/admin?created=${organization.slug}`);

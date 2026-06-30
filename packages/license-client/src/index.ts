@@ -3,6 +3,7 @@ export { resolveLicenseClientConfig, licenseApiUrl, postJsonPreserveMethod, norm
 export type { LicenseEndpoint } from './config.js';
 export type {
   LicenseClientConfig,
+  LicenseClientMetadata,
   LicenseApiPayload,
   LicenseApiResponse,
   LicenseCheckResult,

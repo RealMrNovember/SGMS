@@ -1,6 +1,7 @@
 'use client';
 
 import { addGymMember, type AddGymMemberState } from '@/actions/members';
+import { useTranslations } from 'next-intl';
 import { useActionState } from 'react';
 
 const initialState: AddGymMemberState = {};
@@ -19,14 +20,13 @@ export function AddMemberForm({
   canManage: boolean;
   plans: PlanOption[];
 }) {
+  const t = useTranslations('members.add');
   const [state, formAction, pending] = useActionState(addGymMember, initialState);
 
   if (!canManage) {
     return (
       <section className="card p-6">
-        <p className="muted text-sm">
-          Üye eklemek için OWNER, ADMIN veya STAFF rolüne sahip olmanız gerekir.
-        </p>
+        <p className="muted text-sm">{t('noPermission')}</p>
       </section>
     );
   }
@@ -34,10 +34,8 @@ export function AddMemberForm({
   return (
     <section className="card space-y-4 p-6">
       <div>
-        <h3 className="text-lg font-semibold">Yeni Sporcu / Üye Kaydı</h3>
-        <p className="muted mt-1 text-sm">
-          Salon üyelik planı atayarak sporcu kaydı oluşturun.
-        </p>
+        <h3 className="text-lg font-semibold">{t('title')}</h3>
+        <p className="muted mt-1 text-sm">{t('subtitle')}</p>
       </div>
 
       {state.error ? (
@@ -55,7 +53,7 @@ export function AddMemberForm({
       <form action={formAction} className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <label htmlFor="firstName" className="muted text-sm">
-            Ad
+            {t('firstName')}
           </label>
           <input id="firstName" name="firstName" className="input" required />
           {state.fieldErrors?.firstName ? (
@@ -65,7 +63,7 @@ export function AddMemberForm({
 
         <div className="space-y-2">
           <label htmlFor="lastName" className="muted text-sm">
-            Soyad
+            {t('lastName')}
           </label>
           <input id="lastName" name="lastName" className="input" required />
           {state.fieldErrors?.lastName ? (
@@ -75,7 +73,7 @@ export function AddMemberForm({
 
         <div className="space-y-2">
           <label htmlFor="nationalId" className="muted text-sm">
-            TC Kimlik No
+            {t('nationalId')}
           </label>
           <input
             id="nationalId"
@@ -83,7 +81,7 @@ export function AddMemberForm({
             className="input"
             inputMode="numeric"
             pattern="\d{11}"
-            placeholder="11 haneli"
+            placeholder={t('nationalIdPlaceholder')}
           />
           {state.fieldErrors?.nationalId ? (
             <p className="text-xs text-rose-400">{state.fieldErrors.nationalId}</p>
@@ -92,57 +90,61 @@ export function AddMemberForm({
 
         <div className="space-y-2">
           <label htmlFor="phone" className="muted text-sm">
-            Telefon
+            {t('phone')}
           </label>
           <input id="phone" name="phone" type="tel" className="input" />
         </div>
 
         <div className="space-y-2">
           <label htmlFor="email" className="muted text-sm">
-            E-posta
+            {t('email')}
           </label>
           <input id="email" name="email" type="email" className="input" />
         </div>
 
         <div className="space-y-2">
           <label htmlFor="birthDate" className="muted text-sm">
-            Doğum Tarihi
+            {t('birthDate')}
           </label>
           <input id="birthDate" name="birthDate" type="date" className="input" />
         </div>
 
         <div className="space-y-2">
           <label htmlFor="gender" className="muted text-sm">
-            Cinsiyet
+            {t('gender')}
           </label>
           <select id="gender" name="gender" className="input" defaultValue="UNSPECIFIED">
-            <option value="UNSPECIFIED">Belirtilmedi</option>
-            <option value="MALE">Erkek</option>
-            <option value="FEMALE">Kadın</option>
-            <option value="OTHER">Diğer</option>
+            <option value="UNSPECIFIED">{t('genderUnspecified')}</option>
+            <option value="MALE">{t('genderMale')}</option>
+            <option value="FEMALE">{t('genderFemale')}</option>
+            <option value="OTHER">{t('genderOther')}</option>
           </select>
         </div>
 
         <div className="space-y-2">
           <label htmlFor="status" className="muted text-sm">
-            Kayıt Durumu
+            {t('status')}
           </label>
           <select id="status" name="status" className="input" defaultValue="ACTIVE">
-            <option value="ACTIVE">Aktif</option>
-            <option value="INACTIVE">Pasif</option>
-            <option value="SUSPENDED">Askıda</option>
+            <option value="ACTIVE">{t('statusActive')}</option>
+            <option value="INACTIVE">{t('statusInactive')}</option>
+            <option value="SUSPENDED">{t('statusSuspended')}</option>
           </select>
         </div>
 
         <div className="space-y-2 md:col-span-2">
           <label htmlFor="planId" className="muted text-sm">
-            Salon Üyelik Planı
+            {t('plan')}
           </label>
           <select id="planId" name="planId" className="input" defaultValue="">
-            <option value="">Plan seçilmedi</option>
+            <option value="">{t('noPlan')}</option>
             {plans.map((plan) => (
               <option key={plan.id} value={plan.id}>
-                {plan.name} — {plan.durationDays} gün — {plan.price} TRY
+                {t('planOption', {
+                  name: plan.name,
+                  days: plan.durationDays,
+                  price: plan.price,
+                })}
               </option>
             ))}
           </select>
@@ -153,7 +155,7 @@ export function AddMemberForm({
 
         <div className="space-y-2">
           <label htmlFor="membershipStartsAt" className="muted text-sm">
-            Üyelik Başlangıcı
+            {t('membershipStart')}
           </label>
           <input
             id="membershipStartsAt"
@@ -166,14 +168,14 @@ export function AddMemberForm({
 
         <div className="space-y-2 md:col-span-2">
           <label htmlFor="notes" className="muted text-sm">
-            Notlar (opsiyonel)
+            {t('notes')}
           </label>
           <textarea id="notes" name="notes" className="input min-h-24 resize-y" rows={3} />
         </div>
 
         <div className="md:col-span-2">
           <button type="submit" className="button px-6 py-3 text-sm" disabled={pending}>
-            {pending ? 'Kaydediliyor…' : 'Üyeyi Kaydet'}
+            {pending ? t('saving') : t('submit')}
           </button>
         </div>
       </form>

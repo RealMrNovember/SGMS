@@ -46,50 +46,28 @@ export async function postJsonPreserveMethod(
   url: string,
   init: { headers: Record<string, string>; body: string; signal?: AbortSignal },
 ): Promise<Response> {
-  const { request } = await import('node:https');
-  const { request: httpRequest } = await import('node:http');
+  let currentUrl = url;
 
-  return new Promise((resolve, reject) => {
-    const target = new URL(url);
-    const transport = target.protocol === 'http:' ? httpRequest : request;
+  for (let hop = 0; hop < 5; hop++) {
+    const response = await fetch(currentUrl, {
+      method: 'POST',
+      headers: init.headers,
+      body: init.body,
+      signal: init.signal,
+      redirect: 'manual',
+    });
 
-    const req = transport(
-      {
-        protocol: target.protocol,
-        hostname: target.hostname,
-        port: target.port || (target.protocol === 'https:' ? 443 : 80),
-        path: `${target.pathname}${target.search}`,
-        method: 'POST',
-        headers: {
-          ...init.headers,
-          'Content-Length': Buffer.byteLength(init.body),
-        },
-      },
-      (res) => {
-        const chunks: Buffer[] = [];
-        res.on('data', (chunk: Buffer) => chunks.push(chunk));
-        res.on('end', () => {
-          const text = Buffer.concat(chunks).toString('utf8');
-          resolve(
-            new Response(text, {
-              status: res.statusCode ?? 502,
-              headers: res.headers as HeadersInit,
-            }),
-          );
-        });
-      },
-    );
-
-    req.on('error', reject);
-
-    if (init.signal) {
-      init.signal.addEventListener('abort', () => {
-        req.destroy();
-        reject(new DOMException('Aborted', 'AbortError'));
-      });
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get('location');
+      if (!location) {
+        return response;
+      }
+      currentUrl = new URL(location, currentUrl).href;
+      continue;
     }
 
-    req.write(init.body);
-    req.end();
-  });
+    return response;
+  }
+
+  throw new Error('Lisans API: çok fazla yönlendirme.');
 }

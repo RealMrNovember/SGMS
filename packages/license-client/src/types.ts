@@ -1,3 +1,12 @@
+export type LicenseClientMetadata = {
+  /** Salon / firma adı — license panelinde müşteri olarak görünür */
+  clientName?: string | null;
+  /** Yönetici e-posta — license Client kaydı */
+  email?: string | null;
+  deviceName?: string | null;
+  platform?: 'web' | 'desktop' | null;
+};
+
 export type LicenseClientConfig = {
   /** Merkezi lisans API taban URL — varsayılan: https://license.cicibyte.com */
   baseUrl?: string;
@@ -35,7 +44,7 @@ export type LicenseCheckResult = {
 export type EnsureLicenseInput = {
   installationId: string;
   licenseKey?: string | null;
-};
+} & LicenseClientMetadata;
 
 export type EnsureLicenseResult = {
   ok: boolean;

@@ -22,17 +22,29 @@ function withLocaleCookie(request: NextRequest, response: NextResponse) {
   return response;
 }
 
-function defaultDestination(isSuperAdmin: boolean) {
-  return isSuperAdmin ? '/admin' : '/dashboard';
+function defaultDestination(isSuperAdmin: boolean, isAthlete: boolean) {
+  if (isSuperAdmin) {
+    return '/admin';
+  }
+  if (isAthlete) {
+    return '/athlete';
+  }
+  return '/dashboard';
+}
+
+function isAthleteSession(auth: { user?: { gymMemberId?: string | null; role?: string | null } } | null) {
+  return Boolean(auth?.user?.gymMemberId && auth.user.role === 'VIEWER');
 }
 
 export default auth((request) => {
   const isLoggedIn = !!request.auth;
   const isSuperAdmin = request.auth?.user?.isSuperAdmin === true;
+  const isAthlete = isAthleteSession(request.auth);
   const { pathname } = request.nextUrl;
 
   const isPublic =
     pathname.startsWith('/login') ||
+    pathname.startsWith('/trial') ||
     pathname.startsWith('/api/auth') ||
     pathname === '/';
 
@@ -52,7 +64,21 @@ export default auth((request) => {
   if (isLoggedIn && pathname === '/login') {
     return withLocaleCookie(
       request,
-      NextResponse.redirect(new URL(defaultDestination(isSuperAdmin), request.nextUrl.origin)),
+      NextResponse.redirect(new URL(defaultDestination(isSuperAdmin, isAthlete), request.nextUrl.origin)),
+    );
+  }
+
+  if (isLoggedIn && pathname.startsWith('/dashboard') && isAthlete) {
+    return withLocaleCookie(
+      request,
+      NextResponse.redirect(new URL('/athlete', request.nextUrl.origin)),
+    );
+  }
+
+  if (isLoggedIn && pathname.startsWith('/athlete') && !request.auth?.user?.gymMemberId) {
+    return withLocaleCookie(
+      request,
+      NextResponse.redirect(new URL('/dashboard', request.nextUrl.origin)),
     );
   }
 

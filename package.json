@@ -16,6 +16,7 @@
     "db:generate": "pnpm --filter @sgms/database db:generate",
     "db:migrate": "pnpm --filter @sgms/database db:migrate",
     "db:seed": "pnpm --filter @sgms/database db:seed",
+    "admin:seed": "pnpm --filter @sgms/database admin:seed",
     "db:migrate:deploy": "pnpm --filter @sgms/database exec prisma migrate deploy",
     "deploy:verify": "bash docs/deployment/verify-production.sh",
     "license:heartbeat": "pnpm --filter @sgms/license-client heartbeat",

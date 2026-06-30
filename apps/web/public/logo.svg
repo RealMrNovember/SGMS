@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none" role="img" aria-label="CiCiByte SGMS">
+  <defs>
+    <linearGradient id="sgms-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e8d5a3"/>
+      <stop offset="45%" stop-color="#c9a962"/>
+      <stop offset="100%" stop-color="#8f7340"/>
+    </linearGradient>
+    <linearGradient id="sgms-cyan" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0ea5e9"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+    <filter id="sgms-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <path d="M60 8L104 34v52L60 112 16 86V34L60 8z" stroke="url(#sgms-gold)" stroke-width="2.5" fill="#0b1220"/>
+  <path d="M60 22L88 38v36L60 90 32 74V38L60 22z" stroke="url(#sgms-cyan)" stroke-width="1.5" opacity="0.85" fill="none"/>
+  <path d="M38 58c6-14 18-22 22-22s16 8 22 22" stroke="url(#sgms-cyan)" stroke-width="3" stroke-linecap="round" filter="url(#sgms-glow)"/>
+  <circle cx="60" cy="58" r="4" fill="url(#sgms-gold)"/>
+  <text x="60" y="78" text-anchor="middle" fill="url(#sgms-gold)" font-family="Inter,Segoe UI,sans-serif" font-size="11" font-weight="700" letter-spacing="2">SGMS</text>
+</svg>

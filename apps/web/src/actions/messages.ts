@@ -1,6 +1,7 @@
 'use server';
 
 import { auth } from '@/lib/auth';
+import { publishMessageEvent } from '@/lib/realtime/hub';
 import { prisma } from '@/lib/prisma';
 import { getTenantWriteBlockReason } from '@/lib/tenant-access';
 import { revalidatePath } from 'next/cache';
@@ -82,16 +83,31 @@ export async function sendDirectMessage(
     return { error: 'Alıcı bu salonda bulunamadı.' };
   }
 
-  await prisma.directMessage.create({
+  const message = await prisma.directMessage.create({
     data: {
       organizationId: context.organizationId,
       senderId: context.userId,
       receiverId,
       content: content.trim(),
+      deliveredAt: new Date(),
+    },
+  });
+
+  publishMessageEvent({
+    type: 'message.created',
+    organizationId: context.organizationId,
+    userIds: [receiverId, context.userId],
+    message: {
+      id: message.id,
+      senderId: message.senderId,
+      receiverId: message.receiverId,
+      content: message.content,
+      createdAt: message.createdAt.toISOString(),
     },
   });
 
   revalidatePath('/dashboard/messages');
+  revalidatePath('/athlete/messages');
 
   return { success: 'Mesaj gönderildi.' };
 }
@@ -117,10 +133,13 @@ export async function markMessageRead(messageId: string): Promise<{ error?: stri
   if (!message.isRead) {
     await prisma.directMessage.update({
       where: { id: messageId },
-      data: { isRead: true },
+      data: { isRead: true, readAt: new Date() },
     });
   }
 
   revalidatePath('/dashboard/messages');
+  revalidatePath('/athlete/messages');
+  revalidatePath('/athlete');
+
   return {};
 }

@@ -1,25 +1,25 @@
 'use client';
 
 import { inviteTeamMember, type InviteTeamMemberState } from '@/actions/team';
+import { useTranslations } from 'next-intl';
 import { useActionState } from 'react';
 
 const initialState: InviteTeamMemberState = {};
 
-const roleOptions = [
-  { value: 'STAFF', label: 'Personel (STAFF)' },
-  { value: 'TRAINER', label: 'Antrenör (TRAINER)' },
-  { value: 'VIEWER', label: 'Görüntüleyici (VIEWER)' },
-] as const;
-
 export function InviteTeamForm({ canInvite }: { canInvite: boolean }) {
+  const t = useTranslations('team.invite');
   const [state, formAction, pending] = useActionState(inviteTeamMember, initialState);
+
+  const roleOptions = [
+    { value: 'STAFF', label: t('roleStaff') },
+    { value: 'TRAINER', label: t('roleTrainer') },
+    { value: 'VIEWER', label: t('roleViewer') },
+  ] as const;
 
   if (!canInvite) {
     return (
       <section className="card p-6">
-        <p className="muted text-sm">
-          Personel eklemek için OWNER veya ADMIN rolüne sahip olmanız gerekir.
-        </p>
+        <p className="muted text-sm">{t('noPermission')}</p>
       </section>
     );
   }
@@ -27,10 +27,8 @@ export function InviteTeamForm({ canInvite }: { canInvite: boolean }) {
   return (
     <section className="card space-y-4 p-6">
       <div>
-        <h3 className="text-lg font-semibold">Yeni Personel Davet Et</h3>
-        <p className="muted mt-1 text-sm">
-          STAFF, TRAINER veya VIEWER rolüyle yeni kullanıcı oluşturulur.
-        </p>
+        <h3 className="text-lg font-semibold">{t('title')}</h3>
+        <p className="muted mt-1 text-sm">{t('subtitle')}</p>
       </div>
 
       {state.error ? (
@@ -44,7 +42,7 @@ export function InviteTeamForm({ canInvite }: { canInvite: boolean }) {
           <p>{state.success}</p>
           {state.temporaryPassword ? (
             <p className="mt-2">
-              Geçici parola: <strong>{state.temporaryPassword}</strong>
+              {t('tempPassword', { password: state.temporaryPassword })}
             </p>
           ) : null}
         </div>
@@ -53,7 +51,7 @@ export function InviteTeamForm({ canInvite }: { canInvite: boolean }) {
       <form action={formAction} className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <label htmlFor="name" className="muted text-sm">
-            Ad Soyad
+            {t('name')}
           </label>
           <input id="name" name="name" className="input" required />
           {state.fieldErrors?.name ? (
@@ -63,7 +61,7 @@ export function InviteTeamForm({ canInvite }: { canInvite: boolean }) {
 
         <div className="space-y-2">
           <label htmlFor="email" className="muted text-sm">
-            E-posta
+            {t('email')}
           </label>
           <input id="email" name="email" type="email" className="input" required />
           {state.fieldErrors?.email ? (
@@ -73,7 +71,7 @@ export function InviteTeamForm({ canInvite }: { canInvite: boolean }) {
 
         <div className="space-y-2 md:col-span-2">
           <label htmlFor="role" className="muted text-sm">
-            Rol
+            {t('role')}
           </label>
           <select id="role" name="role" className="input" required defaultValue="STAFF">
             {roleOptions.map((option) => (
@@ -89,7 +87,7 @@ export function InviteTeamForm({ canInvite }: { canInvite: boolean }) {
 
         <div className="md:col-span-2">
           <button type="submit" className="button px-6 py-3 text-sm" disabled={pending}>
-            {pending ? 'Ekleniyor…' : 'Personel Ekle'}
+            {pending ? t('saving') : t('submit')}
           </button>
         </div>
       </form>
