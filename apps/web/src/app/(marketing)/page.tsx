@@ -1,5 +1,6 @@
 import { auth } from '@/lib/auth';
 import { siteConfig } from '@/lib/site-config';
+import { ReceptionDownloadPromo } from '@/components/reception/reception-download-promo';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
@@ -71,6 +72,8 @@ export default async function ShowcaseHomePage() {
           ))}
         </div>
       </section>
+
+      <ReceptionDownloadPromo variant="marketing" />
 
       <section id="why-sgms" className="mx-auto max-w-6xl px-5 py-8 lg:px-8">
         <div className="marketing-cta-band p-8 md:p-10">

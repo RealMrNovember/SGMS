@@ -4,9 +4,13 @@ import { licenseStatusKey, resolveLicenseCardHint } from '@/lib/license-i18n';
 import { refreshDashboardLicense } from '@/lib/license-dashboard';
 import { intlLocaleFor } from '@/lib/format-locale';
 import { prisma } from '@/lib/prisma';
+import { ReceptionDownloadPromo } from '@/components/reception/reception-download-promo';
+import type { OrganizationRole } from '@sgms/database';
 import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+
+const RECEPTION_ROLES = new Set<OrganizationRole>(['OWNER', 'ADMIN', 'STAFF', 'TRAINER']);
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -94,6 +98,10 @@ export default async function DashboardPage() {
           ) : null}
         </p>
       </section>
+
+      {role && RECEPTION_ROLES.has(role) && license.isOperational ? (
+        <ReceptionDownloadPromo variant="card" />
+      ) : null}
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <article className="card p-5">

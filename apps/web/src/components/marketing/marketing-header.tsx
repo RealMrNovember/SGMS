@@ -24,6 +24,9 @@ export async function MarketingHeader() {
           <a href="#contact" className="marketing-nav-link">
             {t('contact')}
           </a>
+          <a href="#reception-desktop" className="marketing-nav-link">
+            {t('receptionDesktop')}
+          </a>
         </nav>
 
         <div className="flex items-center gap-3">

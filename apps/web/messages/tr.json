@@ -500,7 +500,8 @@
       "why": "Neden SGMS",
       "contact": "İletişim",
       "login": "Giriş Yap",
-      "trial": "14 Gün Deneyin"
+      "trial": "14 Gün Deneyin",
+      "receptionDesktop": "Resepsiyon Uygulaması"
     },
     "hero": {
       "kicker": "Dijital Spor Salonu İşletim Sistemi",
@@ -692,6 +693,22 @@
       "orgSuspended": "Hesap askıda. Destek ile iletişime geçin.",
       "noSubscription": "Aktif abonelik bulunamadı."
     }
+  },
+  "receptionDesktop": {
+    "badge": "Windows Masaüstü",
+    "title": "SGMS Resepsiyon",
+    "subtitle": "Turnike giriş ve çıkışlarını resepsiyon bilgisayarında anında Windows bildirimi olarak alın. Uygulama tepside çalışır; otostart ile salon açılışında hazır olur.",
+    "download": "Windows İndir (v{version})",
+    "size": "{size} · {platforms}",
+    "features": {
+      "notify": "Canlı giriş / çıkış toast bildirimleri",
+      "tray": "Tepsi modu ve Windows açılışında otostart",
+      "brand": "CiCiByte markalı kontrol paneli"
+    },
+    "loginHint": "Resepsiyon bilgisayarı kurulumu",
+    "loginHintText": "Turnike olaylarını kaçırmamak için Windows uygulamasını indirin. Giriş sonrası personel hesabınızla bağlanın.",
+    "checkInHint": "Resepsiyon PC’sine kurun; turnike olayları tarayıcı açık olmasa bile Windows bildirimi olarak gelir.",
+    "footerLink": "SGMS Resepsiyon (Windows)"
   },
   "checkIn": {
     "title": "Salon Girişi",

@@ -500,7 +500,8 @@
       "why": "Why SGMS",
       "contact": "Contact",
       "login": "Sign in",
-      "trial": "14-Day Trial"
+      "trial": "14-Day Trial",
+      "receptionDesktop": "Reception App"
     },
     "hero": {
       "kicker": "Digital Gym Operating System",
@@ -692,6 +693,22 @@
       "orgSuspended": "Account suspended. Contact support.",
       "noSubscription": "No active subscription found."
     }
+  },
+  "receptionDesktop": {
+    "badge": "Windows Desktop",
+    "title": "SGMS Reception",
+    "subtitle": "Deliver turnstile entry and exit events as native Windows notifications on the front-desk PC. Runs in the system tray with optional autostart at login.",
+    "download": "Download for Windows (v{version})",
+    "size": "{size} · {platforms}",
+    "features": {
+      "notify": "Live entry / exit toast notifications",
+      "tray": "Tray mode and Windows autostart",
+      "brand": "CiCiByte-branded control center"
+    },
+    "loginHint": "Front-desk PC setup",
+    "loginHintText": "Download the Windows app so turnstile events reach reception even when the browser is closed. Sign in with your staff account after install.",
+    "checkInHint": "Install on the reception PC; turnstile events arrive as Windows notifications without keeping the browser open.",
+    "footerLink": "SGMS Reception (Windows)"
   },
   "checkIn": {
     "title": "Gym Check-in",

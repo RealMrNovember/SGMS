@@ -1,6 +1,7 @@
 import { CheckInLiveRefresh } from '@/components/check-in-live-refresh';
 import { DeviceManagementPanel } from '@/components/device-management-panel';
 import { ManualCheckInForm } from '@/components/manual-check-in-form';
+import { ReceptionDownloadPromo } from '@/components/reception/reception-download-promo';
 import { UserAvatar } from '@/components/user-avatar';
 import { auth } from '@/lib/auth';
 import { intlLocaleFor } from '@/lib/format-locale';
@@ -79,6 +80,8 @@ export default async function CheckInDashboardPage() {
         </div>
         <p className="muted mt-2 text-sm">{t('subtitle')}</p>
       </div>
+
+      <ReceptionDownloadPromo variant="card" />
 
       <section className="grid gap-4 sm:grid-cols-3">
         <div className="card p-5">

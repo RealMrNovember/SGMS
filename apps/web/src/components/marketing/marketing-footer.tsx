@@ -1,10 +1,13 @@
 import { SgmsLogo } from '@/components/brand/sgms-logo';
 import { siteConfig } from '@/lib/site-config';
+import { getReceptionDesktopDownloadUrl, receptionDesktopRelease } from '@/lib/reception-desktop';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 
 export async function MarketingFooter() {
   const t = await getTranslations('marketing.footer');
+  const tDesktop = await getTranslations('receptionDesktop');
+  const downloadUrl = getReceptionDesktopDownloadUrl();
 
   return (
     <footer id="contact" className="marketing-footer mt-20">
@@ -26,6 +29,15 @@ export async function MarketingFooter() {
             </li>
             <li>
               <Link href="/login">{t('login')}</Link>
+            </li>
+            <li>
+              <a
+                href={downloadUrl}
+                download={receptionDesktopRelease.fileName}
+                rel="noopener noreferrer"
+              >
+                {tDesktop('footerLink')}
+              </a>
             </li>
           </ul>
         </div>

@@ -1,6 +1,7 @@
 import { LocaleSwitcher } from '@/components/locale-switcher';
 import { SgmsLogo } from '@/components/brand/sgms-logo';
 import { LoginForm } from '@/components/login-form';
+import { ReceptionDownloadPromo } from '@/components/reception/reception-download-promo';
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { Suspense } from 'react';
@@ -44,6 +45,8 @@ export default async function LoginPage() {
           <Suspense fallback={<div className="muted text-sm">{tCommon('loading')}</div>}>
             <LoginForm />
           </Suspense>
+
+          <ReceptionDownloadPromo variant="compact" />
         </div>
       </section>
     </main>
