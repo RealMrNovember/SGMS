@@ -21,6 +21,18 @@ export const metadata: Metadata = {
     url: 'https://sgms.cicibyte.com',
     siteName: 'CiCiByte SGMS',
   },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'SGMS',
+  },
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover' as const,
+  themeColor: '#070b12',
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

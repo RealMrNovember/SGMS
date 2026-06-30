@@ -501,6 +501,8 @@
       "contact": "İletişim",
       "login": "Giriş Yap",
       "trial": "14 Gün Deneyin",
+      "loginShort": "Giriş",
+      "trialShort": "14 Gün",
       "receptionDesktop": "Resepsiyon Uygulaması"
     },
     "hero": {

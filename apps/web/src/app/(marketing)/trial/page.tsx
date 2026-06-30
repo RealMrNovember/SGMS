@@ -15,14 +15,14 @@ export default async function TrialPage() {
   const t = await getTranslations('marketing.trialPage');
 
   return (
-    <div className="mx-auto grid max-w-6xl gap-10 px-5 py-12 lg:grid-cols-[1fr_1.05fr] lg:px-8 lg:py-16">
+    <div className="mx-auto grid max-w-6xl gap-8 px-4 py-8 sm:px-5 sm:gap-10 lg:grid-cols-[1fr_1.05fr] lg:px-8 lg:py-16">
       <section className="space-y-6">
         <Link href="/" className="muted inline-flex text-sm hover:text-white">
           ← {t('backHome')}
         </Link>
         <SgmsLogo size="lg" href="/" />
         <p className="marketing-kicker">{t('kicker')}</p>
-        <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">{t('title', { days: siteConfig.trialDays })}</h1>
+        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl md:text-4xl">{t('title', { days: siteConfig.trialDays })}</h1>
         <p className="muted max-w-lg text-sm leading-7">{t('subtitle')}</p>
 
         <ul className="space-y-4 pt-2">

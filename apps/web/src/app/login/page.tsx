@@ -20,7 +20,7 @@ export default async function LoginPage() {
           <Link href="/" className="transition-opacity hover:opacity-90">
             <SgmsLogo size="sm" href={null} showWordmark />
           </Link>
-          <LocaleSwitcher />
+          <LocaleSwitcher compact />
         </div>
 
         <div className="relative z-10 mt-auto pt-16">

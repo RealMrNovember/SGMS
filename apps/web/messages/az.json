@@ -497,7 +497,9 @@
       "why": "Why SGMS",
       "contact": "Contact",
       "login": "Sign in",
-      "trial": "14-Day Trial"
+      "trial": "14-Day Trial",
+      "loginShort": "Login",
+      "trialShort": "14 Days"
     },
     "hero": {
       "kicker": "Digital Gym Operating System",

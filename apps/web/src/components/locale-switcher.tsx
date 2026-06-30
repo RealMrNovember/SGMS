@@ -15,7 +15,11 @@ const localeLabels: Record<AppLocale, string> = {
   az: 'AZ',
 };
 
-export function LocaleSwitcher() {
+type Props = {
+  compact?: boolean;
+};
+
+export function LocaleSwitcher({ compact = false }: Props) {
   const locale = useLocale() as AppLocale;
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -29,7 +33,7 @@ export function LocaleSwitcher() {
 
   return (
     <select
-      className="input w-auto py-1.5 text-sm"
+      className={compact ? 'locale-switcher-compact' : 'input w-auto py-1.5 text-sm'}
       value={locale}
       disabled={pending}
       onChange={(event) => onChange(event.target.value as AppLocale)}

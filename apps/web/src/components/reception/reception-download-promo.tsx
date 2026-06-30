@@ -22,11 +22,11 @@ export async function ReceptionDownloadPromo({ variant }: Props) {
 
   if (variant === 'marketing') {
     return (
-      <section id="reception-desktop" className="mx-auto max-w-6xl px-5 py-16 lg:px-8">
+      <section id="reception-desktop" className="mx-auto max-w-6xl px-4 py-12 sm:px-5 sm:py-16 lg:px-8">
         <div className="reception-promo-band">
           <div className="reception-promo-copy">
             <p className="marketing-kicker">{t('badge')}</p>
-            <h2 className="mt-4 text-3xl font-semibold tracking-tight">{t('title')}</h2>
+            <h2 className="mt-4 text-2xl font-semibold tracking-tight sm:text-3xl">{t('title')}</h2>
             <p className="muted mt-4 max-w-2xl text-sm leading-7">{t('subtitle')}</p>
             <ul className="reception-promo-features mt-6">
               <li>{t('features.notify')}</li>
@@ -38,7 +38,7 @@ export async function ReceptionDownloadPromo({ variant }: Props) {
             <span className="reception-promo-version">v{version}</span>
             <a
               href={downloadUrl}
-              className="button button-gold px-6 py-3 text-sm"
+              className="button button-gold marketing-cta-btn reception-promo-download"
               download={receptionDesktopRelease.fileName}
               rel="noopener noreferrer"
             >

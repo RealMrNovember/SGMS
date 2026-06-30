@@ -501,6 +501,8 @@
       "contact": "Contact",
       "login": "Sign in",
       "trial": "14-Day Trial",
+      "loginShort": "Login",
+      "trialShort": "14 Days",
       "receptionDesktop": "Reception App"
     },
     "hero": {
