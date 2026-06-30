@@ -43,10 +43,16 @@ pnpm reception:dist
 Çıktı:
 
 ```text
-apps/reception/release/SGMS-Resepsiyon-0.3.0-Setup.exe
+apps/reception/release/SGMS-Resepsiyon-0.3.0-Setup.exe   # yerel build
+releases/sgms-reception/v0.3.0/SGMS-Resepsiyon-0.3.0-Setup.exe   # GitHub dağıtımı
 ```
 
 ### 2. Salon PC’ye kurulum
+
+**İndirme (GitHub):**  
+https://github.com/RealMrNovember/SGMS/raw/main/releases/sgms-reception/v0.3.0/SGMS-Resepsiyon-0.3.0-Setup.exe
+
+Alternatif: repo içi `releases/sgms-reception/v0.3.0/` klasörü.
 
 1. `SGMS-Resepsiyon-0.3.0-Setup.exe` dosyasını çalıştırın.
 2. İlk kurulumda Windows SmartScreen **“Tanınmayan yayıncı”** uyarısı gösterebilir (henüz Authenticode imzası yok) → **Yine de çalıştır**.
