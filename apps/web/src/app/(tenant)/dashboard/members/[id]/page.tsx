@@ -2,9 +2,11 @@ import { AddMeasurementForm } from '@/components/add-measurement-form';
 import { AvatarUpload } from '@/components/avatar-upload';
 import { MemberAccountPanel } from '@/components/member-account-panel';
 import { MemberHealthHistoryTable } from '@/components/member-health-history-table';
+import { ProgramContentView } from '@/components/program-content-view';
 import { auth } from '@/lib/auth';
 import { intlLocaleFor } from '@/lib/format-locale';
 import { decimalToNumber, getMemberAccountSummary } from '@/lib/member-balance';
+import { memberCountryLabel } from '@/lib/member-countries';
 import { prisma } from '@/lib/prisma';
 import type { OrganizationRole } from '@sgms/database';
 import { getLocale, getTranslations } from 'next-intl/server';
@@ -110,9 +112,25 @@ export default async function MemberDetailPage({
               <dd className="text-white">{member.phone ?? '—'}</dd>
             </div>
             <div className="flex justify-between gap-4">
-              <dt>{t('detail.fields.nationalId')}</dt>
-              <dd className="text-white">{member.nationalId ?? '—'}</dd>
+              <dt>
+                {member.isForeignMember
+                  ? t('detail.fields.passportNumber')
+                  : t('detail.fields.nationalId')}
+              </dt>
+              <dd className="text-white">
+                {member.isForeignMember
+                  ? (member.passportNumber ?? '—')
+                  : (member.nationalId ?? '—')}
+              </dd>
             </div>
+            {member.isForeignMember ? (
+              <div className="flex justify-between gap-4">
+                <dt>{t('detail.fields.nationality')}</dt>
+                <dd className="text-white">
+                  {memberCountryLabel(member.nationality)}
+                </dd>
+              </div>
+            ) : null}
             <div className="flex justify-between gap-4">
               <dt>{t('detail.fields.birthDate')}</dt>
               <dd className="text-white">
@@ -228,6 +246,7 @@ export default async function MemberDetailPage({
                     ? ` → ${program.endDate.toLocaleDateString(dateLocale)}`
                     : ''}
                 </p>
+                <ProgramContentView content={program.content} type={program.type} />
               </article>
             ))
           )}

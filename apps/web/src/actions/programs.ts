@@ -1,5 +1,10 @@
 'use server';
 
+import {
+  parseProgramContentJson,
+  sanitizeProgramContent,
+  validateProgramContent,
+} from '@/lib/program-content';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { getTenantWriteBlockReason } from '@/lib/tenant-access';
@@ -13,7 +18,7 @@ const createProgramSchema = z.object({
   gymMemberId: z.string().cuid(),
   title: z.string().min(2).max(120),
   type: z.enum(['WORKOUT', 'NUTRITION']),
-  content: z.string().optional().or(z.literal('')),
+  contentJson: z.string().optional().or(z.literal('')),
   startDate: z.string().optional().or(z.literal('')),
   endDate: z.string().optional().or(z.literal('')),
   trainerId: z.string().cuid().optional().or(z.literal('')),
@@ -50,16 +55,13 @@ function parseOptionalDate(value: string | undefined): Date | null {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
-function parseContentJson(raw: string | undefined): Prisma.InputJsonValue {
-  if (!raw?.trim()) {
-    return {};
+function parseContentJson(raw: string | undefined, type: ProgramType): Prisma.InputJsonValue {
+  const parsed = parseProgramContentJson(raw, type);
+  const validationError = validateProgramContent(parsed, type);
+  if (validationError) {
+    throw new Error(validationError);
   }
-  try {
-    const parsed = JSON.parse(raw) as unknown;
-    return (typeof parsed === 'object' && parsed !== null ? parsed : {}) as Prisma.InputJsonValue;
-  } catch {
-    return { notes: raw.trim() };
-  }
+  return sanitizeProgramContent(parsed, type) as Prisma.InputJsonValue;
 }
 
 export async function createTrainingProgram(
@@ -80,7 +82,7 @@ export async function createTrainingProgram(
     gymMemberId: formData.get('gymMemberId'),
     title: formData.get('title'),
     type: formData.get('type'),
-    content: formData.get('content') ?? '',
+    contentJson: formData.get('contentJson') ?? '',
     startDate: formData.get('startDate') ?? '',
     endDate: formData.get('endDate') ?? '',
     trainerId: formData.get('trainerId') ?? '',
@@ -124,6 +126,14 @@ export async function createTrainingProgram(
     return { fieldErrors: { trainerId: 'Atanan antrenör bu salonda geçerli değil.' } };
   }
 
+  let content: Prisma.InputJsonValue;
+  try {
+    content = parseContentJson(data.contentJson, data.type);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Program içeriği geçersiz.';
+    return { error: message };
+  }
+
   await prisma.trainingProgram.create({
     data: {
       organizationId: context.organizationId,
@@ -131,7 +141,7 @@ export async function createTrainingProgram(
       trainerId,
       title: data.title,
       type: data.type as ProgramType,
-      content: parseContentJson(data.content),
+      content,
       startDate: parseOptionalDate(data.startDate) ?? new Date(),
       endDate: parseOptionalDate(data.endDate),
       isActive: true,

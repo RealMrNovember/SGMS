@@ -1,3 +1,4 @@
+import { ProgramContentView } from '@/components/program-content-view';
 import { auth } from '@/lib/auth';
 import { intlLocaleFor } from '@/lib/format-locale';
 import { prisma } from '@/lib/prisma';
@@ -63,6 +64,7 @@ export default async function AthleteProgramsPage() {
                 <p className="muted mt-2 text-xs">
                   {t('trainer')}: {program.trainer?.name ?? program.trainer?.email ?? t('noTrainer')}
                 </p>
+                <ProgramContentView content={program.content} type={program.type} />
               </article>
             ))}
           </div>

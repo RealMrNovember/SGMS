@@ -380,6 +380,9 @@ model GymMember {
   firstName      String          @map("first_name")
   lastName       String          @map("last_name")
   nationalId     String?         @map("national_id")
+  isForeignMember Boolean        @default(false) @map("is_foreign_member")
+  nationality    String?
+  passportNumber String?         @map("passport_number")
   phone          String?
   email          String?
   birthDate      DateTime?       @map("birth_date") @db.Date
@@ -405,6 +408,7 @@ model GymMember {
   transactions       Transaction[]
 
   @@unique([organizationId, nationalId])
+  @@unique([organizationId, passportNumber])
   @@index([organizationId, status])
   @@index([organizationId, lastName, firstName])
   @@index([organizationId, trainerId])

@@ -1,9 +1,15 @@
-import { MarkReadButton } from '@/components/mark-read-button';
+import { ConversationSidebar } from '@/components/conversation-sidebar';
 import { MessageLiveRefresh } from '@/components/message-live-refresh';
+import { MessageThreadPanel } from '@/components/message-thread-panel';
 import { SendMessageForm } from '@/components/send-message-form';
 import { auth } from '@/lib/auth';
 import { intlLocaleFor } from '@/lib/format-locale';
-import { prisma } from '@/lib/prisma';
+import {
+  loadConversationSummaries,
+  loadPeerDirectory,
+  loadThreadMessages,
+  markPeerMessagesRead,
+} from '@/lib/messaging/load-messaging';
 import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -11,7 +17,7 @@ import { redirect } from 'next/navigation';
 export default async function MessagesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ box?: string }>;
+  searchParams: Promise<{ with?: string }>;
 }) {
   const session = await auth();
   if (!session?.user?.organizationId) {
@@ -20,128 +26,86 @@ export default async function MessagesPage({
 
   const organizationId = session.user.organizationId;
   const userId = session.user.id;
-  const { box: boxParam } = await searchParams;
-  const box = boxParam === 'sent' ? 'sent' : 'inbox';
+  const { with: withPeerId } = await searchParams;
 
   const t = await getTranslations('messages');
   const locale = await getLocale();
   const dateLocale = intlLocaleFor(locale);
 
-  const [staffMembers, athleteMembers, messages] = await Promise.all([
-    prisma.organizationMember.findMany({
-      where: { organizationId, isActive: true, userId: { not: userId } },
-      include: { user: { select: { id: true, name: true, email: true } } },
-    }),
-    prisma.gymMember.findMany({
-      where: {
-        organizationId,
-        status: 'ACTIVE',
-        AND: [{ userId: { not: null } }, { userId: { not: userId } }],
-      },
-      include: { user: { select: { id: true, name: true, email: true } } },
-    }),
-    box === 'sent'
-      ? prisma.directMessage.findMany({
-          where: { organizationId, senderId: userId },
-          orderBy: { createdAt: 'desc' },
-          take: 50,
-          include: { receiver: { select: { name: true, email: true } } },
-        })
-      : prisma.directMessage.findMany({
-          where: { organizationId, receiverId: userId },
-          orderBy: { createdAt: 'desc' },
-          take: 50,
-          include: { sender: { select: { name: true, email: true } } },
-        }),
-  ]);
+  const { peerMeta, recipients } = await loadPeerDirectory(
+    organizationId,
+    userId,
+    t('recipientAthlete'),
+  );
 
-  const recipientMap = new Map<string, string>();
+  const conversations = await loadConversationSummaries(organizationId, userId, peerMeta);
 
-  for (const m of staffMembers) {
-    recipientMap.set(m.user.id, `${m.user.name ?? m.user.email} (${m.role})`);
+  const activePeerId =
+    withPeerId &&
+    (peerMeta.has(withPeerId) || conversations.some((c) => c.peer.id === withPeerId))
+      ? withPeerId
+      : undefined;
+
+  let threadMessages: Awaited<ReturnType<typeof loadThreadMessages>> = [];
+  let activePeer: { id: string; name: string; subtitle?: string } | null = null;
+
+  if (activePeerId) {
+    await markPeerMessagesRead(organizationId, userId, activePeerId);
+    threadMessages = await loadThreadMessages(organizationId, userId, activePeerId);
+
+    const fromConversation = conversations.find((c) => c.peer.id === activePeerId)?.peer;
+    const fromDirectory = peerMeta.get(activePeerId);
+    activePeer = fromConversation ?? (fromDirectory
+      ? { id: activePeerId, name: fromDirectory.name, subtitle: fromDirectory.subtitle }
+      : null);
   }
 
-  for (const a of athleteMembers) {
-    if (a.user) {
-      recipientMap.set(
-        a.user.id,
-        `${a.user.name ?? a.user.email} (${t('recipientAthlete')})`,
-      );
-    }
-  }
-
-  const recipients = [...recipientMap.entries()].map(([id, label]) => ({ id, label }));
+  const totalUnread = conversations.reduce((sum, c) => sum + c.unreadCount, 0);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <MessageLiveRefresh />
       <div>
         <Link href="/dashboard" className="muted text-sm hover:text-white">
           {t('backToOverview')}
         </Link>
         <h2 className="mt-4 text-2xl font-semibold">{t('title')}</h2>
-        <p className="muted mt-2 text-sm">{t('subtitle')}</p>
+        <p className="muted mt-2 text-sm">
+          {totalUnread > 0 ? t('thread.unreadTotal', { count: totalUnread }) : t('subtitle')}
+        </p>
       </div>
 
-      <div className="flex gap-4">
-        <Link
-          href="/dashboard/messages"
-          className={box === 'inbox' ? 'text-white' : 'muted hover:text-white'}
-        >
-          {t('inbox')}
-        </Link>
-        <Link
-          href="/dashboard/messages?box=sent"
-          className={box === 'sent' ? 'text-white' : 'muted hover:text-white'}
-        >
-          {t('sent')}
-        </Link>
+      <div className="card grid min-h-[560px] overflow-hidden lg:grid-cols-[minmax(260px,320px)_1fr]">
+        <div className={activePeerId ? 'hidden lg:block' : 'block min-h-0'}>
+          <ConversationSidebar
+            conversations={conversations}
+            activePeerId={activePeerId}
+            basePath="/dashboard/messages"
+          />
+        </div>
+
+        {activePeer && activePeerId ? (
+          <div className="flex min-h-0 flex-col">
+            <MessageThreadPanel
+              messages={threadMessages}
+              currentUserId={userId}
+              peer={activePeer}
+              dateLocale={dateLocale}
+              listHref="/dashboard/messages"
+              canCompose
+            />
+          </div>
+        ) : (
+          <div className="hidden flex-col items-center justify-center p-8 text-center lg:flex">
+            <p className="text-lg font-medium">{t('thread.selectConversation')}</p>
+            <p className="muted mt-2 max-w-sm text-sm">{t('thread.selectConversationHint')}</p>
+          </div>
+        )}
       </div>
 
-      <SendMessageForm recipients={recipients} />
-
-      <section className="card overflow-hidden">
-        <div className="border-b border-[var(--border)] px-6 py-4">
-          <h3 className="text-lg font-semibold">
-            {box === 'sent' ? t('sentListTitle') : t('inboxListTitle')}
-          </h3>
-          <p className="muted mt-1 text-sm">{t('messageCount', { count: messages.length })}</p>
-        </div>
-
-        <div className="divide-y divide-[var(--border)]">
-          {messages.length === 0 ? (
-            <p className="muted px-6 py-8 text-center text-sm">{t('empty')}</p>
-          ) : (
-            messages.map((msg) => {
-              const peer =
-                box === 'sent'
-                  ? ('receiver' in msg ? msg.receiver : null)
-                  : ('sender' in msg ? msg.sender : null);
-              const peerLabel = peer?.name ?? peer?.email ?? '—';
-
-              return (
-                <article key={msg.id} className="px-6 py-4">
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <p className="font-medium">
-                        {box === 'sent' ? `→ ${peerLabel}` : `← ${peerLabel}`}
-                      </p>
-                      <p className="muted text-xs">
-                        {msg.createdAt.toLocaleString(dateLocale)}
-                        {!msg.isRead && box === 'inbox' ? ` · ${t('unread')}` : ''}
-                      </p>
-                    </div>
-                    {box === 'inbox' && !msg.isRead ? (
-                      <MarkReadButton messageId={msg.id} />
-                    ) : null}
-                  </div>
-                  <p className="mt-3 whitespace-pre-wrap text-sm leading-6">{msg.content}</p>
-                </article>
-              );
-            })
-          )}
-        </div>
-      </section>
+      {recipients.length > 0 ? (
+        <SendMessageForm recipients={recipients} />
+      ) : null}
     </div>
   );
 }

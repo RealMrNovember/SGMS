@@ -2,6 +2,7 @@ import { AddMemberForm } from '@/components/add-member-form';
 import { UserAvatar } from '@/components/user-avatar';
 import { auth } from '@/lib/auth';
 import { intlLocaleFor } from '@/lib/format-locale';
+import { memberCountryLabel } from '@/lib/member-countries';
 import { prisma } from '@/lib/prisma';
 import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
@@ -115,8 +116,21 @@ export default async function MembersPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <p>{member.nationalId ?? '—'}</p>
-                        <p className="muted text-xs">{member.phone ?? '—'}</p>
+                        <p>
+                          {member.isForeignMember
+                            ? (member.passportNumber ?? '—')
+                            : (member.nationalId ?? '—')}
+                        </p>
+                        <p className="muted text-xs">
+                          {[
+                            member.isForeignMember
+                              ? memberCountryLabel(member.nationality)
+                              : null,
+                            member.phone,
+                          ]
+                            .filter(Boolean)
+                            .join(' · ') || '—'}
+                        </p>
                       </td>
                       <td className="px-6 py-4">{member.plan?.name ?? '—'}</td>
                       <td className="px-6 py-4">

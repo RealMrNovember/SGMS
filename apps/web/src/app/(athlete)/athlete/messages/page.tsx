@@ -1,37 +1,91 @@
-import { MarkReadButton } from '@/components/mark-read-button';
+import { ConversationSidebar } from '@/components/conversation-sidebar';
 import { MessageLiveRefresh } from '@/components/message-live-refresh';
+import { MessageThreadPanel } from '@/components/message-thread-panel';
 import { auth } from '@/lib/auth';
 import { intlLocaleFor } from '@/lib/format-locale';
+import { displayName } from '@/lib/messaging/conversations';
+import {
+  loadConversationSummaries,
+  loadThreadMessages,
+  markPeerMessagesRead,
+} from '@/lib/messaging/load-messaging';
 import { prisma } from '@/lib/prisma';
 import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
-export default async function AthleteMessagesPage() {
+export default async function AthleteMessagesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ with?: string }>;
+}) {
   const session = await auth();
   if (!session?.user?.gymMemberId || !session.user.organizationId) {
     redirect('/login');
   }
+
+  const organizationId = session.user.organizationId;
+  const userId = session.user.id;
+  const { with: withPeerId } = await searchParams;
 
   const t = await getTranslations('athlete');
   const tMessages = await getTranslations('messages');
   const locale = await getLocale();
   const dateLocale = intlLocaleFor(locale);
 
-  const messages = await prisma.directMessage.findMany({
-    where: {
-      organizationId: session.user.organizationId,
-      receiverId: session.user.id,
+  const gymMember = await prisma.gymMember.findFirst({
+    where: { id: session.user.gymMemberId, organizationId },
+    include: {
+      trainer: { select: { id: true, name: true, email: true } },
     },
-    orderBy: { createdAt: 'desc' },
-    take: 50,
-    include: { sender: { select: { name: true, email: true } } },
   });
 
-  const unreadCount = messages.filter((message) => !message.isRead).length;
+  const peerMeta = new Map<string, { name: string; subtitle?: string }>();
+
+  if (gymMember?.trainer) {
+    peerMeta.set(gymMember.trainer.id, {
+      name: displayName(gymMember.trainer),
+      subtitle: tMessages('thread.roleTrainer'),
+    });
+  }
+
+  const conversations = await loadConversationSummaries(organizationId, userId, peerMeta);
+
+  const conversationList = [...conversations];
+  if (gymMember?.trainer && !conversationList.some((c) => c.peer.id === gymMember.trainer!.id)) {
+    conversationList.unshift({
+      peer: {
+        id: gymMember.trainer.id,
+        name: displayName(gymMember.trainer),
+        subtitle: tMessages('thread.roleTrainer'),
+      },
+      lastMessage: tMessages('thread.noMessagesYet'),
+      lastMessageAt: new Date(0),
+      unreadCount: 0,
+    });
+  }
+
+  const activePeerId =
+    withPeerId && peerMeta.has(withPeerId) ? withPeerId : undefined;
+
+  let threadMessages: Awaited<ReturnType<typeof loadThreadMessages>> = [];
+  let activePeer: { id: string; name: string; subtitle?: string } | null = null;
+
+  if (activePeerId) {
+    await markPeerMessagesRead(organizationId, userId, activePeerId);
+    threadMessages = await loadThreadMessages(organizationId, userId, activePeerId);
+
+    const fromConversation = conversations.find((c) => c.peer.id === activePeerId)?.peer;
+    const fromDirectory = peerMeta.get(activePeerId);
+    activePeer = fromConversation ?? (fromDirectory
+      ? { id: activePeerId, name: fromDirectory.name, subtitle: fromDirectory.subtitle }
+      : null);
+  }
+
+  const totalUnread = conversationList.reduce((sum, c) => sum + c.unreadCount, 0);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <MessageLiveRefresh />
       <div>
         <Link href="/athlete" className="muted text-sm hover:text-white">
@@ -39,41 +93,45 @@ export default async function AthleteMessagesPage() {
         </Link>
         <h2 className="mt-3 text-xl font-semibold">{t('pages.messages')}</h2>
         <p className="muted mt-1 text-sm">
-          {unreadCount > 0
-            ? t('unreadCount', { count: unreadCount })
+          {totalUnread > 0
+            ? t('unreadCount', { count: totalUnread })
             : t('allRead')}
         </p>
       </div>
 
-      {messages.length === 0 ? (
-        <section className="card p-5">
-          <p className="muted text-sm">{t('noMessages')}</p>
-        </section>
-      ) : (
-        <section className="card overflow-hidden">
-          <div className="divide-y divide-[var(--border)]">
-            {messages.map((message) => (
-              <article key={message.id} className="px-5 py-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="font-medium">
-                      {message.sender.name ?? message.sender.email ?? '—'}
-                    </p>
-                    <p className="muted mt-1 text-xs">
-                      {message.createdAt.toLocaleString(dateLocale)}
-                      {!message.isRead ? (
-                        <span className="ml-2 badge text-[10px]">{tMessages('unread')}</span>
-                      ) : null}
-                    </p>
-                  </div>
-                  {!message.isRead ? <MarkReadButton messageId={message.id} /> : null}
-                </div>
-                <p className="muted mt-3 whitespace-pre-wrap text-sm">{message.content}</p>
-              </article>
-            ))}
+      <div className="card grid min-h-[calc(100dvh-12rem)] overflow-hidden md:min-h-[520px] lg:grid-cols-[minmax(240px,280px)_1fr]">
+        <div className={activePeerId ? 'hidden lg:block' : 'block'}>
+          <ConversationSidebar
+            conversations={conversationList}
+            activePeerId={activePeerId}
+            basePath="/athlete/messages"
+            backHref="/athlete/messages"
+          />
+        </div>
+
+        {activePeer && activePeerId ? (
+          <div className="flex min-h-0 flex-col">
+            <MessageThreadPanel
+              messages={threadMessages}
+              currentUserId={userId}
+              peer={activePeer}
+              dateLocale={dateLocale}
+              listHref="/athlete/messages"
+              canCompose
+            />
           </div>
-        </section>
-      )}
+        ) : conversationList.length === 0 ? (
+          <div className="flex flex-col items-center justify-center p-8 text-center">
+            <p className="font-medium">{tMessages('thread.noConversations')}</p>
+            <p className="muted mt-2 text-sm">{t('noMessages')}</p>
+          </div>
+        ) : (
+          <div className="hidden flex-col items-center justify-center p-8 text-center lg:flex">
+            <p className="font-medium">{tMessages('thread.selectConversation')}</p>
+            <p className="muted mt-2 text-sm">{tMessages('thread.selectConversationHint')}</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

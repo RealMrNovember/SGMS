@@ -9,14 +9,9 @@ import { z } from 'zod';
 
 const MEMBER_MANAGER_ROLES = new Set<OrganizationRole>(['OWNER', 'ADMIN', 'STAFF']);
 
-const addGymMemberSchema = z.object({
+const addGymMemberBaseSchema = z.object({
   firstName: z.string().min(2).max(80),
   lastName: z.string().min(2).max(80),
-  nationalId: z
-    .string()
-    .regex(/^\d{11}$/, 'TC Kimlik No 11 haneli olmalıdır.')
-    .optional()
-    .or(z.literal('')),
   phone: z.string().min(10).max(20).optional().or(z.literal('')),
   email: z.string().email().optional().or(z.literal('')),
   birthDate: z.string().optional().or(z.literal('')),
@@ -25,6 +20,10 @@ const addGymMemberSchema = z.object({
   planId: z.string().cuid().optional().or(z.literal('')),
   membershipStartsAt: z.string().optional().or(z.literal('')),
   notes: z.string().max(500).optional().or(z.literal('')),
+  isForeignMember: z.boolean(),
+  nationalId: z.string().optional().or(z.literal('')),
+  nationality: z.string().optional().or(z.literal('')),
+  passportNumber: z.string().optional().or(z.literal('')),
 });
 
 export type AddGymMemberState = {
@@ -61,6 +60,26 @@ function parseOptionalDate(value: string | undefined): Date | null {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
+function validateMemberIdentity(data: z.infer<typeof addGymMemberBaseSchema>) {
+  const fieldErrors: AddGymMemberState['fieldErrors'] = {};
+
+  if (data.isForeignMember) {
+    if (!data.nationality || data.nationality.length < 2) {
+      fieldErrors.nationality = 'Ülke seçimi zorunludur.';
+    }
+    const passport = data.passportNumber?.trim();
+    if (!passport || passport.length < 3) {
+      fieldErrors.passportNumber = 'Pasaport numarası en az 3 karakter olmalıdır.';
+    } else if (passport.length > 32) {
+      fieldErrors.passportNumber = 'Pasaport numarası en fazla 32 karakter olabilir.';
+    }
+  } else if (data.nationalId && !/^\d{11}$/.test(data.nationalId)) {
+    fieldErrors.nationalId = 'TC Kimlik No 11 haneli olmalıdır.';
+  }
+
+  return fieldErrors;
+}
+
 export async function addGymMember(
   _prevState: AddGymMemberState,
   formData: FormData,
@@ -75,10 +94,14 @@ export async function addGymMember(
     return { error: writeBlock };
   }
 
-  const parsed = addGymMemberSchema.safeParse({
+  const isForeignMember = formData.get('isForeignMember') === 'on';
+
+  const parsed = addGymMemberBaseSchema.safeParse({
     firstName: formData.get('firstName'),
     lastName: formData.get('lastName'),
-    nationalId: formData.get('nationalId') ?? '',
+    nationalId: isForeignMember ? '' : (formData.get('nationalId') ?? ''),
+    nationality: isForeignMember ? (formData.get('nationality') ?? '') : '',
+    passportNumber: isForeignMember ? (formData.get('passportNumber') ?? '') : '',
     phone: formData.get('phone') ?? '',
     email: formData.get('email') ?? '',
     birthDate: formData.get('birthDate') ?? '',
@@ -87,6 +110,7 @@ export async function addGymMember(
     planId: formData.get('planId') ?? '',
     membershipStartsAt: formData.get('membershipStartsAt') ?? '',
     notes: formData.get('notes') ?? '',
+    isForeignMember,
   });
 
   if (!parsed.success) {
@@ -100,14 +124,21 @@ export async function addGymMember(
     return { error: 'Lütfen form alanlarını kontrol edin.', fieldErrors };
   }
 
+  const identityErrors = validateMemberIdentity(parsed.data);
+  if (Object.keys(identityErrors).length > 0) {
+    return { error: 'Lütfen kimlik alanlarını kontrol edin.', fieldErrors: identityErrors };
+  }
+
   const data = parsed.data;
-  const nationalId = data.nationalId || null;
+  const nationalId = !data.isForeignMember && data.nationalId ? data.nationalId : null;
+  const nationality = data.isForeignMember ? data.nationality?.trim().toUpperCase() ?? null : null;
+  const passportNumber = data.isForeignMember ? data.passportNumber?.trim().toUpperCase() ?? null : null;
   const email = data.email?.toLowerCase() || null;
   const phone = data.phone || null;
   const birthDate = parseOptionalDate(data.birthDate || undefined);
   const membershipStartsAt = parseOptionalDate(data.membershipStartsAt || undefined) ?? new Date();
 
-  const [plan, nationalIdTaken] = await Promise.all([
+  const [plan, nationalIdTaken, passportTaken] = await Promise.all([
     data.planId
       ? prisma.gymMembershipPlan.findFirst({
           where: {
@@ -127,10 +158,24 @@ export async function addGymMember(
           },
         })
       : Promise.resolve(null),
+    passportNumber
+      ? prisma.gymMember.findUnique({
+          where: {
+            organizationId_passportNumber: {
+              organizationId: context.organizationId,
+              passportNumber,
+            },
+          },
+        })
+      : Promise.resolve(null),
   ]);
 
   if (nationalIdTaken) {
     return { fieldErrors: { nationalId: 'Bu TC Kimlik No bu salonda zaten kayıtlı.' } };
+  }
+
+  if (passportTaken) {
+    return { fieldErrors: { passportNumber: 'Bu pasaport numarası bu salonda zaten kayıtlı.' } };
   }
 
   if (data.planId && !plan) {
@@ -156,6 +201,9 @@ export async function addGymMember(
         firstName: data.firstName,
         lastName: data.lastName,
         nationalId,
+        isForeignMember: data.isForeignMember,
+        nationality,
+        passportNumber,
         phone,
         email,
         birthDate,
@@ -179,6 +227,7 @@ export async function addGymMember(
           lastName: created.lastName,
           planName: plan?.name ?? null,
           status: created.status,
+          isForeignMember: created.isForeignMember,
         },
       },
     });

@@ -1,8 +1,9 @@
 'use client';
 
 import { addGymMember, type AddGymMemberState } from '@/actions/members';
+import { memberCountryOptions } from '@/lib/member-countries';
 import { useTranslations } from 'next-intl';
-import { useActionState } from 'react';
+import { useActionState, useState } from 'react';
 
 const initialState: AddGymMemberState = {};
 
@@ -22,6 +23,7 @@ export function AddMemberForm({
 }) {
   const t = useTranslations('members.add');
   const [state, formAction, pending] = useActionState(addGymMember, initialState);
+  const [isForeignMember, setIsForeignMember] = useState(false);
 
   if (!canManage) {
     return (
@@ -71,22 +73,76 @@ export function AddMemberForm({
           ) : null}
         </div>
 
-        <div className="space-y-2">
-          <label htmlFor="nationalId" className="muted text-sm">
-            {t('nationalId')}
+        <div className="md:col-span-2">
+          <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-[var(--border)] px-4 py-3">
+            <input
+              type="checkbox"
+              name="isForeignMember"
+              checked={isForeignMember}
+              onChange={(event) => setIsForeignMember(event.target.checked)}
+              className="h-4 w-4 rounded border-[var(--border)]"
+            />
+            <span className="text-sm">{t('foreignMember')}</span>
           </label>
-          <input
-            id="nationalId"
-            name="nationalId"
-            className="input"
-            inputMode="numeric"
-            pattern="\d{11}"
-            placeholder={t('nationalIdPlaceholder')}
-          />
-          {state.fieldErrors?.nationalId ? (
-            <p className="text-xs text-rose-400">{state.fieldErrors.nationalId}</p>
-          ) : null}
         </div>
+
+        {!isForeignMember ? (
+          <div className="space-y-2">
+            <label htmlFor="nationalId" className="muted text-sm">
+              {t('nationalId')}
+            </label>
+            <input
+              id="nationalId"
+              name="nationalId"
+              className="input"
+              inputMode="numeric"
+              pattern="\d{11}"
+              placeholder={t('nationalIdPlaceholder')}
+            />
+            {state.fieldErrors?.nationalId ? (
+              <p className="text-xs text-rose-400">{state.fieldErrors.nationalId}</p>
+            ) : null}
+          </div>
+        ) : (
+          <>
+            <div className="space-y-2">
+              <label htmlFor="nationality" className="muted text-sm">
+                {t('nationality')}
+              </label>
+              <select id="nationality" name="nationality" className="input" required defaultValue="">
+                <option value="" disabled>
+                  {t('nationalityPlaceholder')}
+                </option>
+                {memberCountryOptions.map((country) => (
+                  <option key={country.code} value={country.code}>
+                    {country.label}
+                  </option>
+                ))}
+              </select>
+              {state.fieldErrors?.nationality ? (
+                <p className="text-xs text-rose-400">{state.fieldErrors.nationality}</p>
+              ) : null}
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="passportNumber" className="muted text-sm">
+                {t('passportNumber')}
+              </label>
+              <input
+                id="passportNumber"
+                name="passportNumber"
+                className="input"
+                required
+                maxLength={32}
+                placeholder={t('passportPlaceholder')}
+                autoComplete="off"
+              />
+              {state.fieldErrors?.passportNumber ? (
+                <p className="text-xs text-rose-400">{state.fieldErrors.passportNumber}</p>
+              ) : null}
+            </div>
+          </>
+        )}
 
         <div className="space-y-2">
           <label htmlFor="phone" className="muted text-sm">

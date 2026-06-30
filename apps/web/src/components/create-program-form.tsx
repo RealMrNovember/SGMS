@@ -1,8 +1,10 @@
 'use client';
 
 import { createTrainingProgram, type CreateProgramState } from '@/actions/programs';
+import { ProgramContentBuilder } from '@/components/program-content-builder';
+import type { ProgramType } from '@sgms/database';
 import { useTranslations } from 'next-intl';
-import { useActionState } from 'react';
+import { useActionState, useState } from 'react';
 
 const initialState: CreateProgramState = {};
 
@@ -24,6 +26,7 @@ export function CreateProgramForm({
   const tTypes = useTranslations('programs.types');
   const tCommon = useTranslations('common');
   const [state, formAction, pending] = useActionState(createTrainingProgram, initialState);
+  const [programType, setProgramType] = useState<ProgramType>('WORKOUT');
 
   if (!canManage) {
     return (
@@ -71,7 +74,14 @@ export function CreateProgramForm({
           <label htmlFor="type" className="muted text-sm">
             {t('type')}
           </label>
-          <select id="type" name="type" className="input" required>
+          <select
+            id="type"
+            name="type"
+            className="input"
+            required
+            value={programType}
+            onChange={(e) => setProgramType(e.target.value as ProgramType)}
+          >
             <option value="WORKOUT">{tTypes('workout')}</option>
             <option value="NUTRITION">{tTypes('nutrition')}</option>
           </select>
@@ -114,18 +124,7 @@ export function CreateProgramForm({
           <input id="endDate" name="endDate" type="date" className="input" />
         </div>
 
-        <div className="space-y-2 md:col-span-2">
-          <label htmlFor="content" className="muted text-sm">
-            {t('content')}
-          </label>
-          <textarea
-            id="content"
-            name="content"
-            rows={4}
-            className="input font-mono text-xs"
-            placeholder={t('contentPlaceholder')}
-          />
-        </div>
+        <ProgramContentBuilder programType={programType} />
 
         <div className="md:col-span-2">
           <button type="submit" className="button px-5 py-2.5" disabled={pending}>
