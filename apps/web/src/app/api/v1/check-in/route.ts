@@ -1,5 +1,5 @@
 import { extractDeviceKey } from '@/lib/check-in/device-key';
-import { processCheckIn } from '@/lib/check-in/process';
+import { parseDirection, processCheckIn } from '@/lib/check-in/process';
 import { validateDeviceKey } from '@/lib/api/device-auth';
 import { isStaffContext } from '@/lib/api/auth-context';
 import { requireMemberScopedApiContext, requireTenantWriteAccess } from '@/lib/api/guard';
@@ -47,6 +47,7 @@ export async function POST(request: Request) {
     const rfidTag = typeof body.rfidTag === 'string' ? body.rfidTag : undefined;
     const gymMemberId = typeof body.gymMemberId === 'string' ? body.gymMemberId : undefined;
     const clientEventId = typeof body.clientEventId === 'string' ? body.clientEventId : undefined;
+    const direction = parseDirection(body.direction);
 
     if (!qrToken && !rfidTag && !gymMemberId) {
       return apiErrorI18n('checkInPayloadRequired', 400, request);
@@ -63,6 +64,7 @@ export async function POST(request: Request) {
       qrToken,
       rfidTag,
       clientEventId,
+      direction,
       ...meta,
     });
 
@@ -100,6 +102,7 @@ export async function POST(request: Request) {
   }
 
   const gymMemberId = typeof body.gymMemberId === 'string' ? body.gymMemberId : '';
+  const direction = parseDirection(body.direction);
   if (!gymMemberId) {
     return apiErrorI18n('checkInPayloadRequired', 400, request);
   }
@@ -110,6 +113,7 @@ export async function POST(request: Request) {
     method: 'MANUAL',
     actorId: context.userId,
     gymMemberId,
+    direction,
     ...meta,
   });
 

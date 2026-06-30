@@ -1,4 +1,5 @@
 import { InviteTeamForm } from '@/components/invite-team-form';
+import { StaffRfidField } from '@/components/staff-rfid-field';
 import { UserAvatar } from '@/components/user-avatar';
 import { auth } from '@/lib/auth';
 import { intlLocaleFor } from '@/lib/format-locale';
@@ -66,6 +67,7 @@ export default async function TeamPage() {
                 <th className="px-6 py-3 font-medium">{t('columns.name')}</th>
                 <th className="px-6 py-3 font-medium">{t('columns.email')}</th>
                 <th className="px-6 py-3 font-medium">{t('columns.role')}</th>
+                <th className="px-6 py-3 font-medium">{t('columns.rfid')}</th>
                 <th className="px-6 py-3 font-medium">{t('columns.joined')}</th>
               </tr>
             </thead>
@@ -85,6 +87,13 @@ export default async function TeamPage() {
                   <td className="px-6 py-4">{member.user.email}</td>
                   <td className="px-6 py-4">
                     <span className="badge">{member.role}</span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <StaffRfidField
+                      membershipId={member.id}
+                      currentRfid={member.rfidTag}
+                      canManage={canInvite}
+                    />
                   </td>
                   <td className="muted px-6 py-4">
                     {(member.joinedAt ?? member.invitedAt ?? member.createdAt).toLocaleDateString(

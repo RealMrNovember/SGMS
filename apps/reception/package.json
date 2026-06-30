@@ -1,0 +1,86 @@
+{
+  "name": "@sgms/reception",
+  "version": "0.3.0",
+  "private": true,
+  "description": "SGMS Resepsiyon — premium Windows masaüstü giriş/çıkış bildirimleri",
+  "author": "CiCiByte",
+  "homepage": "https://sgms.cicibyte.com",
+  "main": "./out/main/index.js",
+  "scripts": {
+    "icons": "node scripts/generate-icons.mjs",
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "start": "electron-vite preview",
+    "pack": "pnpm icons && pnpm build && electron-builder --dir --win",
+    "dist": "pnpm icons && pnpm build && electron-builder --win"
+  },
+  "dependencies": {
+    "electron-store": "^8.2.0",
+    "pusher-js": "^8.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.21",
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "@vitejs/plugin-react": "^4.4.1",
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8",
+    "electron-vite": "^3.1.0",
+    "png-to-ico": "^2.1.8",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "sharp": "^0.34.2",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5"
+  },
+  "build": {
+    "appId": "com.cicibyte.sgms.reception",
+    "productName": "SGMS Resepsiyon",
+    "copyright": "Copyright © 2026 CiCiByte",
+    "artifactName": "SGMS-Resepsiyon-${version}-Setup.${ext}",
+    "directories": {
+      "output": "release",
+      "buildResources": "installer-branding"
+    },
+    "files": [
+      "out/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "resources",
+        "to": "resources",
+        "filter": ["**/*"]
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "installer-branding/icon.ico",
+      "publisherName": "CiCiByte",
+      "legalTrademarks": "CiCiByte SGMS",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "allowElevation": true,
+      "installerIcon": "installer-branding/icon.ico",
+      "uninstallerIcon": "installer-branding/icon.ico",
+      "installerHeaderIcon": "installer-branding/icon.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "SGMS Resepsiyon",
+      "menuCategory": "CiCiByte SGMS",
+      "license": "installer-branding/LICENSE.txt",
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": false
+    }
+  }
+}

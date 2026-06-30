@@ -184,6 +184,7 @@
       "name": "Name",
       "email": "Email",
       "role": "Role",
+      "rfid": "Turnstile card",
       "joined": "Joined"
     },
     "invite": {
@@ -711,6 +712,10 @@
       "rfid": "RFID card",
       "manual": "Manual (desk)",
       "device": "Device"
+    },
+    "direction": {
+      "entry": "Entry",
+      "exit": "Exit"
     },
     "manual": {
       "title": "Manual check-in",

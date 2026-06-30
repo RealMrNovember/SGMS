@@ -1,4 +1,5 @@
-# Dependencies
+# SGMS desktop installer output
+apps/reception/release/
 node_modules/
 .pnpm-store/
 

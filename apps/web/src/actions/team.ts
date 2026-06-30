@@ -153,3 +153,56 @@ export async function inviteTeamMember(
     temporaryPassword: existingUser ? undefined : DEFAULT_STAFF_PASSWORD,
   };
 }
+
+export type UpdateStaffRfidState = { error?: string; success?: string };
+
+export async function updateStaffRfid(
+  _prev: UpdateStaffRfidState,
+  formData: FormData,
+): Promise<UpdateStaffRfidState> {
+  const context = await getTenantContext();
+  if ('error' in context) {
+    return { error: context.error };
+  }
+
+  const writeBlock = await getTenantWriteBlockReason(context.organizationId);
+  if (writeBlock) {
+    return { error: writeBlock };
+  }
+
+  const membershipId = String(formData.get('membershipId') ?? '');
+  const rfidTag = String(formData.get('rfidTag') ?? '').trim();
+
+  const membership = await prisma.organizationMember.findFirst({
+    where: { id: membershipId, organizationId: context.organizationId },
+  });
+  if (!membership) {
+    return { error: 'Personel kaydı bulunamadı.' };
+  }
+
+  if (rfidTag) {
+    const takenMember = await prisma.gymMember.findFirst({
+      where: { organizationId: context.organizationId, rfidTag },
+    });
+    const takenStaff = await prisma.organizationMember.findFirst({
+      where: {
+        organizationId: context.organizationId,
+        rfidTag,
+        NOT: { id: membershipId },
+      },
+    });
+    if (takenMember || takenStaff) {
+      return { error: 'Bu RFID kartı başka bir kayda atanmış.' };
+    }
+  }
+
+  await prisma.organizationMember.update({
+    where: { id: membershipId },
+    data: { rfidTag: rfidTag || null },
+  });
+
+  revalidatePath('/dashboard/team');
+  revalidatePath('/dashboard/check-in');
+
+  return { success: rfidTag ? 'Personel kartı kaydedildi.' : 'Personel kartı kaldırıldı.' };
+}

@@ -402,6 +402,8 @@ Organization ─┬─ ExpenseCategory
 - [x] RFID: `GymMember.rfidTag` + üye detay formu
 - [x] Dashboard `/dashboard/check-in` — canlı giriş listesi + manuel giriş + **Soketi canlı yenileme**
 - [x] Sporcu paneli — giriş QR kartı
+- [x] Giriş / çıkış (`direction`: ENTRY | EXIT) + personel RFID
+- [x] **SGMS Resepsiyon** masaüstü (`apps/reception`) — Electron + Vite + React, logo, frameless UI, Windows toast
 - [ ] Webhook: `POST /api/v1/webhooks/turnstile` — üçüncü parti turnike yazılımı
 
 ### 10.3 Offline sync
@@ -413,6 +415,9 @@ Organization ─┬─ ExpenseCategory
 ### 10.4 Dokümantasyon & istemci
 - [x] `docs/api/turnstile-protocol.md`
 - [x] Emülatör script (`scripts/turnstile-emulator.sh`)
+- [x] Resepsiyon senaryosu: `docs/desktop/RECEPTION-SCENARIO.md`
+- [x] Windows installer: `docs/desktop/INSTALL.md` · `pnpm reception:dist`
+- [ ] Kod imzalama (Authenticode — SmartScreen)
 
 **Kabul kriteri:** Offline check-in kuyruğu → online sync → `AuditLog` + üye giriş kaydı
 

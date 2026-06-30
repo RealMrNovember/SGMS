@@ -1,0 +1,9 @@
+CiCiByte SGMS Resepsiyon — Lisans Sözleşmesi
+
+Copyright (c) 2026 CiCiByte. Tüm hakları saklıdır.
+
+Bu yazılım, CiCiByte SGMS aboneliği olan spor salonları için lisanslanmıştır.
+Yetkisiz kopyalama, dağıtım veya tersine mühendislik yasaktır.
+
+Destek: support@cicibyte.com
+Web: https://sgms.cicibyte.com

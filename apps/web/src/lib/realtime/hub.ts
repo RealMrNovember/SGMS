@@ -17,11 +17,19 @@ export type MessageCreatedEvent = {
 
 export type CheckInCreatedPayload = {
   id: string;
-  gymMemberId: string;
+  subjectType: string;
+  direction: string;
+  gymMemberId: string | null;
+  staffUserId: string | null;
+  personName: string;
+  subtitle: string;
+  avatarUrl: string | null;
+  role: string | null;
   memberName: string;
   method: string;
   checkedInAt: string;
   deviceId: string | null;
+  deviceName: string | null;
 };
 
 export type CheckInCreatedEvent = {

@@ -133,6 +133,16 @@ enum CheckInMethod {
   DEVICE
 }
 
+enum AccessDirection {
+  ENTRY
+  EXIT
+}
+
+enum AccessSubjectType {
+  GYM_MEMBER
+  STAFF
+}
+
 enum SyncBatchStatus {
   PENDING
   COMPLETED
@@ -188,6 +198,7 @@ model User {
   apiTokens          ApiToken[]
   expensesCreated    Expense[]            @relation("ExpenseCreatedBy")
   transactionsCreated Transaction[]       @relation("TransactionCreatedBy")
+  staffCheckIns       CheckIn[]            @relation("StaffCheckIn")
 
   @@index([status])
   @@index([isSuperAdmin])
@@ -254,6 +265,7 @@ model OrganizationMember {
   userId         String           @map("user_id")
   role           OrganizationRole @default(STAFF)
   isActive       Boolean          @default(true) @map("is_active")
+  rfidTag        String?          @map("rfid_tag")
   invitedAt      DateTime?        @map("invited_at")
   joinedAt       DateTime?        @map("joined_at")
 
@@ -264,6 +276,7 @@ model OrganizationMember {
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([organizationId, userId])
+  @@unique([organizationId, rfidTag])
   @@index([userId, isActive])
   @@index([organizationId, role])
   @@map("organization_members")
@@ -667,21 +680,27 @@ model ApiToken {
 // ---------------------------------------------------------------------------
 
 model CheckIn {
-  id             String        @id @default(cuid())
-  organizationId String        @map("organization_id")
-  gymMemberId    String        @map("gym_member_id")
-  deviceId       String?       @map("device_id")
-  clientEventId  String?       @map("client_event_id")
+  id             String             @id @default(cuid())
+  organizationId String             @map("organization_id")
+  subjectType    AccessSubjectType  @default(GYM_MEMBER) @map("subject_type")
+  direction      AccessDirection    @default(ENTRY)
+  gymMemberId    String?            @map("gym_member_id")
+  staffUserId    String?            @map("staff_user_id")
+  deviceId       String?            @map("device_id")
+  clientEventId  String?            @map("client_event_id")
   method         CheckInMethod
-  checkedInAt    DateTime      @default(now()) @map("checked_in_at")
-  metadata       Json          @default("{}")
+  checkedInAt    DateTime           @default(now()) @map("checked_in_at")
+  metadata       Json               @default("{}")
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  gymMember    GymMember    @relation(fields: [gymMemberId], references: [id], onDelete: Cascade)
+  gymMember    GymMember?   @relation(fields: [gymMemberId], references: [id], onDelete: Cascade)
+  staffUser    User?        @relation("StaffCheckIn", fields: [staffUserId], references: [id], onDelete: SetNull)
   device       Device?      @relation(fields: [deviceId], references: [id], onDelete: SetNull)
 
   @@index([organizationId, checkedInAt])
+  @@index([organizationId, direction, checkedInAt])
   @@index([gymMemberId, checkedInAt])
+  @@index([staffUserId, checkedInAt])
   @@index([deviceId, checkedInAt])
   @@unique([deviceId, clientEventId])
   @@map("check_ins")

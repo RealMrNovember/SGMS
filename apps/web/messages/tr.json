@@ -184,6 +184,7 @@
       "name": "Ad",
       "email": "E-posta",
       "role": "Rol",
+      "rfid": "Turnike kartı",
       "joined": "Katılım"
     },
     "invite": {
@@ -711,6 +712,10 @@
       "rfid": "RFID kart",
       "manual": "Manuel (resepsiyon)",
       "device": "Cihaz"
+    },
+    "direction": {
+      "entry": "Giriş",
+      "exit": "Çıkış"
     },
     "manual": {
       "title": "Manuel giriş",

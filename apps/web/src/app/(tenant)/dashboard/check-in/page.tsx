@@ -43,6 +43,9 @@ export default async function CheckInDashboardPage() {
         gymMember: {
           select: { id: true, firstName: true, lastName: true, avatarUrl: true },
         },
+        staffUser: {
+          select: { id: true, name: true, avatarUrl: true },
+        },
         device: { select: { name: true } },
       },
     }),
@@ -102,13 +105,27 @@ export default async function CheckInDashboardPage() {
         ) : (
           <ul className="mt-4 divide-y divide-white/5">
             {recentCheckIns.map((row) => {
-              const name = `${row.gymMember.firstName} ${row.gymMember.lastName}`;
+              const name = row.gymMember
+                ? `${row.gymMember.firstName} ${row.gymMember.lastName}`
+                : (row.staffUser?.name ?? '—');
+              const avatarUrl = row.gymMember?.avatarUrl ?? row.staffUser?.avatarUrl ?? null;
+              const directionKey = row.direction === 'EXIT' ? 'exit' : 'entry';
               return (
                 <li key={row.id} className="flex items-center gap-3 py-3">
-                  <UserAvatar name={name} avatarUrl={row.gymMember.avatarUrl} size="sm" />
+                  <UserAvatar name={name} avatarUrl={avatarUrl} size="sm" />
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium">{name}</p>
                     <p className="muted text-xs">
+                      <span
+                        className={
+                          row.direction === 'EXIT'
+                            ? 'text-amber-300'
+                            : 'text-emerald-300'
+                        }
+                      >
+                        {t(`direction.${directionKey}`)}
+                      </span>
+                      {' · '}
                       {t(`methods.${row.method.toLowerCase()}`)}
                       {row.device?.name ? ` · ${row.device.name}` : ''}
                     </p>

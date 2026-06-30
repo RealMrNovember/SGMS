@@ -1,11 +1,13 @@
-import { processCheckIn, type ProcessCheckInResult } from '@/lib/check-in/process';
+import { processCheckIn, parseDirection, type ProcessCheckInResult } from '@/lib/check-in/process';
 import { prisma } from '@/lib/prisma';
 import type { CheckInMethod, SyncBatchStatus } from '@sgms/database';
 
 export type SyncPushEvent = {
   clientEventId: string;
   method?: CheckInMethod;
+  direction?: 'ENTRY' | 'EXIT';
   gymMemberId?: string;
+  staffUserId?: string;
   rfidTag?: string;
   qrToken?: string;
   checkedInAt?: string;
@@ -64,8 +66,10 @@ export async function processSyncPushBatch(input: {
       organizationId: input.organizationId,
       deviceId: input.deviceId,
       method: resolveMethod(event),
+      direction: parseDirection(event.direction),
       clientEventId: event.clientEventId,
       gymMemberId: event.gymMemberId,
+      staffUserId: event.staffUserId,
       rfidTag: event.rfidTag,
       qrToken: event.qrToken,
       checkedInAt: parseCheckedInAt(event.checkedInAt),
@@ -130,28 +134,46 @@ export async function processSyncPushBatch(input: {
 }
 
 export async function pullMemberCache(organizationId: string) {
-  const members = await prisma.gymMember.findMany({
-    where: { organizationId, status: 'ACTIVE' },
-    select: {
-      id: true,
-      firstName: true,
-      lastName: true,
-      rfidTag: true,
-      membershipEndsAt: true,
-      status: true,
-    },
-    orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
-  });
+  const [members, staff] = await Promise.all([
+    prisma.gymMember.findMany({
+      where: { organizationId, status: 'ACTIVE' },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        rfidTag: true,
+        membershipEndsAt: true,
+        status: true,
+      },
+      orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
+    }),
+    prisma.organizationMember.findMany({
+      where: { organizationId, isActive: true, rfidTag: { not: null } },
+      select: {
+        userId: true,
+        role: true,
+        rfidTag: true,
+        user: { select: { name: true } },
+      },
+    }),
+  ]);
 
   return {
     syncedAt: new Date().toISOString(),
     memberCount: members.length,
+    staffCount: staff.length,
     members: members.map((m) => ({
       id: m.id,
       name: `${m.firstName} ${m.lastName}`,
       rfidTag: m.rfidTag,
       membershipEndsAt: m.membershipEndsAt?.toISOString() ?? null,
       status: m.status,
+    })),
+    staff: staff.map((s) => ({
+      userId: s.userId,
+      name: s.user.name,
+      role: s.role,
+      rfidTag: s.rfidTag,
     })),
   };
 }

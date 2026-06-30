@@ -42,9 +42,14 @@ Sporcu uygulamasındaki QR değeri (`GET /api/v1/check-in/qr` yanıtındaki `tok
 
 ```json
 {
-  "rfidTag": "04A1B2C3D4"
+  "rfidTag": "04A1B2C3D4",
+  "direction": "ENTRY"
 }
 ```
+
+`direction`: `ENTRY` (giriş) veya `EXIT` (çıkış). Gönderilmezse son kayda göre otomatik toggle.
+
+Personel kartları **Personel → Turnike kartı** alanından atanır; aynı `rfidTag` ile okutulur.
 
 ### Cihaz ile — doğrudan üye ID
 
