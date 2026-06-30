@@ -34,7 +34,10 @@ export async function LicenseStatusBanner({
       <div className="border-b border-rose-500/40 bg-rose-500/15 px-6 py-3 text-sm text-rose-100">
         {expiresLabel
           ? t('banner.blockedWithDate', { date: expiresLabel })
-          : t('banner.blocked')}
+          : t('banner.blocked')}{' '}
+        <a href="/dashboard/billing" className="ml-1 underline">
+          {t('banner.billingLink')}
+        </a>
         {lastLicenseCheckAt ? (
           <span className="ml-2 opacity-80">
             {t('banner.lastCheck', {

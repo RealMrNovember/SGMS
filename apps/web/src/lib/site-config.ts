@@ -10,6 +10,8 @@ export const siteConfig = {
     support: 'support@cicibyte.com',
     website: 'https://cicibyte.com',
     phone: '+90 (850) 000 00 00',
+    /** wa.me link için ülke kodu dahil, + işareti olmadan */
+    whatsapp: '905325667788',
     address: 'İstanbul, Türkiye',
   },
   social: {

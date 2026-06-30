@@ -316,7 +316,8 @@
       "blockedWithDate": "Central license is invalid or expired ({date}). Panel is read-only; no new records or updates.",
       "lastCheck": "Last check: {date}",
       "trial": "Trial license active. Assign a production license before expiry.",
-      "trialWithDate": "Trial license active — expires: {date}. Assign a production license before expiry."
+      "trialWithDate": "Trial license active — expires: {date}. Assign a production license before expiry.",
+      "billingLink": "Billing & Payment"
     },
     "hint": {
       "adminBlocked": "Central license invalid — write operations restricted.",
@@ -583,6 +584,50 @@
     "auditTitle": "Audit log",
     "auditSubtitle": "Recent platform and customer events.",
     "communicationsTitle": "Communication templates",
-    "communicationsSubtitle": "Ready email copy for customer outreach. Customer detail pages use personalized versions."
+    "communicationsSubtitle": "Ready email copy for customer outreach. Customer detail pages use personalized versions.",
+    "plansNav": "SaaS Plans",
+    "plansTitle": "SaaS Plan Management",
+    "plansSubtitle": "Edit trial and paid subscription pricing, limits, and visibility.",
+    "billingRequestsTitle": "Payment requests",
+    "noBillingRequests": "No payment requests."
+  },
+  "billing": {
+    "nav": "Billing & Payment",
+    "title": "Billing & Payment",
+    "subtitle": "Choose a plan, submit a payment request, or contact us on WhatsApp.",
+    "lockedKicker": "Access locked",
+    "lockedTitle": "Your trial has ended",
+    "lockedBanner": "The panel is locked. Select a plan and submit a payment request, or reach us on WhatsApp. Access unlocks automatically after approval.",
+    "layoutLockBanner": "Subscription required — only billing and contact are available:",
+    "backToDashboard": "Back to dashboard",
+    "trialReminder": "{days} days left on your trial.",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "selectCycle": "Billing cycle",
+    "bankSoon": "Bank online payment integration coming soon.",
+    "onlinePaySoon": "Online payment (coming soon)",
+    "requestTitle": "Payment request",
+    "requestHint": "Your request appears in Master Admin. When approved, this page refreshes and your panel unlocks.",
+    "submitRequest": "Submit payment request",
+    "submitting": "Submitting…",
+    "notesPlaceholder": "Invoice details, tax ID, or notes…",
+    "whatsappTitle": "Contact via WhatsApp",
+    "whatsappHint": "Message the CiCiByte team on WhatsApp for immediate support.",
+    "whatsappButton": "Message on WhatsApp",
+    "pendingTitle": "Request under review",
+    "pendingHint": "We received your payment request. When approved, access unlocks automatically (checked every 15s).",
+    "limits": "Up to {members} members · {staff} staff",
+    "athleteLockedTitle": "Gym subscription pending",
+    "athleteLockedHint": "Your gym's trial or subscription has ended. Please contact gym management.",
+    "reason": {
+      "trialActive": "Trial in progress ({days} days left).",
+      "paidActive": "You have an active subscription.",
+      "trialExpired": "Your 14-day trial ended. Your data is kept; choose a plan to continue.",
+      "subscriptionExpired": "Subscription expired. Your data is kept.",
+      "paymentOverdue": "Payment overdue. Please renew your subscription.",
+      "licenseExpired": "Central license expired. Continue via payment or contact.",
+      "orgSuspended": "Account suspended. Contact support.",
+      "noSubscription": "No active subscription found."
+    }
   }
 }

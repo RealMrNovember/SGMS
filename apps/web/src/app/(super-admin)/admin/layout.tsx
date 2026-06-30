@@ -21,6 +21,7 @@ export default async function SuperAdminLayout({ children }: { children: React.R
   const navItems = [
     { href: '/admin', label: t('adminOverview'), exact: true },
     { href: '/admin/organizations', label: tAdmin('customers') },
+    { href: '/admin/plans', label: tAdmin('plansNav') },
     { href: '/admin/communications', label: tAdmin('communicationsNav') },
     { href: '/admin/audit', label: tAdmin('auditNav') },
     { href: '/admin/organizations/new', label: t('newCustomer') },

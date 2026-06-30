@@ -2,6 +2,7 @@ import { AthleteNav } from '@/components/athlete-nav';
 import { LocaleSwitcher } from '@/components/locale-switcher';
 import { UserAvatar } from '@/components/user-avatar';
 import { auth, signOut } from '@/lib/auth';
+import { resolveSubscriptionAccess } from '@/lib/billing/subscription-gate';
 import { getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
 
@@ -11,13 +12,36 @@ export default async function AthleteLayout({ children }: { children: React.Reac
     redirect('/login');
   }
 
-  if (!session.user.gymMemberId) {
+  if (!session.user.gymMemberId || !session.user.organizationId) {
     redirect('/dashboard');
   }
 
+  const access = await resolveSubscriptionAccess(session.user.organizationId);
   const t = await getTranslations('athlete');
   const tAuth = await getTranslations('auth');
   const tCommon = await getTranslations('common');
+  const tBilling = await getTranslations('billing');
+
+  if (access.mode === 'billing_only') {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center px-6 py-16 text-center">
+        <p className="badge">{t('badge')}</p>
+        <h1 className="mt-4 text-xl font-semibold">{tBilling('athleteLockedTitle')}</h1>
+        <p className="muted mt-3 max-w-md text-sm leading-7">{tBilling('athleteLockedHint')}</p>
+        <form
+          className="mt-8"
+          action={async () => {
+            'use server';
+            await signOut({ redirectTo: '/login' });
+          }}
+        >
+          <button type="submit" className="button px-5 py-2.5 text-sm">
+            {tAuth('logout')}
+          </button>
+        </form>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">

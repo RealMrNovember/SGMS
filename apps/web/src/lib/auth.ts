@@ -79,6 +79,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         });
 
         if (!user.isSuperAdmin && membership?.organization) {
+          const { syncSubscriptionLifecycle } = await import('@/lib/billing/subscription-gate');
+          await syncSubscriptionLifecycle(membership.organization.id);
           void syncLicenseOnLogin(
             membership.organization.id,
             membership.organization.installationId,

@@ -316,7 +316,8 @@
       "blockedWithDate": "Merkezi lisans geçersiz veya süresi doldu ({date}). Panel salt okunur modda; yeni kayıt ve güncelleme yapılamaz.",
       "lastCheck": "Son kontrol: {date}",
       "trial": "Deneme lisansı aktif. Süre dolmadan üretim lisansı tanımlayın.",
-      "trialWithDate": "Deneme lisansı aktif — bitiş: {date}. Süre dolmadan üretim lisansı tanımlayın."
+      "trialWithDate": "Deneme lisansı aktif — bitiş: {date}. Süre dolmadan üretim lisansı tanımlayın.",
+      "billingLink": "Abonelik & Ödeme"
     },
     "hint": {
       "adminBlocked": "Merkezi lisans geçersiz — yazma işlemleri kısıtlı.",
@@ -583,6 +584,50 @@
     "auditTitle": "Denetim kayıtları",
     "auditSubtitle": "Platform genelinde son sistem ve müşteri olayları.",
     "communicationsTitle": "İletişim şablonları",
-    "communicationsSubtitle": "Müşteri iletişimi için hazır e-posta metinleri. Müşteri detay sayfasında kişiselleştirilmiş sürümler kullanılır."
+    "communicationsSubtitle": "Müşteri iletişimi için hazır e-posta metinleri. Müşteri detay sayfasında kişiselleştirilmiş sürümler kullanılır.",
+    "plansNav": "SaaS Paketleri",
+    "plansTitle": "SaaS Paket Yönetimi",
+    "plansSubtitle": "Deneme ve ücretli abonelik fiyatlarını, limitleri ve görünürlüğü buradan düzenleyin.",
+    "billingRequestsTitle": "Ödeme talepleri",
+    "noBillingRequests": "Bekleyen ödeme talebi yok."
+  },
+  "billing": {
+    "nav": "Abonelik & Ödeme",
+    "title": "Abonelik & Ödeme",
+    "subtitle": "Paketinizi seçin, ödeme talebi gönderin veya WhatsApp üzerinden bizimle iletişime geçin.",
+    "lockedKicker": "Erişim kilitlendi",
+    "lockedTitle": "Deneme süreniz sona erdi",
+    "lockedBanner": "Panel kilitlendi. Devam etmek için paket seçip ödeme talebi gönderin veya WhatsApp ile bize ulaşın. Onay sonrası erişim otomatik açılır.",
+    "layoutLockBanner": "Abonelik gerekli — yalnızca ödeme ve iletişim sayfasına erişebilirsiniz:",
+    "backToDashboard": "Panele dön",
+    "trialReminder": "Deneme sürenizin bitmesine {days} gün kaldı.",
+    "monthly": "Aylık",
+    "yearly": "Yıllık",
+    "selectCycle": "Fatura dönemi",
+    "bankSoon": "Banka online ödeme entegrasyonu kısa süre içinde aktif olacak.",
+    "onlinePaySoon": "Online ödeme (yakında)",
+    "requestTitle": "Ödeme talebi",
+    "requestHint": "Talebiniz Master Admin paneline düşer. Onaylandığında sayfa otomatik yenilenir ve paneliniz açılır.",
+    "submitRequest": "Ödeme talebi gönder",
+    "submitting": "Gönderiliyor…",
+    "notesPlaceholder": "Fatura bilgisi, vergi no veya not…",
+    "whatsappTitle": "WhatsApp ile iletişim",
+    "whatsappHint": "Hemen destek almak için CiCiByte ekibine WhatsApp üzerinden yazın.",
+    "whatsappButton": "WhatsApp ile yaz",
+    "pendingTitle": "Talebiniz inceleniyor",
+    "pendingHint": "Ödeme talebiniz alındı. Onaylandığında bu sayfa otomatik kapanır ve paneliniz açılır (15 sn'de bir kontrol edilir).",
+    "limits": "En fazla {members} üye · {staff} personel",
+    "athleteLockedTitle": "Salon aboneliği beklemede",
+    "athleteLockedHint": "Salonunuzun deneme veya abonelik süresi sona erdi. Lütfen salon yönetimi ile iletişime geçin.",
+    "reason": {
+      "trialActive": "Deneme süreniz devam ediyor ({days} gün kaldı).",
+      "paidActive": "Aktif aboneliğiniz var.",
+      "trialExpired": "14 günlük deneme süreniz sona erdi. Verileriniz korunur; devam için paket seçin.",
+      "subscriptionExpired": "Abonelik süreniz sona erdi. Verileriniz korunur.",
+      "paymentOverdue": "Ödeme gecikmesi var. Lütfen aboneliğinizi yenileyin.",
+      "licenseExpired": "Merkezi lisans süresi doldu. Ödeme veya iletişim ile devam edin.",
+      "orgSuspended": "Hesap askıda. Destek ile iletişime geçin.",
+      "noSubscription": "Aktif abonelik bulunamadı."
+    }
   }
 }

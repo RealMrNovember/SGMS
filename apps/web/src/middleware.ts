@@ -96,7 +96,15 @@ export default auth((request) => {
     );
   }
 
-  return withLocaleCookie(request, NextResponse.next());
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-pathname', pathname);
+
+  return withLocaleCookie(
+    request,
+    NextResponse.next({
+      request: { headers: requestHeaders },
+    }),
+  );
 });
 
 export const config = {

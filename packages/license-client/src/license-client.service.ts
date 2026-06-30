@@ -305,7 +305,6 @@ export class LicenseClientService {
         lastLicenseCheckAt: new Date(),
         ...(extras?.licenseKey ? { centralLicenseKey: extras.licenseKey } : {}),
         ...(extras?.trialStartedAt ? { trialStartedAt: extras.trialStartedAt } : {}),
-        status: centralLicenseStatus === 'EXPIRED' || centralLicenseStatus === 'REVOKED' ? 'SUSPENDED' : 'ACTIVE',
       },
     });
   }
@@ -316,7 +315,6 @@ export class LicenseClientService {
       data: {
         centralLicenseStatus: 'EXPIRED',
         lastLicenseCheckAt: new Date(),
-        status: 'SUSPENDED',
         settings: {
           licenseError: reason,
         } as Prisma.InputJsonValue,

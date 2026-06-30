@@ -81,7 +81,7 @@ export async function registerTrialOrganization(
   const installationId = randomUUID();
   const trialEndsAt = new Date(Date.now() + siteConfig.trialDays * 24 * 60 * 60 * 1000);
 
-  const { organization, ownerId } = await prisma.$transaction(async (tx) => {
+  const { organization } = await prisma.$transaction(async (tx) => {
     const org = await tx.organization.create({
       data: {
         name: data.gymName.trim(),
@@ -142,7 +142,7 @@ export async function registerTrialOrganization(
       },
     });
 
-    return { organization: org, ownerId: owner.id };
+    return { organization: org };
   });
 
   const { bootstrapOrganizationLicense } = await import('@/lib/license');
@@ -151,7 +151,6 @@ export async function registerTrialOrganization(
     organization.id,
     organization.installationId,
     {
-      strict: true,
       metadata: {
         clientName: data.gymName.trim(),
         email: ownerEmail,
@@ -162,16 +161,7 @@ export async function registerTrialOrganization(
   );
 
   if (!licenseResult.ok) {
-    await prisma.$transaction([
-      prisma.organization.delete({ where: { id: organization.id } }),
-      prisma.user.delete({ where: { id: ownerId } }),
-    ]);
-
-    return {
-      error:
-        licenseResult.message ||
-        'Merkezi lisans sunucusuna kayıt yapılamadı. Lütfen daha sonra tekrar deneyin veya destek ile iletişime geçin.',
-    };
+    console.error('[trial-registration] license sync deferred:', licenseResult.message);
   }
 
   return {

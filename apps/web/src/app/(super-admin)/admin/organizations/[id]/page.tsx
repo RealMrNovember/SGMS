@@ -1,4 +1,5 @@
 import { AdminBadge } from '@/components/admin/admin-badge';
+import { BillingRequestActions } from '@/components/admin/billing-request-actions';
 import { CopyEmailBlock } from '@/components/admin/copy-email-block';
 import { OrganizationAdminActions } from '@/components/admin/organization-admin-actions';
 import { OrganizationQuickActions } from '@/components/admin/organization-quick-actions';
@@ -13,7 +14,7 @@ import {
   organizationTone,
   subscriptionTone,
 } from '@/lib/admin/format';
-import { parseOrganizationSettings } from '@/lib/admin/org-settings';
+import { parseBillingSettings } from '@/lib/billing/settings';
 import { getOrganizationAdminDetail, listActivePlans } from '@/lib/admin/queries';
 import { siteConfig } from '@/lib/site-config';
 import { getTranslations } from 'next-intl/server';
@@ -42,7 +43,7 @@ export default async function AdminOrganizationDetailPage({
   const subscription = org.subscriptions[0] ?? null;
   const ownerMember = org.members.find((m) => m.role === 'OWNER') ?? org.members[0];
   const owner = ownerMember?.user ?? null;
-  const settings = parseOrganizationSettings(org.settings);
+  const settings = parseBillingSettings(org.settings);
   const trialDays = daysUntil(subscription?.trialEndsAt ?? org.licenseExpiresAt);
   const isTrialing = subscription?.status === 'TRIALING';
 
@@ -138,6 +139,35 @@ export default async function AdminOrganizationDetailPage({
           plans={plans.map((p) => ({ id: p.id, name: p.name, code: p.code }))}
           isTrialing={isTrialing}
         />
+      </section>
+
+      <section className="space-y-4">
+        <h3 className="text-lg font-semibold">{tAdmin('billingRequestsTitle')}</h3>
+        {settings.billingRequests?.length ? (
+          <ul className="space-y-3">
+            {settings.billingRequests.map((req) => (
+              <li key={req.id} className="card p-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="font-medium">
+                      {req.planName} · {req.billingCycle === 'YEARLY' ? 'Yıllık' : 'Aylık'}
+                    </p>
+                    <p className="muted text-sm">
+                      {req.amount} {req.currency} · {req.status}
+                    </p>
+                    {req.notes ? <p className="muted mt-2 text-xs">{req.notes}</p> : null}
+                    <p className="muted mt-1 text-xs">{formatDateTimeTr(new Date(req.createdAt))}</p>
+                  </div>
+                  {req.status === 'pending' ? (
+                    <BillingRequestActions organizationId={org.id} requestId={req.id} />
+                  ) : null}
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="muted text-sm">{tAdmin('noBillingRequests')}</p>
+        )}
       </section>
 
       <section className="grid gap-6 lg:grid-cols-2">

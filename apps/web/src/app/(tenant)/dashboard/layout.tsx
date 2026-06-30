@@ -1,9 +1,11 @@
 import { LicenseStatusBanner } from '@/components/license-status-banner';
 import { LocaleSwitcher } from '@/components/locale-switcher';
 import { auth, signOut } from '@/lib/auth';
+import { isBillingPath, resolveSubscriptionAccess } from '@/lib/billing/subscription-gate';
 import { prisma } from '@/lib/prisma';
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 export default async function TenantDashboardLayout({ children }: { children: React.ReactNode }) {
@@ -20,19 +22,33 @@ export default async function TenantDashboardLayout({ children }: { children: Re
     redirect('/login');
   }
 
+  const headerStore = await headers();
+  const pathname = headerStore.get('x-pathname') ?? headerStore.get('x-invoke-path') ?? '';
+  const access = await resolveSubscriptionAccess(session.user.organizationId);
+
+  if (access.mode === 'billing_only' && pathname && !isBillingPath(pathname)) {
+    redirect('/dashboard/billing');
+  }
+
   const t = await getTranslations('nav');
   const tAuth = await getTranslations('auth');
   const tCommon = await getTranslations('common');
+  const tBilling = await getTranslations('billing');
 
-  const navItems = [
-    { href: '/dashboard', label: t('overview') },
-    { href: '/dashboard/members', label: t('members') },
-    { href: '/dashboard/plans', label: t('plans') },
-    { href: '/dashboard/programs', label: t('programs') },
-    { href: '/dashboard/messages', label: t('messages') },
-    { href: '/dashboard/pos', label: t('pos') },
-    { href: '/dashboard/team', label: t('team') },
-  ];
+  const locked = access.mode === 'billing_only';
+
+  const navItems = locked
+    ? [{ href: '/dashboard/billing', label: tBilling('nav') }]
+    : [
+        { href: '/dashboard', label: t('overview') },
+        { href: '/dashboard/members', label: t('members') },
+        { href: '/dashboard/plans', label: t('plans') },
+        { href: '/dashboard/programs', label: t('programs') },
+        { href: '/dashboard/messages', label: t('messages') },
+        { href: '/dashboard/pos', label: t('pos') },
+        { href: '/dashboard/team', label: t('team') },
+        { href: '/dashboard/billing', label: tBilling('nav') },
+      ];
 
   const organization = await prisma.organization.findUnique({
     where: { id: session.user.organizationId },
@@ -55,6 +71,15 @@ export default async function TenantDashboardLayout({ children }: { children: Re
         />
       ) : null}
 
+      {locked ? (
+        <div className="border-b border-rose-500/40 bg-rose-950/40 px-6 py-3 text-center text-sm text-rose-100">
+          {tBilling('layoutLockBanner')}{' '}
+          <Link href="/dashboard/billing" className="underline">
+            {tBilling('nav')}
+          </Link>
+        </div>
+      ) : null}
+
       <header className="border-b border-[var(--border)] bg-[rgba(17,24,39,0.85)] backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
           <div>
@@ -67,7 +92,7 @@ export default async function TenantDashboardLayout({ children }: { children: Re
             </p>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4">
             {navItems.map((item) => (
               <Link key={item.href} href={item.href} className="muted text-sm hover:text-white">
                 {item.label}
