@@ -1,5 +1,6 @@
 import { LicenseStatusBanner } from '@/components/license-status-banner';
 import { LocaleSwitcher } from '@/components/locale-switcher';
+import { MessageLiveRefresh } from '@/components/message-live-refresh';
 import { auth, signOut } from '@/lib/auth';
 import { isBillingPath, resolveSubscriptionAccess } from '@/lib/billing/subscription-gate';
 import { prisma } from '@/lib/prisma';
@@ -37,6 +38,16 @@ export default async function TenantDashboardLayout({ children }: { children: Re
 
   const locked = access.mode === 'billing_only';
 
+  const unreadMessages = locked
+    ? 0
+    : await prisma.directMessage.count({
+        where: {
+          organizationId: session.user.organizationId,
+          receiverId: session.user.id,
+          isRead: false,
+        },
+      });
+
   const navItems = locked
     ? [{ href: '/dashboard/billing', label: tBilling('nav') }]
     : [
@@ -44,7 +55,7 @@ export default async function TenantDashboardLayout({ children }: { children: Re
         { href: '/dashboard/members', label: t('members') },
         { href: '/dashboard/plans', label: t('plans') },
         { href: '/dashboard/programs', label: t('programs') },
-        { href: '/dashboard/messages', label: t('messages') },
+        { href: '/dashboard/messages', label: t('messages'), badge: unreadMessages },
         { href: '/dashboard/pos', label: t('pos') },
         { href: '/dashboard/team', label: t('team') },
         { href: '/dashboard/billing', label: tBilling('nav') },
@@ -80,6 +91,13 @@ export default async function TenantDashboardLayout({ children }: { children: Re
         </div>
       ) : null}
 
+      {!locked ? (
+        <MessageLiveRefresh
+          userId={session.user.id}
+          organizationId={session.user.organizationId}
+        />
+      ) : null}
+
       <header className="border-b border-[var(--border)] bg-[rgba(17,24,39,0.85)] backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
           <div>
@@ -94,8 +112,13 @@ export default async function TenantDashboardLayout({ children }: { children: Re
 
           <div className="flex flex-wrap items-center gap-4">
             {navItems.map((item) => (
-              <Link key={item.href} href={item.href} className="muted text-sm hover:text-white">
+              <Link key={item.href} href={item.href} className="muted relative text-sm hover:text-white">
                 {item.label}
+                {'badge' in item && item.badge && item.badge > 0 ? (
+                  <span className="ml-1.5 inline-flex min-w-[1.1rem] items-center justify-center rounded-full bg-rose-500 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                    {item.badge > 99 ? '99+' : item.badge}
+                  </span>
+                ) : null}
               </Link>
             ))}
             <LocaleSwitcher />

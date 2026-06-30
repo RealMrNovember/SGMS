@@ -1,8 +1,10 @@
 import { AthleteNav } from '@/components/athlete-nav';
 import { LocaleSwitcher } from '@/components/locale-switcher';
+import { MessageLiveRefresh } from '@/components/message-live-refresh';
 import { UserAvatar } from '@/components/user-avatar';
 import { auth, signOut } from '@/lib/auth';
 import { resolveSubscriptionAccess } from '@/lib/billing/subscription-gate';
+import { prisma } from '@/lib/prisma';
 import { getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
 
@@ -43,8 +45,20 @@ export default async function AthleteLayout({ children }: { children: React.Reac
     );
   }
 
+  const unreadMessages = await prisma.directMessage.count({
+    where: {
+      organizationId: session.user.organizationId,
+      receiverId: session.user.id,
+      isRead: false,
+    },
+  });
+
   return (
     <div className="min-h-screen">
+      <MessageLiveRefresh
+        userId={session.user.id}
+        organizationId={session.user.organizationId}
+      />
       <header className="border-b border-[var(--border)] bg-[rgba(17,24,39,0.9)] backdrop-blur">
         <div className="mx-auto flex max-w-lg items-center justify-between gap-4 px-4 py-4">
           <div className="flex items-center gap-3">
@@ -72,7 +86,7 @@ export default async function AthleteLayout({ children }: { children: React.Reac
       </header>
 
       <main className="mx-auto max-w-lg px-4 py-6 pb-24">{children}</main>
-      <AthleteNav />
+      <AthleteNav unreadMessages={unreadMessages} />
     </div>
   );
 }

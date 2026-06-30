@@ -52,6 +52,9 @@ fi
 echo "==> Docker"
 check "sgms-postgres healthy" "docker inspect -f '{{.State.Health.Status}}' sgms-postgres | grep -q healthy"
 check "sgms-redis healthy" "docker inspect -f '{{.State.Health.Status}}' sgms-redis | grep -q healthy"
+if docker ps --format '{{.Names}}' | grep -qx 'sgms-soketi'; then
+  check "sgms-soketi healthy" "docker inspect -f '{{.State.Health.Status}}' sgms-soketi | grep -q healthy"
+fi
 
 if [[ "$FAIL" -ne 0 ]]; then
   echo ""

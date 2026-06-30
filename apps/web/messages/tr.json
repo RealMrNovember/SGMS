@@ -523,7 +523,7 @@
         "pos": { "icon": "💳", "title": "POS & Cari Hesap", "description": "Market, kafe, ekstra ders borçları. Tahsilat, kasa özeti ve üye bakiyesi tek ekranda." },
         "i18n": { "icon": "🌍", "title": "6 Dil Desteği", "description": "TR, EN, RU, FR, ES, AZ — expat üyeler ve uluslararası zincirler için hazır." },
         "mobile": { "icon": "📱", "title": "Mobil API & Sporcu Portalı", "description": "Bearer token API, ölçüm/program/mesaj self-service. Mobil uygulama için hazır altyapı." },
-        "realtime": { "icon": "⚡", "title": "Anlık Mesajlaşma", "description": "PT ↔ sporcu iletişimi. SSE tabanlı canlı güncelleme, tenant güvenli kanallar." }
+        "realtime": { "icon": "⚡", "title": "Anlık Mesajlaşma", "description": "PT ↔ sporcu iletişimi. WebSocket (Soketi) ile anlık güncelleme; yapılandırılmazsa SSE yedek kanal." }
       }
     },
     "why": {

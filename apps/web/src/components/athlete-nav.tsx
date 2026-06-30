@@ -12,7 +12,11 @@ const NAV_ITEMS = [
   { href: '/athlete/account', exact: false, key: 'account' as const },
 ];
 
-export function AthleteNav() {
+type AthleteNavProps = {
+  unreadMessages?: number;
+};
+
+export function AthleteNav({ unreadMessages = 0 }: AthleteNavProps) {
   const pathname = usePathname();
   const t = useTranslations('athlete.nav');
 
@@ -25,11 +29,16 @@ export function AthleteNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={`rounded-lg px-2 py-2 text-center text-xs font-medium transition ${
+              className={`relative rounded-lg px-2 py-2 text-center text-xs font-medium transition ${
                 active ? 'bg-white/10 text-white' : 'muted hover:text-white'
               }`}
             >
               {t(item.key)}
+              {item.key === 'messages' && unreadMessages > 0 ? (
+                <span className="absolute right-1 top-0.5 flex min-w-[1rem] items-center justify-center rounded-full bg-rose-500 px-1 text-[9px] font-semibold text-white">
+                  {unreadMessages > 99 ? '99+' : unreadMessages}
+                </span>
+              ) : null}
             </Link>
           );
         })}

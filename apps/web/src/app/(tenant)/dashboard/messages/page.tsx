@@ -64,7 +64,7 @@ export default async function MessagesPage({
 
   return (
     <div className="space-y-6">
-      <MessageLiveRefresh />
+      <MessageLiveRefresh userId={userId} organizationId={organizationId} />
       <div>
         <Link href="/dashboard" className="muted text-sm hover:text-white">
           {t('backToOverview')}

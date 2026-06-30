@@ -86,7 +86,7 @@ export default async function AthleteMessagesPage({
 
   return (
     <div className="space-y-4">
-      <MessageLiveRefresh />
+      <MessageLiveRefresh userId={userId} organizationId={organizationId} />
       <div>
         <Link href="/athlete" className="muted text-sm hover:text-white">
           {t('backHome')}

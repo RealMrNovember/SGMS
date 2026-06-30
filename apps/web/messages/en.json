@@ -523,7 +523,7 @@
         "pos": { "icon": "💳", "title": "POS & Member Accounts", "description": "Market, café and extra session charges. Collections, daily cash summary and balances." },
         "i18n": { "icon": "🌍", "title": "6 Languages", "description": "TR, EN, RU, FR, ES, AZ — ready for expat members and international chains." },
         "mobile": { "icon": "📱", "title": "Mobile API & Athlete Portal", "description": "Bearer token API and self-service for measurements, programs and messages." },
-        "realtime": { "icon": "⚡", "title": "Real-time Messaging", "description": "Coach ↔ athlete communication with SSE live updates and tenant-safe channels." }
+        "realtime": { "icon": "⚡", "title": "Real-time Messaging", "description": "Coach ↔ athlete messaging with WebSocket (Soketi) live updates; SSE fallback when not configured." }
       }
     },
     "why": {

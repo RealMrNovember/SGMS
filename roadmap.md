@@ -149,7 +149,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ### 4.3 Mesajlaşma (async — polling tabanlı)
 - [x] `/dashboard/messages` — inbox / sent, okundu işaretleme
-- [ ] Thread + real-time → **Faz 9**
+- [ ] Thread + real-time → **Faz 9** ✅ (Soketi + thread UI)
 
 ### 4.4 Salon üyelik planları
 - [x] `/dashboard/plans` — `GymMembershipPlan` CRUD
@@ -234,7 +234,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 **Depolama (aşamalı)**
 - [x] **Faz 6.2a:** Local storage abstraction (`lib/storage.ts`) + `POST /api/v1/upload/avatar`
 - [ ] **Faz 6.2b:** Object storage — **Cloudflare R2** (tercih) veya AWS S3
-  - [x] `lib/storage.ts` abstraction (local + S3 stub)
+  - [x] `lib/storage-r2.ts` + `STORAGE_PROVIDER=r2` (docs: `docs/deployment/R2-STORAGE.md`)
   - [x] Upload API: `POST /api/v1/upload/avatar` (tenant + rol guard)
   - [ ] Signed URL / public CDN path
   - [x] Max boyut, MIME whitelist (`image/jpeg`, `image/png`, `image/webp`)
@@ -366,16 +366,18 @@ Organization ─┬─ ExpenseCategory
 - [x] Kanal adlandırma: `lib/realtime/channels.ts` — `private-org.{organizationId}.user.{userId}`
 - [x] `POST /api/v1/messages` → DB + in-process broadcast (`lib/realtime/hub.ts`)
 - [x] SSE fallback: `GET /api/v1/messages/events` + `MessageLiveRefresh` (dashboard + sporcu)
-- [ ] Soketi / Socket.io + Redis adapter (production çoklu instance)
+- [x] Soketi + Redis adapter (`sgms-soketi`, `lib/realtime/pusher-server.ts`, `POST /api/v1/realtime/auth`)
+- [x] Pusher-js istemci; `NEXT_PUBLIC_SOKETI_KEY` yoksa otomatik SSE
 
 ### 9.3 UI
-- [x] `/dashboard/messages` — SSE ile anlık yenileme
-- [x] Sporcu portal mesajları — SSE ile anlık yenileme
-- [ ] Konuşma thread görünümü (1:1 aktif sohbet)
-- [ ] Typing indicator (P2), unread badge
+- [x] `/dashboard/messages` — thread görünümü + canlı yenileme (WebSocket / SSE)
+- [x] Sporcu portal mesajları — thread + canlı yenileme
+- [x] Konuşma thread görünümü (1:1 aktif sohbet, `?with=userId`)
+- [x] Unread badge (dashboard nav + sporcu alt menü)
+- [ ] Typing indicator (P2)
 
 ### 9.4 Güvenlik
-- [ ] Kanal yetkisi: yalnızca aynı `organizationId` üyeleri
+- [x] Kanal yetkisi: `private-org.{orgId}.user.{userId}` + auth endpoint
 - [ ] Rate limit (mesaj flood)
 - [ ] Audit: şikayet / moderasyon (P3)
 

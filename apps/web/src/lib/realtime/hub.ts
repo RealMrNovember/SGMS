@@ -1,3 +1,5 @@
+import { publishMessageEventToSoketi } from '@/lib/realtime/pusher-server';
+
 export type RealtimeMessagePayload = {
   id: string;
   senderId: string;
@@ -51,6 +53,10 @@ export function publishMessageEvent(event: MessageCreatedEvent) {
       listener(payload);
     }
   }
+
+  void publishMessageEventToSoketi(event).catch(() => {
+    // Soketi optional — SSE remains primary fallback
+  });
 }
 
 export function heartbeatChunk() {

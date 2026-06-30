@@ -50,6 +50,33 @@ services:
     networks:
       - sgms-net
 
+  soketi:
+    image: quay.io/soketi/soketi:1.6-16-debian
+    container_name: sgms-soketi
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      SOKETI_DEBUG: ${SOKETI_DEBUG:-0}
+      SOKETI_DEFAULT_APP_ID: ${SOKETI_APP_ID:-sgms}
+      SOKETI_DEFAULT_APP_KEY: ${SOKETI_APP_KEY:-sgms-dev-key}
+      SOKETI_DEFAULT_APP_SECRET: ${SOKETI_APP_SECRET:-sgms-dev-secret}
+      SOKETI_ADAPTER_DRIVER: redis
+      SOKETI_ADAPTER_REDIS_HOST: redis
+      SOKETI_ADAPTER_REDIS_PORT: 6379
+      SOKETI_ADAPTER_REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}
+    ports:
+      - "${SOKETI_HOST_BIND:-127.0.0.1}:${SOKETI_PORT:-6001}:6001"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:6001/ || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - sgms-net
+
 volumes:
   postgres_data:
     driver: local
