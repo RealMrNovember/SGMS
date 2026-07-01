@@ -9,7 +9,7 @@ import {
 } from 'electron';
 import path from 'path';
 import Store from 'electron-store';
-import Pusher from 'pusher-js';
+import { Pusher, type PusherClient } from './pusher-client';
 import { SGMS_API_BASE_URL } from '../shared/constants';
 import {
   getLaunchAtStartup,
@@ -27,7 +27,7 @@ const store = new Store<{ config?: ReceptionConfig }>({ name: 'sgms-reception' }
 
 let tray: Tray | null = null;
 let window: BrowserWindow | null = null;
-let pusher: Pusher | null = null;
+let pusher: PusherClient | null = null;
 let isQuitting = false;
 const startHidden = shouldStartHidden();
 
@@ -357,7 +357,13 @@ async function loginAndConnect(input: LoginInput): Promise<ReceptionConfig> {
   };
 
   store.set('config', config);
-  connectRealtime(config);
+
+  try {
+    connectRealtime(config);
+  } catch (error) {
+    console.error('SGMS realtime connection failed after login', error);
+    window?.webContents.send('status', { online: false });
+  }
 
   if (!getLaunchAtStartup()) {
     setLaunchAtStartup(true);
