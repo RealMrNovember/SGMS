@@ -18,13 +18,22 @@ export type ReceptionConfig = {
   organizationName: string;
   soketiKey: string;
   soketiWsPath: string;
+  soketiForceTLS?: boolean;
+  soketiWsPort?: number;
+  soketiWssPort?: number;
   userName: string;
 };
 
 export type LoginInput = {
-  apiBaseUrl: string;
   email: string;
   password: string;
-  soketiKey: string;
-  soketiWsPath: string;
+};
+
+export type RealtimePublicConfig = {
+  enabled: boolean;
+  key: string | null;
+  wsPath: string;
+  forceTLS: boolean;
+  wsPort: number;
+  wssPort: number;
 };

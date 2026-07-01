@@ -7,6 +7,8 @@ contextBridge.exposeInMainWorld('reception', {
   getConfig: () => ipcRenderer.invoke('get-config') as Promise<ReceptionConfig | undefined>,
   minimize: () => ipcRenderer.invoke('window:minimize'),
   hideToTray: () => ipcRenderer.invoke('window:hide'),
+  toggleMaximize: () => ipcRenderer.invoke('window:toggle-maximize') as Promise<boolean>,
+  isMaximized: () => ipcRenderer.invoke('window:is-maximized') as Promise<boolean>,
   getLaunchAtStartup: () => ipcRenderer.invoke('get-launch-at-startup') as Promise<boolean>,
   setLaunchAtStartup: (enabled: boolean) =>
     ipcRenderer.invoke('set-launch-at-startup', enabled) as Promise<boolean>,
@@ -21,5 +23,8 @@ contextBridge.exposeInMainWorld('reception', {
   },
   onLaunchAtStartup: (handler: (payload: { enabled: boolean }) => void) => {
     ipcRenderer.on('launch-at-startup', (_event, payload: { enabled: boolean }) => handler(payload));
+  },
+  onMaximizedChange: (handler: (maximized: boolean) => void) => {
+    ipcRenderer.on('window:maximized', (_event, maximized: boolean) => handler(maximized));
   },
 });

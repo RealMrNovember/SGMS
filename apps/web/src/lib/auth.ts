@@ -3,6 +3,11 @@ import Credentials from 'next-auth/providers/credentials';
 import { compare } from 'bcryptjs';
 import { z } from 'zod';
 import { authConfig } from '@/lib/auth.config';
+import {
+  getRequestAuditContext,
+  writeAuditLog,
+  writeLoginFailedAudit,
+} from '@/lib/audit/logger';
 import { syncLicenseOnLogin } from '@/lib/license';
 import { prisma } from '@/lib/prisma';
 
@@ -13,6 +18,39 @@ const credentialsSchema = z.object({
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
+  events: {
+    signOut: async (message) => {
+      const userId = 'token' in message ? message.token?.sub : null;
+      if (!userId) return;
+
+      const ctx = await getRequestAuditContext();
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          memberships: {
+            where: { isActive: true },
+            orderBy: { createdAt: 'asc' },
+            take: 1,
+            select: { organizationId: true },
+          },
+        },
+      });
+
+      if (!user) return;
+
+      void writeAuditLog({
+        actorId: user.id,
+        organizationId: user.memberships[0]?.organizationId ?? null,
+        action: 'USER_LOGOUT',
+        entityType: 'user',
+        entityId: user.id,
+        metadata: { source: 'web' },
+        ipAddress: ctx.ipAddress,
+        userAgent: ctx.userAgent,
+      });
+    },
+  },
   providers: [
     Credentials({
       name: 'Credentials',
@@ -21,8 +59,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         password: { label: 'Parola', type: 'password' },
       },
       authorize: async (credentials) => {
+        const ctx = await getRequestAuditContext();
+        const rawEmail = String(credentials?.email ?? '').toLowerCase();
+
         const parsed = credentialsSchema.safeParse(credentials);
         if (!parsed.success) {
+          void writeLoginFailedAudit({
+            email: rawEmail || 'unknown',
+            reason: 'invalid_credentials_format',
+            source: 'web',
+            ipAddress: ctx.ipAddress,
+            userAgent: ctx.userAgent,
+          });
           return null;
         }
 
@@ -50,12 +98,41 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           },
         });
 
-        if (!user || user.status !== 'ACTIVE') {
+        if (!user) {
+          void writeLoginFailedAudit({
+            email: parsed.data.email.toLowerCase(),
+            reason: 'user_not_found',
+            source: 'web',
+            ipAddress: ctx.ipAddress,
+            userAgent: ctx.userAgent,
+          });
+          return null;
+        }
+
+        if (user.status !== 'ACTIVE') {
+          void writeLoginFailedAudit({
+            email: parsed.data.email.toLowerCase(),
+            reason: 'user_inactive',
+            actorId: user.id,
+            organizationId: user.memberships[0]?.organizationId ?? null,
+            source: 'web',
+            ipAddress: ctx.ipAddress,
+            userAgent: ctx.userAgent,
+          });
           return null;
         }
 
         const valid = await compare(parsed.data.password, user.passwordHash);
         if (!valid) {
+          void writeLoginFailedAudit({
+            email: parsed.data.email.toLowerCase(),
+            reason: 'invalid_password',
+            actorId: user.id,
+            organizationId: user.memberships[0]?.organizationId ?? null,
+            source: 'web',
+            ipAddress: ctx.ipAddress,
+            userAgent: ctx.userAgent,
+          });
           return null;
         }
 
@@ -68,14 +145,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           data: { lastLoginAt: new Date() },
         });
 
-        await prisma.auditLog.create({
-          data: {
-            actorId: user.id,
-            organizationId: membership?.organizationId,
-            action: 'USER_LOGIN',
-            entityType: 'user',
-            entityId: user.id,
-          },
+        void writeAuditLog({
+          actorId: user.id,
+          organizationId: membership?.organizationId ?? gymMember?.organizationId ?? null,
+          action: 'USER_LOGIN',
+          entityType: 'user',
+          entityId: user.id,
+          metadata: { source: 'web' },
+          ipAddress: ctx.ipAddress,
+          userAgent: ctx.userAgent,
         });
 
         if (!user.isSuperAdmin && membership?.organization) {

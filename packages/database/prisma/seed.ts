@@ -620,10 +620,50 @@ async function seedGymMembershipPlans(organizationId: string) {
   console.log(`Seeded ${plans.length} gym membership plans for demo-gym.`);
 }
 
+async function seedPlaceholderAvatars() {
+  if (process.env.SEED_PLACEHOLDER_AVATARS !== 'true') {
+    return;
+  }
+
+  const userAvatars: Record<string, string> = {
+    [process.env.SEED_OWNER_EMAIL ?? 'owner@demo-gym.local']: '/placeholders/avatar-default.svg',
+    [process.env.SEED_STAFF_EMAIL ?? 'staff@demo-gym.local']: '/placeholders/avatar-staff.svg',
+    [process.env.SEED_TRAINER_EMAIL ?? 'trainer@demo-gym.local']: '/placeholders/avatar-trainer.svg',
+  };
+
+  for (const [email, avatarUrl] of Object.entries(userAvatars)) {
+    await prisma.user.updateMany({
+      where: { email },
+      data: { avatarUrl },
+    });
+  }
+
+  const athleteEmail = process.env.SEED_ATHLETE_EMAIL ?? 'athlete@demo-gym.local';
+  await prisma.user.updateMany({
+    where: { email: athleteEmail },
+    data: { avatarUrl: '/placeholders/avatar-athlete.svg' },
+  });
+
+  const athleteMember = await prisma.gymMember.findFirst({
+    where: { email: athleteEmail },
+    select: { id: true },
+  });
+
+  if (athleteMember) {
+    await prisma.gymMember.update({
+      where: { id: athleteMember.id },
+      data: { avatarUrl: '/placeholders/avatar-athlete.svg' },
+    });
+  }
+
+  console.log('Placeholder avatars assigned (SEED_PLACEHOLDER_AVATARS=true).');
+}
+
 async function main() {
   await seedPlans();
   await seedSuperAdmin();
   await seedDemoTenant();
+  await seedPlaceholderAvatars();
 }
 
 main()

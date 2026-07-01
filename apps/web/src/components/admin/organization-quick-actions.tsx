@@ -2,6 +2,7 @@
 
 import {
   activateOrganization,
+  archiveOrganization,
   suspendOrganization,
   syncOrganizationLicenseAdmin,
   type AdminActionState,
@@ -69,8 +70,18 @@ export function OrganizationQuickActions({
         >
           Lisans senkronu
         </button>
+        {status !== 'ARCHIVED' ? (
+          <button
+            type="button"
+            className="button px-4 py-2 text-sm"
+            disabled={pending}
+            onClick={() => run(() => archiveOrganization(organizationId))}
+          >
+            Arşivle
+          </button>
+        ) : null}
         <a
-          href={`https://license.cicibyte.com/admin`}
+          href="https://license.cicibyte.com/admin"
           target="_blank"
           rel="noreferrer"
           className="button px-4 py-2 text-sm"

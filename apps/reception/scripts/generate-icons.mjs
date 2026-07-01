@@ -22,6 +22,7 @@ async function main() {
   const resourcesDir = path.join(root, '..', 'resources');
   await sharp(logoSvg).resize(512, 512, { fit: 'contain' }).png().toFile(png512);
   fs.copyFileSync(png512, path.join(resourcesDir, 'icon.png'));
+  fs.copyFileSync(path.join(buildDir, 'icon.ico'), path.join(resourcesDir, 'icon.ico'));
 
   console.log('Icons generated in installer-branding/');
 }

@@ -1,7 +1,9 @@
 import { ConversationSidebar } from '@/components/conversation-sidebar';
 import { MessageLiveRefresh } from '@/components/message-live-refresh';
 import { MessageThreadPanel } from '@/components/message-thread-panel';
+import { MessageTypingBar } from '@/components/message-typing-bar';
 import { auth } from '@/lib/auth';
+import { parseOrganizationSettings } from '@/lib/admin/org-settings';
 import { intlLocaleFor } from '@/lib/format-locale';
 import { displayName } from '@/lib/messaging/conversations';
 import {
@@ -39,6 +41,13 @@ export default async function AthleteMessagesPage({
       trainer: { select: { id: true, name: true, email: true } },
     },
   });
+
+  const org = await prisma.organization.findUnique({
+    where: { id: organizationId },
+    select: { settings: true },
+  });
+  const orgSettings = parseOrganizationSettings(org?.settings);
+  const enableReports = orgSettings.features?.messageReports !== false;
 
   const peerMeta = new Map<string, { name: string; subtitle?: string }>();
 
@@ -111,6 +120,11 @@ export default async function AthleteMessagesPage({
 
         {activePeer && activePeerId ? (
           <div className="flex min-h-0 flex-col">
+            <MessageTypingBar
+              peerId={activePeerId}
+              userId={userId}
+              organizationId={organizationId}
+            />
             <MessageThreadPanel
               messages={threadMessages}
               currentUserId={userId}
@@ -118,6 +132,7 @@ export default async function AthleteMessagesPage({
               dateLocale={dateLocale}
               listHref="/athlete/messages"
               canCompose
+              enableReports={enableReports}
             />
           </div>
         ) : conversationList.length === 0 ? (

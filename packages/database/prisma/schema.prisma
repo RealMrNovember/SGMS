@@ -74,6 +74,12 @@ enum OrganizationRole {
   VIEWER
 }
 
+enum MessageReportStatus {
+  OPEN
+  REVIEWED
+  DISMISSED
+}
+
 enum AuditAction {
   ORGANIZATION_CREATED
   ORGANIZATION_UPDATED
@@ -91,6 +97,10 @@ enum AuditAction {
   USER_CREATED
   USER_UPDATED
   USER_LOGIN
+  USER_LOGIN_FAILED
+  USER_LOGOUT
+  ACCESS_DENIED
+  API_ERROR
   MEMBER_INVITED
   MEMBER_UPDATED
   MEMBER_REMOVED
@@ -101,6 +111,8 @@ enum AuditAction {
   EXPENSE_VOIDED
   PAYMENT_RECORDED
   SETTINGS_CHANGED
+  AUDIT_LOG_DELETED
+  MESSAGE_REPORTED
 }
 
 enum GymMemberStatus {
@@ -195,6 +207,8 @@ model User {
   trainingPrograms   TrainingProgram[]    @relation("TrainingProgramTrainer")
   sentMessages       DirectMessage[]      @relation("DirectMessageSender")
   receivedMessages   DirectMessage[]      @relation("DirectMessageReceiver")
+  messageReports     MessageReport[]      @relation("MessageReportReporter")
+  reviewedReports    MessageReport[]      @relation("MessageReportReviewer")
   apiTokens          ApiToken[]
   expensesCreated    Expense[]            @relation("ExpenseCreatedBy")
   transactionsCreated Transaction[]       @relation("TransactionCreatedBy")
@@ -243,6 +257,7 @@ model Organization {
   healthMeasurements HealthMeasurement[]
   trainingPrograms   TrainingProgram[]
   directMessages     DirectMessage[]
+  messageReports     MessageReport[]
   apiTokens          ApiToken[]
   expenseCategories  ExpenseCategory[]
   expenses           Expense[]
@@ -529,11 +544,34 @@ model DirectMessage {
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   sender       User         @relation("DirectMessageSender", fields: [senderId], references: [id], onDelete: Cascade)
   receiver     User         @relation("DirectMessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  reports      MessageReport[]
 
   @@index([organizationId, receiverId, isRead, createdAt])
   @@index([organizationId, senderId, createdAt])
   @@index([organizationId, senderId, receiverId, createdAt])
   @@map("direct_messages")
+}
+
+model MessageReport {
+  id             String              @id @default(cuid())
+  organizationId String              @map("organization_id")
+  messageId      String              @map("message_id")
+  reporterId     String              @map("reporter_id")
+  reason         String              @db.Text
+  status         MessageReportStatus @default(OPEN)
+  reviewedById   String?             @map("reviewed_by_id")
+  reviewedAt     DateTime?           @map("reviewed_at")
+  reviewNotes    String?             @map("review_notes") @db.Text
+  createdAt      DateTime            @default(now()) @map("created_at")
+
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  message      DirectMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  reporter     User          @relation("MessageReportReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  reviewedBy   User?         @relation("MessageReportReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, status, createdAt])
+  @@index([messageId])
+  @@map("message_reports")
 }
 
 // ---------------------------------------------------------------------------

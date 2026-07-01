@@ -1,6 +1,7 @@
 'use server';
 
 import { auth } from '@/lib/auth';
+import { consumeMessageRateLimit, consumeTypingRateLimit } from '@/lib/rate-limit';
 import { publishMessageEvent } from '@/lib/realtime/hub';
 import { prisma } from '@/lib/prisma';
 import { getTenantWriteBlockReason } from '@/lib/tenant-access';
@@ -46,6 +47,11 @@ export async function sendDirectMessage(
   const writeBlock = await getTenantWriteBlockReason(context.organizationId);
   if (writeBlock) {
     return { error: writeBlock };
+  }
+
+  const rate = await consumeMessageRateLimit(context.userId, context.organizationId);
+  if (!rate.allowed) {
+    return { error: 'Çok hızlı mesaj gönderiyorsunuz. Lütfen bir dakika bekleyin.' };
   }
 
   const parsed = sendMessageSchema.safeParse({
@@ -110,6 +116,27 @@ export async function sendDirectMessage(
   revalidatePath('/athlete/messages');
 
   return { success: 'Mesaj gönderildi.' };
+}
+
+export async function sendTypingPulse(receiverId: string): Promise<void> {
+  const context = await getMessageContext();
+  if ('error' in context || receiverId === context.userId) {
+    return;
+  }
+
+  const rate = await consumeTypingRateLimit(context.userId, context.organizationId);
+  if (!rate.allowed) {
+    return;
+  }
+
+  const { publishTypingEvent } = await import('@/lib/realtime/hub');
+  publishTypingEvent({
+    type: 'message.typing',
+    organizationId: context.organizationId,
+    userIds: [receiverId],
+    senderId: context.userId,
+    receiverId,
+  });
 }
 
 export async function markMessageRead(messageId: string): Promise<{ error?: string }> {

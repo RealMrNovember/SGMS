@@ -11,6 +11,8 @@ export type SyncPushEvent = {
   rfidTag?: string;
   qrToken?: string;
   checkedInAt?: string;
+  /** last-write-wins (default) | server-wins | client-wins | reject-if-newer-exists */
+  conflictPolicy?: 'last-write-wins' | 'server-wins' | 'client-wins' | 'reject-if-newer-exists';
 };
 
 export type SyncPushEventResult = {
@@ -73,6 +75,7 @@ export async function processSyncPushBatch(input: {
       rfidTag: event.rfidTag,
       qrToken: event.qrToken,
       checkedInAt: parseCheckedInAt(event.checkedInAt),
+      conflictPolicy: event.conflictPolicy,
     });
 
     if (result.ok) {

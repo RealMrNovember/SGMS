@@ -1,8 +1,10 @@
 import { AdminBadge } from '@/components/admin/admin-badge';
 import { BillingRequestActions } from '@/components/admin/billing-request-actions';
 import { CopyEmailBlock } from '@/components/admin/copy-email-block';
-import { OrganizationAdminActions } from '@/components/admin/organization-admin-actions';
+import { OrganizationProfileForm } from '@/components/admin/organization-profile-form';
 import { OrganizationQuickActions } from '@/components/admin/organization-quick-actions';
+import { OrganizationSubscriptionPanel } from '@/components/admin/organization-subscription-panel';
+import { OrganizationTeamPanel } from '@/components/admin/organization-team-panel';
 import { auth } from '@/lib/auth';
 import { adminEmailTemplates, fillEmailTemplate } from '@/lib/admin/email-templates';
 import {
@@ -34,7 +36,10 @@ export default async function AdminOrganizationDetailPage({
   const { id } = await params;
   const tAdmin = await getTranslations('admin');
 
-  const [org, plans] = await Promise.all([getOrganizationAdminDetail(id), listActivePlans()]);
+  const [org, plans] = await Promise.all([
+    getOrganizationAdminDetail(id),
+    listActivePlans(),
+  ]);
 
   if (!org) {
     notFound();
@@ -134,9 +139,22 @@ export default async function AdminOrganizationDetailPage({
 
       <section className="space-y-4">
         <h3 className="text-lg font-semibold">{tAdmin('actionsTitle')}</h3>
-        <OrganizationAdminActions
+        <OrganizationProfileForm organization={org} />
+        <OrganizationSubscriptionPanel
           organizationId={org.id}
           plans={plans.map((p) => ({ id: p.id, name: p.name, code: p.code }))}
+          subscription={
+            subscription
+              ? {
+                  id: subscription.id,
+                  status: subscription.status,
+                  billingCycle: subscription.billingCycle,
+                  trialEndsAt: subscription.trialEndsAt,
+                  currentPeriodEnd: subscription.currentPeriodEnd,
+                  planId: subscription.planId,
+                }
+              : null
+          }
           isTrialing={isTrialing}
         />
       </section>
@@ -199,56 +217,36 @@ export default async function AdminOrganizationDetailPage({
         </div>
       </section>
 
-      <section className="card overflow-hidden">
-        <div className="border-b border-[var(--border)] px-6 py-4">
+      <section className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <h3 className="text-lg font-semibold">{tAdmin('teamTitle')}</h3>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="muted border-b border-[var(--border)] text-xs uppercase">
-              <tr>
-                <th className="px-6 py-3">Ad</th>
-                <th className="px-6 py-3">E-posta</th>
-                <th className="px-6 py-3">Rol</th>
-                <th className="px-6 py-3">Durum</th>
-              </tr>
-            </thead>
-            <tbody>
-              {org.members.map((member) => (
-                <tr key={member.id} className="border-b border-[var(--border)] last:border-none">
-                  <td className="px-6 py-4">{member.user.name}</td>
-                  <td className="px-6 py-4">
-                    <a href={`mailto:${member.user.email}`} className="hover:underline">
-                      {member.user.email}
-                    </a>
-                  </td>
-                  <td className="px-6 py-4">{member.role}</td>
-                  <td className="px-6 py-4">{member.isActive ? 'Aktif' : 'Pasif'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <OrganizationTeamPanel
+          organizationId={org.id}
+          members={org.members.map((member) => ({
+            id: member.id,
+            role: member.role,
+            isActive: member.isActive,
+            rfidTag: member.rfidTag,
+            joinedAt: member.joinedAt,
+            user: member.user,
+          }))}
+        />
       </section>
 
-      <section className="card overflow-hidden">
-        <div className="border-b border-[var(--border)] px-6 py-4">
-          <h3 className="text-lg font-semibold">{tAdmin('auditTitle')}</h3>
+      <section className="card overflow-hidden p-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h3 className="text-lg font-semibold">{tAdmin('auditTitle')}</h3>
+            <p className="muted mt-1 text-sm">{tAdmin('auditOrgPreview')}</p>
+          </div>
+          <Link
+            href={`/admin/organizations/${org.id}/audit`}
+            className="button button-gold px-4 py-2 text-sm"
+          >
+            {tAdmin('auditOpenFull')} →
+          </Link>
         </div>
-        <ul className="divide-y divide-[var(--border)]">
-          {org.auditLogs.map((log) => (
-            <li key={log.id} className="px-6 py-4 text-sm">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="font-medium">{log.action}</span>
-                <span className="muted text-xs">{formatDateTimeTr(log.createdAt)}</span>
-              </div>
-              <p className="muted mt-1 text-xs">
-                {log.actor?.name ?? 'Sistem'}
-                {log.actor?.email ? ` · ${log.actor.email}` : ''}
-              </p>
-            </li>
-          ))}
-        </ul>
       </section>
     </div>
   );

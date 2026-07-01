@@ -5,6 +5,7 @@ import {
   bootstrapOrganizationLicense,
   resolveOrganizationLicenseMetadata,
 } from '@/lib/license';
+import { writeAdminAuditLog } from '@/lib/admin/audit-write';
 import { appendSupportNote, parseOrganizationSettings } from '@/lib/admin/org-settings';
 import { prisma } from '@/lib/prisma';
 import type { OrganizationStatus, Prisma } from '@sgms/database';
@@ -28,6 +29,7 @@ function revalidateOrg(orgId: string) {
   revalidatePath('/admin');
   revalidatePath('/admin/organizations');
   revalidatePath(`/admin/organizations/${orgId}`);
+  revalidatePath('/admin/audit');
 }
 
 export async function updateOrganizationStatus(
@@ -387,4 +389,247 @@ export async function suspendOrganization(organizationId: string): Promise<Admin
 
 export async function activateOrganization(organizationId: string): Promise<AdminActionState> {
   return updateOrganizationStatus(organizationId, 'ACTIVE');
+}
+
+export async function archiveOrganization(organizationId: string): Promise<AdminActionState> {
+  return updateOrganizationStatus(organizationId, 'ARCHIVED');
+}
+
+const profileSchema = z.object({
+  organizationId: z.string().cuid(),
+  name: z.string().min(2).max(120),
+  email: z.string().email().optional().or(z.literal('')),
+  phone: z.string().max(32).optional().or(z.literal('')),
+  address: z.string().max(200).optional().or(z.literal('')),
+  city: z.string().max(80).optional().or(z.literal('')),
+  country: z.string().length(2),
+  timezone: z.string().min(3).max(64),
+});
+
+export async function updateOrganizationProfile(
+  _prev: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  const parsed = profileSchema.safeParse({
+    organizationId: formData.get('organizationId'),
+    name: formData.get('name'),
+    email: formData.get('email') ?? '',
+    phone: formData.get('phone') ?? '',
+    address: formData.get('address') ?? '',
+    city: formData.get('city') ?? '',
+    country: formData.get('country'),
+    timezone: formData.get('timezone'),
+  });
+
+  if (!parsed.success) {
+    return { error: 'Salon bilgilerini kontrol edin.' };
+  }
+
+  try {
+    const session = await requireSuperAdmin();
+    const data = parsed.data;
+
+    const org = await prisma.organization.findUnique({ where: { id: data.organizationId } });
+    if (!org) {
+      return { error: 'Organizasyon bulunamadı.' };
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.organization.update({
+        where: { id: data.organizationId },
+        data: {
+          name: data.name.trim(),
+          email: data.email?.trim() || null,
+          phone: data.phone?.trim() || null,
+          address: data.address?.trim() || null,
+          city: data.city?.trim() || null,
+          country: data.country,
+          timezone: data.timezone,
+        },
+      });
+
+      await writeAdminAuditLog({
+        actorId: session.user.id!,
+        organizationId: data.organizationId,
+        action: 'ORGANIZATION_UPDATED',
+        entityType: 'organization',
+        entityId: data.organizationId,
+        metadata: {
+          fields: ['name', 'email', 'phone', 'address', 'city', 'country', 'timezone'],
+          previousName: org.name,
+        },
+      });
+    });
+
+    revalidateOrg(data.organizationId);
+    return { success: 'Salon profili güncellendi.' };
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : 'Profil güncellenemedi.' };
+  }
+}
+
+const periodSchema = z.object({
+  organizationId: z.string().cuid(),
+  planId: z.string().cuid(),
+  status: z.enum(['TRIALING', 'ACTIVE', 'PAST_DUE', 'CANCELED', 'EXPIRED']),
+  billingCycle: z.enum(['MONTHLY', 'YEARLY']),
+  periodEnd: z.string().min(8),
+});
+
+export async function setOrganizationSubscription(
+  _prev: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  const parsed = periodSchema.safeParse({
+    organizationId: formData.get('organizationId'),
+    planId: formData.get('planId'),
+    status: formData.get('status'),
+    billingCycle: formData.get('billingCycle'),
+    periodEnd: formData.get('periodEnd'),
+  });
+
+  if (!parsed.success) {
+    return { error: 'Abonelik alanlarını kontrol edin.' };
+  }
+
+  try {
+    const session = await requireSuperAdmin();
+    const { organizationId, planId, status, billingCycle, periodEnd } = parsed.data;
+    const endDate = new Date(periodEnd);
+    if (Number.isNaN(endDate.getTime())) {
+      return { error: 'Geçerli bir bitiş tarihi girin.' };
+    }
+
+    const plan = await prisma.plan.findFirst({ where: { id: planId, isActive: true } });
+    if (!plan) {
+      return { error: 'Plan bulunamadı.' };
+    }
+
+    const subscription = await prisma.subscription.findFirst({
+      where: { organizationId },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (!subscription) {
+      return { error: 'Abonelik kaydı bulunamadı.' };
+    }
+
+    const licenseStatus =
+      status === 'TRIALING' ? 'TRIAL' : status === 'ACTIVE' ? 'ACTIVE' : 'EXPIRED';
+
+    await prisma.$transaction(async (tx) => {
+      await tx.subscription.update({
+        where: { id: subscription.id },
+        data: {
+          planId,
+          status,
+          billingCycle,
+          trialEndsAt: status === 'TRIALING' ? endDate : null,
+          currentPeriodStart: new Date(),
+          currentPeriodEnd: endDate,
+          canceledAt: status === 'CANCELED' ? new Date() : null,
+        },
+      });
+
+      await tx.organization.update({
+        where: { id: organizationId },
+        data: {
+          status:
+            status === 'CANCELED' || status === 'EXPIRED'
+              ? orgStatusForSubscription(status)
+              : 'ACTIVE',
+          centralLicenseStatus: licenseStatus,
+          licenseExpiresAt: endDate,
+        },
+      });
+
+      await writeAdminAuditLog({
+        actorId: session.user.id!,
+        organizationId,
+        action: 'SUBSCRIPTION_CHANGED',
+        entityType: 'subscription',
+        entityId: subscription.id,
+        metadata: {
+          planCode: plan.code,
+          status,
+          billingCycle,
+          periodEnd: endDate.toISOString(),
+          updatedBy: 'master_admin',
+        },
+      });
+    });
+
+    revalidateOrg(organizationId);
+    return { success: 'Abonelik ve süre güncellendi.' };
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : 'Abonelik güncellenemedi.' };
+  }
+}
+
+function orgStatusForSubscription(status: string) {
+  if (status === 'CANCELED' || status === 'EXPIRED') return 'SUSPENDED' as const;
+  return 'ACTIVE' as const;
+}
+
+const cancelSchema = z.object({
+  organizationId: z.string().cuid(),
+});
+
+export async function cancelOrganizationSubscription(
+  _prev: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  const parsed = cancelSchema.safeParse({
+    organizationId: formData.get('organizationId'),
+  });
+
+  if (!parsed.success) {
+    return { error: 'Geçersiz organizasyon.' };
+  }
+
+  try {
+    const session = await requireSuperAdmin();
+    const { organizationId } = parsed.data;
+
+    const subscription = await prisma.subscription.findFirst({
+      where: { organizationId },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (!subscription) {
+      return { error: 'Abonelik kaydı bulunamadı.' };
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.subscription.update({
+        where: { id: subscription.id },
+        data: {
+          status: 'CANCELED',
+          canceledAt: new Date(),
+          cancelAtPeriodEnd: false,
+        },
+      });
+
+      await tx.organization.update({
+        where: { id: organizationId },
+        data: {
+          centralLicenseStatus: 'REVOKED',
+        },
+      });
+
+      await writeAdminAuditLog({
+        actorId: session.user.id!,
+        organizationId,
+        action: 'SUBSCRIPTION_CANCELED',
+        entityType: 'subscription',
+        entityId: subscription.id,
+        metadata: { canceledBy: 'master_admin' },
+      });
+    });
+
+    revalidateOrg(organizationId);
+    return { success: 'Abonelik iptal edildi.' };
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : 'Abonelik iptal edilemedi.' };
+  }
 }

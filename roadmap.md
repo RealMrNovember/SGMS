@@ -121,7 +121,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 ### 3.1 Nginx & TLS
 - [x] aaPanel `sgms.cicibyte.com` → reverse proxy `127.0.0.1:3100`
 - [x] `/_next/static/` Nginx alias
-- [ ] Site PHP → Static (aaPanel manuel; proxy çalışıyor)
+- [x] Site PHP → Static (aaPanel manuel; proxy çalışıyor) — `docs/deployment/AAPANEL-PHP-STATIC.md`
 - [x] TLS / Cloudflare — `https://sgms.cicibyte.com/login` → 200
 - [x] `AUTH_URL` prod doğrulandı
 
@@ -149,7 +149,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ### 4.3 Mesajlaşma (async — polling tabanlı)
 - [x] `/dashboard/messages` — inbox / sent, okundu işaretleme
-- [ ] Thread + real-time → **Faz 9** ✅ (Soketi + thread UI)
+- [x] Thread + real-time → **Faz 9** ✅ (Soketi + thread UI)
 
 ### 4.4 Salon üyelik planları
 - [x] `/dashboard/plans` — `GymMembershipPlan` CRUD
@@ -177,7 +177,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ---
 
-## 🔲 Faz 6 — Uluslararasılaşma (i18n) & Medya/Kimlik (Öncelik: P0)
+## 🔲 Faz 6 — Uluslararasılaşma (i18n) & Medya/Kimlik (Öncelik: P0) — TAMAMLANDI
 
 > **Hedef:** Premium, uluslararası salon markası deneyimi. Resepsiyon ve PT sporcuları isim + fotoğrafla tanır.
 
@@ -205,7 +205,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 - [x] `User.locale` — JWT session + DB
 - [x] `GymMember.locale` — sporcu paneli için (şema hazır)
 - [x] `LocaleSwitcher` — login + dashboard/admin header (cookie + DB güncelleme)
-- [ ] Org düzeyi varsayılan dil: `Organization.settings.defaultLocale`
+- [x] Org düzeyi varsayılan dil: `Organization.settings.defaultLocale` — `/dashboard/settings`
 
 **Kapsam (aşamalı çeviri)**
 - [x] Faz 6a (kısmi): Auth, dashboard nav, admin nav
@@ -223,7 +223,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 **Veritabanı**
 - [x] `User.avatarUrl` — nullable `String` (migration `20260609140000_add_avatars_and_locales`)
 - [x] `GymMember.avatarUrl` — nullable `String`
-- [ ] Migration + seed placeholder avatarları (opsiyonel)
+- [x] Migration + seed placeholder avatarları (opsiyonel) — `SEED_PLACEHOLDER_AVATARS=true` + `public/placeholders/*.svg`
 
 **UI / UX**
 - [x] Üye listesi: avatar + isim (resepsiyon tanıma)
@@ -233,10 +233,10 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 **Depolama (aşamalı)**
 - [x] **Faz 6.2a:** Local storage abstraction (`lib/storage.ts`) + `POST /api/v1/upload/avatar`
-- [ ] **Faz 6.2b:** Object storage — **Cloudflare R2** (tercih) veya AWS S3
+- [x] **Faz 6.2b:** Object storage — **Cloudflare R2** (tercih) veya AWS S3
   - [x] `lib/storage-r2.ts` + `STORAGE_PROVIDER=r2` (docs: `docs/deployment/R2-STORAGE.md`)
   - [x] Upload API: `POST /api/v1/upload/avatar` (tenant + rol guard)
-  - [ ] Signed URL / public CDN path
+  - [x] Signed URL / public CDN path — `R2_USE_SIGNED_URLS` + `getSignedAvatarUrl()`
   - [x] Max boyut, MIME whitelist (`image/jpeg`, `image/png`, `image/webp`)
 
 **Güvenlik**
@@ -259,7 +259,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 - [x] `POST /api/v1/auth/logout` — token revoke (DB `revokedAt`)
 - [x] `lib/api/token.ts` + `lib/api/auth-context.ts` — Bearer doğrulama
 - [x] `lib/api/guard.ts` — session + Bearer birleşik context
-- [ ] Token revoke Redis cache (opsiyonel — P2)
+- [x] Token revoke Redis cache (opsiyonel — P2) — `lib/api/token-revoke-cache.ts` + `REDIS_URL`
 
 ### 7.2 Sporcu oturumu
 - [x] `GymMember.userId` → JWT session `gymMemberId` claim
@@ -337,7 +337,7 @@ Organization ─┬─ ExpenseCategory
 ### 8.4 Raporlama (minimal)
 - [x] Günlük kasa özeti (OWNER/ADMIN — POS üst panel)
 - [x] Üye bazlı ekstre export CSV — `GET /api/v1/members/{id}/statement`
-- [ ] Üye bazlı ekstre PDF (P2)
+- [x] Üye bazlı ekstre PDF (P2) — `GET /api/v1/members/{id}/statement?format=pdf` + `lib/member-statement-pdf.ts`
 
 **Kabul kriteri:** Resepsiyon "Su - 15 TL" ekler → sporcu panelinde borç görünür → tahsilat sonrası bakiye sıfırlanır
 
@@ -345,7 +345,7 @@ Organization ─┬─ ExpenseCategory
 
 ---
 
-## ✅ Faz 9 — Gerçek Zamanlı İletişim (Real-time Chat) (Öncelik: P2) — TAMAMLANDI (typing P2)
+## ✅ Faz 9 — Gerçek Zamanlı İletişim (Real-time Chat) (Öncelik: P2) — TAMAMLANDI
 
 > **Hedef:** Mevcut `DirectMessage` üzerine WhatsApp benzeri anlık mesajlaşma.
 
@@ -374,12 +374,12 @@ Organization ─┬─ ExpenseCategory
 - [x] Sporcu portal mesajları — thread + canlı yenileme
 - [x] Konuşma thread görünümü (1:1 aktif sohbet, `?with=userId`)
 - [x] Unread badge (dashboard nav + sporcu alt menü)
-- [ ] Typing indicator (P2)
+- [x] Typing indicator (P2) — `message.typing` + `MessageTypingBar` (dashboard + sporcu)
 
 ### 9.4 Güvenlik
 - [x] Kanal yetkisi: `private-org.{orgId}.user.{userId}` + auth endpoint
-- [ ] Rate limit (mesaj flood)
-- [ ] Audit: şikayet / moderasyon (P3)
+- [x] Rate limit (mesaj flood) — `lib/rate-limit.ts` (`MESSAGE_RATE_LIMIT_PER_MINUTE`)
+- [x] Audit: şikayet / moderasyon (P3) — `MessageReport` + `/admin/moderation` + thread şikayet UI
 
 **Kabul kriteri:** PT mesaj gönderir → sporcu paneli anında güncellenir (WebSocket, <2 sn)
 
@@ -404,20 +404,20 @@ Organization ─┬─ ExpenseCategory
 - [x] Sporcu paneli — giriş QR kartı
 - [x] Giriş / çıkış (`direction`: ENTRY | EXIT) + personel RFID
 - [x] **SGMS Resepsiyon** masaüstü (`apps/reception`) — Electron + Vite + React, logo, frameless UI, Windows toast
-- [ ] Webhook: `POST /api/v1/webhooks/turnstile` — üçüncü parti turnike yazılımı
+- [x] Webhook: `POST /api/v1/webhooks/turnstile` — üçüncü parti turnike yazılımı (`TURNSTILE_WEBHOOK_SECRET` veya device key)
 
 ### 10.3 Offline sync
 - [x] `SyncBatch` modeli — `deviceId`, queued events, `syncedAt`
 - [x] `POST /api/v1/sync/push` + `GET /api/v1/sync/pull`
 - [x] Idempotent `clientEventId` + `AuditLog`
-- [ ] Çakışma politikası genişletmesi (last-write-wins dışı senaryolar)
+- [x] Çakışma politikası genişletmesi — `client-wins`, `server-wins`, `reject-if-newer-exists` (`sync/push` + `process.ts`)
 
 ### 10.4 Dokümantasyon & istemci
 - [x] `docs/api/turnstile-protocol.md`
 - [x] Emülatör script (`scripts/turnstile-emulator.sh`)
 - [x] Resepsiyon senaryosu: `docs/desktop/RECEPTION-SCENARIO.md`
 - [x] Windows installer: `docs/desktop/INSTALL.md` · `pnpm reception:dist`
-- [ ] Kod imzalama (Authenticode — SmartScreen)
+- [x] Kod imzalama (Authenticode — SmartScreen) — `docs/desktop/CODE-SIGNING.md` + `scripts/sign-reception.ps1`
 
 **Kabul kriteri:** Offline check-in kuyruğu → online sync → `AuditLog` + üye giriş kaydı
 
@@ -464,7 +464,7 @@ Organization ─┬─ ExpenseCategory
 | E2E (Playwright): login, CRM ölçüm, expense | P2 | 7–8 |
 | Super Admin: org detay + askıya alma | P2 | — |
 | `readme.md` ↔ `roadmap.md` senkron | P2 | — |
-| PHP → Static (aaPanel) | P3 | 3 |
+| PHP → Static (aaPanel) | P3 | 3 | ✅ `docs/deployment/AAPANEL-PHP-STATIC.md` |
 | CI/CD GitHub Actions (`migrate deploy` + build) | P2 | 3 |
 | ~~i18n TR/EN~~ | — | → **Faz 6 (6 dil)** |
 

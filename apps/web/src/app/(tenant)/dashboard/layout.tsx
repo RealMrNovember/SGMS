@@ -59,6 +59,7 @@ export default async function TenantDashboardLayout({ children }: { children: Re
         { href: '/dashboard/check-in', label: t('checkIn') },
         { href: '/dashboard/pos', label: t('pos') },
         { href: '/dashboard/team', label: t('team') },
+        { href: '/dashboard/settings', label: t('settings') },
         { href: '/dashboard/billing', label: tBilling('nav') },
       ];
 

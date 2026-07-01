@@ -11,6 +11,15 @@ export type SupportNote = {
 export type OrganizationSettings = {
   supportNotes?: SupportNote[];
   licenseError?: string;
+  /** Salon varsayılan dili — yeni kullanıcılar ve cookie yokken */
+  defaultLocale?: string;
+  /** Opsiyonel özellik bayrakları */
+  features?: {
+    typingIndicator?: boolean;
+    messageReports?: boolean;
+    signedAvatarUrls?: boolean;
+    tokenRevokeRedisCache?: boolean;
+  };
   [key: string]: unknown;
 };
 

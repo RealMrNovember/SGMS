@@ -2,6 +2,7 @@ import {
   getReceptionDesktopDownloadUrl,
   receptionDesktopRelease,
 } from '@/lib/reception-desktop';
+import { MarketingReveal } from '@/components/marketing/marketing-motion';
 import { getTranslations } from 'next-intl/server';
 
 type Variant = 'marketing' | 'card' | 'compact';
@@ -23,7 +24,8 @@ export async function ReceptionDownloadPromo({ variant }: Props) {
   if (variant === 'marketing') {
     return (
       <section id="reception-desktop" className="mx-auto max-w-6xl px-4 py-12 sm:px-5 sm:py-16 lg:px-8">
-        <div className="reception-promo-band">
+        <MarketingReveal variant="scale-in">
+          <div className="reception-promo-band">
           <div className="reception-promo-copy">
             <p className="marketing-kicker">{t('badge')}</p>
             <h2 className="mt-4 text-2xl font-semibold tracking-tight sm:text-3xl">{t('title')}</h2>
@@ -47,6 +49,7 @@ export async function ReceptionDownloadPromo({ variant }: Props) {
             <p className="muted mt-3 text-xs">{metaLabel}</p>
           </div>
         </div>
+        </MarketingReveal>
       </section>
     );
   }

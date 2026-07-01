@@ -1,8 +1,8 @@
 'use client';
 
-import { sendDirectMessage, type SendMessageState } from '@/actions/messages';
+import { sendDirectMessage, sendTypingPulse, type SendMessageState } from '@/actions/messages';
 import { useTranslations } from 'next-intl';
-import { useActionState } from 'react';
+import { useActionState, useEffect, useRef } from 'react';
 
 const initialState: SendMessageState = {};
 
@@ -17,6 +17,20 @@ export function MessageCompose({
 }) {
   const t = useTranslations('messages.compose');
   const [state, formAction, pending] = useActionState(sendDirectMessage, initialState);
+  const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (typingTimer.current) clearTimeout(typingTimer.current);
+    };
+  }, []);
+
+  function handleTyping() {
+    if (typingTimer.current) clearTimeout(typingTimer.current);
+    typingTimer.current = setTimeout(() => {
+      void sendTypingPulse(receiverId);
+    }, 350);
+  }
 
   return (
     <div className={compact ? 'border-t border-[var(--border)] p-4' : 'space-y-4'}>
@@ -41,6 +55,7 @@ export function MessageCompose({
             className="input min-h-[44px] resize-y text-sm"
             placeholder={t('placeholder')}
             required
+            onInput={handleTyping}
           />
         </div>
         <button

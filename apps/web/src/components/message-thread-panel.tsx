@@ -1,4 +1,5 @@
 import { MessageCompose } from '@/components/message-compose';
+import { MessageReportButton } from '@/components/message-report-button';
 import { displayName } from '@/lib/messaging/conversations';
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
@@ -18,6 +19,7 @@ export async function MessageThreadPanel({
   dateLocale,
   listHref,
   canCompose,
+  enableReports = false,
 }: {
   messages: ThreadMessage[];
   currentUserId: string;
@@ -25,6 +27,7 @@ export async function MessageThreadPanel({
   dateLocale: string;
   listHref: string;
   canCompose: boolean;
+  enableReports?: boolean;
 }) {
   const t = await getTranslations('messages.thread');
 
@@ -67,6 +70,9 @@ export async function MessageThreadPanel({
                   <p className={`mt-1.5 text-[10px] ${isMine ? 'text-white/60' : 'muted'}`}>
                     {message.createdAt.toLocaleString(dateLocale)}
                   </p>
+                  {!isMine && enableReports ? (
+                    <MessageReportButton messageId={message.id} />
+                  ) : null}
                 </div>
               </div>
             );

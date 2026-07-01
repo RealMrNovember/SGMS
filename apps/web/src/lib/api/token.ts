@@ -1,4 +1,5 @@
 import { createHash, randomBytes } from 'crypto';
+import { cacheRevokedToken, isTokenRevokedInCache } from '@/lib/api/token-revoke-cache';
 import { prisma } from '@/lib/prisma';
 import type { ApiTokenScope, OrganizationRole } from '@sgms/database';
 
@@ -61,6 +62,10 @@ export async function revokeApiTokenByPlain(plainToken: string) {
     data: { revokedAt: new Date() },
   });
 
+  const ttlDays = Number(process.env.API_TOKEN_TTL_DAYS ?? 30);
+  const ttlSeconds = Math.max(3600, ttlDays * 24 * 60 * 60);
+  void cacheRevokedToken(tokenHash, ttlSeconds);
+
   return true;
 }
 
@@ -79,6 +84,12 @@ export async function validateApiToken(plainToken: string): Promise<ValidatedApi
   }
 
   const tokenHash = hashApiToken(plainToken);
+
+  const cachedRevoked = await isTokenRevokedInCache(tokenHash);
+  if (cachedRevoked === true) {
+    return null;
+  }
+
   const record = await prisma.apiToken.findUnique({
     where: { tokenHash },
     select: {
@@ -94,6 +105,9 @@ export async function validateApiToken(plainToken: string): Promise<ValidatedApi
   });
 
   if (!record || record.revokedAt || record.expiresAt.getTime() <= Date.now()) {
+    if (record?.revokedAt) {
+      void cacheRevokedToken(tokenHash);
+    }
     return null;
   }
 

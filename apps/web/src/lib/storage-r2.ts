@@ -1,8 +1,10 @@
 import {
   DeleteObjectCommand,
+  GetObjectCommand,
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import type { AvatarUploadInput, AvatarUploadResult } from '@/lib/storage';
 
 const AVATAR_PREFIX = 'avatars';
@@ -67,6 +69,24 @@ export function relativeKeyFromR2Url(url: string): string | null {
   return objectKey.slice(AVATAR_PREFIX.length + 1);
 }
 
+export async function getSignedAvatarUrl(
+  relativeKey: string,
+  expiresInSeconds = Number(process.env.R2_SIGNED_URL_TTL_SECONDS ?? 3600),
+): Promise<string> {
+  const { bucket } = getR2Config();
+  const client = getR2Client();
+  const ttl = Number.isFinite(expiresInSeconds) && expiresInSeconds > 0 ? expiresInSeconds : 3600;
+
+  return getSignedUrl(
+    client,
+    new GetObjectCommand({
+      Bucket: bucket,
+      Key: buildR2ObjectKey(relativeKey),
+    }),
+    { expiresIn: ttl },
+  );
+}
+
 export async function uploadAvatarToR2(input: AvatarUploadInput): Promise<AvatarUploadResult> {
   const { bucket } = getR2Config();
   const client = getR2Client();
@@ -83,9 +103,12 @@ export async function uploadAvatarToR2(input: AvatarUploadInput): Promise<Avatar
     }),
   );
 
+  const useSigned =
+    process.env.R2_USE_SIGNED_URLS === 'true' || process.env.R2_USE_SIGNED_URLS === '1';
+
   return {
     key: relativeKey,
-    url: buildR2PublicUrl(relativeKey),
+    url: useSigned ? await getSignedAvatarUrl(relativeKey) : buildR2PublicUrl(relativeKey),
   };
 }
 

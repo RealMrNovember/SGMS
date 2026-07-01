@@ -1,0 +1,5 @@
+-- Security & auth audit events for full platform logging
+ALTER TYPE "AuditAction" ADD VALUE IF NOT EXISTS 'USER_LOGIN_FAILED';
+ALTER TYPE "AuditAction" ADD VALUE IF NOT EXISTS 'USER_LOGOUT';
+ALTER TYPE "AuditAction" ADD VALUE IF NOT EXISTS 'ACCESS_DENIED';
+ALTER TYPE "AuditAction" ADD VALUE IF NOT EXISTS 'API_ERROR';

@@ -1,6 +1,12 @@
 import { auth } from '@/lib/auth';
 import { siteConfig } from '@/lib/site-config';
 import { ReceptionDownloadPromo } from '@/components/reception/reception-download-promo';
+import {
+  MarketingHeroScene,
+  MarketingReveal,
+  MarketingStagger,
+} from '@/components/marketing/marketing-motion';
+import { MarketingStepsGrid } from '@/components/marketing/marketing-steps-grid';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
@@ -27,40 +33,55 @@ export default async function ShowcaseHomePage() {
   return (
     <>
       <section className="marketing-hero relative">
+        <MarketingHeroScene />
         <div className="marketing-grid-glow" aria-hidden />
         <div className="relative mx-auto max-w-6xl px-4 sm:px-5 lg:px-8">
-          <p className="marketing-kicker">{t('hero.kicker')}</p>
-          <h1 className="marketing-title mt-5">{t('hero.title')}</h1>
-          <p className="marketing-subtitle mt-6">{t('hero.subtitle')}</p>
+          <MarketingReveal immediate delay={0}>
+            <p className="marketing-kicker">{t('hero.kicker')}</p>
+          </MarketingReveal>
+          <MarketingReveal immediate delay={120}>
+            <h1 className="marketing-title mt-5">{t('hero.title')}</h1>
+          </MarketingReveal>
+          <MarketingReveal immediate delay={240}>
+            <p className="marketing-subtitle mt-6">{t('hero.subtitle')}</p>
+          </MarketingReveal>
 
-          <div className="marketing-hero-actions mt-10">
-            <Link href="/trial" className="button button-gold marketing-cta-btn">
-              {t('hero.ctaTrial', { days: siteConfig.trialDays })}
-            </Link>
-            <Link href="/login" className="button-outline-gold marketing-cta-btn">
-              {t('hero.ctaLogin')}
-            </Link>
-          </div>
+          <MarketingReveal immediate delay={360}>
+            <div className="marketing-hero-actions mt-10">
+              <Link href="/trial" className="button button-gold marketing-cta-btn">
+                {t('hero.ctaTrial', { days: siteConfig.trialDays })}
+              </Link>
+              <Link href="/login" className="button-outline-gold marketing-cta-btn">
+                {t('hero.ctaLogin')}
+              </Link>
+            </div>
+          </MarketingReveal>
 
-          <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <MarketingStagger
+            className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+            staggerMs={100}
+            immediate
+          >
             {STAT_KEYS.map((key) => (
               <div key={key} className="marketing-stat">
                 <p className="marketing-stat-value">{t(`stats.${key}.value`)}</p>
                 <p className="muted mt-1 text-sm">{t(`stats.${key}.label`)}</p>
               </div>
             ))}
-          </div>
+          </MarketingStagger>
         </div>
       </section>
 
       <section id="features" className="mx-auto max-w-6xl px-4 py-12 sm:px-5 sm:py-16 lg:px-8">
-        <div className="max-w-2xl">
-          <p className="marketing-kicker">{t('features.kicker')}</p>
-          <h2 className="mt-4 text-2xl font-semibold tracking-tight sm:text-3xl">{t('features.title')}</h2>
-          <p className="muted mt-4 text-sm leading-7">{t('features.subtitle')}</p>
-        </div>
+        <MarketingReveal>
+          <div className="max-w-2xl">
+            <p className="marketing-kicker">{t('features.kicker')}</p>
+            <h2 className="mt-4 text-2xl font-semibold tracking-tight sm:text-3xl">{t('features.title')}</h2>
+            <p className="muted mt-4 text-sm leading-7">{t('features.subtitle')}</p>
+          </div>
+        </MarketingReveal>
 
-        <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <MarketingStagger className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3" staggerMs={85}>
           {FEATURE_KEYS.map((key) => (
             <article key={key} className="marketing-feature-card">
               <span className="marketing-feature-icon" aria-hidden>
@@ -70,54 +91,65 @@ export default async function ShowcaseHomePage() {
               <p className="muted mt-2 text-sm leading-7">{t(`features.items.${key}.description`)}</p>
             </article>
           ))}
-        </div>
+        </MarketingStagger>
       </section>
 
       <ReceptionDownloadPromo variant="marketing" />
 
       <section id="why-sgms" className="mx-auto max-w-6xl px-4 py-6 sm:px-5 sm:py-8 lg:px-8">
-        <div className="marketing-cta-band p-6 sm:p-8 md:p-10">
-          <p className="marketing-kicker">{t('why.kicker')}</p>
-          <h2 className="mt-4 max-w-2xl text-2xl font-semibold tracking-tight sm:text-3xl">{t('why.title')}</h2>
-          <ul className="mt-8 grid gap-4 md:grid-cols-2">
-            {WHY_KEYS.map((key) => (
-              <li key={key} className="rounded-xl border border-[rgba(148,163,184,0.12)] bg-[rgba(11,18,32,0.55)] p-5">
-                <h3 className="font-medium">{t(`why.items.${key}.title`)}</h3>
-                <p className="muted mt-2 text-sm leading-7">{t(`why.items.${key}.description`)}</p>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <MarketingReveal variant="scale-in">
+          <div className="marketing-cta-band p-6 sm:p-8 md:p-10">
+            <p className="marketing-kicker">{t('why.kicker')}</p>
+            <h2 className="mt-4 max-w-2xl text-2xl font-semibold tracking-tight sm:text-3xl">{t('why.title')}</h2>
+            <MarketingStagger className="mt-8 grid gap-4 md:grid-cols-2" staggerMs={100}>
+              {WHY_KEYS.map((key) => (
+                <div
+                  key={key}
+                  className="rounded-xl border border-[rgba(148,163,184,0.12)] bg-[rgba(11,18,32,0.55)] p-5"
+                >
+                  <h3 className="font-medium">{t(`why.items.${key}.title`)}</h3>
+                  <p className="muted mt-2 text-sm leading-7">{t(`why.items.${key}.description`)}</p>
+                </div>
+              ))}
+            </MarketingStagger>
+          </div>
+        </MarketingReveal>
       </section>
 
       <section id="how-it-works" className="mx-auto max-w-6xl px-4 py-12 sm:px-5 sm:py-16 lg:px-8">
-        <p className="marketing-kicker">{t('how.kicker')}</p>
-        <h2 className="mt-4 text-2xl font-semibold tracking-tight sm:text-3xl">{t('how.title')}</h2>
-        <div className="mt-10 grid gap-8 md:grid-cols-3">
+        <MarketingReveal>
+          <p className="marketing-kicker">{t('how.kicker')}</p>
+          <h2 className="mt-4 text-2xl font-semibold tracking-tight sm:text-3xl">{t('how.title')}</h2>
+        </MarketingReveal>
+        <MarketingStepsGrid>
           {STEP_KEYS.map((key, index) => (
-            <article key={key} className="marketing-step" data-step={String(index + 1).padStart(2, '0')}>
+            <MarketingReveal key={key} delay={index * 160} as="article" className="marketing-step" data-step={String(index + 1).padStart(2, '0')}>
               <h3 className="text-lg font-semibold">{t(`how.steps.${key}.title`)}</h3>
               <p className="muted mt-2 text-sm leading-7">{t(`how.steps.${key}.description`)}</p>
-            </article>
+            </MarketingReveal>
           ))}
-        </div>
+        </MarketingStepsGrid>
       </section>
 
       <section className="mx-auto max-w-6xl px-4 pb-24 sm:px-5 lg:px-8 lg:pb-20">
-        <div className="marketing-cta-band flex flex-col items-start gap-6 p-6 sm:p-8 md:flex-row md:items-center md:justify-between md:p-10">
-          <div className="max-w-xl">
-            <h2 className="text-xl font-semibold sm:text-2xl md:text-3xl">{t('cta.title', { days: siteConfig.trialDays })}</h2>
-            <p className="muted mt-3 text-sm leading-7">{t('cta.subtitle')}</p>
+        <MarketingReveal variant="scale-in">
+          <div className="marketing-cta-band flex flex-col items-start gap-6 p-6 sm:p-8 md:flex-row md:items-center md:justify-between md:p-10">
+            <div className="max-w-xl">
+              <h2 className="text-xl font-semibold sm:text-2xl md:text-3xl">
+                {t('cta.title', { days: siteConfig.trialDays })}
+              </h2>
+              <p className="muted mt-3 text-sm leading-7">{t('cta.subtitle')}</p>
+            </div>
+            <div className="marketing-hero-actions">
+              <Link href="/trial" className="button button-gold marketing-cta-btn">
+                {t('cta.buttonTrial')}
+              </Link>
+              <Link href="/login" className="button-outline-gold marketing-cta-btn">
+                {t('cta.buttonLogin')}
+              </Link>
+            </div>
           </div>
-          <div className="marketing-hero-actions">
-            <Link href="/trial" className="button button-gold marketing-cta-btn">
-              {t('cta.buttonTrial')}
-            </Link>
-            <Link href="/login" className="button-outline-gold marketing-cta-btn">
-              {t('cta.buttonLogin')}
-            </Link>
-          </div>
-        </div>
+        </MarketingReveal>
       </section>
     </>
   );

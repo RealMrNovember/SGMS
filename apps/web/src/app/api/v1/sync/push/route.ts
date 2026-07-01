@@ -39,6 +39,9 @@ export async function POST(request: Request) {
       gymMemberId: typeof row.gymMemberId === 'string' ? row.gymMemberId : undefined,
       rfidTag: typeof row.rfidTag === 'string' ? row.rfidTag : undefined,
       qrToken: typeof row.qrToken === 'string' ? row.qrToken : undefined,
+      conflictPolicy: typeof row.conflictPolicy === 'string'
+        ? (row.conflictPolicy as SyncPushEvent['conflictPolicy'])
+        : undefined,
       checkedInAt: typeof row.checkedInAt === 'string' ? row.checkedInAt : undefined,
     };
   });

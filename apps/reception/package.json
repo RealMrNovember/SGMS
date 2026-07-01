@@ -1,6 +1,6 @@
 {
   "name": "@sgms/reception",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "description": "SGMS Resepsiyon — premium Windows masaüstü giriş/çıkış bildirimleri",
   "author": "CiCiByte",
@@ -68,8 +68,9 @@
     },
     "nsis": {
       "oneClick": false,
-      "perMachine": false,
-      "allowToChangeInstallationDirectory": true,
+      "perMachine": true,
+      "include": "installer-branding/installer.nsh",
+      "allowToChangeInstallationDirectory": false,
       "allowElevation": true,
       "installerIcon": "installer-branding/icon.ico",
       "uninstallerIcon": "installer-branding/icon.ico",
@@ -77,7 +78,6 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "SGMS Resepsiyon",
-      "menuCategory": "CiCiByte SGMS",
       "license": "installer-branding/LICENSE.txt",
       "runAfterFinish": true,
       "deleteAppDataOnUninstall": false

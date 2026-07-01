@@ -1,4 +1,5 @@
 import { TrialRegistrationForm } from '@/components/marketing/trial-registration-form';
+import { MarketingReveal, MarketingStagger } from '@/components/marketing/marketing-motion';
 import { SgmsLogo } from '@/components/brand/sgms-logo';
 import { siteConfig } from '@/lib/site-config';
 import { auth } from '@/lib/auth';
@@ -17,27 +18,39 @@ export default async function TrialPage() {
   return (
     <div className="mx-auto grid max-w-6xl gap-8 px-4 py-8 sm:px-5 sm:gap-10 lg:grid-cols-[1fr_1.05fr] lg:px-8 lg:py-16">
       <section className="space-y-6">
-        <Link href="/" className="muted inline-flex text-sm hover:text-white">
-          ← {t('backHome')}
-        </Link>
-        <SgmsLogo size="lg" href="/" />
-        <p className="marketing-kicker">{t('kicker')}</p>
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl md:text-4xl">{t('title', { days: siteConfig.trialDays })}</h1>
-        <p className="muted max-w-lg text-sm leading-7">{t('subtitle')}</p>
+        <MarketingReveal immediate>
+          <Link href="/" className="muted inline-flex text-sm hover:text-white">
+            ← {t('backHome')}
+          </Link>
+        </MarketingReveal>
+        <MarketingReveal immediate delay={80}>
+          <SgmsLogo size="lg" href="/" />
+        </MarketingReveal>
+        <MarketingReveal immediate delay={160}>
+          <p className="marketing-kicker">{t('kicker')}</p>
+          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl md:text-4xl">
+            {t('title', { days: siteConfig.trialDays })}
+          </h1>
+          <p className="muted max-w-lg text-sm leading-7">{t('subtitle')}</p>
+        </MarketingReveal>
 
-        <ul className="space-y-4 pt-2">
+        <MarketingStagger className="space-y-4 pt-2" staggerMs={90} immediate>
           {(['item1', 'item2', 'item3', 'item4'] as const).map((key) => (
-            <li key={key} className="flex gap-3 text-sm">
+            <li key={key} className="trial-benefit-item flex list-none gap-3 text-sm">
               <span className="text-[#c9a962]">◆</span>
               <span className="muted leading-7">{t(`includes.${key}`)}</span>
             </li>
           ))}
-        </ul>
+        </MarketingStagger>
 
-        <p className="muted text-xs leading-6">{t('disclaimer')}</p>
+        <MarketingReveal delay={400}>
+          <p className="muted text-xs leading-6">{t('disclaimer')}</p>
+        </MarketingReveal>
       </section>
 
-      <TrialRegistrationForm />
+      <MarketingReveal variant="scale-in" delay={200}>
+        <TrialRegistrationForm />
+      </MarketingReveal>
     </div>
   );
 }

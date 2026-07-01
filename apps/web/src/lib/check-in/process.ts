@@ -18,6 +18,7 @@ export type ProcessCheckInInput = {
   ipAddress?: string | null;
   userAgent?: string | null;
   skipRealtime?: boolean;
+  conflictPolicy?: 'last-write-wins' | 'server-wins' | 'client-wins' | 'reject-if-newer-exists';
 };
 
 export type ProcessCheckInResult =
@@ -27,7 +28,7 @@ export type ProcessCheckInResult =
       duplicateWithinHour: boolean;
       idempotent: boolean;
     }
-  | { ok: false; code: 'member_not_found' | 'member_inactive' | 'membership_expired' | 'invalid_qr' | 'org_mismatch' };
+  | { ok: false; code: 'member_not_found' | 'member_inactive' | 'membership_expired' | 'invalid_qr' | 'org_mismatch' | 'sync_conflict' };
 
 type ResolvedSubject =
   | {
@@ -230,6 +231,31 @@ export async function processCheckIn(input: ProcessCheckInInput): Promise<Proces
       },
     });
     if (existing) {
+      const policy = input.conflictPolicy ?? 'last-write-wins';
+
+      if (
+        policy === 'client-wins' &&
+        input.checkedInAt &&
+        input.checkedInAt.getTime() > existing.checkedInAt.getTime()
+      ) {
+        const updated = await prisma.checkIn.update({
+          where: { id: existing.id },
+          data: { checkedInAt: input.checkedInAt },
+          include: {
+            gymMember: { select: { firstName: true, lastName: true, avatarUrl: true, plan: { select: { name: true } } } },
+            staffUser: { select: { name: true, avatarUrl: true } },
+            device: { select: { name: true } },
+          },
+        });
+        existing.checkedInAt = updated.checkedInAt;
+      } else if (
+        policy === 'reject-if-newer-exists' &&
+        input.checkedInAt &&
+        existing.checkedInAt.getTime() >= input.checkedInAt.getTime()
+      ) {
+        return { ok: false, code: 'sync_conflict' };
+      }
+
       const personName = existing.gymMember
         ? `${existing.gymMember.firstName} ${existing.gymMember.lastName}`
         : (existing.staffUser?.name ?? '—');

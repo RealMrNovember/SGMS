@@ -1,8 +1,10 @@
 import { ConversationSidebar } from '@/components/conversation-sidebar';
 import { MessageLiveRefresh } from '@/components/message-live-refresh';
 import { MessageThreadPanel } from '@/components/message-thread-panel';
+import { MessageTypingBar } from '@/components/message-typing-bar';
 import { SendMessageForm } from '@/components/send-message-form';
 import { auth } from '@/lib/auth';
+import { parseOrganizationSettings } from '@/lib/admin/org-settings';
 import { intlLocaleFor } from '@/lib/format-locale';
 import {
   loadConversationSummaries,
@@ -10,6 +12,7 @@ import {
   loadThreadMessages,
   markPeerMessagesRead,
 } from '@/lib/messaging/load-messaging';
+import { prisma } from '@/lib/prisma';
 import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -37,6 +40,13 @@ export default async function MessagesPage({
     userId,
     t('recipientAthlete'),
   );
+
+  const org = await prisma.organization.findUnique({
+    where: { id: organizationId },
+    select: { settings: true },
+  });
+  const orgSettings = parseOrganizationSettings(org?.settings);
+  const enableReports = orgSettings.features?.messageReports !== false;
 
   const conversations = await loadConversationSummaries(organizationId, userId, peerMeta);
 
@@ -86,6 +96,11 @@ export default async function MessagesPage({
 
         {activePeer && activePeerId ? (
           <div className="flex min-h-0 flex-col">
+            <MessageTypingBar
+              peerId={activePeerId}
+              userId={userId}
+              organizationId={organizationId}
+            />
             <MessageThreadPanel
               messages={threadMessages}
               currentUserId={userId}
@@ -93,6 +108,7 @@ export default async function MessagesPage({
               dateLocale={dateLocale}
               listHref="/dashboard/messages"
               canCompose
+              enableReports={enableReports}
             />
           </div>
         ) : (

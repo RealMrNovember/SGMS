@@ -1,6 +1,7 @@
 'use server';
 
 import { auth } from '@/lib/auth';
+import { writeAdminAuditLog } from '@/lib/admin/audit-write';
 import {
   parseBillingSettings,
   updateBillingRequestStatus,
@@ -143,7 +144,17 @@ export async function rejectBillingRequest(
       data: { settings: nextSettings as Prisma.InputJsonValue },
     });
 
+    await writeAdminAuditLog({
+      actorId: session.user.id!,
+      organizationId,
+      action: 'SUBSCRIPTION_CHANGED',
+      entityType: 'billing_request',
+      entityId: requestId,
+      metadata: { status: 'rejected', rejectedBy: 'master_admin' },
+    });
+
     revalidatePath(`/admin/organizations/${organizationId}`);
+    revalidatePath('/admin/audit');
     return { success: 'Talep reddedildi.' };
   } catch (error) {
     return {

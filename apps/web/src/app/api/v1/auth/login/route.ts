@@ -1,6 +1,12 @@
 import { apiErrorI18n } from '@/lib/api/i18n-errors';
 import { apiOk } from '@/lib/api/response';
 import { issueApiToken } from '@/lib/api/token';
+import {
+  getRequestAuditContextFromRequest,
+  writeAccessDeniedAudit,
+  writeAuditLog,
+  writeLoginFailedAudit,
+} from '@/lib/audit/logger';
 import { prisma } from '@/lib/prisma';
 import type { ApiTokenScope, OrganizationRole } from '@sgms/database';
 import { compare } from 'bcryptjs';
@@ -42,6 +48,9 @@ function resolveLoginScope(
 }
 
 export async function POST(request: Request) {
+  const ctx = getRequestAuditContextFromRequest(request);
+  const path = new URL(request.url).pathname;
+
   let body: unknown;
   try {
     body = await request.json();
@@ -51,6 +60,15 @@ export async function POST(request: Request) {
 
   const parsed = loginSchema.safeParse(body);
   if (!parsed.success) {
+    void writeLoginFailedAudit({
+      email: typeof (body as { email?: unknown })?.email === 'string'
+        ? (body as { email: string }).email.toLowerCase()
+        : 'unknown',
+      reason: 'invalid_credentials_format',
+      source: 'api_v1',
+      ipAddress: ctx.ipAddress,
+      userAgent: ctx.userAgent,
+    });
     return apiErrorI18n('emailPasswordRequired', 400, request);
   }
 
@@ -70,12 +88,53 @@ export async function POST(request: Request) {
     },
   });
 
-  if (!user || user.status !== 'ACTIVE' || user.isSuperAdmin) {
+  if (!user) {
+    void writeLoginFailedAudit({
+      email,
+      reason: 'user_not_found',
+      source: 'api_v1',
+      ipAddress: ctx.ipAddress,
+      userAgent: ctx.userAgent,
+    });
+    return apiErrorI18n('invalidCredentials', 401, request);
+  }
+
+  if (user.status !== 'ACTIVE') {
+    void writeLoginFailedAudit({
+      email,
+      reason: 'user_inactive',
+      actorId: user.id,
+      organizationId: user.memberships[0]?.organizationId ?? null,
+      source: 'api_v1',
+      ipAddress: ctx.ipAddress,
+      userAgent: ctx.userAgent,
+    });
+    return apiErrorI18n('invalidCredentials', 401, request);
+  }
+
+  if (user.isSuperAdmin) {
+    void writeLoginFailedAudit({
+      email,
+      reason: 'super_admin_blocked',
+      actorId: user.id,
+      source: 'api_v1',
+      ipAddress: ctx.ipAddress,
+      userAgent: ctx.userAgent,
+    });
     return apiErrorI18n('invalidCredentials', 401, request);
   }
 
   const valid = await compare(parsed.data.password, user.passwordHash);
   if (!valid) {
+    void writeLoginFailedAudit({
+      email,
+      reason: 'invalid_password',
+      actorId: user.id,
+      organizationId: user.memberships[0]?.organizationId ?? null,
+      source: 'api_v1',
+      ipAddress: ctx.ipAddress,
+      userAgent: ctx.userAgent,
+    });
     return apiErrorI18n('invalidCredentials', 401, request);
   }
 
@@ -85,6 +144,14 @@ export async function POST(request: Request) {
 
   const tokenScope = resolveLoginScope(parsed.data.scope, membership, gymMember);
   if (!tokenScope) {
+    void writeAccessDeniedAudit({
+      path,
+      method: 'POST',
+      reason: 'no_api_scope',
+      actorId: user.id,
+      organizationId: membership?.organizationId ?? gymMember?.organizationId ?? null,
+      metadata: { email, scope: parsed.data.scope },
+    });
     return apiErrorI18n('noApiScope', 403, request);
   }
 
@@ -92,6 +159,14 @@ export async function POST(request: Request) {
     tokenScope === 'STAFF' ? membership!.organizationId : gymMember!.organizationId;
 
   if (membership && gymMember && membership.organizationId !== gymMember.organizationId) {
+    void writeAccessDeniedAudit({
+      path,
+      method: 'POST',
+      reason: 'org_mismatch',
+      actorId: user.id,
+      organizationId: membership.organizationId,
+      metadata: { email },
+    });
     return apiErrorI18n('orgMismatch', 403, request);
   }
 
@@ -109,15 +184,15 @@ export async function POST(request: Request) {
     data: { lastLoginAt: new Date() },
   });
 
-  await prisma.auditLog.create({
-    data: {
-      actorId: user.id,
-      organizationId,
-      action: 'USER_LOGIN',
-      entityType: 'api_token',
-      entityId: user.id,
-      metadata: { scope: tokenScope, source: 'api_v1_auth_login' },
-    },
+  void writeAuditLog({
+    actorId: user.id,
+    organizationId,
+    action: 'USER_LOGIN',
+    entityType: 'api_token',
+    entityId: user.id,
+    metadata: { scope: tokenScope, source: 'api_v1_auth_login' },
+    ipAddress: ctx.ipAddress,
+    userAgent: ctx.userAgent,
   });
 
   return apiOk({

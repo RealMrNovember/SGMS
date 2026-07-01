@@ -10,12 +10,18 @@ import {
 import path from 'path';
 import Store from 'electron-store';
 import Pusher from 'pusher-js';
+import { SGMS_API_BASE_URL } from '../shared/constants';
 import {
   getLaunchAtStartup,
   setLaunchAtStartup,
   shouldStartHidden,
 } from './launch-at-startup';
-import type { CheckInNotificationPayload, LoginInput, ReceptionConfig } from '../shared/types';
+import type {
+  CheckInNotificationPayload,
+  LoginInput,
+  RealtimePublicConfig,
+  ReceptionConfig,
+} from '../shared/types';
 
 const store = new Store<{ config?: ReceptionConfig }>({ name: 'sgms-reception' });
 
@@ -34,17 +40,35 @@ function resourcePath(...segments: string[]) {
   return path.join(__dirname, '../../resources', ...segments);
 }
 
-function loadAppIcon() {
+function loadWindowIcon() {
+  const icoPath = resourcePath('icon.ico');
+  const ico = nativeImage.createFromPath(icoPath);
+  if (!ico.isEmpty()) {
+    return ico;
+  }
+
   const pngPath = resourcePath('icon.png');
   const pngImage = nativeImage.createFromPath(pngPath);
   if (!pngImage.isEmpty()) {
-    return pngImage.resize({ width: 32, height: 32 });
+    return pngImage;
   }
 
-  const svgPath = resourcePath('logo.svg');
-  const svgImage = nativeImage.createFromPath(svgPath);
-  if (!svgImage.isEmpty()) {
-    return svgImage.resize({ width: 32, height: 32 });
+  return nativeImage.createEmpty();
+}
+
+function loadTrayIcon() {
+  if (process.platform === 'win32') {
+    const icoPath = resourcePath('icon.ico');
+    const ico = nativeImage.createFromPath(icoPath);
+    if (!ico.isEmpty()) {
+      return ico;
+    }
+  }
+
+  const pngPath = resourcePath('icon.png');
+  const pngImage = nativeImage.createFromPath(pngPath);
+  if (!pngImage.isEmpty()) {
+    return pngImage.resize({ width: 16, height: 16 });
   }
 
   return nativeImage.createEmpty();
@@ -73,7 +97,7 @@ function showAccessNotification(payload: CheckInNotificationPayload) {
     .filter(Boolean)
     .join(' · ');
 
-  const icon = loadAppIcon();
+  const icon = loadTrayIcon();
   const notification = new Notification({
     title,
     body,
@@ -108,14 +132,21 @@ function disconnectRealtime() {
 function connectRealtime(config: ReceptionConfig) {
   disconnectRealtime();
 
+  if (!config.soketiKey) {
+    window?.webContents.send('status', { online: false });
+    return;
+  }
+
   const apiUrl = new URL(config.apiBaseUrl);
-  const forceTLS = apiUrl.protocol === 'https:';
+  const forceTLS = config.soketiForceTLS ?? apiUrl.protocol === 'https:';
+  const wsPort = config.soketiWsPort ?? (forceTLS ? 443 : 6001);
+  const wssPort = config.soketiWssPort ?? 443;
 
   pusher = new Pusher(config.soketiKey, {
     cluster: 'sgms',
     wsHost: apiUrl.hostname,
-    wsPort: forceTLS ? 443 : 6001,
-    wssPort: 443,
+    wsPort,
+    wssPort,
     wsPath: config.soketiWsPath || '/realtime/app',
     forceTLS,
     disableStats: true,
@@ -147,7 +178,7 @@ function connectRealtime(config: ReceptionConfig) {
 }
 
 function createWindow() {
-  const icon = loadAppIcon();
+  const icon = loadWindowIcon();
 
   window = new BrowserWindow({
     width: 980,
@@ -171,6 +202,13 @@ function createWindow() {
   } else {
     window.loadFile(path.join(__dirname, '../renderer/index.html'));
   }
+
+  window.on('maximize', () => {
+    window?.webContents.send('window:maximized', true);
+  });
+  window.on('unmaximize', () => {
+    window?.webContents.send('window:maximized', false);
+  });
 
   window.on('close', (event) => {
     if (!isQuitting) {
@@ -218,7 +256,10 @@ function buildTrayMenu() {
 }
 
 function createTray() {
-  const icon = loadAppIcon();
+  const icon = loadTrayIcon();
+  if (icon.isEmpty()) {
+    console.error('SGMS tray icon could not be loaded from resources/icon.ico');
+  }
   tray = new Tray(icon.isEmpty() ? nativeImage.createEmpty() : icon);
   tray.setToolTip('SGMS Resepsiyon');
   tray.setContextMenu(buildTrayMenu());
@@ -232,8 +273,45 @@ function refreshTrayMenu() {
   tray?.setContextMenu(buildTrayMenu());
 }
 
+async function fetchRealtimeConfig(base: string): Promise<RealtimePublicConfig> {
+  const res = await fetch(`${base.replace(/\/$/, '')}/api/v1/realtime/config`);
+  const json = (await res.json()) as {
+    ok: boolean;
+    data?: RealtimePublicConfig;
+    error?: string;
+  };
+
+  if (!res.ok || !json.ok || !json.data?.enabled || !json.data.key) {
+    throw new Error(
+      'Canlı bildirim servisi şu an kullanılamıyor. Lütfen birkaç dakika sonra tekrar deneyin veya destek ile iletişime geçin.',
+    );
+  }
+
+  return json.data;
+}
+
+async function ensureRealtimeFields(config: ReceptionConfig): Promise<ReceptionConfig> {
+  if (config.soketiKey) {
+    return config;
+  }
+
+  const realtime = await fetchRealtimeConfig(config.apiBaseUrl);
+  const next: ReceptionConfig = {
+    ...config,
+    soketiKey: realtime.key!,
+    soketiWsPath: realtime.wsPath,
+    soketiForceTLS: realtime.forceTLS,
+    soketiWsPort: realtime.wsPort,
+    soketiWssPort: realtime.wssPort,
+  };
+  store.set('config', next);
+  return next;
+}
+
 async function loginAndConnect(input: LoginInput): Promise<ReceptionConfig> {
-  const base = input.apiBaseUrl.replace(/\/$/, '');
+  const base = SGMS_API_BASE_URL.replace(/\/$/, '');
+  const realtime = await fetchRealtimeConfig(base);
+
   const res = await fetch(`${base}/api/v1/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -246,7 +324,7 @@ async function loginAndConnect(input: LoginInput): Promise<ReceptionConfig> {
   };
 
   if (!res.ok || !json.ok || !json.data?.accessToken) {
-    throw new Error(json.error ?? 'Giriş başarısız');
+    throw new Error(json.error ?? 'E-posta veya parola hatalı');
   }
 
   const meRes = await fetch(`${base}/api/v1/me`, {
@@ -270,8 +348,11 @@ async function loginAndConnect(input: LoginInput): Promise<ReceptionConfig> {
     accessToken: json.data.accessToken,
     organizationId: meJson.data.organization.id,
     organizationName: meJson.data.organization.name,
-    soketiKey: input.soketiKey,
-    soketiWsPath: input.soketiWsPath,
+    soketiKey: realtime.key!,
+    soketiWsPath: realtime.wsPath,
+    soketiForceTLS: realtime.forceTLS,
+    soketiWsPort: realtime.wsPort,
+    soketiWssPort: realtime.wssPort,
     userName: meJson.data.user.name,
   };
 
@@ -295,6 +376,16 @@ ipcMain.handle('logout', async () => {
 ipcMain.handle('get-config', async () => store.get('config'));
 ipcMain.handle('window:minimize', () => window?.minimize());
 ipcMain.handle('window:hide', () => window?.hide());
+ipcMain.handle('window:toggle-maximize', () => {
+  if (!window) return false;
+  if (window.isMaximized()) {
+    window.unmaximize();
+    return false;
+  }
+  window.maximize();
+  return true;
+});
+ipcMain.handle('window:is-maximized', () => window?.isMaximized() ?? false);
 ipcMain.handle('get-launch-at-startup', async () => getLaunchAtStartup());
 ipcMain.handle('set-launch-at-startup', async (_event, enabled: boolean) => {
   const next = setLaunchAtStartup(enabled);
@@ -316,20 +407,31 @@ if (process.platform === 'win32') {
   app.setAppUserModelId(APP_ID);
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   createWindow();
   createTray();
 
   const saved = store.get('config');
-  if (saved?.accessToken && saved.soketiKey) {
-    connectRealtime(saved);
-    window?.webContents.once('did-finish-load', () => {
-      window?.webContents.send('logged-in', saved);
-      window?.webContents.send('launch-at-startup', { enabled: getLaunchAtStartup() });
+  if (saved?.accessToken) {
+    try {
+      const ready = await ensureRealtimeFields({
+        ...saved,
+        apiBaseUrl: saved.apiBaseUrl || SGMS_API_BASE_URL,
+      });
+      connectRealtime(ready);
+      window?.webContents.once('did-finish-load', () => {
+        window?.webContents.send('logged-in', ready);
+        window?.webContents.send('launch-at-startup', { enabled: getLaunchAtStartup() });
+        if (!startHidden) {
+          window?.show();
+        }
+      });
+    } catch {
+      store.delete('config');
       if (!startHidden) {
         window?.show();
       }
-    });
+    }
   } else if (!startHidden) {
     window?.show();
   } else {

@@ -9,15 +9,8 @@ export default function App() {
   const [feed, setFeed] = useState<CheckInNotificationPayload[]>([]);
   const [online, setOnline] = useState(false);
   const [launchAtStartup, setLaunchAtStartup] = useState(false);
-  const [savedApiUrl, setSavedApiUrl] = useState<string>();
-  const [savedSoketiKey, setSavedSoketiKey] = useState<string>();
 
   useEffect(() => {
-    window.reception.getConfig().then((saved) => {
-      if (saved?.apiBaseUrl) setSavedApiUrl(saved.apiBaseUrl);
-      if (saved?.soketiKey) setSavedSoketiKey(saved.soketiKey);
-    });
-
     window.reception.getLaunchAtStartup().then(setLaunchAtStartup);
 
     window.reception.onLoggedIn((next) => setConfig(next));
@@ -53,11 +46,7 @@ export default function App() {
           onLogout={handleLogout}
         />
       ) : (
-        <LoginScreen
-          onSuccess={setConfig}
-          initialApiUrl={savedApiUrl}
-          initialSoketiKey={savedSoketiKey}
-        />
+        <LoginScreen onSuccess={setConfig} />
       )}
     </div>
   );
