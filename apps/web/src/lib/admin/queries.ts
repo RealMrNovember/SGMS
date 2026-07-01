@@ -365,15 +365,20 @@ export async function getCategoryCounts(filters: AuditLogFilters = {}) {
   ];
 
   const counts = await Promise.all(
-    categories.map(async (category) => ({
-      category,
-      count: await prisma.auditLog.count({
-        where: {
-          ...baseWhere,
-          action: { in: AUDIT_CATEGORY_ACTIONS[category] },
-        },
-      }),
-    })),
+    categories.map(async (category) => {
+      try {
+        const count = await prisma.auditLog.count({
+          where: {
+            ...baseWhere,
+            action: { in: AUDIT_CATEGORY_ACTIONS[category] },
+          },
+        });
+        return { category, count };
+      } catch (error) {
+        console.error(`[audit] category count failed (${category})`, error);
+        return { category, count: 0 };
+      }
+    }),
   );
 
   return counts.sort((a, b) => b.count - a.count);

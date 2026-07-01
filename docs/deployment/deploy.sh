@@ -49,6 +49,11 @@ sudo -u "${WEB_USER}" env PATH="${NODE_DIR}/bin:${PATH}" PM2_HOME="${PM2_HOME}" 
 echo "==> [7/7] Smoke test"
 sleep 3
 bash "${APP_ROOT}/docs/deployment/verify-production.sh"
+if [[ -f "${APP_ROOT}/.secrets/admin-smoke.env" ]]; then
+  # shellcheck disable=SC1091
+  source "${APP_ROOT}/.secrets/admin-smoke.env"
+  bash "${APP_ROOT}/docs/deployment/verify-admin-audit.sh" "http://127.0.0.1:3100"
+fi
 
 echo ""
 echo "Deploy tamamlandı."
