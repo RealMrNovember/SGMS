@@ -10,7 +10,8 @@ import {
   type AdminActionState,
 } from '@/actions/admin-organizations';
 import { formatDateTr } from '@/lib/admin/format';
-import { useActionState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useActionState, useEffect } from 'react';
 
 type PlanOption = { id: string; name: string; code: string };
 
@@ -23,17 +24,20 @@ type SubscriptionInfo = {
   planId: string;
 };
 
+type Props = {
+  organizationId: string;
+  plans: PlanOption[];
+  subscription: SubscriptionInfo | null;
+  isTrialing: boolean;
+};
+
 export function OrganizationSubscriptionPanel({
   organizationId,
   plans,
   subscription,
   isTrialing,
-}: {
-  organizationId: string;
-  plans: PlanOption[];
-  subscription: SubscriptionInfo | null;
-  isTrialing: boolean;
-}) {
+}: Props) {
+  const router = useRouter();
   const [extendState, extendAction, extendPending] = useActionState(extendOrganizationTrial, {} as AdminActionState);
   const [activateState, activateAction, activatePending] = useActionState(
     activateOrganizationSubscription,
@@ -57,6 +61,12 @@ export function OrganizationSubscriptionPanel({
   const feedback = [extendState, activateState, planState, periodState, cancelState, noteState].find(
     (s) => s.error || s.success,
   );
+
+  useEffect(() => {
+    if (feedback?.success) {
+      router.refresh();
+    }
+  }, [feedback?.success, router]);
 
   return (
     <div className="space-y-6">

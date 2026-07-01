@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { isPeriodStillValid } from '@/lib/billing/period-dates';
 import type { Prisma, SubscriptionStatus } from '@sgms/database';
 
 export type TenantAccessMode = 'full' | 'billing_only';
@@ -41,7 +42,11 @@ export async function syncSubscriptionLifecycle(organizationId: string): Promise
 
   const now = new Date();
 
-  if (subscription.status === 'TRIALING' && subscription.trialEndsAt && subscription.trialEndsAt <= now) {
+  if (
+    subscription.status === 'TRIALING' &&
+    subscription.trialEndsAt &&
+    !isPeriodStillValid(subscription.trialEndsAt)
+  ) {
     await prisma.$transaction([
       prisma.subscription.update({
         where: { id: subscription.id },
@@ -61,13 +66,30 @@ export async function syncSubscriptionLifecycle(organizationId: string): Promise
   if (
     subscription.status === 'ACTIVE' &&
     subscription.currentPeriodEnd &&
-    subscription.currentPeriodEnd <= now
+    !isPeriodStillValid(subscription.currentPeriodEnd)
   ) {
     await prisma.subscription.update({
       where: { id: subscription.id },
       data: { status: 'PAST_DUE' },
     });
   }
+}
+
+function subscriptionGrantsAccess(
+  subscription: {
+    status: SubscriptionStatus;
+    trialEndsAt: Date | null;
+    currentPeriodEnd: Date | null;
+  } | null | undefined,
+): boolean {
+  if (!subscription) return false;
+  if (subscription.status === 'TRIALING' && isPeriodStillValid(subscription.trialEndsAt)) {
+    return true;
+  }
+  if (subscription.status === 'ACTIVE' && isPeriodStillValid(subscription.currentPeriodEnd)) {
+    return true;
+  }
+  return false;
 }
 
 export async function resolveSubscriptionAccess(
@@ -125,7 +147,7 @@ export async function resolveSubscriptionAccess(
 
   if (subscription?.status === 'TRIALING' && subscription.trialEndsAt) {
     const days = daysUntil(subscription.trialEndsAt);
-    if (days !== null && days > 0) {
+    if (isPeriodStillValid(subscription.trialEndsAt)) {
       return {
         ...base,
         mode: 'full',
@@ -138,7 +160,7 @@ export async function resolveSubscriptionAccess(
   if (subscription?.status === 'ACTIVE') {
     const periodEnd = subscription.currentPeriodEnd;
     const days = daysUntil(periodEnd);
-    if (!periodEnd || (days !== null && days > 0)) {
+    if (!periodEnd || isPeriodStillValid(periodEnd)) {
       return {
         ...base,
         mode: 'full',
@@ -179,11 +201,26 @@ export async function resolveSubscriptionAccess(
     organization.centralLicenseStatus === 'EXPIRED' ||
     organization.centralLicenseStatus === 'REVOKED'
   ) {
+    // SaaS aboneliği geçerliyse merkezi lisans hatası paneli kilitlemesin (master admin uzatması).
+    const subscriptionStillValid = subscriptionGrantsAccess(subscription);
+
+    if (!subscriptionStillValid) {
+      return {
+        ...base,
+        mode: 'billing_only',
+        reason: 'license_expired',
+        daysRemaining: daysUntil(organization.licenseExpiresAt),
+      };
+    }
+
+    const reason: SubscriptionAccessReason =
+      subscription?.trialEndsAt ? 'trial_active' : 'paid_active';
+
     return {
       ...base,
-      mode: 'billing_only',
-      reason: 'license_expired',
-      daysRemaining: daysUntil(organization.licenseExpiresAt),
+      mode: 'full',
+      reason,
+      daysRemaining: daysUntil(subscription?.trialEndsAt ?? subscription?.currentPeriodEnd ?? null),
     };
   }
 

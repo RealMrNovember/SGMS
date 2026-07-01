@@ -62,7 +62,7 @@ export default async function BillingPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-8">
-      <BillingStatusPoller enabled={locked || Boolean(pending)} />
+      <BillingStatusPoller enabled={locked || Boolean(pending)} locked={locked} />
 
       <section className="space-y-3">
         {locked ? (

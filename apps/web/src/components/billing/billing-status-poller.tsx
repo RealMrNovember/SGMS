@@ -3,11 +3,17 @@
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-export function BillingStatusPoller({ enabled }: { enabled: boolean }) {
+export function BillingStatusPoller({
+  enabled,
+  locked,
+}: {
+  enabled: boolean;
+  locked: boolean;
+}) {
   const router = useRouter();
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled || !locked) return;
 
     let cancelled = false;
 
@@ -21,7 +27,6 @@ export function BillingStatusPoller({ enabled }: { enabled: boolean }) {
         };
         if (!cancelled && json.ok && json.data?.mode === 'full') {
           router.replace('/dashboard');
-          router.refresh();
         }
       } catch {
         /* ignore */
@@ -34,7 +39,7 @@ export function BillingStatusPoller({ enabled }: { enabled: boolean }) {
       cancelled = true;
       window.clearInterval(id);
     };
-  }, [enabled, router]);
+  }, [enabled, locked, router]);
 
   return null;
 }

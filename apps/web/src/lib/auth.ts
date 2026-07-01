@@ -157,18 +157,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         });
 
         if (!user.isSuperAdmin && membership?.organization) {
-          const { syncSubscriptionLifecycle } = await import('@/lib/billing/subscription-gate');
-          await syncSubscriptionLifecycle(membership.organization.id);
-          void syncLicenseOnLogin(
-            membership.organization.id,
-            membership.organization.installationId,
-            {
-              clientName: membership.organization.name,
-              email: user.email,
-              deviceName: 'SGMS Web Login',
-              platform: 'web',
-            },
+          const { syncSubscriptionLifecycle, resolveSubscriptionAccess } = await import(
+            '@/lib/billing/subscription-gate'
           );
+          await syncSubscriptionLifecycle(membership.organization.id);
+          const access = await resolveSubscriptionAccess(membership.organization.id);
+
+          // Merkezi lisans sunucusu hata verse bile geçerli SaaS aboneliği varsa oturumu kilitleme.
+          if (access.mode !== 'full') {
+            void syncLicenseOnLogin(
+              membership.organization.id,
+              membership.organization.installationId,
+              {
+                clientName: membership.organization.name,
+                email: user.email,
+                deviceName: 'SGMS Web Login',
+                platform: 'web',
+              },
+            );
+          }
         }
 
         return {

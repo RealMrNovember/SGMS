@@ -7,6 +7,7 @@ import {
 } from '@/lib/license';
 import { writeAdminAuditLog } from '@/lib/admin/audit-write';
 import { appendSupportNote, parseOrganizationSettings } from '@/lib/admin/org-settings';
+import { parsePeriodEndInput } from '@/lib/billing/period-dates';
 import { prisma } from '@/lib/prisma';
 import type { OrganizationStatus, Prisma } from '@sgms/database';
 import { revalidatePath } from 'next/cache';
@@ -30,6 +31,8 @@ function revalidateOrg(orgId: string) {
   revalidatePath('/admin/organizations');
   revalidatePath(`/admin/organizations/${orgId}`);
   revalidatePath('/admin/audit');
+  revalidatePath('/dashboard');
+  revalidatePath('/dashboard/billing');
 }
 
 export async function updateOrganizationStatus(
@@ -89,12 +92,12 @@ export async function extendOrganizationTrial(
     const { organizationId, days } = parsed.data;
 
     const subscription = await prisma.subscription.findFirst({
-      where: { organizationId, status: 'TRIALING' },
+      where: { organizationId },
       orderBy: { createdAt: 'desc' },
     });
 
     if (!subscription) {
-      return { error: 'Aktif deneme aboneliği bulunamadı.' };
+      return { error: 'Abonelik kaydı bulunamadı.' };
     }
 
     const base = subscription.trialEndsAt ?? subscription.currentPeriodEnd ?? new Date();
@@ -104,14 +107,17 @@ export async function extendOrganizationTrial(
       await tx.subscription.update({
         where: { id: subscription.id },
         data: {
+          status: 'TRIALING',
           trialEndsAt,
           currentPeriodEnd: trialEndsAt,
+          canceledAt: null,
         },
       });
 
       await tx.organization.update({
         where: { id: organizationId },
         data: {
+          status: 'ACTIVE',
           licenseExpiresAt: trialEndsAt,
           centralLicenseStatus: 'TRIAL',
         },
@@ -495,7 +501,7 @@ export async function setOrganizationSubscription(
   try {
     const session = await requireSuperAdmin();
     const { organizationId, planId, status, billingCycle, periodEnd } = parsed.data;
-    const endDate = new Date(periodEnd);
+    const endDate = parsePeriodEndInput(periodEnd);
     if (Number.isNaN(endDate.getTime())) {
       return { error: 'Geçerli bir bitiş tarihi girin.' };
     }
