@@ -10,6 +10,8 @@ import {
 import path from 'path';
 import Store from 'electron-store';
 import { Pusher, type PusherClient } from './pusher-client';
+import { apiRequest } from './api-client';
+import { fetchRecentCheckIns, startCheckInPolling, stopCheckInPolling } from './check-in-poll';
 import { SGMS_API_BASE_URL } from '../shared/constants';
 import {
   getLaunchAtStartup,
@@ -122,7 +124,12 @@ function showAccessNotification(payload: CheckInNotificationPayload) {
   }
 }
 
+function forwardCheckIn(payload: CheckInNotificationPayload) {
+  showAccessNotification(payload);
+}
+
 function disconnectRealtime() {
+  stopCheckInPolling();
   if (pusher) {
     pusher.disconnect();
     pusher = null;
@@ -132,8 +139,10 @@ function disconnectRealtime() {
 function connectRealtime(config: ReceptionConfig) {
   disconnectRealtime();
 
+  startCheckInPolling(config, forwardCheckIn);
+
   if (!config.soketiKey) {
-    window?.webContents.send('status', { online: false });
+    window?.webContents.send('status', { online: false, mode: 'polling' });
     return;
   }
 
@@ -162,18 +171,24 @@ function connectRealtime(config: ReceptionConfig) {
   const channel = pusher.subscribe(orgStaffChannel(config.organizationId));
   channel.bind('checkin.created', (data: { checkIn: CheckInNotificationPayload }) => {
     if (data?.checkIn) {
-      showAccessNotification(data.checkIn);
+      forwardCheckIn(data.checkIn);
     }
+  });
+  channel.bind('pusher:subscription_error', () => {
+    window?.webContents.send('status', { online: false, mode: 'polling' });
   });
 
   pusher.connection.bind('connected', () => {
-    window?.webContents.send('status', { online: true });
+    window?.webContents.send('status', { online: true, mode: 'realtime' });
   });
   pusher.connection.bind('disconnected', () => {
-    window?.webContents.send('status', { online: false });
+    window?.webContents.send('status', { online: false, mode: 'polling' });
   });
   pusher.connection.bind('error', () => {
-    window?.webContents.send('status', { online: false });
+    window?.webContents.send('status', { online: false, mode: 'polling' });
+  });
+  pusher.connection.bind('unavailable', () => {
+    window?.webContents.send('status', { online: false, mode: 'polling' });
   });
 }
 
@@ -181,10 +196,10 @@ function createWindow() {
   const icon = loadWindowIcon();
 
   window = new BrowserWindow({
-    width: 980,
-    height: 680,
-    minWidth: 900,
-    minHeight: 620,
+    width: 1280,
+    height: 860,
+    minWidth: 1100,
+    minHeight: 720,
     show: false,
     frame: false,
     backgroundColor: '#0b1220',
@@ -359,6 +374,8 @@ async function loginAndConnect(input: LoginInput): Promise<ReceptionConfig> {
   store.set('config', config);
 
   try {
+    const recent = await fetchRecentCheckIns(config);
+    window?.webContents.send('feed-init', recent);
     connectRealtime(config);
   } catch (error) {
     console.error('SGMS realtime connection failed after login', error);
@@ -375,6 +392,20 @@ async function loginAndConnect(input: LoginInput): Promise<ReceptionConfig> {
 }
 
 ipcMain.handle('login', async (_event, input: LoginInput) => loginAndConnect(input));
+ipcMain.handle('api-request', async (_event, payload: { method: string; path: string; body?: unknown }) => {
+  const config = store.get('config');
+  if (!config?.accessToken) {
+    return { ok: false, status: 401, error: 'Oturum bulunamadı' };
+  }
+  return apiRequest(config, payload.method, payload.path, payload.body);
+});
+ipcMain.handle('fetch-recent-checkins', async () => {
+  const config = store.get('config');
+  if (!config?.accessToken) {
+    return { items: [], todayCount: 0 };
+  }
+  return fetchRecentCheckIns(config);
+});
 ipcMain.handle('logout', async () => {
   store.delete('config');
   disconnectRealtime();
@@ -424,9 +455,11 @@ app.whenReady().then(async () => {
         ...saved,
         apiBaseUrl: saved.apiBaseUrl || SGMS_API_BASE_URL,
       });
+      const recent = await fetchRecentCheckIns(ready);
       connectRealtime(ready);
       window?.webContents.once('did-finish-load', () => {
         window?.webContents.send('logged-in', ready);
+        window?.webContents.send('feed-init', recent);
         window?.webContents.send('launch-at-startup', { enabled: getLaunchAtStartup() });
         if (!startHidden) {
           window?.show();

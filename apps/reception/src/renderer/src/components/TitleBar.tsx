@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-export function TitleBar() {
+export function TitleBar({ live = false }: { live?: boolean }) {
   const [maximized, setMaximized] = useState(false);
 
   useEffect(() => {
@@ -11,7 +11,7 @@ export function TitleBar() {
   return (
     <header className="titlebar" data-tauri-drag-region>
       <div className="titlebar-brand">
-        <span className="titlebar-dot titlebar-dot--live" />
+        <span className={`titlebar-dot ${live ? 'titlebar-dot--live' : ''}`} />
         <span className="titlebar-label">SGMS Resepsiyon</span>
       </div>
       <div className="titlebar-actions">

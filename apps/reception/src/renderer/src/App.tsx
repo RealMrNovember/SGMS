@@ -8,16 +8,35 @@ export default function App() {
   const [config, setConfig] = useState<ReceptionConfig | null>(null);
   const [feed, setFeed] = useState<CheckInNotificationPayload[]>([]);
   const [online, setOnline] = useState(false);
+  const [connectionMode, setConnectionMode] = useState<'realtime' | 'polling'>('polling');
   const [launchAtStartup, setLaunchAtStartup] = useState(false);
 
   useEffect(() => {
     window.reception.getLaunchAtStartup().then(setLaunchAtStartup);
+    window.reception.getConfig().then((saved) => {
+      if (saved) {
+        setConfig(saved);
+      }
+    });
 
     window.reception.onLoggedIn((next) => setConfig(next));
-    window.reception.onCheckIn((payload) => {
-      setFeed((prev) => [payload, ...prev].slice(0, 120));
+    window.reception.onFeedInit(({ items }) => {
+      setFeed(items);
     });
-    window.reception.onStatus(({ online: isOnline }) => setOnline(isOnline));
+    window.reception.onCheckIn((payload) => {
+      setFeed((prev) => {
+        if (prev.some((item) => item.id === payload.id)) {
+          return prev;
+        }
+        return [payload, ...prev].slice(0, 200);
+      });
+    });
+    window.reception.onStatus(({ online: isOnline, mode }) => {
+      setOnline(isOnline);
+      if (mode) {
+        setConnectionMode(mode);
+      }
+    });
     window.reception.onLaunchAtStartup(({ enabled }) => setLaunchAtStartup(enabled));
   }, []);
 
@@ -35,12 +54,13 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <TitleBar />
+      <TitleBar live={online} />
       {config ? (
         <Dashboard
           config={config}
           feed={feed}
           online={online}
+          connectionMode={connectionMode}
           launchAtStartup={launchAtStartup}
           onLaunchAtStartupChange={handleLaunchAtStartupChange}
           onLogout={handleLogout}

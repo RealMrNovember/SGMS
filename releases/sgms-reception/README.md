@@ -2,14 +2,14 @@
 
 | Sürüm | Dosya | Notlar |
 |-------|--------|--------|
-| **0.4.1** | [SGMS-Resepsiyon-0.4.1-Setup.exe](./v0.4.1/SGMS-Resepsiyon-0.4.1-Setup.exe) | Pusher giriş hatası düzeltildi (`Pusher is not a constructor`) |
-| 0.4.0 | [SGMS-Resepsiyon-0.4.0-Setup.exe](./v0.4.0/SGMS-Resepsiyon-0.4.0-Setup.exe) | Sadece e-posta + parola · `Program Files\Cicibyte\SGMS` |
-| 0.3.0 | [SGMS-Resepsiyon-0.3.0-Setup.exe](./v0.3.0/SGMS-Resepsiyon-0.3.0-Setup.exe) | Eski sürüm |
+| **0.5.0** | [SGMS-Resepsiyon-0.5.0-Setup.exe](./v0.5.0/SGMS-Resepsiyon-0.5.0-Setup.exe) | Tam resepsiyon paneli: üyeler, manuel giriş, kasa, ayarlar |
+| 0.4.1 | [SGMS-Resepsiyon-0.4.1-Setup.exe](./v0.4.1/SGMS-Resepsiyon-0.4.1-Setup.exe) | Pusher giriş hatası düzeltildi |
+| 0.4.0 | [SGMS-Resepsiyon-0.4.0-Setup.exe](./v0.4.0/SGMS-Resepsiyon-0.4.0-Setup.exe) | Sadece e-posta + parola |
 
 ## İndirme (güncel)
 
 **GitHub (main):**  
-https://github.com/RealMrNovember/SGMS/raw/main/releases/sgms-reception/v0.4.1/SGMS-Resepsiyon-0.4.1-Setup.exe
+https://github.com/RealMrNovember/SGMS/raw/main/releases/sgms-reception/v0.5.0/SGMS-Resepsiyon-0.5.0-Setup.exe
 
 ## Kurulum
 
