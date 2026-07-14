@@ -3,6 +3,7 @@
 import { DEMO_ACCOUNTS, type DemoAccountKey } from '@/lib/demo-accounts';
 import { signIn } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FormEvent, useState } from 'react';
 
@@ -102,9 +103,14 @@ export function LoginForm() {
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="password" className="muted text-sm">
-            {t('password')}
-          </label>
+          <div className="flex items-center justify-between">
+            <label htmlFor="password" className="muted text-sm">
+              {t('password')}
+            </label>
+            <Link href="/forgot-password" className="muted text-xs hover:text-white">
+              Şifremi unuttum
+            </Link>
+          </div>
           <input
             id="password"
             name="password"

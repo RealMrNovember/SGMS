@@ -45,6 +45,10 @@ export default auth((request) => {
   const isPublic =
     pathname.startsWith('/login') ||
     pathname.startsWith('/trial') ||
+    pathname.startsWith('/forgot-password') ||
+    pathname.startsWith('/reset-password') ||
+    pathname.startsWith('/privacy') ||
+    pathname.startsWith('/terms') ||
     pathname.startsWith('/api/auth') ||
     pathname === '/';
 

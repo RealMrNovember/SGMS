@@ -60,7 +60,8 @@ export async function writeLoginFailedAudit(input: {
     | 'invalid_password'
     | 'no_api_scope'
     | 'org_mismatch'
-    | 'super_admin_blocked';
+    | 'super_admin_blocked'
+    | 'rate_limited';
   organizationId?: string | null;
   actorId?: string | null;
   source: 'web' | 'api_v1' | 'reception';

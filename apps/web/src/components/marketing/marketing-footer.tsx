@@ -71,6 +71,14 @@ export async function MarketingFooter() {
       <div className="border-t border-[rgba(201,169,98,0.1)] px-5 py-5 text-center">
         <p className="muted text-xs">
           © {new Date().getFullYear()} {siteConfig.company}. {t('rights')}
+          {' · '}
+          <Link href="/privacy" className="hover:text-white">
+            Gizlilik Politikası
+          </Link>
+          {' · '}
+          <Link href="/terms" className="hover:text-white">
+            Kullanım Şartları
+          </Link>
         </p>
       </div>
     </footer>

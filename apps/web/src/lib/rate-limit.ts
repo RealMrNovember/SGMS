@@ -56,3 +56,23 @@ export async function consumeMessageRateLimit(userId: string, organizationId: st
 export async function consumeTypingRateLimit(userId: string, organizationId: string) {
   return consumeRateLimit(`rl:typing:${organizationId}:${userId}`, 20, 60);
 }
+
+/** Kaba kuvvet (brute-force) parola denemesine karşı — e-posta + IP birlikte anahtarlanır,
+ * tek hesaba odaklı saldırı da (aynı email), IP'den dağıtık deneme de (aynı IP, farklı email) sınırlanır. */
+export async function consumeLoginRateLimit(email: string, ipAddress: string) {
+  const byEmail = await consumeRateLimit(`rl:login:email:${email.toLowerCase()}`, 10, 300);
+  const byIp = await consumeRateLimit(`rl:login:ip:${ipAddress}`, 30, 300);
+
+  if (!byEmail.allowed) return byEmail;
+  if (!byIp.allowed) return byIp;
+  return byEmail;
+}
+
+export async function consumePasswordResetRateLimit(email: string, ipAddress: string) {
+  const byEmail = await consumeRateLimit(`rl:pwreset:email:${email.toLowerCase()}`, 3, 900);
+  const byIp = await consumeRateLimit(`rl:pwreset:ip:${ipAddress}`, 10, 900);
+
+  if (!byEmail.allowed) return byEmail;
+  if (!byIp.allowed) return byIp;
+  return byEmail;
+}

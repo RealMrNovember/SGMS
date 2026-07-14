@@ -13,6 +13,8 @@ export type OrganizationSettings = {
   licenseError?: string;
   /** Salon varsayılan dili — yeni kullanıcılar ve cookie yokken */
   defaultLocale?: string;
+  /** Kayıt formundaki "sizi kim yönlendirdi?" serbest metni — cloud.cicibyte.com Partner/komisyon eşleşmesi için. */
+  referrerName?: string;
   /** Opsiyonel özellik bayrakları */
   features?: {
     typingIndicator?: boolean;

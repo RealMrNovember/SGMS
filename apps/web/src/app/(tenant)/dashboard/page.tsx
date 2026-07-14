@@ -1,5 +1,6 @@
 import { auth } from '@/lib/auth';
 import { buildDashboardLicenseSummary } from '@/lib/dashboard-license';
+import { getDashboardKpis } from '@/lib/dashboard-kpis';
 import { licenseStatusKey, resolveLicenseCardHint } from '@/lib/license-i18n';
 import { refreshDashboardLicense } from '@/lib/license-dashboard';
 import { intlLocaleFor } from '@/lib/format-locale';
@@ -29,6 +30,8 @@ export default async function DashboardPage() {
   const dateLocale = intlLocaleFor(locale);
 
   await refreshDashboardLicense(organizationId);
+
+  const kpis = await getDashboardKpis(organizationId);
 
   const organization = await prisma.organization.findUnique({
     where: { id: organizationId },
@@ -102,6 +105,38 @@ export default async function DashboardPage() {
       {role && RECEPTION_ROLES.has(role) && license.isOperational ? (
         <ReceptionDownloadPromo variant="card" />
       ) : null}
+
+      <section className="grid gap-4 md:grid-cols-3">
+        <article className="card p-5">
+          <p className="muted text-sm">{t('kpis.checkInsToday')}</p>
+          <p className="mt-2 text-3xl font-semibold tabular-nums">{kpis.checkInsToday}</p>
+          <Link href="/dashboard/check-in" className="muted mt-2 inline-block text-xs hover:text-white">
+            {t('kpis.checkInsLink')} →
+          </Link>
+        </article>
+        <article className="card p-5">
+          <p className="muted text-sm">{t('kpis.revenueThisMonth')}</p>
+          <p className="mt-2 text-3xl font-semibold tabular-nums">
+            {new Intl.NumberFormat(dateLocale, {
+              style: 'currency',
+              currency: 'TRY',
+              maximumFractionDigits: 0,
+            }).format(kpis.revenueThisMonth)}
+          </p>
+          <Link href="/dashboard/pos" className="muted mt-2 inline-block text-xs hover:text-white">
+            {t('kpis.revenueLink')} →
+          </Link>
+        </article>
+        <article
+          className={`card p-5 ${kpis.membershipsExpiringSoonCount > 0 ? 'border-amber-500/40 bg-amber-500/5' : ''}`}
+        >
+          <p className="muted text-sm">{t('kpis.expiringSoon')}</p>
+          <p className="mt-2 text-3xl font-semibold tabular-nums">{kpis.membershipsExpiringSoonCount}</p>
+          <Link href="/dashboard/members" className="muted mt-2 inline-block text-xs hover:text-white">
+            {t('kpis.expiringSoonLink')} →
+          </Link>
+        </article>
+      </section>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <article className="card p-5">

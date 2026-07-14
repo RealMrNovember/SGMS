@@ -1,6 +1,6 @@
 'use client';
 
-import { submitBillingRequest, type BillingActionState } from '@/actions/billing';
+import { startCardCheckout, submitBillingRequest, type BillingActionState, type CardCheckoutState } from '@/actions/billing';
 import { siteConfig } from '@/lib/site-config';
 import { useTranslations } from 'next-intl';
 import { useActionState, useState } from 'react';
@@ -55,6 +55,10 @@ export function BillingCheckoutPanel({
 }) {
   const t = useTranslations('billing');
   const [state, formAction, pending] = useActionState(submitBillingRequest, initial);
+  const [checkoutState, checkoutAction, checkoutPending] = useActionState(
+    startCardCheckout,
+    {} as CardCheckoutState,
+  );
   const [selectedPlanId, setSelectedPlanId] = useState(plans[0]?.id ?? '');
   const [cycle, setCycle] = useState<'MONTHLY' | 'YEARLY'>('MONTHLY');
 
@@ -135,10 +139,24 @@ export function BillingCheckoutPanel({
             </button>
           </div>
           <p className="text-3xl font-semibold">{displayAmount}</p>
+
+          <form action={checkoutAction} className="space-y-2">
+            <input type="hidden" name="planId" value={selectedPlanId} />
+            <input type="hidden" name="billingCycle" value={cycle} />
+            {checkoutState.error ? (
+              <p className="text-sm text-rose-400">{checkoutState.error}</p>
+            ) : null}
+            <button
+              type="submit"
+              className="button button-gold w-full px-4 py-3 text-sm"
+              disabled={checkoutPending || !selectedPlanId}
+            >
+              {checkoutPending ? t('startingCheckout') : t('payWithCard')}
+            </button>
+            <p className="muted text-xs">{t('payWithCardHint')}</p>
+          </form>
+
           <p className="muted text-sm">{t('bankSoon')}</p>
-          <button type="button" className="button w-full px-4 py-3 text-sm opacity-60" disabled>
-            {t('onlinePaySoon')}
-          </button>
         </div>
 
         <div className="space-y-4">

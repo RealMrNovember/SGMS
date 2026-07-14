@@ -12,6 +12,11 @@ const registerTrialSchema = z.object({
   ownerPassword: z.string().min(8).max(128),
   phone: z.string().max(32).optional().or(z.literal('')),
   country: z.string().length(2).optional().or(z.literal('')),
+  /** "Sizi kim yönlendirdi?" — cloud.cicibyte.com'da komisyon takibi için Partner ile eşleştirilir. */
+  referrerName: z.string().max(120).optional().or(z.literal('')),
+  consent: z.string().refine((val) => val === 'on', {
+    message: "Devam etmek için Gizlilik Politikası ve Kullanım Şartları'nı onaylamanız gerekir.",
+  }),
 });
 
 export type RegisterTrialState = {
@@ -37,6 +42,8 @@ export async function registerTrialOrganization(
     ownerPassword: formData.get('ownerPassword'),
     phone: formData.get('phone') ?? '',
     country: formData.get('country') ?? 'TR',
+    referrerName: formData.get('referrerName') ?? '',
+    consent: formData.get('consent') ?? '',
   });
 
   if (!parsed.success) {
@@ -91,6 +98,7 @@ export async function registerTrialOrganization(
         country: data.country || 'TR',
         status: 'ACTIVE',
         installationId,
+        settings: data.referrerName?.trim() ? { referrerName: data.referrerName.trim() } : undefined,
       },
     });
 

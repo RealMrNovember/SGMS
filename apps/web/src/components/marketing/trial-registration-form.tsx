@@ -90,7 +90,32 @@ export function TrialRegistrationForm() {
         <p className="muted text-xs">{t('passwordHint')}</p>
       </div>
 
+      <div className="space-y-2">
+        <label htmlFor="referrerName" className="muted text-sm">
+          {t('referrerName')}
+        </label>
+        <input id="referrerName" name="referrerName" className="input" maxLength={120} />
+        <p className="muted text-xs">{t('referrerNameHint')}</p>
+      </div>
+
       <input type="hidden" name="country" value="TR" />
+
+      <label className="muted flex items-start gap-2 text-xs leading-5">
+        <input type="checkbox" name="consent" required className="mt-0.5" />
+        <span>
+          <Link href="/privacy" target="_blank" className="text-white hover:underline">
+            Gizlilik Politikası
+          </Link>
+          {' ve '}
+          <Link href="/terms" target="_blank" className="text-white hover:underline">
+            Kullanım Şartları
+          </Link>
+          &apos;nı okudum, kabul ediyorum.
+        </span>
+      </label>
+      {state.fieldErrors?.consent ? (
+        <p className="text-xs text-rose-300">{state.fieldErrors.consent}</p>
+      ) : null}
 
       <ul className="muted space-y-2 border-t border-[var(--border)] pt-4 text-xs leading-6">
         <li>• {t('benefit1', { days: siteConfig.trialDays })}</li>

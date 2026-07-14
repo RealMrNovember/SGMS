@@ -16,7 +16,13 @@ export type AuditCategory =
 
 export const AUDIT_CATEGORY_ACTIONS: Record<Exclude<AuditCategory, 'all'>, AuditAction[]> = {
   organization: ['ORGANIZATION_CREATED', 'ORGANIZATION_UPDATED'],
-  subscription: ['SUBSCRIPTION_STARTED', 'SUBSCRIPTION_CHANGED', 'SUBSCRIPTION_CANCELED'],
+  subscription: [
+    'SUBSCRIPTION_STARTED',
+    'SUBSCRIPTION_CHANGED',
+    'SUBSCRIPTION_CANCELED',
+    'CLOUD_PAYMENT_SUCCEEDED',
+    'CLOUD_PAYMENT_FAILED',
+  ],
   license: [
     'LICENSE_TRIAL_STARTED',
     'LICENSE_ACTIVATED',
@@ -32,7 +38,15 @@ export const AUDIT_CATEGORY_ACTIONS: Record<Exclude<AuditCategory, 'all'>, Audit
   finance: ['EXPENSE_ADDED', 'EXPENSE_VOIDED', 'PAYMENT_RECORDED'],
   checkin: ['MEMBER_CHECK_IN'],
   auth: ['USER_LOGIN', 'USER_LOGOUT'],
-  security: ['USER_LOGIN_FAILED', 'ACCESS_DENIED', 'API_ERROR', 'AUDIT_LOG_DELETED', 'MESSAGE_REPORTED'],
+  security: [
+    'USER_LOGIN_FAILED',
+    'ACCESS_DENIED',
+    'API_ERROR',
+    'AUDIT_LOG_DELETED',
+    'MESSAGE_REPORTED',
+    'PASSWORD_RESET_REQUESTED',
+    'PASSWORD_RESET_COMPLETED',
+  ],
   settings: ['SETTINGS_CHANGED'],
 };
 
@@ -52,6 +66,10 @@ export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   LICENSE_EXPIRED: 'Lisans süresi doldu',
   CLOUD_TENANT_SYNCED: 'CiciByte Cloud senkronu',
   CLOUD_SYNC_FAILED: 'CiciByte Cloud senkronu başarısız',
+  PASSWORD_RESET_REQUESTED: 'Şifre sıfırlama talebi',
+  PASSWORD_RESET_COMPLETED: 'Şifre sıfırlama tamamlandı',
+  CLOUD_PAYMENT_SUCCEEDED: 'Ödeme başarılı (cloud.cicibyte.com)',
+  CLOUD_PAYMENT_FAILED: 'Ödeme başarısız (cloud.cicibyte.com)',
   USER_CREATED: 'Kullanıcı oluşturuldu',
   USER_UPDATED: 'Kullanıcı güncellendi',
   USER_LOGIN: 'Başarılı giriş',
@@ -96,6 +114,7 @@ export const LOGIN_FAILURE_LABELS: Record<string, string> = {
   user_inactive: 'Hesap pasif / devre dışı',
   invalid_password: 'Hatalı parola',
   no_api_scope: 'API erişim kapsamı yok',
+  rate_limited: 'Çok fazla deneme — geçici olarak sınırlandı',
   org_mismatch: 'Organizasyon uyuşmazlığı',
   super_admin_blocked: 'Super admin API girişi engellendi',
 };

@@ -1,6 +1,7 @@
 import type { AuditAction, CentralLicenseStatus, Prisma, PrismaClient } from '@sgms/database';
 import { cloudApiUrl, requestJsonPreserveMethod, resolveCloudClientConfig } from './config.js';
 import type {
+  CheckoutPayload,
   CloudApiResponse,
   CloudApiResult,
   CloudClientConfig,
@@ -8,6 +9,10 @@ import type {
   CloudTenantStatus,
   LicenseApiPayload,
   OfflineTokenPayload,
+  PaymentStatusPayload,
+  SendMailInput,
+  SendMailPayload,
+  StartCheckoutInput,
   TenantSyncInput,
   TenantSyncPayload,
 } from './types.js';
@@ -43,6 +48,7 @@ export class CloudClientService {
     const subscription = organization.subscriptions[0];
     const status = mapSubscriptionToCloudStatus(subscription?.status);
     const expiresAt = subscription?.currentPeriodEnd ?? subscription?.trialEndsAt ?? null;
+    const referrerName = extractReferrerName(organization.settings);
 
     const result = await this.syncTenant({
       tenantSlug: organization.slug,
@@ -52,6 +58,7 @@ export class CloudClientService {
       status,
       trialEndsAt: subscription?.trialEndsAt?.toISOString() ?? null,
       seats: subscription?.plan.maxStaff ?? null,
+      referrerName,
     });
 
     if (result.ok && result.payload) {
@@ -120,7 +127,76 @@ export class CloudClientService {
       status: input.status,
       trial_ends_at: input.trialEndsAt ?? undefined,
       seats: input.seats ?? undefined,
+      referrer_name: input.referrerName ?? undefined,
     });
+  }
+
+  // --- Mail relay (v2) — SGMS'in kendi SMTP'si yok, gönderim mail.cicibyte.com üzerinden. ---
+
+  async sendMail(input: SendMailInput): Promise<CloudApiResult<SendMailPayload>> {
+    return this.request<SendMailPayload>('POST', `v2/${this.config.productSlug}/mail/send`, {
+      to: input.to,
+      subject: input.subject,
+      html: input.html,
+      category: input.category ?? 'transactional',
+    });
+  }
+
+  // --- Commerce checkout (v2) — gerçek ödeme ağ geçidi entegrasyonu cloud.cicibyte.com'da. ---
+
+  async startCheckout(input: StartCheckoutInput): Promise<CloudApiResult<CheckoutPayload>> {
+    return this.request<CheckoutPayload>('POST', `v2/${this.config.productSlug}/commerce/checkout`, {
+      tenant_slug: input.tenantSlug,
+      tenant_name: input.tenantName,
+      email: input.email ?? undefined,
+      plan_code: input.planCode ?? undefined,
+      billing_interval: input.billingInterval ?? undefined,
+      amount: input.amount,
+      currency: input.currency ?? 'TRY',
+      provider: input.provider ?? 'iyzico',
+      buyer: input.buyer
+        ? {
+            name: input.buyer.name,
+            surname: input.buyer.surname,
+            gsm_number: input.buyer.gsmNumber,
+            identity_number: input.buyer.identityNumber,
+            address: input.buyer.address,
+            city: input.buyer.city,
+            country: input.buyer.country,
+            zip_code: input.buyer.zipCode,
+          }
+        : undefined,
+      return_url: input.returnUrl,
+    });
+  }
+
+  async checkPaymentStatus(paymentId: number | string): Promise<CloudApiResult<PaymentStatusPayload>> {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), this.config.timeoutMs);
+
+    try {
+      const headers: Record<string, string> = { Accept: 'application/json' };
+      if (this.config.apiKey) {
+        headers['X-Api-Key'] = this.config.apiKey.trim();
+      }
+
+      const response = await fetch(
+        cloudApiUrl(this.config.baseUrl, `v2/${this.config.productSlug}/commerce/payments/${paymentId}`),
+        { headers, signal: controller.signal },
+      );
+
+      const json = (await response.json()) as CloudApiResponse<PaymentStatusPayload>;
+
+      if (!response.ok || !json.success || !json.data) {
+        return { ok: false, statusCode: response.status, message: json.message ?? 'Ödeme durumu alınamadı.' };
+      }
+
+      return { ok: true, statusCode: response.status, message: json.message ?? 'OK', payload: json.data };
+    } catch {
+      return { ok: false, statusCode: 503, message: 'cloud.cicibyte.com bağlantısı kurulamadı.' };
+    } finally {
+      clearTimeout(timeout);
+    }
   }
 
   // --- Legacy v1 hwid tabanlı uçlar — masaüstü/offline cihaz senaryoları (Faz 10 turnike/resepsiyon) için saklanıyor ---
@@ -242,6 +318,14 @@ export class CloudClientService {
       },
     });
   }
+}
+
+function extractReferrerName(settings: unknown): string | null {
+  if (!settings || typeof settings !== 'object' || Array.isArray(settings)) {
+    return null;
+  }
+  const value = (settings as Record<string, unknown>).referrerName;
+  return typeof value === 'string' && value.trim() ? value.trim() : null;
 }
 
 function mapSubscriptionToCloudStatus(status?: string): CloudTenantStatus {

@@ -12,4 +12,11 @@ export type {
   LicenseDevice,
   LicenseApiPayload,
   OfflineTokenPayload,
+  MailCategory,
+  SendMailInput,
+  SendMailPayload,
+  CommerceBuyer,
+  StartCheckoutInput,
+  CheckoutPayload,
+  PaymentStatusPayload,
 } from './types.js';

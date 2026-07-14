@@ -19,11 +19,71 @@ export type TenantSyncInput = {
   status: CloudTenantStatus;
   trialEndsAt?: string | null;
   seats?: number | null;
+  /** "Sizi kim yönlendirdi?" serbest metni — cloud.cicibyte.com'da bir Partner ile eşleşirse
+   * komisyon takibi için otomatik atanır, eşleşmezse not olarak bırakılır. */
+  referrerName?: string | null;
 };
 
 export type TenantSyncPayload = {
   license_key: string;
   status: string;
+};
+
+// --- Mail relay (v2) ---
+
+export type MailCategory = 'transactional' | 'password_reset' | 'reminder' | 'notification';
+
+export type SendMailInput = {
+  to: string;
+  subject: string;
+  html: string;
+  category?: MailCategory;
+};
+
+export type SendMailPayload = {
+  id: number;
+  status: string;
+};
+
+// --- Commerce checkout (v2) — tüm CiciByte ürünleri ödeme işlemlerini buradan geçirir ---
+
+export type CommerceBuyer = {
+  name?: string;
+  surname?: string;
+  gsmNumber?: string;
+  identityNumber?: string;
+  address?: string;
+  city?: string;
+  country?: string;
+  zipCode?: string;
+};
+
+export type StartCheckoutInput = {
+  tenantSlug: string;
+  tenantName: string;
+  email?: string | null;
+  planCode?: string | null;
+  billingInterval?: 'monthly' | 'yearly';
+  amount: number;
+  currency?: string;
+  provider?: 'iyzico';
+  buyer?: CommerceBuyer;
+  /** Ödeme sonrası cloud.cicibyte.com'un tarayıcıyı yönlendireceği sayfa (query'e payment_id ve status eklenir). */
+  returnUrl: string;
+};
+
+export type CheckoutPayload = {
+  payment_id: number;
+  checkout_url: string | null;
+  status: string;
+};
+
+export type PaymentStatusPayload = {
+  payment_id: number;
+  status: 'pending' | 'succeeded' | 'failed' | 'refunded';
+  amount: string;
+  currency: string;
+  paid_at: string | null;
 };
 
 export type CloudApiResponse<T> = {

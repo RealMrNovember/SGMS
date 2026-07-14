@@ -8,11 +8,17 @@ import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
-export default async function BillingPage() {
+export default async function BillingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ payment_id?: string; status?: string }>;
+}) {
   const session = await auth();
   if (!session?.user?.organizationId || session.user.isSuperAdmin) {
     redirect('/login');
   }
+
+  const checkoutReturn = await searchParams;
 
   const orgId = session.user.organizationId;
   const t = await getTranslations('billing');
@@ -63,6 +69,20 @@ export default async function BillingPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-8">
       <BillingStatusPoller enabled={locked || Boolean(pending)} locked={locked} />
+
+      {checkoutReturn.payment_id ? (
+        <section
+          className={`rounded-xl border px-5 py-4 text-sm ${
+            checkoutReturn.status === 'succeeded'
+              ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-100'
+              : 'border-rose-500/30 bg-rose-500/10 text-rose-100'
+          }`}
+        >
+          {checkoutReturn.status === 'succeeded'
+            ? t('checkoutReturnSuccess')
+            : t('checkoutReturnFailed')}
+        </section>
+      ) : null}
 
       <section className="space-y-3">
         {locked ? (

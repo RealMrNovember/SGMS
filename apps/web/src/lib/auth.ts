@@ -10,6 +10,7 @@ import {
 } from '@/lib/audit/logger';
 import { syncOrganizationToCloud } from '@/lib/cloud-sync';
 import { prisma } from '@/lib/prisma';
+import { consumeLoginRateLimit } from '@/lib/rate-limit';
 
 const credentialsSchema = z.object({
   email: z.string().email(),
@@ -67,6 +68,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           void writeLoginFailedAudit({
             email: rawEmail || 'unknown',
             reason: 'invalid_credentials_format',
+            source: 'web',
+            ipAddress: ctx.ipAddress,
+            userAgent: ctx.userAgent,
+          });
+          return null;
+        }
+
+        const rateLimit = await consumeLoginRateLimit(parsed.data.email, ctx.ipAddress ?? 'unknown');
+        if (!rateLimit.allowed) {
+          void writeLoginFailedAudit({
+            email: parsed.data.email.toLowerCase(),
+            reason: 'rate_limited',
             source: 'web',
             ipAddress: ctx.ipAddress,
             userAgent: ctx.userAgent,
