@@ -3,7 +3,7 @@
 import { auditSummary } from '@/lib/admin/audit-labels';
 import { buildAuditWhere, type AuditLogFilters } from '@/lib/admin/audit-query';
 import { writeAdminAuditLog } from '@/lib/admin/audit-write';
-import { auth } from '@/lib/auth';
+import { requireSuperAdmin } from '@/lib/admin/guards';
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
@@ -12,14 +12,6 @@ export type AdminAuditState = {
   success?: string;
   deletedCount?: number;
 };
-
-async function requireSuperAdmin() {
-  const session = await auth();
-  if (!session?.user?.isSuperAdmin) {
-    throw new Error('Bu işlem için Master Admin yetkisi gerekir.');
-  }
-  return session;
-}
 
 function revalidateAuditPaths(organizationId?: string | null) {
   revalidatePath('/admin/audit');

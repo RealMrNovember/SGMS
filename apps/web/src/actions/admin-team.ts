@@ -1,6 +1,6 @@
 'use server';
 
-import { auth } from '@/lib/auth';
+import { requireSuperAdmin } from '@/lib/admin/guards';
 import { writeAdminAuditLog } from '@/lib/admin/audit-write';
 import { prisma } from '@/lib/prisma';
 import type { OrganizationRole } from '@sgms/database';
@@ -17,14 +17,6 @@ export type AdminTeamState = {
 };
 
 const MANAGEABLE_ROLES = ['STAFF', 'TRAINER', 'VIEWER', 'ADMIN'] as const satisfies readonly OrganizationRole[];
-
-async function requireSuperAdmin() {
-  const session = await auth();
-  if (!session?.user?.isSuperAdmin) {
-    throw new Error('Bu işlem için Master Admin yetkisi gerekir.');
-  }
-  return session;
-}
 
 function revalidateOrg(organizationId: string) {
   revalidatePath('/admin');

@@ -32,6 +32,9 @@ async function requireOrgAdmin() {
   if (!session.user.role || !['OWNER', 'ADMIN'].includes(session.user.role)) {
     throw new Error('Bu ayar için OWNER veya ADMIN yetkisi gerekir.');
   }
+  if (session.user.isDemo) {
+    throw new Error('Demo hesaplar değişiklik yapamaz. Bu bir inceleme hesabıdır — gerçek kullanım için ücretsiz deneme oluşturun.');
+  }
   return session;
 }
 

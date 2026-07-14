@@ -1,6 +1,6 @@
 'use server';
 
-import { auth } from '@/lib/auth';
+import { requireSuperAdmin } from '@/lib/admin/guards';
 import { syncOrganizationToCloud } from '@/lib/cloud-sync';
 import { prisma } from '@/lib/prisma';
 import { slugify } from '@/lib/slug';
@@ -29,9 +29,11 @@ export async function createOrganization(
   _prevState: CreateOrganizationState,
   formData: FormData,
 ): Promise<CreateOrganizationState> {
-  const session = await auth();
-  if (!session?.user?.isSuperAdmin) {
-    return { error: 'Bu işlem için Super Admin yetkisi gerekir.' };
+  let session;
+  try {
+    session = await requireSuperAdmin();
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : 'Bu işlem için Super Admin yetkisi gerekir.' };
   }
 
   const parsed = createOrganizationSchema.safeParse({

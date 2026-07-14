@@ -74,6 +74,9 @@ export async function POST(request: Request) {
   if (!session?.user) {
     return apiErrorI18n('unauthorized', 401, request);
   }
+  if (session.user.isDemo) {
+    return apiErrorI18n('demoWriteBlocked', 403, request);
+  }
 
   let formData: FormData;
   try {

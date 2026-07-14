@@ -1,6 +1,7 @@
 'use server';
 
 import { auth } from '@/lib/auth';
+import { requireSuperAdmin } from '@/lib/admin/guards';
 import { parseOrganizationSettings } from '@/lib/admin/org-settings';
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
@@ -32,6 +33,9 @@ export async function reportMessage(
   const session = await auth();
   if (!session?.user?.organizationId) {
     return { error: 'Oturum gerekli.' };
+  }
+  if (session.user.isDemo) {
+    return { error: 'Demo hesaplar değişiklik yapamaz. Bu bir inceleme hesabıdır — gerçek kullanım için ücretsiz deneme oluşturun.' };
   }
 
   const org = await prisma.organization.findUnique({
@@ -89,9 +93,11 @@ export async function reviewMessageReport(input: {
   status: 'REVIEWED' | 'DISMISSED';
   reviewNotes?: string;
 }): Promise<MessageReportState> {
-  const session = await auth();
-  if (!session?.user?.isSuperAdmin) {
-    return { error: 'Master Admin yetkisi gerekir.' };
+  let session;
+  try {
+    session = await requireSuperAdmin();
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : 'Master Admin yetkisi gerekir.' };
   }
 
   const report = await prisma.messageReport.findUnique({ where: { id: input.reportId } });

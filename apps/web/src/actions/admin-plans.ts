@@ -1,6 +1,6 @@
 'use server';
 
-import { auth } from '@/lib/auth';
+import { requireSuperAdmin } from '@/lib/admin/guards';
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
@@ -9,14 +9,6 @@ export type PlanActionState = {
   error?: string;
   success?: string;
 };
-
-async function requireSuperAdmin() {
-  const session = await auth();
-  if (!session?.user?.isSuperAdmin) {
-    throw new Error('Bu işlem için Master Admin yetkisi gerekir.');
-  }
-  return session;
-}
 
 const planSchema = z.object({
   planId: z.string().cuid(),

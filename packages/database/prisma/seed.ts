@@ -195,6 +195,7 @@ async function seedDemoTenant() {
       passwordHash,
       status: 'ACTIVE',
       isSuperAdmin: false,
+      isDemo: true,
     },
     create: {
       email: ownerEmail,
@@ -202,6 +203,7 @@ async function seedDemoTenant() {
       passwordHash,
       status: 'ACTIVE',
       isSuperAdmin: false,
+      isDemo: true,
       locale: 'tr',
     },
   });
@@ -270,6 +272,7 @@ async function seedDemoStaff(organizationId: string) {
       passwordHash,
       status: 'ACTIVE',
       isSuperAdmin: false,
+      isDemo: true,
     },
     create: {
       email: staffEmail,
@@ -277,6 +280,7 @@ async function seedDemoStaff(organizationId: string) {
       passwordHash,
       status: 'ACTIVE',
       isSuperAdmin: false,
+      isDemo: true,
       locale: 'tr',
     },
   });
@@ -321,6 +325,7 @@ async function seedDemoGymEcosystem(organizationId: string) {
       passwordHash: trainerPasswordHash,
       status: 'ACTIVE',
       isSuperAdmin: false,
+      isDemo: true,
     },
     create: {
       email: trainerEmail,
@@ -328,6 +333,7 @@ async function seedDemoGymEcosystem(organizationId: string) {
       passwordHash: trainerPasswordHash,
       status: 'ACTIVE',
       isSuperAdmin: false,
+      isDemo: true,
       locale: 'tr',
     },
   });
@@ -360,6 +366,7 @@ async function seedDemoGymEcosystem(organizationId: string) {
       passwordHash: athletePasswordHash,
       status: 'ACTIVE',
       isSuperAdmin: false,
+      isDemo: true,
     },
     create: {
       email: athleteEmail,
@@ -367,6 +374,7 @@ async function seedDemoGymEcosystem(organizationId: string) {
       passwordHash: athletePasswordHash,
       status: 'ACTIVE',
       isSuperAdmin: false,
+      isDemo: true,
       locale: 'tr',
     },
   });

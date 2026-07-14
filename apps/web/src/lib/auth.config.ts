@@ -8,6 +8,7 @@ declare module 'next-auth' {
       email: string;
       name: string;
       isSuperAdmin: boolean;
+      isDemo: boolean;
       organizationId: string | null;
       organizationName: string | null;
       role: OrganizationRole | null;
@@ -18,6 +19,7 @@ declare module 'next-auth' {
 
   interface User {
     isSuperAdmin?: boolean;
+    isDemo?: boolean;
     organizationId?: string | null;
     organizationName?: string | null;
     role?: OrganizationRole | null;
@@ -38,6 +40,7 @@ export const authConfig = {
       if (user) {
         token.sub = user.id;
         token.isSuperAdmin = user.isSuperAdmin ?? false;
+        token.isDemo = user.isDemo ?? false;
         token.organizationId = user.organizationId ?? null;
         token.organizationName = user.organizationName ?? null;
         token.role = user.role ?? null;
@@ -51,6 +54,7 @@ export const authConfig = {
       if (session.user && token.sub) {
         session.user.id = token.sub;
         session.user.isSuperAdmin = Boolean(token.isSuperAdmin);
+        session.user.isDemo = Boolean(token.isDemo);
         session.user.organizationId = (token.organizationId as string | null | undefined) ?? null;
         session.user.organizationName = (token.organizationName as string | null | undefined) ?? null;
         session.user.role = (token.role as OrganizationRole | null | undefined) ?? null;

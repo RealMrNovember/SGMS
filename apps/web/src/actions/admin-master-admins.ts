@@ -2,7 +2,7 @@
 
 import { countActiveMasterAdmins } from '@/lib/admin/master-admin-queries';
 import { writeAdminAuditLog } from '@/lib/admin/audit-write';
-import { auth } from '@/lib/auth';
+import { requireSuperAdmin } from '@/lib/admin/guards';
 import { prisma } from '@/lib/prisma';
 import { hash } from 'bcryptjs';
 import { randomBytes } from 'crypto';
@@ -15,14 +15,6 @@ export type MasterAdminState = {
   temporaryPassword?: string;
   fieldErrors?: Record<string, string>;
 };
-
-async function requireSuperAdmin() {
-  const session = await auth();
-  if (!session?.user?.isSuperAdmin) {
-    throw new Error('Bu işlem için Master Admin yetkisi gerekir.');
-  }
-  return session;
-}
 
 function revalidateAdminPages() {
   revalidatePath('/admin');

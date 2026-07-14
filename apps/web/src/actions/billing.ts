@@ -25,6 +25,9 @@ async function requireOwnerContext() {
   if (!['OWNER', 'ADMIN'].includes(session.user.role ?? '')) {
     throw new Error('Paket ve ödeme işlemleri yalnızca salon sahibi veya admin tarafından yapılabilir.');
   }
+  if (session.user.isDemo) {
+    throw new Error('Demo hesaplar değişiklik yapamaz. Bu bir inceleme hesabıdır — gerçek kullanım için ücretsiz deneme oluşturun.');
+  }
   return session;
 }
 

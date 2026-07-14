@@ -1,6 +1,6 @@
 'use server';
 
-import { auth } from '@/lib/auth';
+import { requireSuperAdmin } from '@/lib/admin/guards';
 import { syncOrganizationToCloud } from '@/lib/cloud-sync';
 import { writeAdminAuditLog } from '@/lib/admin/audit-write';
 import { appendSupportNote, parseOrganizationSettings } from '@/lib/admin/org-settings';
@@ -14,14 +14,6 @@ export type AdminActionState = {
   error?: string;
   success?: string;
 };
-
-async function requireSuperAdmin() {
-  const session = await auth();
-  if (!session?.user?.isSuperAdmin) {
-    throw new Error('Bu işlem için Master Admin yetkisi gerekir.');
-  }
-  return session;
-}
 
 function revalidateOrg(orgId: string) {
   revalidatePath('/admin');

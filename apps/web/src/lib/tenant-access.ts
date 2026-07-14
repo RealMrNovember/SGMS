@@ -1,3 +1,4 @@
+import { auth } from '@/lib/auth';
 import { resolveSubscriptionAccess } from '@/lib/billing/subscription-gate';
 import { prisma } from '@/lib/prisma';
 import type { CentralLicenseStatus } from '@sgms/database';
@@ -11,6 +12,11 @@ const WRITE_ALLOWED_LICENSE: ReadonlySet<CentralLicenseStatus> = new Set([
 export async function getTenantWriteBlockReason(
   organizationId: string,
 ): Promise<string | null> {
+  const session = await auth();
+  if (session?.user?.isDemo) {
+    return 'Demo hesaplar değişiklik yapamaz. Bu bir inceleme hesabıdır — gerçek kullanım için ücretsiz deneme oluşturun.';
+  }
+
   const access = await resolveSubscriptionAccess(organizationId);
   if (access.mode === 'billing_only') {
     return 'Abonelik veya deneme süresi sona erdi. Devam etmek için Abonelik & Ödeme sayfasını kullanın.';

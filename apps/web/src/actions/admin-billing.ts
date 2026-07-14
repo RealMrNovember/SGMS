@@ -1,6 +1,6 @@
 'use server';
 
-import { auth } from '@/lib/auth';
+import { requireSuperAdmin } from '@/lib/admin/guards';
 import { writeAdminAuditLog } from '@/lib/admin/audit-write';
 import {
   parseBillingSettings,
@@ -15,14 +15,6 @@ export type AdminBillingState = {
   error?: string;
   success?: string;
 };
-
-async function requireSuperAdmin() {
-  const session = await auth();
-  if (!session?.user?.isSuperAdmin) {
-    throw new Error('Bu işlem için Master Admin yetkisi gerekir.');
-  }
-  return session;
-}
 
 export async function approveBillingRequest(
   organizationId: string,

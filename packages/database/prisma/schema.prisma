@@ -193,6 +193,7 @@ model User {
   passwordHash    String     @map("password_hash")
   name            String
   isSuperAdmin    Boolean    @default(false) @map("is_super_admin")
+  isDemo          Boolean    @default(false) @map("is_demo")
   status          UserStatus @default(ACTIVE)
   emailVerifiedAt DateTime?  @map("email_verified_at")
   lastLoginAt     DateTime?  @map("last_login_at")
