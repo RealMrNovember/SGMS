@@ -48,7 +48,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 10 | IoT, Kapı, Turnike & SGMS Resepsiyon | ✅ Tamamlandı | 100% |
 | 11 | Marketing & Showcase Sitesi | ✅ Tamamlandı | 100% |
 | 12 | Master Admin, Billing & Audit Platformu | ✅ Tamamlandı | 100% |
-| 13 | CiciByte Cloud Migrasyonu & Platform Sertleştirme | 🔄 Devam ediyor | ~80% |
+| 13 | CiciByte Cloud Migrasyonu & Platform Sertleştirme | 🔄 Devam ediyor | ~90% (yalnızca Playwright E2E kaldı) |
 
 > Fazlar 6/9/10'un durum özeti önceki revizyonlarda detay bölümleriyle **çelişiyordu** (özet tablo güncellenmeden unutulmuştu). Bu revizyon koda göre (tüm alt maddeler `[x]`, gerçek commit geçmişi) düzeltilmiştir.
 
@@ -420,10 +420,13 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 - [x] Tüm `license.cicibyte.com` / `LICENSE_API_*` referansları kod tabanından temizlendi (env dosyaları, i18n mesajları, deploy scriptleri, `NGINX-AAPANEL.md`) — yalnızca "komşu vhost'a dokunma" uyarıları (gerçek, hâlâ geçerli — sunucu diğer istemciler için ayakta) korundu
 - [x] `docs/deployment/license-heartbeat.sh` → `docs/deployment/cloud-heartbeat.sh`
 - [x] `scripts/verify-license-integration.sh` → `scripts/verify-cloud-integration.sh` (artık `/v1/health` + key format kontrolü; eski script başka bir üretim sunucusunun MySQL'ine SSH ile bağlanıyordu — kaldırıldı)
-- [ ] **[BEKLEMEDE — kullanıcı onayı gerekli]** cloud.cicibyte.com'da production API key rotasyonu: yetim (plaintext'i kaybolmuş) `sgms-web-2026-07-13` anahtarının iptali + yeni `sgms-web-production` anahtarının üretilmesi. Auto-mode sınıflandırıcısı bunu adlandırılmamış bir prod kimlik bilgisi işlemi olarak engelledi.
-- [ ] Production `.env` (sgms.cicibyte.com sunucusu) → `CLOUD_API_BASE_URL` / `CLOUD_PRODUCT_SLUG` / `CLOUD_API_KEY` ile güncelleme (yeni key üretildikten sonra)
-- [ ] `pnpm db:migrate:deploy` — yeni `CLOUD_TENANT_SYNCED`/`CLOUD_SYNC_FAILED` enum migration'ının production DB'de uygulanması
-- [ ] `pnpm cloud:heartbeat` ile production doğrulaması + `scripts/verify-cloud-integration.sh` çalıştırması
+- [x] cloud.cicibyte.com production API key rotasyonu: yetim `sgms-web-2026-07-13` anahtarı iptal edildi, yeni `sgms-web-production` (id 7) üretildi — kullanıcı onayıyla
+- [x] Production `.env` (sgms.cicibyte.com sunucusu) → `CLOUD_API_BASE_URL` / `CLOUD_PRODUCT_SLUG` / `CLOUD_API_KEY` ile güncellendi
+- [x] Kod GitHub `main`'e push edildi (`f3b3686`) ve production'a deploy edildi (`pnpm install` → `db:migrate:deploy` → `build:packages` → `web:build` → `pm2 reload`)
+- [x] `pnpm db:migrate:deploy` — `CLOUD_TENANT_SYNCED`/`CLOUD_SYNC_FAILED` enum migration'ı production DB'de uygulandı
+- [x] `pnpm cloud:heartbeat` production'da çalıştırıldı: **4/4 organizasyon başarıyla senkronize oldu** (pilates, pasha, test-salon, demo-gym) — cloud.cicibyte.com'da doğru `plan_code`/`billing_status` ile doğrulandı
+- [x] `scripts/verify-cloud-integration.sh` → `cloud.cicibyte.com` health check `ok:true`, API key formatı doğru
+- [x] `sgms.cicibyte.com/login` → 200 (deploy sonrası canlı doğrulama)
 
 ### 13.4 Mühendislik pratikleri (önceki roadmap'in "Teknik Borç" listesinden)
 - [x] Test altyapısı: Vitest kuruldu (`packages/cloud-client`, `apps/web`) — 21 gerçek unit test (config normalizasyonu, slug, dönem/lisans hesaplamaları) yeşil
@@ -447,8 +450,8 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 | Öğe | Öncelik | Faz | Durum |
 |-----|---------|-----|-------|
-| CiciByte Cloud API key rotasyonu (production) | P0 | 13 | 🔲 kullanıcı onayı bekleniyor |
-| Production `.env` + migration deploy + `cloud:heartbeat` doğrulaması | P0 | 13 | 🔲 API key rotasyonuna bağımlı |
+| CiciByte Cloud API key rotasyonu (production) | P0 | 13 | ✅ tamamlandı |
+| Production `.env` + migration deploy + `cloud:heartbeat` doğrulaması | P0 | 13 | ✅ tamamlandı — 4/4 organizasyon senkronize |
 | Test altyapısı (Vitest) | P1 | 13 | ✅ kuruldu, 21 test yeşil |
 | CI/CD GitHub Actions | P1 | 13 | ✅ `.github/workflows/ci.yml` |
 | ESLint yapılandırması | P1 | 13 | ✅ hiç yoktu, bu revizyonla eklendi |
