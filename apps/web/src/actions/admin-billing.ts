@@ -6,6 +6,7 @@ import {
   parseBillingSettings,
   updateBillingRequestStatus,
 } from '@/lib/billing/settings';
+import { syncOrganizationToCloud } from '@/lib/cloud-sync';
 import { prisma } from '@/lib/prisma';
 import type { Prisma } from '@sgms/database';
 import { revalidatePath } from 'next/cache';
@@ -104,6 +105,8 @@ export async function approveBillingRequest(
         },
       }),
     ]);
+
+    await syncOrganizationToCloud(organizationId);
 
     revalidatePath(`/admin/organizations/${organizationId}`);
     revalidatePath('/admin/plans');

@@ -8,7 +8,7 @@ import {
   writeAuditLog,
   writeLoginFailedAudit,
 } from '@/lib/audit/logger';
-import { syncLicenseOnLogin } from '@/lib/license';
+import { syncOrganizationToCloud } from '@/lib/cloud-sync';
 import { prisma } from '@/lib/prisma';
 
 const credentialsSchema = z.object({
@@ -163,18 +163,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           await syncSubscriptionLifecycle(membership.organization.id);
           const access = await resolveSubscriptionAccess(membership.organization.id);
 
-          // Merkezi lisans sunucusu hata verse bile geçerli SaaS aboneliği varsa oturumu kilitleme.
+          // cloud.cicibyte.com hata verse bile geçerli SaaS aboneliği varsa oturumu kilitleme.
           if (access.mode !== 'full') {
-            void syncLicenseOnLogin(
-              membership.organization.id,
-              membership.organization.installationId,
-              {
-                clientName: membership.organization.name,
-                email: user.email,
-                deviceName: 'SGMS Web Login',
-                platform: 'web',
-              },
-            );
+            void syncOrganizationToCloud(membership.organization.id);
           }
         }
 

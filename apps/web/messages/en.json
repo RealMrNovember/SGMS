@@ -583,7 +583,7 @@
         "item1": "Full CRM, metrics and programs on Starter plan limits",
         "item2": "POS / member accounts and front-desk terminal",
         "item3": "Athlete portal and mobile API access",
-        "item4": "Central license validation (license.cicibyte.com)"
+        "item4": "Central platform sync (cloud.cicibyte.com integration)"
       },
       "disclaimer": "After the trial, write operations may be restricted until you choose a plan. Your data is preserved."
     },

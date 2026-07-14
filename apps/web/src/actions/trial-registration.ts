@@ -145,23 +145,12 @@ export async function registerTrialOrganization(
     return { organization: org };
   });
 
-  const { bootstrapOrganizationLicense } = await import('@/lib/license');
+  const { syncOrganizationToCloud } = await import('@/lib/cloud-sync');
 
-  const licenseResult = await bootstrapOrganizationLicense(
-    organization.id,
-    organization.installationId,
-    {
-      metadata: {
-        clientName: data.gymName.trim(),
-        email: ownerEmail,
-        deviceName: 'SGMS Trial Registration',
-        platform: 'web',
-      },
-    },
-  );
+  const syncResult = await syncOrganizationToCloud(organization.id);
 
-  if (!licenseResult.ok) {
-    console.error('[trial-registration] license sync deferred:', licenseResult.message);
+  if (!syncResult.ok) {
+    console.error('[trial-registration] cloud sync deferred:', syncResult.message);
   }
 
   return {

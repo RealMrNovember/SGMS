@@ -1,10 +1,7 @@
 'use server';
 
 import { auth } from '@/lib/auth';
-import {
-  bootstrapOrganizationLicense,
-  resolveOrganizationLicenseMetadata,
-} from '@/lib/license';
+import { syncOrganizationToCloud } from '@/lib/cloud-sync';
 import { writeAdminAuditLog } from '@/lib/admin/audit-write';
 import { appendSupportNote, parseOrganizationSettings } from '@/lib/admin/org-settings';
 import { parsePeriodEndInput } from '@/lib/billing/period-dates';
@@ -135,6 +132,7 @@ export async function extendOrganizationTrial(
       });
     });
 
+    await syncOrganizationToCloud(organizationId);
     revalidateOrg(organizationId);
     return { success: `Deneme süresi ${days} gün uzatıldı.` };
   } catch (error) {
@@ -207,6 +205,7 @@ export async function activateOrganizationSubscription(
       });
     });
 
+    await syncOrganizationToCloud(organizationId);
     revalidateOrg(organizationId);
     return { success: 'Abonelik ücretli paket olarak aktifleştirildi.' };
   } catch (error) {
@@ -270,6 +269,7 @@ export async function changeOrganizationPlan(
       });
     });
 
+    await syncOrganizationToCloud(organizationId);
     revalidateOrg(organizationId);
     return { success: `Plan ${plan.name} olarak güncellendi.` };
   } catch (error) {
@@ -283,43 +283,29 @@ export async function syncOrganizationLicenseAdmin(
   organizationId: string,
 ): Promise<AdminActionState> {
   try {
-    const session = await requireSuperAdmin();
+    await requireSuperAdmin();
 
     const org = await prisma.organization.findUnique({
       where: { id: organizationId },
-      select: { installationId: true },
+      select: { id: true },
     });
 
     if (!org) {
       return { error: 'Organizasyon bulunamadı.' };
     }
 
-    const metadata = await resolveOrganizationLicenseMetadata(organizationId);
-    const result = await bootstrapOrganizationLicense(organizationId, org.installationId, {
-      metadata,
-    });
-
-    await prisma.auditLog.create({
-      data: {
-        actorId: session.user.id,
-        organizationId,
-        action: 'LICENSE_HEARTBEAT',
-        entityType: 'organization',
-        entityId: organizationId,
-        metadata: { source: 'master_admin_sync', ok: result.ok, status: result.status },
-      },
-    });
+    const result = await syncOrganizationToCloud(organizationId);
 
     revalidateOrg(organizationId);
 
     if (!result.ok) {
-      return { error: result.message ?? 'Lisans senkronu başarısız.' };
+      return { error: result.message ?? 'cloud.cicibyte.com senkronu başarısız.' };
     }
 
-    return { success: `Lisans senkronu tamamlandı (${result.status}).` };
+    return { success: 'cloud.cicibyte.com tenant senkronu tamamlandı.' };
   } catch (error) {
     return {
-      error: error instanceof Error ? error.message : 'Lisans senkronu başarısız.',
+      error: error instanceof Error ? error.message : 'cloud.cicibyte.com senkronu başarısız.',
     };
   }
 }
@@ -565,6 +551,7 @@ export async function setOrganizationSubscription(
       });
     });
 
+    await syncOrganizationToCloud(organizationId);
     revalidateOrg(organizationId);
     return { success: 'Abonelik ve süre güncellendi.' };
   } catch (error) {
@@ -633,6 +620,7 @@ export async function cancelOrganizationSubscription(
       });
     });
 
+    await syncOrganizationToCloud(organizationId);
     revalidateOrg(organizationId);
     return { success: 'Abonelik iptal edildi.' };
   } catch (error) {

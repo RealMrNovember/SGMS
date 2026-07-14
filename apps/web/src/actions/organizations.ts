@@ -1,7 +1,7 @@
 'use server';
 
 import { auth } from '@/lib/auth';
-import { bootstrapOrganizationLicense } from '@/lib/license';
+import { syncOrganizationToCloud } from '@/lib/cloud-sync';
 import { prisma } from '@/lib/prisma';
 import { slugify } from '@/lib/slug';
 import { hash } from 'bcryptjs';
@@ -143,14 +143,7 @@ export async function createOrganization(
     return org;
   });
 
-  await bootstrapOrganizationLicense(organization.id, organization.installationId, {
-    metadata: {
-      clientName: data.organizationName,
-      email: ownerEmail,
-      deviceName: 'SGMS Admin Provisioning',
-      platform: 'web',
-    },
-  });
+  await syncOrganizationToCloud(organization.id);
 
   revalidatePath('/admin');
   redirect(`/admin?created=${organization.slug}`);

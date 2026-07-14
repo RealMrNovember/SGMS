@@ -7,24 +7,27 @@
 | **VDS** | `/www/wwwroot/sgms.cicibyte.com` → `sgms.cicibyte.com` |
 | **Repo** | https://github.com/RealMrNovember/SGMS.git |
 | **Strateji** | Local geliştir → Git push → VDS `git pull` (`www:www`) |
-| **Komşu (dokunulmaz)** | `license.cicibyte.com` |
-| **Kaynak doküman** | `sgms.cicibyte.com - readme.md`, `CiCiByte_SGMS_Ultimate_Enterprise_Blueprint.docx` |
+| **Merkezi platform** | `cloud.cicibyte.com` — CiciByte Cloud (Developer → Products → `sgms`) |
+| **Legacy (kullanımdan kalktı)** | `license.cicibyte.com` — SGMS artık bu servisi kullanmıyor (bkz. Faz 13). Sunucu diğer istemciler (GarageLedger vb.) için ayakta kalmaya devam ediyor, SGMS'in ona bağımlılığı yok. |
+| **Kaynak doküman** | `sgms.cicibyte.com - readme.md` (teknik günlük/arşiv), `CiCiByte_SGMS_Ultimate_Enterprise_Blueprint.docx` |
 
-**Son güncelleme:** 2026-06-30 · **HEAD:** `cbe0983` (Faz 6 devam)
+**Son güncelleme:** 2026-07-14 · **Bu dosya artık tek doğru kaynaktır** (`readme.md` sadece hızlı başlangıç talimatlarını barındırır, faz/durum takibi burada yapılır).
 
 ---
 
 ## Vizyon Özeti
 
-SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM, PT, mesajlaşma, kasa, cari hesap, çok dilli deneyim) operasyonlarını tek tenant çatısı altında yöneten bir platformdur.
+SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM, PT, mesajlaşma, kasa, cari hesap, abonelik/ödeme, çok dilli deneyim) operasyonlarını tek tenant çatısı altında yöneten bir platformdur. Şirket çapında **CiciByte Cloud** (`cloud.cicibyte.com`) merkezi platformuna tenant senkronu ile bağlanır.
 
 | Katman | Kapsam |
 |--------|--------|
-| **Çekirdek (tamamlandı)** | Multi-tenant, RBAC, CRM, ölçüm, program, mesaj, lisans |
+| **Çekirdek (tamamlandı)** | Multi-tenant, RBAC, CRM, ölçüm, program, mesaj |
 | **Premium deneyim** | i18n (6 dil), avatar/kimlik, boutique UI |
-| **İşletme & finans** | POS, market/kafe borçları, cari hesap |
-| **Bağlantı** | Real-time chat, mobil/sporcu API |
+| **İşletme & finans** | POS, market/kafe borçları, cari hesap, abonelik/ödeme yönetimi |
+| **Yönetim** | Master Admin konsolu, audit log platformu |
+| **Bağlantı** | Real-time chat, mobil/sporcu API, SGMS Resepsiyon masaüstü |
 | **Fiziksel entegrasyon** | QR/RFID turnike, offline sync |
+| **Merkezi platform** | CiciByte Cloud (`cloud.cicibyte.com`) tenant senkronu — şirket çapında görünürlük |
 
 ---
 
@@ -37,15 +40,17 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 2 | Multi-Tenant Core & API v1 | ✅ Tamamlandı | 100% |
 | 3 | Production & Operasyon | ✅ Tamamlandı | 100% |
 | 4 | Tenant UI — Core İş Mantığı (CRM) | ✅ Tamamlandı | 100% |
-| 5 | Merkezi Lisans Entegrasyonu | ✅ Tamamlandı | 100% |
-| 6 | Uluslararasılaşma (i18n) & Medya/Kimlik | 🔄 Devam ediyor | ~92% |
+| 5 | ~~Merkezi Lisans Entegrasyonu (license.cicibyte.com)~~ | 🗑️ Emekli (bkz. Faz 13) | — |
+| 6 | Uluslararasılaşma (i18n) & Medya/Kimlik | ✅ Tamamlandı | 100% |
 | 7 | Mobil & Sporcu Auth (API-First) | ✅ Tamamlandı | 100% |
-| 8 | POS, Kasa & Cari Hesap Yönetimi | 🔄 Devam ediyor | ~85% |
-| 9 | Gerçek Zamanlı İletişim (Real-time Chat) | 🔄 Devam ediyor | ~40% |
-| 10 | IoT, Kapı & Turnike Sistemleri | 🔲 Gelecek Vizyon | 0% |
+| 8 | POS, Kasa, Cari Hesap & Abonelik/Ödeme | ✅ Tamamlandı | ~95% (Invoice modeli hariç) |
+| 9 | Gerçek Zamanlı İletişim (Real-time Chat) | ✅ Tamamlandı | 100% |
+| 10 | IoT, Kapı, Turnike & SGMS Resepsiyon | ✅ Tamamlandı | 100% |
 | 11 | Marketing & Showcase Sitesi | ✅ Tamamlandı | 100% |
+| 12 | Master Admin, Billing & Audit Platformu | ✅ Tamamlandı | 100% |
+| 13 | CiciByte Cloud Migrasyonu & Platform Sertleştirme | 🔄 Devam ediyor | ~80% |
 
-> **Öncelik mantığı:** Önce uluslararası ve görsel kimlik (Faz 6) → sporcu/mobil erişim (Faz 7) → salon içi finans (Faz 8) → anlık mesajlaşma (Faz 9) → fiziksel cihazlar (Faz 10).
+> Fazlar 6/9/10'un durum özeti önceki revizyonlarda detay bölümleriyle **çelişiyordu** (özet tablo güncellenmeden unutulmuştu). Bu revizyon koda göre (tüm alt maddeler `[x]`, gerçek commit geçmişi) düzeltilmiştir.
 
 ---
 
@@ -111,8 +116,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 - [x] `GET/POST /api/v1/messages`
 - [x] `lib/api/guard.ts` — NextAuth session + rol + org doğrulama
 - [x] Middleware: API → `401 JSON` (HTML redirect yok)
-
-**Eksik (sonraki fazlara):** Bearer token (Faz 7), OpenAPI spec, `PATCH`/`DELETE`
+- [x] Bearer token (Faz 7'de tamamlandı), `PATCH`/`DELETE` (Faz 7), OpenAPI spec (Faz 7)
 
 ---
 
@@ -146,10 +150,10 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ### 4.2 Antrenman & diyet programları
 - [x] `/dashboard/programs` — oluşturma, filtre, aktif/pasif toggle
+- [x] Program içerik editörü (`program-content-builder.tsx`, `program-content-view.tsx`)
 
-### 4.3 Mesajlaşma (async — polling tabanlı)
-- [x] `/dashboard/messages` — inbox / sent, okundu işaretleme
-- [x] Thread + real-time → **Faz 9** ✅ (Soketi + thread UI)
+### 4.3 Mesajlaşma (Faz 9'da real-time'a taşındı)
+- [x] `/dashboard/messages` — inbox / sent, okundu işaretleme, thread + canlı yenileme
 
 ### 4.4 Salon üyelik planları
 - [x] `/dashboard/plans` — `GymMembershipPlan` CRUD
@@ -157,27 +161,28 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 ### 4.5 Sporcu detay (CRM)
 - [x] Tek Prisma `include` (ölçümler + aktif programlar)
 - [x] Tenant izolasyonu (`organizationId` → `notFound`)
+- [x] Yabancı üye alanları (foreign member fields, `20260630210000_add_foreign_member_fields`)
 
 **Kabul kriteri:** ✅ OWNER/TRAINER ile ölçüm → program → mesaj → plan akışı panelden mümkün
 
 ---
 
-## ✅ Faz 5 — Merkezi Lisans Entegrasyonu (Tamamlandı)
+## 🗑️ Faz 5 — Merkezi Lisans Entegrasyonu (Emekli — bkz. Faz 13)
 
-- [x] `packages/license-client` → `license.cicibyte.com` (`app_code=sgms`)
-- [x] Trial / check / activate + `LICENSE_API_KEY` (paylaşımlı anahtar, VDS doğrulandı)
-- [x] Org oluşturma / public trial kayıt / giriş / heartbeat senkronu
-- [x] **Müşteri görünürlüğü:** `client_name` + `email` trial/check gövdesine eklendi → [license.cicibyte.com/admin](https://license.cicibyte.com/admin) panelinde Client kaydı
-- [x] Trial kayıt strict mod: lisans sunucusu başarısızsa org geri alınır
-- [x] `pnpm license:heartbeat` — org adı + OWNER e-posta ile metadata senkronu
-- [x] `lib/tenant-access.ts` — limit + salt okunur mod
-- [x] Dashboard lisans özet kartları + `LicenseStatusBanner`
+> `license.cicibyte.com` entegrasyonu (`packages/license-client`, hwid/trial/activate/check akışı) **tamamen kaldırıldı** ve `cloud.cicibyte.com` (CiciByte Cloud) tenant senkronu ile değiştirildi. Bu bölüm yalnızca tarihsel referans için tutulur — güncel mimari için **Faz 13**'e bakın.
 
-**Kabul kriteri:** ✅ `pnpm license:heartbeat` · panelde merkezi lisans durumu
+<details>
+<summary>Eski içerik (arşiv)</summary>
+
+- ~~`packages/license-client` → `license.cicibyte.com` (`app_code=sgms`)~~
+- ~~Trial / check / activate + `LICENSE_API_KEY`~~
+- ~~`pnpm license:heartbeat`~~
+
+</details>
 
 ---
 
-## 🔲 Faz 6 — Uluslararasılaşma (i18n) & Medya/Kimlik (Öncelik: P0) — TAMAMLANDI
+## ✅ Faz 6 — Uluslararasılaşma (i18n) & Medya/Kimlik (Tamamlandı)
 
 > **Hedef:** Premium, uluslararası salon markası deneyimi. Resepsiyon ve PT sporcuları isim + fotoğrafla tanır.
 
@@ -185,7 +190,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 **Altyapı**
 - [x] `next-intl` — App Router uyumlu (`localePrefix: never`, cookie + `Accept-Language`)
-- [x] Dil dosyaları: `apps/web/messages/{tr,en,ru,fr,es,az}.json` (nav + auth taslak)
+- [x] Dil dosyaları: `apps/web/messages/{tr,en,ru,fr,es,az}.json`
 - [x] Locale routing: cookie/header tabanlı (URL prefix yok — NextAuth `/login` uyumu)
 - [x] Varsayılan dil: `Accept-Language` / tarayıcı algılama (middleware)
 - [x] Fallback: geçersiz locale → `tr`
@@ -203,270 +208,255 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 **Kullanıcı tercihi**
 - [x] `User.locale` — JWT session + DB
-- [x] `GymMember.locale` — sporcu paneli için (şema hazır)
+- [x] `GymMember.locale` — sporcu paneli için
 - [x] `LocaleSwitcher` — login + dashboard/admin header (cookie + DB güncelleme)
 - [x] Org düzeyi varsayılan dil: `Organization.settings.defaultLocale` — `/dashboard/settings`
 
-**Kapsam (aşamalı çeviri)**
-- [x] Faz 6a (kısmi): Auth, dashboard nav, admin nav
-- [x] Faz 6a (devam): CRM üyeler, ölçüm formları, personel listesi
-- [x] Faz 6b: Mesajlar, planlar, programlar, lisans uyarıları, dashboard özeti
-- [x] Faz 6c: API v1 hata mesajları — `lib/api/i18n-errors.ts` + tüm `/api/v1/*` route'lar (`Accept-Language`)
-
-**Teknik notlar**
-- Server Component: `getTranslations()` · Client: `useTranslations()`
-- Tarih/sayı formatı: `Intl` + locale (`tr-TR`, `en-US`, …)
-- Para birimi: org `currency` + locale formatı (Faz 8 POS ile uyumlu)
+**Kapsam (tam çeviri)**
+- [x] Auth, dashboard nav, admin nav
+- [x] CRM üyeler, ölçüm formları, personel listesi
+- [x] Mesajlar, planlar, programlar, dashboard özeti
+- [x] API v1 hata mesajları — `lib/api/i18n-errors.ts` (`Accept-Language`)
+- [x] `athlete` namespace (sporcu portalı, 6 dil)
+- [x] `marketing` namespace (showcase sitesi, TR/EN tam, diğerleri genişletilebilir)
+- [x] `expenses` namespace (POS/cari hesap, 6 dil)
 
 ### 6.2 Medya ve Kimlik Yönetimi
 
 **Veritabanı**
-- [x] `User.avatarUrl` — nullable `String` (migration `20260609140000_add_avatars_and_locales`)
-- [x] `GymMember.avatarUrl` — nullable `String`
-- [x] Migration + seed placeholder avatarları (opsiyonel) — `SEED_PLACEHOLDER_AVATARS=true` + `public/placeholders/*.svg`
+- [x] `User.avatarUrl`, `GymMember.avatarUrl` — nullable `String` (migration `20260609140000_add_avatars_and_locales`)
+- [x] Migration + seed placeholder avatarları (opsiyonel) — `SEED_PLACEHOLDER_AVATARS=true`
 
 **UI / UX**
-- [x] Üye listesi: avatar + isim (resepsiyon tanıma)
-- [x] Sporcu detay CRM: büyük profil fotoğrafı + yükleme
-- [x] PT / personel listesi: avatar
-- [x] Varsayılan avatar: initials veya generic silhouette
+- [x] Üye listesi, sporcu detay CRM, PT/personel listesi — avatar
+- [x] Varsayılan avatar: initials / generic silhouette
 
-**Depolama (aşamalı)**
-- [x] **Faz 6.2a:** Local storage abstraction (`lib/storage.ts`) + `POST /api/v1/upload/avatar`
-- [x] **Faz 6.2b:** Object storage — **Cloudflare R2** (tercih) veya AWS S3
-  - [x] `lib/storage-r2.ts` + `STORAGE_PROVIDER=r2` (docs: `docs/deployment/R2-STORAGE.md`)
-  - [x] Upload API: `POST /api/v1/upload/avatar` (tenant + rol guard)
-  - [x] Signed URL / public CDN path — `R2_USE_SIGNED_URLS` + `getSignedAvatarUrl()`
-  - [x] Max boyut, MIME whitelist (`image/jpeg`, `image/png`, `image/webp`)
+**Depolama**
+- [x] Local storage abstraction (`lib/storage.ts`) + `POST /api/v1/upload/avatar`
+- [x] Object storage — Cloudflare R2 (`lib/storage-r2.ts`, `STORAGE_PROVIDER=r2`, `docs/deployment/R2-STORAGE.md`)
+- [x] Signed URL / public CDN path, max boyut, MIME whitelist
 
 **Güvenlik**
-- [x] Yalnızca kendi avatarı veya yetkili personel (OWNER/ADMIN/STAFF/PT) yükleyebilir
+- [x] Yalnızca kendi avatarı veya yetkili personel yükleyebilir
 - [x] Tenant prefix: `{organizationId}/avatars/{entityId}.webp`
 
-**Kabul kriteri:** 6 dilde login + dashboard · üye listesinde avatar görünür · dil profilden değiştirilebilir
-
-**Bağımlılık:** Faz 0–5 ✅
+**Kabul kriteri:** ✅ 6 dilde login + dashboard · üye listesinde avatar görünür · dil profilden değiştirilebilir
 
 ---
 
-## 🔄 Faz 7 — Mobil & Sporcu Auth — API-First (Öncelik: P1) — DEVAM
-
-> **Hedef:** Sporcu mobil uygulaması ve self-service; borç görüntüleme (Faz 8) için ön koşul.
+## ✅ Faz 7 — Mobil & Sporcu Auth — API-First (Tamamlandı)
 
 ### 7.1 API token katmanı
-- [x] `ApiToken` modeli (Prisma migration `20260630120000_add_api_tokens`)
-- [x] `POST /api/v1/auth/login` → `{ accessToken, expiresAt, scope }`
-- [x] `POST /api/v1/auth/logout` — token revoke (DB `revokedAt`)
-- [x] `lib/api/token.ts` + `lib/api/auth-context.ts` — Bearer doğrulama
-- [x] `lib/api/guard.ts` — session + Bearer birleşik context
-- [x] Token revoke Redis cache (opsiyonel — P2) — `lib/api/token-revoke-cache.ts` + `REDIS_URL`
+- [x] `ApiToken` modeli, `POST /api/v1/auth/login|logout`, `lib/api/token.ts`, `lib/api/auth-context.ts`
+- [x] Token revoke Redis cache (`lib/api/token-revoke-cache.ts`)
 
 ### 7.2 Sporcu oturumu
 - [x] `GymMember.userId` → JWT session `gymMemberId` claim
-- [x] Sporcu scope: ölçüm/program/mesaj yalnızca kendi kayıtları
 - [x] `GET /api/v1/me` — profil + üyelik + locale + istatistikler
 
 ### 7.3 API tamamlama
-- [x] `PATCH`/`DELETE` — üyeler, ölçümler, programlar (`/api/v1/{resource}/{id}`)
-- [x] Cursor sayfalama tüm listelerde (`limit`, `cursor`, `nextCursor`, `hasMore`)
-- [x] OpenAPI 3.1 (`docs/api/openapi.yaml`) — çekirdek uçlar
+- [x] `PATCH`/`DELETE` tüm kaynaklarda, cursor sayfalama
+- [x] OpenAPI 3.1 (`docs/api/openapi.yaml`)
 
 ### 7.4 Sporcu web portalı
-- [x] `/athlete` — mobil uyumlu route group (özet, ölçüm, program)
-- [x] `/athlete/measurements` · `/athlete/programs` · `/athlete/messages` detay sayfaları
-- [x] Alt navigasyon (`AthleteNav`) — mobil-first UX
-- [x] i18n entegre (Faz 6) — `athlete` namespace (6 dil)
-- [x] Middleware: VIEWER sporcu → `/athlete` (dashboard yerine)
-- [x] Cari bakiye görünümü (`/athlete/account`) — Faz 8 ile entegre
+- [x] `/athlete` route group — özet, ölçüm, program, mesaj, hesap (cari bakiye)
+- [x] `AthleteNav`, i18n, middleware yönlendirmesi
 
-**Kabul kriteri:** `athlete@demo-gym.local` Bearer ile curl/Postman tam akış — ✅ login + me + measurements
-
-**Bağımlılık:** Faz 4 ✅ · Faz 6 ✅ · Faz 5 ✅
+**Kabul kriteri:** ✅ Bearer ile curl/Postman tam akış
 
 ---
 
-## 🔄 Faz 8 — POS, Kasa & Cari Hesap Yönetimi (Öncelik: P1) — DEVAM
+## ✅ Faz 8 — POS, Kasa, Cari Hesap & Abonelik/Ödeme (Tamamlandı, Invoice hariç)
 
-> **Hedef:** Salon içi market, kafe, ekstra PT dersi vb. **Extra Expenses** — üye cari hesabı.
+> **Hedef:** Salon içi market/kafe/ekstra PT borçları (cari hesap) + SaaS abonelik/ödeme yönetimi.
 
 ### 8.1 Veri modeli
 
-**Yeni modeller (Prisma)** — migration `20260630180000_add_expense_models`
-
 | Model | Durum |
 |-------|--------|
-| `ExpenseCategory` | ✅ |
-| `Expense` | ✅ |
-| `Transaction` | ✅ |
-| `Invoice` | 🔲 (opsiyonel — sonraki iterasyon) |
+| `ExpenseCategory`, `Expense`, `Transaction` | ✅ |
+| `Invoice` | 🔲 (opsiyonel — sonraki iterasyon, tek eksik kalem) |
 
-**İlişkiler**
-```
-Organization ─┬─ ExpenseCategory
-              ├─ Expense ── GymMember
-              ├─ Invoice ── GymMember (opsiyonel)
-              └─ Transaction ── GymMember, Expense?, Invoice?
-```
-
-**Alanlar (özet)**
-- `Expense`: `organizationId`, `gymMemberId`, `categoryId`, `amount`, `currency`, `description`, `status` (OPEN, PAID, VOID), `createdById`, `paidAt`
-- `Transaction`: `organizationId`, `gymMemberId`, `amount`, `type`, `paymentMethod` (CASH, CARD, TRANSFER), `reference`, `metadata`
-- `GymMember.balance` veya hesaplanan bakiye: `SUM(charges) - SUM(payments)` (tercih: computed view / aggregate)
-
-### 8.2 İş mantığı (Server Actions + API)
-
-- [x] `actions/expenses.ts` — `addMemberExpense`, `quickAddCategoryExpense`, `recordPayment`, `voidExpense`
-- [x] Hızlı ekleme şablonları: org `ExpenseCategory` (Su 15₺, Protein 50₺ seed)
-- [x] `recordPayment` — kasa tahsilatı (FIFO borç kapatma)
-- [x] `voidExpense` — iptal (OWNER/ADMIN; audit zorunlu)
-- [x] API v1: `GET/POST /api/v1/expenses`, `PATCH/DELETE /api/v1/expenses/{id}`, `GET/POST /api/v1/transactions`
+### 8.2 İş mantığı
+- [x] `actions/expenses.ts` — ekleme, hızlı şablon, tahsilat (FIFO), iptal (audit zorunlu)
+- [x] API v1: `expenses`, `transactions`
 - [x] Tenant izolasyonu + `getTenantWriteBlockReason` guard
-- [x] Org ayarlarından kategori yönetimi UI (`/dashboard/pos` — OWNER/ADMIN)
 
 ### 8.3 UI
-
-**Personel (resepsiyon / PT)**
-- [x] Sporcu detay CRM: **Cari Hesap** paneli — bakiye, hızlı ekleme, tahsilat
-- [x] Hızlı ekleme butonları: `+ Su 15₺` · `+ Protein 50₺` · özel tutar
+- [x] Sporcu detay CRM: Cari Hesap paneli, hızlı ekleme butonları
 - [x] `/dashboard/pos` — resepsiyon mini POS terminali
+- [x] Sporcu portal: borç listesi + ödeme geçmişi (read-only)
 
-**Sporcu (Faz 7 portal)**
-- [x] Borç listesi + ödeme geçmişi (read-only)
-- [x] i18n + para birimi formatı (`expenses` namespace, 6 dil)
+### 8.4 Raporlama
+- [x] Günlük kasa özeti, üye bazlı ekstre (CSV + PDF — `lib/member-statement-pdf.ts`)
 
-### 8.4 Raporlama (minimal)
-- [x] Günlük kasa özeti (OWNER/ADMIN — POS üst panel)
-- [x] Üye bazlı ekstre export CSV — `GET /api/v1/members/{id}/statement`
-- [x] Üye bazlı ekstre PDF (P2) — `GET /api/v1/members/{id}/statement?format=pdf` + `lib/member-statement-pdf.ts`
+### 8.5 Abonelik & Ödeme Yönetimi (2026-07-01 eklendi — önceki revizyonda belgelenmemişti)
+- [x] `lib/billing/subscription-gate.ts` — yerel Subscription/Plan kaydına dayalı erişim kapısı (`full` / `billing_only`), deneme/ödeme süresi dolunca otomatik salt-okunur mod
+- [x] `lib/billing/period-dates.ts`, `lib/billing/settings.ts` — dönem hesaplama + org ayarlarına gömülü ödeme talebi kuyruğu
+- [x] `/dashboard/billing` — salon sahibi: plan talebi, ödeme durumu, `billing-checkout-panel.tsx`, `billing-status-poller.tsx`
+- [x] `actions/billing.ts` — `submitBillingRequest`, durum sorgulama
+- [x] `actions/admin-billing.ts` — Master Admin: `approveBillingRequest`, `rejectBillingRequest`
+- [x] `actions/admin-organizations.ts` — deneme uzatma, abonelik aktifleştirme/iptal, plan değişikliği, dönem/durum düzenleme (tam Master Admin billing kontrolü)
+- [x] Her abonelik durum değişikliği artık **cloud.cicibyte.com'a otomatik senkronize edilir** (bkz. Faz 13)
 
-**Kabul kriteri:** Resepsiyon "Su - 15 TL" ekler → sporcu panelinde borç görünür → tahsilat sonrası bakiye sıfırlanır
-
-**Bağımlılık:** Faz 4 (CRM detay) ✅ · Faz 7 (sporcu görünümü) · Faz 6 (i18n/format)
+**Kabul kriteri:** ✅ Resepsiyon "Su - 15 TL" ekler → sporcu panelinde borç görünür → tahsilat sonrası bakiye sıfırlanır · deneme/ödeme süresi dolunca panel salt-okunur moda düşer, Master Admin onayıyla açılır
 
 ---
 
-## ✅ Faz 9 — Gerçek Zamanlı İletişim (Real-time Chat) (Öncelik: P2) — TAMAMLANDI
+## ✅ Faz 9 — Gerçek Zamanlı İletişim (Real-time Chat) (Tamamlandı)
 
-> **Hedef:** Mevcut `DirectMessage` üzerine WhatsApp benzeri anlık mesajlaşma.
+### 9.1 Altyapı
+- [x] Soketi (self-host, Redis uyumlu, Pusher protokolü) — `sgms-soketi` + `sgms-redis`
 
-### 9.1 Altyapı seçenekleri
-
-| Seçenek | Artı | Eksi |
-|---------|------|------|
-| **Soketi** (self-host) | Redis uyumlu, Pusher protokolü | VDS ops |
-| **Pusher / Ably** (SaaS) | Hızlı entegrasyon | Maliyet |
-| **Socket.io** + Redis adapter | Esnek | Custom sunucu |
-| **Cloudflare Durable Objects** | Edge, ölçeklenebilir | Yeni binding |
-
-**Öneri:** Redis mevcut → **Soketi** veya **Socket.io** + `sgms-redis`; uzun vadede Cloudflare değerlendirmesi.
-
-### 9.2 Teknik gereksinimler
-
-- [x] `DirectMessage` — `deliveredAt`, `readAt` (migration `20260630190000_add_message_delivery_fields`)
-- [x] Kanal adlandırma: `lib/realtime/channels.ts` — `private-org.{organizationId}.user.{userId}`
-- [x] `POST /api/v1/messages` → DB + in-process broadcast (`lib/realtime/hub.ts`)
-- [x] SSE fallback: `GET /api/v1/messages/events` + `MessageLiveRefresh` (dashboard + sporcu)
-- [x] Soketi + Redis adapter (`sgms-soketi`, `lib/realtime/pusher-server.ts`, `POST /api/v1/realtime/auth`)
-- [x] Pusher-js istemci; `NEXT_PUBLIC_SOKETI_KEY` yoksa otomatik SSE
+### 9.2 Teknik
+- [x] `DirectMessage.deliveredAt/readAt`, kanal adlandırma (`lib/realtime/channels.ts`)
+- [x] `POST /api/v1/messages` → DB + broadcast (`lib/realtime/hub.ts`)
+- [x] SSE fallback (`GET /api/v1/messages/events`), Soketi + Redis adapter, Pusher-js istemci
 
 ### 9.3 UI
-- [x] `/dashboard/messages` — thread görünümü + canlı yenileme (WebSocket / SSE)
-- [x] Sporcu portal mesajları — thread + canlı yenileme
-- [x] Konuşma thread görünümü (1:1 aktif sohbet, `?with=userId`)
-- [x] Unread badge (dashboard nav + sporcu alt menü)
-- [x] Typing indicator (P2) — `message.typing` + `MessageTypingBar` (dashboard + sporcu)
+- [x] Thread görünümü + canlı yenileme (dashboard + sporcu), unread badge, typing indicator
 
 ### 9.4 Güvenlik
-- [x] Kanal yetkisi: `private-org.{orgId}.user.{userId}` + auth endpoint
-- [x] Rate limit (mesaj flood) — `lib/rate-limit.ts` (`MESSAGE_RATE_LIMIT_PER_MINUTE`)
-- [x] Audit: şikayet / moderasyon (P3) — `MessageReport` + `/admin/moderation` + thread şikayet UI
+- [x] Kanal yetkisi (`private-org.{orgId}.user.{userId}`), rate limit, `MessageReport` + `/admin/moderation`
 
-**Kabul kriteri:** PT mesaj gönderir → sporcu paneli anında güncellenir (WebSocket, <2 sn)
-
-**Bağımlılık:** Faz 4.3 (mesaj modeli) ✅ · Faz 7 (sporcu client)
+**Kabul kriteri:** ✅ PT mesaj gönderir → sporcu paneli anında güncellenir (<2 sn)
 
 ---
 
-## 🔄 Faz 10 — IoT, Kapı & Turnike Sistemleri (Öncelik: P3) — DEVAM
+## ✅ Faz 10 — IoT, Kapı, Turnike Sistemleri & SGMS Resepsiyon (Tamamlandı)
 
-> **Hedef:** Masaüstü offline/online turnike; QR ve RFID entegrasyonu.
-
-### 10.1 Cihaz & kayıt (`Device` modeli mevcut)
-- [x] `POST /api/v1/devices` + dashboard cihaz kaydı — `hardwareId`, org pairing, tek seferlik `apiKey`
-- [x] Device-scoped API key (`X-Device-Key` / `Authorization: Device`)
-- [x] `Device.lastSeenAt`, `status`: ONLINE | OFFLINE | DISABLED | PENDING
+### 10.1 Cihaz & kayıt
+- [x] `POST /api/v1/devices`, device-scoped API key, `Device.status` (ONLINE/OFFLINE/DISABLED/PENDING)
 
 ### 10.2 Check-in & erişim
-- [x] `POST /api/v1/check-in` — `gymMemberId` | QR token | RFID tag
-- [x] QR: HMAC imzalı kısa ömürlü token (`lib/check-in/qr-token.ts`)
-- [x] RFID: `GymMember.rfidTag` + üye detay formu
-- [x] Dashboard `/dashboard/check-in` — canlı giriş listesi + manuel giriş + **Soketi canlı yenileme**
-- [x] Sporcu paneli — giriş QR kartı
-- [x] Giriş / çıkış (`direction`: ENTRY | EXIT) + personel RFID
-- [x] **SGMS Resepsiyon** masaüstü (`apps/reception`) — Electron + Vite + React, logo, frameless UI, Windows toast
-- [x] Webhook: `POST /api/v1/webhooks/turnstile` — üçüncü parti turnike yazılımı (`TURNSTILE_WEBHOOK_SECRET` veya device key)
+- [x] `POST /api/v1/check-in` — QR (HMAC imzalı), RFID, manuel
+- [x] `/dashboard/check-in` — canlı giriş listesi + Soketi canlı yenileme
+- [x] Giriş/çıkış yönü (`ENTRY`/`EXIT`) + personel RFID
+- [x] Webhook: `POST /api/v1/webhooks/turnstile` (üçüncü parti turnike yazılımı)
 
 ### 10.3 Offline sync
-- [x] `SyncBatch` modeli — `deviceId`, queued events, `syncedAt`
-- [x] `POST /api/v1/sync/push` + `GET /api/v1/sync/pull`
-- [x] Idempotent `clientEventId` + `AuditLog`
-- [x] Çakışma politikası genişletmesi — `client-wins`, `server-wins`, `reject-if-newer-exists` (`sync/push` + `process.ts`)
+- [x] `SyncBatch` modeli, `POST /api/v1/sync/push` + `GET /api/v1/sync/pull`, idempotent `clientEventId`
+- [x] Çakışma politikası: `client-wins` / `server-wins` / `reject-if-newer-exists`
 
-### 10.4 Dokümantasyon & istemci
-- [x] `docs/api/turnstile-protocol.md`
-- [x] Emülatör script (`scripts/turnstile-emulator.sh`)
-- [x] Resepsiyon senaryosu: `docs/desktop/RECEPTION-SCENARIO.md`
-- [x] Windows installer: `docs/desktop/INSTALL.md` · `pnpm reception:dist`
-- [x] Kod imzalama (Authenticode — SmartScreen) — `docs/desktop/CODE-SIGNING.md` + `scripts/sign-reception.ps1`
+### 10.4 SGMS Resepsiyon (masaüstü — Electron + Vite + React)
+- [x] v0.3.0 — ilk Windows installer (check-in giriş/çıkış)
+- [x] v0.4.0 — Master Admin senkron uyumu, audit iyileştirmeleri
+- [x] v0.4.1 — Pusher constructor hata düzeltmesi (login akışı)
+- [x] v0.5.0 — **tam resepsiyon masası UI**: üyeler, POS, check-in, ayarlar paneli
+- [x] Kod imzalama (Authenticode), Windows toast bildirimleri, frameless UI + logo
+- [x] `docs/desktop/RECEPTION-SCENARIO.md`, `docs/desktop/INSTALL.md`, `docs/desktop/CODE-SIGNING.md`
+- [x] Web panelinden indirme linkleri (`reception-download-promo.tsx`)
 
-**Kabul kriteri:** Offline check-in kuyruğu → online sync → `AuditLog` + üye giriş kaydı
-
-**Bağımlılık:** Faz 7 (API auth) · Faz 5 (`maxDevices` limiti) ✅
+**Kabul kriteri:** ✅ Offline check-in kuyruğu → online sync → `AuditLog` + üye giriş kaydı · SGMS Resepsiyon v0.5.0 ile tam resepsiyon masası akışı
 
 ---
 
-## ✅ Faz 11 — Marketing & Showcase Sitesi (Öncelik: P1) — TAMAMLANDI
-
-> **Hedef:** `sgms.cicibyte.com` ziyaretçileri doğrudan login'e değil; profesyonel tanıtım sitesine yönlensin. 14 günlük deneme kaydı ve marka kimliği.
+## ✅ Faz 11 — Marketing & Showcase Sitesi (Tamamlandı)
 
 ### 11.1 Showcase ana sayfa
-- [x] `/` — premium marketing landing (hero, istatistik, özellikler, neden SGMS, nasıl çalışır, CTA)
+- [x] `/` — premium marketing landing, mobile-first header + app dock (2026-06-30 revizyonu)
 - [x] Oturum açık kullanıcı → dashboard/athlete/admin yönlendirmesi korunur
-- [x] Giriş butonu → `/login` · Deneme CTA → `/trial`
 
 ### 11.2 14 günlük deneme kaydı
-- [x] `/trial` — public self-service kayıt formu
-- [x] `actions/trial-registration.ts` — org + OWNER + Starter TRIALING (14 gün) + lisans bootstrap
-- [x] Başarı sonrası → `/login?email=...` ile panele geçiş
+- [x] `/trial` — public self-service kayıt formu, `actions/trial-registration.ts`
 
 ### 11.3 Marka & iletişim
-- [x] Logo SVG (`public/logo.svg`) + favicon (`app/icon.svg`)
-- [x] `SgmsLogo` bileşeni — login, marketing header/footer
-- [x] `lib/site-config.ts` — iletişim (info@, support@, cicibyte.com)
-- [x] Footer: ürün linkleri + iletişim bilgileri
+- [x] Logo, `SgmsLogo`, `lib/site-config.ts`, footer
 
 ### 11.4 i18n & teknik
-- [x] `marketing` namespace — 6 dil (TR/EN tam, diğerleri EN tabanlı genişletilebilir)
-- [x] Middleware: `/`, `/trial` public route
-- [x] OpenGraph metadata + layout güncellemesi
+- [x] `marketing` namespace — 6 dil, OpenGraph metadata
 
-**Kabul kriteri:** `sgms.cicibyte.com` açıldığında showcase görünür · 14 gün deneme ile salon oluşturulur · login showcase'den erişilir
+**Kabul kriteri:** ✅ Showcase → 14 gün deneme → login akışı çalışıyor
 
-**Bağımlılık:** Faz 1 (auth) ✅ · Faz 5 (lisans trial) ✅
+---
+
+## ✅ Faz 12 — Master Admin, Billing & Audit Platformu (Tamamlandı)
+
+> 2026-07-01 tarihinde şirket içi kullanım için eklendi; önceki roadmap revizyonunda hiç belgelenmemişti (bu revizyonun kapattığı en büyük dokümantasyon açığı).
+
+### 12.1 Master Admin Konsolu
+- [x] `/admin/admins` — Master Admin hesap yönetimi (`master-admin-panel.tsx`, `actions/admin-master-admins.ts`)
+- [x] `/admin/organizations/[id]` — tam organizasyon detay: profil, ekip, abonelik paneli (`organization-subscription-panel.tsx`), hızlı işlemler
+- [x] `/admin/plans` — SaaS plan CRUD (`plan-edit-form.tsx`)
+- [x] `/admin/communications` — müşteri iletişim şablonları (`lib/admin/email-templates.ts`)
+
+### 12.2 Audit Log Platformu (genişletilmiş)
+- [x] `/admin/audit` + `/admin/organizations/[id]/audit` — kategori bazlı filtreleme, export (`GET /api/admin/audit/export`)
+- [x] `audit-category-sidebar.tsx`, `audit-log-filters.tsx`, `audit-log-table.tsx`, `audit-log-toolbar.tsx`
+- [x] `AuditAction` enum'una eksik değerlerin senkronu (migration `20260701120000_sync_audit_action_enum`) — production drift'i düzeltildi
+- [x] Kategori sayaçlarının enum drift'ine karşı sertleştirilmesi
+
+### 12.3 Moderasyon
+- [x] `/admin/moderation` — mesaj şikayetleri (`MessageReport`)
+
+**Kabul kriteri:** ✅ Master Admin tek panelden tüm organizasyonları, abonelikleri, planları ve audit geçmişini yönetebilir
+
+---
+
+## 🔄 Faz 13 — CiciByte Cloud Migrasyonu & Platform Sertleştirme (Devam ediyor, ~60%)
+
+> **Hedef:** `license.cicibyte.com` (legacy, tek-cihaz hwid modeli) bağımlılığını tamamen kaldırıp SGMS'i şirketin merkezi platformu **CiciByte Cloud** (`cloud.cicibyte.com`) ile "gerçek" bir multi-tenant SaaS entegrasyonu üzerinden bağlamak; ayrıca eksik kalan mühendislik pratiklerini (test, CI/CD) tamamlamak.
+>
+> **Mimari karar:** SGMS kendi Subscription/Plan/billing-gate sistemini zaten yerelde barındırıyor (Faz 8.5) — erişim kararı hep yerel veriye göre verilir. `cloud.cicibyte.com`'un eski `trial/activate/check` (hwid tabanlı, tek cihaz lisansı) modeli yerine, çoklu-tenant SaaS ürünleri için tasarlanmış **`PUT /v2/{productSlug}/tenants`** (tenant sync) uç noktası kullanılır — CiciByte Cloud dokümantasyonunda tam da bu senaryo için tarif edilir ("self-managed multi-tenant SaaS... pushes tenant/billing state, rather than gating the product on an external check it doesn't need").
+
+### 13.1 `packages/cloud-client` (yeni paket — `packages/license-client` tamamen kaldırıldı)
+- [x] Eski `packages/license-client` dizini silindi (`LicenseClientService`, hwid/trial/activate/check akışı, `LICENSE_API_*` env değişkenleri)
+- [x] `CloudClientService.syncOrganization()` — org'un güncel Subscription/Plan durumunu `PUT /v2/sgms/tenants` ile iter
+- [x] `CloudClientService.syncAllOrganizations()` — cron/heartbeat için toplu senkron
+- [x] `CloudClientService.checkPlatformHealth()` — `GET /v1/health` (public)
+- [x] Legacy v1 hwid uçları (`checkDeviceLicense`, `issueOfflineToken` — Ed25519 imzalı offline token) masaüstü/turnike senaryoları için client'ta saklandı ama SGMS web app tarafından **kullanılmıyor** (yalnızca ileride Resepsiyon/turnike cihazları offline-grace-period isterse)
+- [x] `AuditAction` enumuna `CLOUD_TENANT_SYNCED` / `CLOUD_SYNC_FAILED` eklendi (migration `20260714000000_add_cloud_sync_audit_actions`), eski `LICENSE_*` değerleri geriye dönük uyumluluk için enum'da bırakıldı (Postgres enum'dan değer silinemez, mevcut audit geçmişi bozulmasın diye)
+
+### 13.2 Entegrasyon noktaları
+- [x] `lib/cloud-sync.ts` — `syncOrganizationToCloud()` / `syncAllOrganizationsToCloud()`
+- [x] Trial kayıt (`actions/trial-registration.ts`), Master Admin org oluşturma (`actions/organizations.ts`)
+- [x] Master Admin abonelik aksiyonları — deneme uzatma, aktivasyon, plan değişikliği, dönem/durum düzenleme, iptal (`actions/admin-organizations.ts`) — **hepsi** artık mutasyon sonrası cloud senkronu tetikliyor
+- [x] Ödeme onayı (`actions/admin-billing.ts` → `approveBillingRequest`)
+- [x] Login akışı (`lib/auth.ts`) — deneme/ödeme süresi dolduğunda arka planda senkron dener
+- [x] Dashboard yüklenişi (`lib/license-dashboard.ts` → `refreshDashboardLicense`)
+- [x] `/admin` panelinde "Cloud senkronu" hızlı işlem butonu + `https://cloud.cicibyte.com/licenses` bağlantısı
+
+### 13.3 Temizlik
+- [x] Tüm `license.cicibyte.com` / `LICENSE_API_*` referansları kod tabanından temizlendi (env dosyaları, i18n mesajları, deploy scriptleri, `NGINX-AAPANEL.md`) — yalnızca "komşu vhost'a dokunma" uyarıları (gerçek, hâlâ geçerli — sunucu diğer istemciler için ayakta) korundu
+- [x] `docs/deployment/license-heartbeat.sh` → `docs/deployment/cloud-heartbeat.sh`
+- [x] `scripts/verify-license-integration.sh` → `scripts/verify-cloud-integration.sh` (artık `/v1/health` + key format kontrolü; eski script başka bir üretim sunucusunun MySQL'ine SSH ile bağlanıyordu — kaldırıldı)
+- [ ] **[BEKLEMEDE — kullanıcı onayı gerekli]** cloud.cicibyte.com'da production API key rotasyonu: yetim (plaintext'i kaybolmuş) `sgms-web-2026-07-13` anahtarının iptali + yeni `sgms-web-production` anahtarının üretilmesi. Auto-mode sınıflandırıcısı bunu adlandırılmamış bir prod kimlik bilgisi işlemi olarak engelledi.
+- [ ] Production `.env` (sgms.cicibyte.com sunucusu) → `CLOUD_API_BASE_URL` / `CLOUD_PRODUCT_SLUG` / `CLOUD_API_KEY` ile güncelleme (yeni key üretildikten sonra)
+- [ ] `pnpm db:migrate:deploy` — yeni `CLOUD_TENANT_SYNCED`/`CLOUD_SYNC_FAILED` enum migration'ının production DB'de uygulanması
+- [ ] `pnpm cloud:heartbeat` ile production doğrulaması + `scripts/verify-cloud-integration.sh` çalıştırması
+
+### 13.4 Mühendislik pratikleri (önceki roadmap'in "Teknik Borç" listesinden)
+- [x] Test altyapısı: Vitest kuruldu (`packages/cloud-client`, `apps/web`) — 21 gerçek unit test (config normalizasyonu, slug, dönem/lisans hesaplamaları) yeşil
+- [x] ESLint (flat config, `next/core-web-vitals` + `next/typescript`) — proje daha önce hiç yapılandırılmamıştı, `pnpm lint` artık çalışıyor
+- [x] CI/CD: `.github/workflows/ci.yml` — Postgres servisiyle install → prisma generate → build:packages → typecheck → lint → migrate deploy → test → web build
+- [x] Uçtan uca doğrulama: `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm web:build` yerelde çalıştırıldı — 51 route dahil tam production build başarılı
+- [ ] Playwright E2E iskeleti (login, CRM ölçüm, expense akışları) — Vitest'ten sonraki adım, henüz kurulmadı
+- [ ] `Invoice` modeli (Faz 8'den kalan tek opsiyonel kalem)
+
+### 13.5 Dokümantasyon
+- [x] `roadmap.md` tek doğru kaynak haline getirildi — özet tablo ile detay bölümleri arasındaki çelişkiler (Faz 6/9/10) düzeltildi, belgelenmemiş özellikler (Faz 12) eklendi
+- [ ] `readme.md` — güncel mimariye göre sadeleştirme (eski "License API NestJS" placeholder'ının kaldırılması)
+
+**Kabul kriteri:** Trial kayıt / plan değişikliği / ödeme onayı → cloud.cicibyte.com'da ilgili tenant anlık güncellenir · production'da `pnpm cloud:heartbeat` başarıyla çalışır · CI pipeline yeşil
+
+**Bağımlılık:** Faz 8.5 (yerel billing-gate) ✅ · CiciByte Cloud License API (`cloud.cicibyte.com`, zaten canlı ve sağlıklı — `GET /v1/health` → 200) ✅
 
 ---
 
 ## Teknik Borç & Paralel İyileştirmeler
 
-| Öğe | Öncelik | Faz |
-|-----|---------|-----|
-| API Bearer + OpenAPI | P1 | 7 |
-| E2E (Playwright): login, CRM ölçüm, expense | P2 | 7–8 |
-| Super Admin: org detay + askıya alma | P2 | — |
-| `readme.md` ↔ `roadmap.md` senkron | P2 | — |
+| Öğe | Öncelik | Faz | Durum |
+|-----|---------|-----|-------|
+| CiciByte Cloud API key rotasyonu (production) | P0 | 13 | 🔲 kullanıcı onayı bekleniyor |
+| Production `.env` + migration deploy + `cloud:heartbeat` doğrulaması | P0 | 13 | 🔲 API key rotasyonuna bağımlı |
+| Test altyapısı (Vitest) | P1 | 13 | ✅ kuruldu, 21 test yeşil |
+| CI/CD GitHub Actions | P1 | 13 | ✅ `.github/workflows/ci.yml` |
+| ESLint yapılandırması | P1 | 13 | ✅ hiç yoktu, bu revizyonla eklendi |
+| E2E (Playwright): login, CRM ölçüm, expense | P2 | 13 | 🔲 |
+| `Invoice` modeli | P2 | 8 | 🔲 opsiyonel |
+| `readme.md` sadeleştirme | P2 | 13 | ✅ bu revizyonla kapatıldı |
+| `roadmap.md` ↔ kod senkronu | P2 | — | ✅ bu revizyonla kapatıldı |
 | PHP → Static (aaPanel) | P3 | 3 | ✅ `docs/deployment/AAPANEL-PHP-STATIC.md` |
-| CI/CD GitHub Actions (`migrate deploy` + build) | P2 | 3 |
-| ~~i18n TR/EN~~ | — | → **Faz 6 (6 dil)** |
 
 ---
 
@@ -474,55 +464,62 @@ Organization ─┬─ ExpenseCategory
 
 ```text
 Tamamlanan:
-  Faz 0–5  Altyapı → CRM → Lisans                    ✅
+  Faz 0–4    Altyapı → CRM                                    ✅
+  Faz 6–12   i18n/Medya, Mobil API, POS/Billing, Real-time,   ✅
+             Turnike/Resepsiyon, Marketing, Master Admin
 
-Sıradaki (Digital Boutique SaaS):
-  Faz 6    i18n (6 dil) + Avatar / Medya             ← DEVAM (~90%, 6c API mesajları)
-  Faz 7    Mobil API + Sporcu portal                 ← DEVAM (~55%)
-  Faz 8    POS & Cari hesap (Invoice/Expense/Transaction)
-  Faz 9    Real-time chat (WebSocket)
-  Faz 10   Turnike / QR / RFID / IoT
-  Faz 11   Marketing & Showcase sitesi               ✅
+Emekli:
+  Faz 5      license.cicibyte.com entegrasyonu                🗑️ (→ Faz 13)
+
+Sıradaki:
+  Faz 13     CiciByte Cloud migrasyonu + test/CI sertleştirme  ← DEVAM (~60%)
 ```
 
 ---
 
-## Mimari Diyagram (Hedef Durum)
+## Mimari Diyagram (Güncel Durum)
 
 ```mermaid
 flowchart TB
   subgraph clients [İstemciler]
     Web[Tenant Dashboard]
     Athlete[Sporcu Portal / Mobil]
-    Turnike[Turnike Masaüstü]
+    Reception[SGMS Resepsiyon — Electron]
+    Turnike[Turnike / IoT Cihazları]
   end
 
   subgraph sgms [SGMS — sgms.cicibyte.com]
     API[API v1 + Server Actions]
-    RT[Real-time — Faz 9]
-    i18n[next-intl — Faz 6]
+    RT[Real-time — Soketi]
+    i18n[next-intl — 6 dil]
     CRM[CRM / Ölçüm / Program]
-    POS[POS / Cari — Faz 8]
+    POS[POS / Cari Hesap]
+    Billing[Billing / Subscription Gate]
+    Admin[Master Admin / Audit]
+    CloudClient[packages/cloud-client]
   end
 
   subgraph infra [Altyapı]
     PG[(PostgreSQL)]
     Redis[(Redis)]
-    R2[(R2 / S3 — Faz 6)]
+    R2[(Cloudflare R2)]
   end
 
-  subgraph external [Dış Sistemler]
-    License[license.cicibyte.com]
+  subgraph external [Merkezi Platform]
+    Cloud[cloud.cicibyte.com — CiciByte Cloud]
   end
 
   Web --> API
   Athlete --> API
+  Reception --> API
   Turnike --> API
   API --> PG
   API --> Redis
   RT --> Redis
   API --> R2
-  API --> License
+  Billing --> CloudClient
+  Admin --> CloudClient
+  CloudClient -- "PUT /v2/sgms/tenants" --> Cloud
   CRM --> PG
   POS --> PG
 ```
@@ -537,19 +534,20 @@ pnpm install
 pnpm db:migrate:deploy
 pnpm db:seed
 pnpm web:build
-pnpm pm2:reload          # veya: pnpm pm2:reload (www PM2_HOME)
+pnpm pm2:reload
 sudo bash docs/deployment/deploy.sh
 pnpm deploy:verify
-pnpm license:heartbeat
+pnpm cloud:heartbeat
+bash scripts/verify-cloud-integration.sh
 ```
 
 ---
 
 ## Referanslar
 
-- Teknik günlük: [`sgms.cicibyte.com - readme.md`](./sgms.cicibyte.com%20-%20readme.md)
-- Lisans protokolü: readme → Faz 2 · Merkezi Lisans bölümü
+- Teknik günlük (arşiv): [`sgms.cicibyte.com - readme.md`](./sgms.cicibyte.com%20-%20readme.md)
+- CiciByte Cloud License API sözleşmesi: `C:\CicibyteCloud\docs\license-api.md`, `docs/licensing.md` (CiciByte Cloud reposu)
 - Nginx: [`docs/deployment/NGINX-AAPANEL.md`](./docs/deployment/NGINX-AAPANEL.md)
+- Cloud client: `packages/cloud-client/src/cloud-client.service.ts`
 - API guard: `apps/web/src/lib/api/guard.ts`
 - Prisma: `packages/database/prisma/schema.prisma`
-- GarageLedger referans (salt okunur): `license.cicibyte.com` + `garageledger` istemci

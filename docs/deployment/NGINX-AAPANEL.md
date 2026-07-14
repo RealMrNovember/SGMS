@@ -1,7 +1,7 @@
 # aaPanel — sgms.cicibyte.com Reverse Proxy Kurulumu
 
 > **Güvenlik kuralı:** Yalnızca `sgms.cicibyte.com` sitesini düzenleyin.  
-> `license.cicibyte.com` veya başka hiçbir site/vhost'a dokunmayın.
+> `cloud.cicibyte.com`, `license.cicibyte.com` (legacy) veya başka hiçbir site/vhost'a dokunmayın.
 
 ---
 
@@ -146,17 +146,13 @@ Alternatif systemd unit (yalnızca sgms yolları): `docs/deployment/systemd/sgms
 
 ---
 
-## license.cicibyte.com — app_code kaydı (sonraki adım)
+## cloud.cicibyte.com — tenant senkron entegrasyonu
 
-Merkezi panelde **Uygulamalar** → yeni kayıt:
+CiciByte Cloud'da (Developer → Products) SGMS ürünü zaten kayıtlı (`slug: sgms`). Her ortam için ayrı bir API key üretilir (Developer → API Keys → "sgms-web-production").
 
-| Alan | Değer |
-|------|--------|
-| **name** | SGMS |
-| **app_code** | `sgms` |
-| **is_active** | ✅ |
+API: `PUT https://cloud.cicibyte.com/api/v2/sgms/tenants`
+Body: `{ "tenant_slug": "<org.slug>", "tenant_name": "<org.name>", "status": "trialing|active|past_due|cancelled", ... }`
 
-API: `POST https://license.cicibyte.com/api/v1/license/trial`  
-Body: `{ "app_code": "sgms", "hwid": "<Organization.installationId>" }`
+Header: `X-Api-Key: <CLOUD_API_KEY>` (üretimde zorunlu)
 
-Header: `X-Api-Key: <LICENSE_API_KEY>` (üretimde zorunlu)
+Bkz. [`packages/cloud-client`](../../packages/cloud-client) ve `docs/api/license-api.md` (CiciByte Cloud reposu).

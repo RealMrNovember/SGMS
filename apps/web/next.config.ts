@@ -23,7 +23,7 @@ function buildAvatarRemotePatterns() {
 }
 
 const nextConfig: NextConfig = {
-  transpilePackages: ['@sgms/database', '@sgms/license-client'],
+  transpilePackages: ['@sgms/database', '@sgms/cloud-client'],
   images: {
     remotePatterns: buildAvatarRemotePatterns(),
   },

@@ -94,6 +94,8 @@ enum AuditAction {
   LICENSE_VALIDATED
   LICENSE_HEARTBEAT
   LICENSE_EXPIRED
+  CLOUD_TENANT_SYNCED
+  CLOUD_SYNC_FAILED
   USER_CREATED
   USER_UPDATED
   USER_LOGIN
@@ -236,7 +238,7 @@ model Organization {
   status    OrganizationStatus @default(PENDING)
   settings  Json               @default("{}")
 
-  // Org düzeyinde merkezi lisans kimliği (license.cicibyte.com hwid)
+  // Org düzeyinde merkezi platform kimliği (cloud.cicibyte.com — CiciByte Cloud tenant sync)
   installationId       String               @unique @map("installation_id")
   centralLicenseKey    String?              @unique @map("central_license_key")
   centralLicenseStatus CentralLicenseStatus @default(UNKNOWN) @map("central_license_status")

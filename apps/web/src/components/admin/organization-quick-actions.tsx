@@ -68,7 +68,7 @@ export function OrganizationQuickActions({
           disabled={pending}
           onClick={() => run(() => syncOrganizationLicenseAdmin(organizationId))}
         >
-          Lisans senkronu
+          Cloud senkronu
         </button>
         {status !== 'ARCHIVED' ? (
           <button
@@ -81,12 +81,12 @@ export function OrganizationQuickActions({
           </button>
         ) : null}
         <a
-          href="https://license.cicibyte.com/admin"
+          href="https://cloud.cicibyte.com/licenses"
           target="_blank"
           rel="noreferrer"
           className="button px-4 py-2 text-sm"
         >
-          Lisans paneli ↗
+          CiciByte Cloud ↗
         </a>
       </div>
     </div>

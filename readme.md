@@ -4,51 +4,14 @@
 |--------|-----|
 | **Blueprint** | `CiCiByte_SGMS_Ultimate_Enterprise_Blueprint.docx` |
 | **VDS (aaPanel)** | `/www/wwwroot/sgms.cicibyte.com` → `sgms.cicibyte.com` |
-| **Komşu (mevcut)** | `license.cicibyte.com` — aynı `wwwroot` altında; **dokunulmaz** |
-| **Local** | `C:\Users\Admin\Cicibyte Projects\SGMS` |
+| **Merkezi platform** | `cloud.cicibyte.com` — CiciByte Cloud (bkz. `roadmap.md` Faz 13) |
+| **Komşu vhost'lar (dokunulmaz)** | `license.cicibyte.com` (legacy, artık SGMS'in bağımlılığı değil), `cloud.cicibyte.com` |
+| **Local** | `C:\Users\Captain\CicibyteProjects\SGMS` |
 | **Sunucu IP** | `31.40.199.47` |
 
 Strateji: **Local geliştir → Git push → VDS `git pull` (aaPanel `www:www`)**
 
----
-
-## Faz 1 — Checklist (güncel durum)
-
-### 0 — Altyapı ve repo ✅ tamamlandı
-
-- [x] Monorepo iskeleti (`pnpm-workspace.yaml`, `package.json`)
-- [x] `infra/docker/docker-compose.yml` (PostgreSQL 16 + Redis 7)
-- [x] VDS volume yolu: `/www/wwwroot/sgms.cicibyte.com/data`
-- [x] `.gitignore` + `docs/deployment/vds-bootstrap.sh` (aaPanel `www:www`)
-- [x] `readme.md` Faz 1 checklist
-- [x] Git: `git init` + ilk commit (local)
-- [x] VDS: `/www/wwwroot/sgms.cicibyte.com` + `www:www`
-- [x] VDS: `data/postgres`, `data/redis`
-- [x] Git: remote + VDS `git clone`
-- [x] VDS: `infra/docker/.env` (`.env.vds.example` kopyası)
-- [x] VDS: Docker kurulu + `docker compose up -d`
-- [x] VDS: `sgms-postgres` + `sgms-redis` Up (Redis port **6380** — sistem 6379 kullanımda)
-
-### 1 — Veritabanı ve Web Paneli ✅ tamamlandı
-
-- [x] `packages/database` — Prisma şema
-- [x] İlk migration (`20260605191622_init`)
-- [x] Plan seed (Starter / Pro / Enterprise / Franchise — TRY / USD / AZN)
-- [x] Web Paneli (Next.js) İskeleti — NextAuth v5, login, dashboard, middleware
-- [x] `ecosystem.config.cjs` + PM2 production script’leri
-
-### 2 — License API
-
-- [ ] `apps/license-api` (NestJS)
-- [ ] `GET /health`
-- [ ] `POST /v1/licenses/activate`, `validate`, `heartbeat`
-- [ ] JWT + Redis cache / revoke
-
-### 3 — Operasyon
-
-- [ ] aaPanel Nginx site → API proxy (mevcut `license` vhost’una **dokunmadan**)
-- [ ] TLS
-- [ ] CI/CD deploy script
+> **Faz/durum takibi:** Bu dosya yalnızca hızlı başlangıç ve deploy talimatlarını içerir. Hangi özelliğin tamamlandığı, hangisinin devam ettiği ve genel mimari için **tek doğru kaynak [`roadmap.md`](./roadmap.md)**'dir.
 
 ---
 
@@ -57,7 +20,7 @@ Strateji: **Local geliştir → Git push → VDS `git pull` (aaPanel `www:www`)*
 - Tüm dosyalar: **`/www/wwwroot/sgms.cicibyte.com`**
 - Sahiplik: **`www:www`** — `chown -R www:www /www/wwwroot/sgms.cicibyte.com`
 - Docker veri bind mount: **`/www/wwwroot/sgms.cicibyte.com/data/{postgres,redis}`**
-- `license.cicibyte.com` kurulumu **değiştirilmez**; SGMS yalnızca kendi dizininde çalışır.
+- Komşu sitelerin (`license.cicibyte.com`, `cloud.cicibyte.com`) kurulumu **değiştirilmez**; SGMS yalnızca kendi dizininde çalışır.
 
 ---
 
@@ -66,13 +29,20 @@ Strateji: **Local geliştir → Git push → VDS `git pull` (aaPanel `www:www`)*
 ```text
 sgms/
 ├── apps/
+│   ├── web/            # Next.js — tenant dashboard, sporcu portalı, admin, marketing
+│   └── reception/       # SGMS Resepsiyon — Electron masaüstü uygulaması
 ├── packages/
+│   ├── database/        # Prisma şema + client
+│   └── cloud-client/     # cloud.cicibyte.com (CiciByte Cloud) tenant senkron istemcisi
 ├── infra/docker/
 │   ├── docker-compose.yml
 │   ├── .env.example          # local
 │   └── .env.vds.example      # VDS şablonu
-├── docs/deployment/
-│   └── vds-bootstrap.sh
+├── docs/
+│   ├── api/              # OpenAPI, turnike protokolü
+│   ├── deployment/        # Nginx, R2, Soketi, deploy scriptleri
+│   └── desktop/           # SGMS Resepsiyon kurulum/kod imzalama
+├── scripts/               # Turnike emülatörü, cloud entegrasyon doğrulaması
 ├── package.json
 └── pnpm-workspace.yaml
 ```
@@ -80,8 +50,6 @@ sgms/
 ---
 
 ## VDS — Adım 0 (Remote SSH terminalinde çalıştırın)
-
-Cursor’da **Remote SSH → 31.40.199.47** bağlı terminalde:
 
 ```bash
 # Dizin + izinler (aaPanel standardı)
@@ -109,7 +77,6 @@ sudo bash docs/deployment/vds-bootstrap.sh
 
 ```bash
 cd /www/wwwroot
-# Dizin boşsa clone (www kullanıcısı veya clone sonrası chown)
 sudo git clone <REMOTE_URL> sgms.cicibyte.com
 sudo chown -R www:www /www/wwwroot/sgms.cicibyte.com
 
@@ -123,12 +90,29 @@ sudo docker compose -f infra/docker/docker-compose.yml ps
 
 > Postgres/Redis varsayılan olarak **127.0.0.1** üzerinde dinler (`POSTGRES_HOST_BIND` / `REDIS_HOST_BIND`).
 
+### Uygulama ortam değişkenleri + ilk deploy
+
+```bash
+cd /www/wwwroot/sgms.cicibyte.com
+cp apps/web/.env.example apps/web/.env.local
+nano apps/web/.env.local   # DATABASE_URL, AUTH_SECRET, CLOUD_API_KEY, ...
+
+pnpm install
+pnpm db:migrate:deploy
+pnpm db:seed
+pnpm web:build
+pnpm pm2:reload
+pnpm deploy:verify
+pnpm cloud:heartbeat
+bash scripts/verify-cloud-integration.sh
+```
+
 ---
 
 ## Local geliştirme
 
 ```powershell
-cd "C:\Users\Admin\Cicibyte Projects\SGMS"
+cd "C:\Users\Captain\CicibyteProjects\SGMS"
 pnpm install
 
 copy infra\docker\.env.example infra\docker\.env
@@ -137,6 +121,13 @@ copy infra\docker\.env.example infra\docker\.env
 mkdir infra\docker\data\postgres, infra\docker\data\redis -Force
 pnpm docker:up
 pnpm docker:ps
+
+copy apps\web\.env.example apps\web\.env.local
+# DATABASE_URL, AUTH_SECRET, CLOUD_API_KEY, ... doldurun
+
+pnpm db:migrate
+pnpm db:seed
+pnpm web:dev
 ```
 
 ---
@@ -144,10 +135,9 @@ pnpm docker:ps
 ## Git
 
 ```powershell
-cd "C:\Users\Admin\Cicibyte Projects\SGMS"
+cd "C:\Users\Captain\CicibyteProjects\SGMS"
 git status
-git remote add origin <REMOTE_URL>
-git push -u origin main
+git push
 ```
 
 VDS güncelleme:
@@ -155,7 +145,10 @@ VDS güncelleme:
 ```bash
 cd /www/wwwroot/sgms.cicibyte.com
 sudo -u www git pull
-sudo docker compose -f infra/docker/docker-compose.yml --env-file infra/docker/.env up -d
+pnpm install
+pnpm db:migrate:deploy
+pnpm web:build
+pnpm pm2:reload
 ```
 
 ---
@@ -171,6 +164,19 @@ sudo docker compose -f infra/docker/docker-compose.yml --env-file infra/docker/.
 
 ---
 
+## Diğer önemli komutlar
+
+| Komut | Açıklama |
+|--------|----------|
+| `pnpm cloud:heartbeat` | Tüm organizasyonları cloud.cicibyte.com ile senkronize eder |
+| `pnpm reception:dev` / `reception:build` / `reception:dist` | SGMS Resepsiyon masaüstü uygulaması |
+| `bash scripts/verify-cloud-integration.sh` | Production'da cloud.cicibyte.com bağlantı/anahtar doğrulaması |
+| `bash scripts/turnstile-emulator.sh` | Turnike webhook emülatörü |
+
+---
+
 ## Referans
 
-`CiCiByte_SGMS_Ultimate_Enterprise_Blueprint.docx`
+- Faz/durum takibi ve mimari: [`roadmap.md`](./roadmap.md)
+- `CiCiByte_SGMS_Ultimate_Enterprise_Blueprint.docx`
+- Teknik günlük (arşiv): [`sgms.cicibyte.com - readme.md`](./sgms.cicibyte.com%20-%20readme.md)

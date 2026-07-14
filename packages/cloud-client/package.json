@@ -1,8 +1,8 @@
 {
-  "name": "@sgms/license-client",
+  "name": "@sgms/cloud-client",
   "version": "0.1.0",
   "private": true,
-  "description": "Central license server client for license.cicibyte.com",
+  "description": "CiciByte Cloud (cloud.cicibyte.com) platform client — tenant sync, licensing & offline-token API",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -14,6 +14,7 @@
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
     "heartbeat": "node dist/heartbeat-cli.js"
   },
   "dependencies": {
@@ -21,6 +22,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.15.21",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vitest": "^2.1.9"
   }
 }

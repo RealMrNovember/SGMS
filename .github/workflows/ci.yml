@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: sgms
+          POSTGRES_PASSWORD: sgms
+          POSTGRES_DB: sgms
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://sgms:sgms@localhost:5432/sgms?schema=public
+      AUTH_SECRET: ci-placeholder-secret-not-for-production
+      AUTH_URL: http://localhost:3100
+      NEXTAUTH_URL: http://localhost:3100
+      CLOUD_API_BASE_URL: https://cloud.cicibyte.com/api
+      CLOUD_PRODUCT_SLUG: sgms
+      CLOUD_API_KEY: ci-placeholder-key
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm --filter @sgms/database db:generate
+
+      - name: Build workspace packages
+        run: pnpm build:packages
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Run migrations against CI database
+        run: pnpm --filter @sgms/database exec prisma migrate deploy
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: Build web app
+        run: pnpm web:build
