@@ -190,7 +190,24 @@ export async function getOrganizationAdminDetail(id: string) {
         },
       },
       partner: { select: { id: true, name: true, code: true } },
+      parentOrganization: { select: { id: true, name: true } },
+      childOrganizations: { select: { id: true, name: true }, orderBy: { name: 'asc' } },
+      hierarchyMembers: {
+        where: { isActive: true },
+        include: { user: { select: { id: true, name: true, email: true } } },
+        orderBy: { createdAt: 'asc' },
+      },
     },
+  });
+}
+
+/** Ebeveyn organizasyon seçimi için, kendisi ve tüm torunları hariç tutulmuş liste
+ * (döngü oluşmasını engellemek için — bkz. actions/admin-hierarchy.ts). */
+export async function listOrganizationsForParentSelect(excludeOrganizationIds: string[]) {
+  return prisma.organization.findMany({
+    where: { id: { notIn: excludeOrganizationIds } },
+    select: { id: true, name: true },
+    orderBy: { name: 'asc' },
   });
 }
 

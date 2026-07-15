@@ -30,6 +30,7 @@
     "team": "Personnel",
     "pos": "Caisse",
     "reports": "Rapports",
+    "enterprise": "Entreprise",
     "adminOverview": "Vue système",
     "newCustomer": "Nouveau client",
     "comingSoonGroup": "Bientôt disponible"
@@ -597,6 +598,11 @@
           "title": "Rapports Avancés et BI",
           "description": "Tendances de visiteurs, heures de pointe, coachs/produits les plus vendus et indicateurs comme le MRR, le LTV et le taux de renouvellement."
         },
+        "enterprise": {
+          "icon": "🏢",
+          "title": "Hiérarchie d'entreprise multi-succursales",
+          "description": "Construisez un arbre société/région/succursale et consultez les données consolidées (membres, personnel, revenus, visites) de toutes les succursales sur un seul écran."
+        },
         "i18n": {
           "icon": "🌍",
           "title": "6 Languages",
@@ -989,6 +995,36 @@
       "title": "Catégories les Plus Vendues",
       "colName": "Catégorie",
       "colRevenue": "Chiffre d'affaires"
+    }
+  },
+  "enterprise": {
+    "title": "Vue Consolidée d'Entreprise",
+    "subtitle": "Consultez toutes les succursales de votre nœud d'entreprise sur un seul écran, en lecture seule.",
+    "export": "Télécharger CSV",
+    "empty": "Aucune donnée pour cette période.",
+    "noAccess": "Vous n'avez pas d'accès à la hiérarchie d'entreprise pour cette vue.",
+    "nodeSelector": "Nœud affiché",
+    "range": {
+      "7d": "7 derniers jours",
+      "30d": "30 derniers jours",
+      "90d": "90 derniers jours",
+      "month": "Ce mois-ci"
+    },
+    "kpi": {
+      "branchCount": "Succursales",
+      "totalActiveMembers": "Total Membres Actifs",
+      "totalStaff": "Total Personnel",
+      "totalRevenue": "Chiffre d'Affaires Total",
+      "totalCheckIns": "Total Visites"
+    },
+    "branchTable": {
+      "title": "Détail par Succursale",
+      "colBranch": "Succursale",
+      "colOwner": "Propriétaire",
+      "colMembers": "Membres Actifs",
+      "colStaff": "Personnel",
+      "colRevenue": "Chiffre d'Affaires",
+      "colCheckIns": "Visites"
     }
   }
 }

@@ -11,6 +11,7 @@ declare module 'next-auth' {
       isDemo: boolean;
       isPartner: boolean;
       partnerId: string | null;
+      isHierarchyMember: boolean;
       organizationId: string | null;
       organizationName: string | null;
       role: OrganizationRole | null;
@@ -24,6 +25,7 @@ declare module 'next-auth' {
     isDemo?: boolean;
     isPartner?: boolean;
     partnerId?: string | null;
+    isHierarchyMember?: boolean;
     organizationId?: string | null;
     organizationName?: string | null;
     role?: OrganizationRole | null;
@@ -47,6 +49,7 @@ export const authConfig = {
         token.isDemo = user.isDemo ?? false;
         token.isPartner = user.isPartner ?? false;
         token.partnerId = user.partnerId ?? null;
+        token.isHierarchyMember = user.isHierarchyMember ?? false;
         token.organizationId = user.organizationId ?? null;
         token.organizationName = user.organizationName ?? null;
         token.role = user.role ?? null;
@@ -63,6 +66,7 @@ export const authConfig = {
         session.user.isDemo = Boolean(token.isDemo);
         session.user.isPartner = Boolean(token.isPartner);
         session.user.partnerId = (token.partnerId as string | null | undefined) ?? null;
+        session.user.isHierarchyMember = Boolean(token.isHierarchyMember);
         session.user.organizationId = (token.organizationId as string | null | undefined) ?? null;
         session.user.organizationName = (token.organizationName as string | null | undefined) ?? null;
         session.user.role = (token.role as OrganizationRole | null | undefined) ?? null;

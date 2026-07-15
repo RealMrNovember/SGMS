@@ -14,7 +14,8 @@ export type AuditCategory =
   | 'security'
   | 'settings'
   | 'partner'
-  | 'trainer';
+  | 'trainer'
+  | 'enterprise';
 
 export const AUDIT_CATEGORY_ACTIONS: Record<Exclude<AuditCategory, 'all'>, AuditAction[]> = {
   organization: ['ORGANIZATION_CREATED', 'ORGANIZATION_UPDATED'],
@@ -66,6 +67,12 @@ export const AUDIT_CATEGORY_ACTIONS: Record<Exclude<AuditCategory, 'all'>, Audit
     'PT_SESSION_SCHEDULED',
     'PT_SESSION_COMPLETED',
     'PT_SESSION_CANCELED',
+  ],
+  enterprise: [
+    'ORGANIZATION_HIERARCHY_LINKED',
+    'ORGANIZATION_HIERARCHY_UNLINKED',
+    'HIERARCHY_MEMBER_GRANTED',
+    'HIERARCHY_MEMBER_REVOKED',
   ],
 };
 
@@ -121,6 +128,10 @@ export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   PT_SESSION_SCHEDULED: 'PT seansı planlandı',
   PT_SESSION_COMPLETED: 'PT seansı tamamlandı',
   PT_SESSION_CANCELED: 'PT seansı iptal/no-show',
+  ORGANIZATION_HIERARCHY_LINKED: 'Organizasyon kurumsal hiyerarşiye bağlandı',
+  ORGANIZATION_HIERARCHY_UNLINKED: 'Organizasyonun kurumsal hiyerarşi bağı kaldırıldı',
+  HIERARCHY_MEMBER_GRANTED: 'Kurumsal hiyerarşi yetkisi verildi',
+  HIERARCHY_MEMBER_REVOKED: 'Kurumsal hiyerarşi yetkisi kaldırıldı',
 };
 
 export const ALL_AUDIT_ACTIONS = Object.keys(AUDIT_ACTION_LABELS) as AuditAction[];
@@ -140,6 +151,7 @@ export const AUDIT_CATEGORY_LABELS: Record<AuditCategory, string> = {
   settings: 'Ayarlar',
   partner: 'Temsilci',
   trainer: 'PT Performansı',
+  enterprise: 'Kurumsal Hiyerarşi',
 };
 
 export const LOGIN_FAILURE_LABELS: Record<string, string> = {

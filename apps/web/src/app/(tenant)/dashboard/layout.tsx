@@ -50,6 +50,7 @@ export default async function TenantDashboardLayout({ children }: { children: Re
       });
 
   const canViewReports = session.user.role === 'OWNER' || session.user.role === 'ADMIN';
+  const canViewEnterprise = session.user.isHierarchyMember === true;
 
   const navItems = locked
     ? [{ href: '/dashboard/billing', label: tBilling('nav') }]
@@ -63,6 +64,7 @@ export default async function TenantDashboardLayout({ children }: { children: Re
         { href: '/dashboard/check-in', label: t('checkIn') },
         { href: '/dashboard/pos', label: t('pos') },
         ...(canViewReports ? [{ href: '/dashboard/reports', label: t('reports') }] : []),
+        ...(canViewEnterprise ? [{ href: '/dashboard/enterprise', label: t('enterprise') }] : []),
         { href: '/dashboard/team', label: t('team') },
         { href: '/dashboard/settings', label: t('settings') },
         { href: '/dashboard/billing', label: tBilling('nav') },

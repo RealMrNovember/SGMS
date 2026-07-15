@@ -30,6 +30,7 @@
     "team": "Personal",
     "pos": "Caja",
     "reports": "Informes",
+    "enterprise": "Empresa",
     "adminOverview": "Resumen del sistema",
     "newCustomer": "Nuevo cliente",
     "comingSoonGroup": "Próximamente"
@@ -597,6 +598,11 @@
           "title": "Informes Avanzados y BI",
           "description": "Tendencias de visitantes, horas pico, entrenadores/productos más vendidos y métricas como MRR, LTV y tasa de renovación."
         },
+        "enterprise": {
+          "icon": "🏢",
+          "title": "Jerarquía empresarial multi-sucursal",
+          "description": "Cree un árbol empresa/región/sucursal y consulte datos consolidados de miembros, personal, ingresos y visitas de todas las sucursales en una sola pantalla."
+        },
         "i18n": {
           "icon": "🌍",
           "title": "6 Languages",
@@ -989,6 +995,36 @@
       "title": "Categorías Más Vendidas",
       "colName": "Categoría",
       "colRevenue": "Ingresos"
+    }
+  },
+  "enterprise": {
+    "title": "Vista Consolidada Empresarial",
+    "subtitle": "Vea todas las sucursales de su nodo empresarial en una sola pantalla de solo lectura.",
+    "export": "Descargar CSV",
+    "empty": "No hay datos para este período.",
+    "noAccess": "No tiene acceso de jerarquía empresarial para esta vista.",
+    "nodeSelector": "Nodo visualizado",
+    "range": {
+      "7d": "Últimos 7 días",
+      "30d": "Últimos 30 días",
+      "90d": "Últimos 90 días",
+      "month": "Este mes"
+    },
+    "kpi": {
+      "branchCount": "Sucursales",
+      "totalActiveMembers": "Total Miembros Activos",
+      "totalStaff": "Total Personal",
+      "totalRevenue": "Ingresos Totales",
+      "totalCheckIns": "Total Visitas"
+    },
+    "branchTable": {
+      "title": "Desglose por Sucursal",
+      "colBranch": "Sucursal",
+      "colOwner": "Propietario",
+      "colMembers": "Miembros Activos",
+      "colStaff": "Personal",
+      "colRevenue": "Ingresos",
+      "colCheckIns": "Visitas"
     }
   }
 }

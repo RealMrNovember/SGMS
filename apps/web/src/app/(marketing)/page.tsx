@@ -11,7 +11,7 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
 
-const FEATURE_KEYS = ['crm', 'programs', 'pt', 'pos', 'reports', 'i18n', 'mobile', 'realtime'] as const;
+const FEATURE_KEYS = ['crm', 'programs', 'pt', 'pos', 'reports', 'enterprise', 'i18n', 'mobile', 'realtime'] as const;
 const STAT_KEYS = ['members', 'languages', 'uptime', 'trial'] as const;
 const STEP_KEYS = ['register', 'setup', 'operate'] as const;
 const WHY_KEYS = ['fragmented', 'international', 'finance', 'athlete'] as const;
@@ -24,7 +24,6 @@ const ROADMAP_ICONS: Record<string, string> = {
   digitalCard: '📱',
   notifications: '🔔',
   insights: '🤖',
-  enterprise: '🏢',
   integrations: '🔌',
   helpCenter: '📖',
 };

@@ -32,6 +32,7 @@
     "settings": "Settings",
     "pos": "POS",
     "reports": "Reports",
+    "enterprise": "Enterprise",
     "adminOverview": "System Overview",
     "newCustomer": "New Customer",
     "comingSoonGroup": "Coming Soon"
@@ -578,6 +579,7 @@
         "pt": { "icon": "🥇", "title": "PT Performance & Commission", "description": "Monthly session count, hours, revenue, and commission calculated automatically for every trainer — cancellation and no-show rate included." },
         "pos": { "icon": "💳", "title": "POS & Member Accounts", "description": "Market, café and extra session charges. Collections, daily cash summary and balances." },
         "reports": { "icon": "📊", "title": "Advanced Reporting & BI", "description": "Visitor trends, busiest hours, top-selling trainers/products, and membership metrics like MRR, LTV, and renewal rate." },
+        "enterprise": { "icon": "🏢", "title": "Enterprise Multi-Branch Hierarchy", "description": "Build a company/region/branch tree and view consolidated members, staff, revenue and visit data across every branch in one screen." },
         "i18n": { "icon": "🌍", "title": "6 Languages", "description": "TR, EN, RU, FR, ES, AZ — ready for expat members and international chains." },
         "mobile": { "icon": "📱", "title": "Mobile API & Athlete Portal", "description": "Bearer token API and self-service for measurements, programs and messages." },
         "realtime": { "icon": "⚡", "title": "Real-time Messaging", "description": "Coach ↔ athlete messaging with WebSocket (Soketi) live updates; SSE fallback when not configured." }
@@ -1108,6 +1110,36 @@
       "title": "Top-Selling Categories",
       "colName": "Category",
       "colRevenue": "Revenue"
+    }
+  },
+  "enterprise": {
+    "title": "Enterprise Consolidated View",
+    "subtitle": "See every branch under your corporate node in one read-only screen.",
+    "export": "Download CSV",
+    "empty": "No data for this period.",
+    "noAccess": "You don't have enterprise hierarchy access for this view.",
+    "nodeSelector": "Viewing node",
+    "range": {
+      "7d": "Last 7 days",
+      "30d": "Last 30 days",
+      "90d": "Last 90 days",
+      "month": "This month"
+    },
+    "kpi": {
+      "branchCount": "Branches",
+      "totalActiveMembers": "Total Active Members",
+      "totalStaff": "Total Staff",
+      "totalRevenue": "Total Revenue",
+      "totalCheckIns": "Total Check-ins"
+    },
+    "branchTable": {
+      "title": "Per-Branch Breakdown",
+      "colBranch": "Branch",
+      "colOwner": "Owner",
+      "colMembers": "Active Members",
+      "colStaff": "Staff",
+      "colRevenue": "Revenue",
+      "colCheckIns": "Check-ins"
     }
   }
 }

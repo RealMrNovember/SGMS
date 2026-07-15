@@ -1,6 +1,7 @@
 import { AdminBadge } from '@/components/admin/admin-badge';
 import { BillingRequestActions } from '@/components/admin/billing-request-actions';
 import { CopyEmailBlock } from '@/components/admin/copy-email-block';
+import { OrganizationHierarchyPanel } from '@/components/admin/organization-hierarchy-panel';
 import { OrganizationPartnerPanel } from '@/components/admin/organization-partner-panel';
 import { OrganizationProfileForm } from '@/components/admin/organization-profile-form';
 import { OrganizationQuickActions } from '@/components/admin/organization-quick-actions';
@@ -18,7 +19,13 @@ import {
   subscriptionTone,
 } from '@/lib/admin/format';
 import { parseBillingSettings } from '@/lib/billing/settings';
-import { getOrganizationAdminDetail, listActivePartners, listActivePlans } from '@/lib/admin/queries';
+import {
+  getOrganizationAdminDetail,
+  listActivePartners,
+  listActivePlans,
+  listOrganizationsForParentSelect,
+} from '@/lib/admin/queries';
+import { resolveDescendantOrganizationIds } from '@/lib/enterprise/hierarchy';
 import { siteConfig } from '@/lib/site-config';
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
@@ -46,6 +53,9 @@ export default async function AdminOrganizationDetailPage({
   if (!org) {
     notFound();
   }
+
+  const descendantIds = await resolveDescendantOrganizationIds(org.id);
+  const parentOptions = await listOrganizationsForParentSelect(descendantIds);
 
   const subscription = org.subscriptions[0] ?? null;
   const ownerMember = org.members.find((m) => m.role === 'OWNER') ?? org.members[0];
@@ -163,6 +173,17 @@ export default async function AdminOrganizationDetailPage({
           organizationId={org.id}
           currentPartnerId={org.partner?.id ?? null}
           partners={partners}
+        />
+        <OrganizationHierarchyPanel
+          organizationId={org.id}
+          currentParentId={org.parentOrganization?.id ?? null}
+          parentOptions={parentOptions}
+          childOrganizations={org.childOrganizations}
+          hierarchyMembers={org.hierarchyMembers.map((hm) => ({
+            id: hm.id,
+            role: hm.role,
+            user: hm.user,
+          }))}
         />
       </section>
 

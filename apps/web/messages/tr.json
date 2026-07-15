@@ -32,6 +32,7 @@
     "settings": "Ayarlar",
     "pos": "Kasa",
     "reports": "Raporlar",
+    "enterprise": "Kurumsal",
     "adminOverview": "Sistem Özeti",
     "newCustomer": "Yeni Müşteri",
     "comingSoonGroup": "Yakında"
@@ -578,6 +579,7 @@
         "pt": { "icon": "🥇", "title": "PT Performans & Prim Yönetimi", "description": "Antrenörlerin aylık seans sayısı, saati, cirosu ve komisyonu otomatik hesaplanır — iptal ve no-show oranıyla birlikte." },
         "pos": { "icon": "💳", "title": "POS & Cari Hesap", "description": "Market, kafe, ekstra ders borçları. Tahsilat, kasa özeti ve üye bakiyesi tek ekranda." },
         "reports": { "icon": "📊", "title": "İleri Raporlama & İş Zekası", "description": "Ziyaretçi trendi, yoğunluk saatleri, en çok satan PT/ürün ve MRR/LTV/yenileme oranı gibi üyelik iş metrikleri." },
+        "enterprise": { "icon": "🏢", "title": "Kurumsal Hiyerarşi & Çoklu Şube", "description": "Şirket/bölge/şube ağacı kurun; tüm şubelerin üye, personel, gelir ve ziyaret verilerini tek konsolide ekranda görün." },
         "i18n": { "icon": "🌍", "title": "6 Dil Desteği", "description": "TR, EN, RU, FR, ES, AZ — expat üyeler ve uluslararası zincirler için hazır." },
         "mobile": { "icon": "📱", "title": "Mobil API & Sporcu Portalı", "description": "Bearer token API, ölçüm/program/mesaj self-service. Mobil uygulama için hazır altyapı." },
         "realtime": { "icon": "⚡", "title": "Anlık Mesajlaşma", "description": "PT ↔ sporcu iletişimi. WebSocket (Soketi) ile anlık güncelleme; yapılandırılmazsa SSE yedek kanal." }
@@ -1111,6 +1113,36 @@
       "title": "En Çok Satan Kategoriler",
       "colName": "Kategori",
       "colRevenue": "Ciro"
+    }
+  },
+  "enterprise": {
+    "title": "Kurumsal Konsolide Görünüm",
+    "subtitle": "Bağlı olduğunuz kurumsal düğümün tüm şubelerini tek ekranda, salt-okunur olarak görün.",
+    "export": "CSV İndir",
+    "empty": "Bu dönem için veri yok.",
+    "noAccess": "Bu görünüm için kurumsal hiyerarşi yetkiniz bulunmuyor.",
+    "nodeSelector": "Görüntülenen düğüm",
+    "range": {
+      "7d": "Son 7 gün",
+      "30d": "Son 30 gün",
+      "90d": "Son 90 gün",
+      "month": "Bu ay"
+    },
+    "kpi": {
+      "branchCount": "Şube Sayısı",
+      "totalActiveMembers": "Toplam Aktif Üye",
+      "totalStaff": "Toplam Personel",
+      "totalRevenue": "Toplam Ciro",
+      "totalCheckIns": "Toplam Ziyaret"
+    },
+    "branchTable": {
+      "title": "Şube Bazında Döküm",
+      "colBranch": "Şube",
+      "colOwner": "Sahibi",
+      "colMembers": "Aktif Üye",
+      "colStaff": "Personel",
+      "colRevenue": "Ciro",
+      "colCheckIns": "Ziyaret"
     }
   }
 }

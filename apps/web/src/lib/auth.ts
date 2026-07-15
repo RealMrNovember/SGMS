@@ -111,6 +111,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             partnerProfile: {
               select: { id: true, isActive: true },
             },
+            hierarchyMemberships: {
+              where: { isActive: true },
+              select: { id: true },
+              take: 1,
+            },
           },
         });
 
@@ -196,6 +201,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           isDemo: user.isDemo,
           isPartner: Boolean(activePartnerProfile),
           partnerId: activePartnerProfile?.id ?? null,
+          isHierarchyMember: user.hierarchyMemberships.length > 0,
           organizationId: membership?.organizationId ?? gymMember?.organizationId ?? null,
           organizationName:
             membership?.organization.name ?? gymMember?.organization.name ?? null,

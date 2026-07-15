@@ -132,6 +132,15 @@ enum AuditAction {
   PT_SESSION_SCHEDULED
   PT_SESSION_COMPLETED
   PT_SESSION_CANCELED
+  ORGANIZATION_HIERARCHY_LINKED
+  ORGANIZATION_HIERARCHY_UNLINKED
+  HIERARCHY_MEMBER_GRANTED
+  HIERARCHY_MEMBER_REVOKED
+}
+
+enum HierarchyRole {
+  COMPANY_ADMIN
+  REGIONAL_MANAGER
 }
 
 enum PtCommissionModel {
@@ -254,6 +263,7 @@ model User {
   trainerProfiles     TrainerProfile[]
   ptSessionsAsTrainer PtSession[]          @relation("PtSessionTrainer")
   ptSessionsCreated   PtSession[]          @relation("PtSessionCreatedBy")
+  hierarchyMemberships HierarchyMember[]
 
   @@index([status])
   @@index([isSuperAdmin])
@@ -361,6 +371,32 @@ model PtSession {
 }
 
 // ---------------------------------------------------------------------------
+// HierarchyMember — kurumsal hiyerarşi (Faz 30). Bir kullanıcıya, bir organizasyon
+// düğümünün (şirket/bölge) tüm alt ağacı üzerinde salt-okunur konsolide görünürlük
+// verir. Mevcut OrganizationRole (OWNER/ADMIN/STAFF/TRAINER/VIEWER) yetki sistemine
+// dokunmaz — tamamen ek ve ayrı bir katmandır; kullanıcı kendi şubesinde ayrıca bir
+// OrganizationMember rolüne de sahip olabilir.
+// ---------------------------------------------------------------------------
+
+model HierarchyMember {
+  id             String        @id @default(cuid())
+  organizationId String        @map("organization_id")
+  userId         String        @map("user_id")
+  role           HierarchyRole
+  isActive       Boolean       @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([userId, isActive])
+  @@map("hierarchy_members")
+}
+
+// ---------------------------------------------------------------------------
 // PasswordResetToken — "şifremi unuttum" imzalı, süreli token (e-posta cloud.cicibyte.com üzerinden gider)
 // ---------------------------------------------------------------------------
 
@@ -417,10 +453,18 @@ model Organization {
   extraStaffCapacity  Int @default(0) @map("extra_staff_capacity")
   extraDeviceCapacity Int @default(0) @map("extra_device_capacity")
 
+  // Kurumsal hiyerarşi (Faz 30) — bu şube/bölgenin bağlı olduğu üst düğüm (şirket/bölge).
+  // Zincirleme ile keyfi derinlikte ağaç kurulabilir (Şirket → Bölge → Şube), ayrı bir
+  // "tip" alanı gerektirmeden.
+  parentOrganizationId String? @map("parent_organization_id")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   partner            Partner?             @relation(fields: [partnerId], references: [id], onDelete: SetNull)
+  parentOrganization Organization?        @relation("OrganizationHierarchy", fields: [parentOrganizationId], references: [id], onDelete: SetNull)
+  childOrganizations Organization[]       @relation("OrganizationHierarchy")
+  hierarchyMembers   HierarchyMember[]
   members            OrganizationMember[]
   subscriptions      Subscription[]
   devices            Device[]
@@ -443,6 +487,7 @@ model Organization {
   @@index([status])
   @@index([centralLicenseStatus])
   @@index([partnerId])
+  @@index([parentOrganizationId])
   @@map("organizations")
 }
 

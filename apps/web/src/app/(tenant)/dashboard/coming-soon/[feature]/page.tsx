@@ -11,7 +11,6 @@ const FEATURE_ICONS: Record<string, string> = {
   digitalCard: '📱',
   notifications: '🔔',
   insights: '🤖',
-  enterprise: '🏢',
   integrations: '🔌',
   helpCenter: '📖',
 };

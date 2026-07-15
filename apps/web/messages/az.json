@@ -30,6 +30,7 @@
     "team": "Personal",
     "pos": "Kassa",
     "reports": "Hesabatlar",
+    "enterprise": "Korporativ",
     "adminOverview": "Sistem icmalı",
     "newCustomer": "Yeni müştəri",
     "comingSoonGroup": "Tezliklə"
@@ -597,6 +598,11 @@
           "title": "Ətraflı Hesabat & Biznes Analitikası",
           "description": "Ziyarətçi tendensiyası, yoğunluq saatları, ən çox satan PT/məhsul və MRR/LTV/yeniləmə nisbəti kimi üzvlük metrikaları."
         },
+        "enterprise": {
+          "icon": "🏢",
+          "title": "Korporativ çoxşaxəli iyerarxiya",
+          "description": "Şirkət/region/filial ağacı qurun və bütün filialların üzv, işçi, gəlir və ziyarət məlumatlarını tək konsolidasiya olunmuş ekranda görün."
+        },
         "i18n": {
           "icon": "🌍",
           "title": "6 Languages",
@@ -989,6 +995,36 @@
       "title": "Ən Çox Satılan Kateqoriyalar",
       "colName": "Kateqoriya",
       "colRevenue": "Gəlir"
+    }
+  },
+  "enterprise": {
+    "title": "Korporativ Konsolidasiya Olunmuş Görünüş",
+    "subtitle": "Korporativ düyününüzə bağlı bütün filialları tək, salt-oxu ekranda görün.",
+    "export": "CSV Yüklə",
+    "empty": "Bu dövr üçün məlumat yoxdur.",
+    "noAccess": "Bu görünüş üçün korporativ iyerarxiya yetkiniz yoxdur.",
+    "nodeSelector": "Baxılan düyün",
+    "range": {
+      "7d": "Son 7 gün",
+      "30d": "Son 30 gün",
+      "90d": "Son 90 gün",
+      "month": "Bu ay"
+    },
+    "kpi": {
+      "branchCount": "Filial Sayı",
+      "totalActiveMembers": "Ümumi Aktiv Üzv",
+      "totalStaff": "Ümumi Personal",
+      "totalRevenue": "Ümumi Gəlir",
+      "totalCheckIns": "Ümumi Ziyarət"
+    },
+    "branchTable": {
+      "title": "Filial Üzrə Bölgü",
+      "colBranch": "Filial",
+      "colOwner": "Sahibi",
+      "colMembers": "Aktiv Üzv",
+      "colStaff": "Personal",
+      "colRevenue": "Gəlir",
+      "colCheckIns": "Ziyarət"
     }
   }
 }
