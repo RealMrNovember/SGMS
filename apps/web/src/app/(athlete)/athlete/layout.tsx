@@ -1,9 +1,10 @@
+import { performSignOut } from '@/actions/sign-out';
 import { AthleteNav } from '@/components/athlete-nav';
 import { LocaleSwitcher } from '@/components/locale-switcher';
 import { MessageLiveRefresh } from '@/components/message-live-refresh';
 import { PushNotificationToggle } from '@/components/push-notification-toggle';
 import { UserAvatar } from '@/components/user-avatar';
-import { auth, signOut } from '@/lib/auth';
+import { auth } from '@/lib/auth';
 import { resolveSubscriptionAccess } from '@/lib/billing/subscription-gate';
 import { prisma } from '@/lib/prisma';
 import { getTranslations } from 'next-intl/server';
@@ -35,7 +36,7 @@ export default async function AthleteLayout({ children }: { children: React.Reac
           className="mt-8"
           action={async () => {
             'use server';
-            await signOut({ redirectTo: '/login' });
+            await performSignOut('/login');
           }}
         >
           <button type="submit" className="button px-5 py-2.5 text-sm">
@@ -76,7 +77,7 @@ export default async function AthleteLayout({ children }: { children: React.Reac
             <form
               action={async () => {
                 'use server';
-                await signOut({ redirectTo: '/login' });
+                await performSignOut('/login');
               }}
             >
               <button type="submit" className="button px-3 py-2 text-xs">

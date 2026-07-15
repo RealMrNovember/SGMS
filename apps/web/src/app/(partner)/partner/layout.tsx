@@ -1,6 +1,7 @@
+import { performSignOut } from '@/actions/sign-out';
 import { LocaleSwitcher } from '@/components/locale-switcher';
 import { PushNotificationToggle } from '@/components/push-notification-toggle';
-import { auth, signOut } from '@/lib/auth';
+import { auth } from '@/lib/auth';
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -37,7 +38,7 @@ export default async function PartnerLayout({ children }: { children: React.Reac
             <form
               action={async () => {
                 'use server';
-                await signOut({ redirectTo: '/login' });
+                await performSignOut('/login');
               }}
             >
               <button type="submit" className="button px-4 py-2 text-sm">

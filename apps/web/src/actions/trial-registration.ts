@@ -88,77 +88,95 @@ export async function registerTrialOrganization(
   const installationId = randomUUID();
   const trialEndsAt = new Date(Date.now() + siteConfig.trialDays * 24 * 60 * 60 * 1000);
 
-  const { organization } = await prisma.$transaction(async (tx) => {
-    const org = await tx.organization.create({
-      data: {
-        name: data.gymName.trim(),
-        slug,
-        email: ownerEmail,
-        phone: data.phone?.trim() || null,
-        country: data.country || 'TR',
-        status: 'ACTIVE',
-        installationId,
-        settings: data.referrerName?.trim() ? { referrerName: data.referrerName.trim() } : undefined,
-      },
-    });
+  let organizationId: string;
 
-    const owner = await tx.user.create({
-      data: {
-        email: ownerEmail,
-        name: data.ownerName.trim(),
-        passwordHash,
-        status: 'ACTIVE',
-        locale: 'tr',
-      },
-    });
-
-    await tx.organizationMember.create({
-      data: {
-        organizationId: org.id,
-        userId: owner.id,
-        role: 'OWNER',
-        isActive: true,
-        joinedAt: new Date(),
-      },
-    });
-
-    await tx.subscription.create({
-      data: {
-        organizationId: org.id,
-        planId: starterPlan.id,
-        status: 'TRIALING',
-        billingCycle: 'MONTHLY',
-        trialEndsAt,
-        currentPeriodStart: new Date(),
-        currentPeriodEnd: trialEndsAt,
-      },
-    });
-
-    await tx.auditLog.create({
-      data: {
-        actorId: owner.id,
-        organizationId: org.id,
-        action: 'ORGANIZATION_CREATED',
-        entityType: 'organization',
-        entityId: org.id,
-        metadata: {
-          planCode: starterPlan.code,
-          ownerEmail,
-          source: 'public_trial_registration',
-          trialDays: siteConfig.trialDays,
+  try {
+    const { organization } = await prisma.$transaction(async (tx) => {
+      const org = await tx.organization.create({
+        data: {
+          name: data.gymName.trim(),
+          slug,
+          email: ownerEmail,
+          phone: data.phone?.trim() || null,
+          country: data.country || 'TR',
+          status: 'ACTIVE',
+          installationId,
+          settings: data.referrerName?.trim() ? { referrerName: data.referrerName.trim() } : undefined,
         },
-      },
+      });
+
+      const owner = await tx.user.create({
+        data: {
+          email: ownerEmail,
+          name: data.ownerName.trim(),
+          passwordHash,
+          status: 'ACTIVE',
+          locale: 'tr',
+        },
+      });
+
+      await tx.organizationMember.create({
+        data: {
+          organizationId: org.id,
+          userId: owner.id,
+          role: 'OWNER',
+          isActive: true,
+          joinedAt: new Date(),
+        },
+      });
+
+      await tx.subscription.create({
+        data: {
+          organizationId: org.id,
+          planId: starterPlan.id,
+          status: 'TRIALING',
+          billingCycle: 'MONTHLY',
+          trialEndsAt,
+          currentPeriodStart: new Date(),
+          currentPeriodEnd: trialEndsAt,
+        },
+      });
+
+      await tx.auditLog.create({
+        data: {
+          actorId: owner.id,
+          organizationId: org.id,
+          action: 'ORGANIZATION_CREATED',
+          entityType: 'organization',
+          entityId: org.id,
+          metadata: {
+            planCode: starterPlan.code,
+            ownerEmail,
+            source: 'public_trial_registration',
+            trialDays: siteConfig.trialDays,
+          },
+        },
+      });
+
+      return { organization: org };
     });
 
-    return { organization: org };
-  });
+    organizationId = organization.id;
+  } catch (error) {
+    console.error('[trial-registration] account creation failed:', error);
+    return {
+      error:
+        'Hesabınız oluşturulurken beklenmedik bir sorun oluştu. Lütfen birkaç saniye sonra tekrar deneyin — sorun devam ederse destek ile iletişime geçin.',
+    };
+  }
 
-  const { syncOrganizationToCloud } = await import('@/lib/cloud-sync');
+  // Cloud senkronu ve sonrasındaki her adım, hesabın zaten oluşturulduğu andan sonra
+  // gerçekleşir — burada bir hata olsa bile kullanıcıya "hesap oluşturulamadı" denmemeli,
+  // yalnızca senkron arka planda tekrar denenecek şekilde loglanır.
+  try {
+    const { syncOrganizationToCloud } = await import('@/lib/cloud-sync');
+    const syncResult = await syncOrganizationToCloud(organizationId);
 
-  const syncResult = await syncOrganizationToCloud(organization.id);
-
-  if (!syncResult.ok) {
-    console.error('[trial-registration] cloud sync deferred:', syncResult.message);
+    if (!syncResult.ok) {
+      console.error('[trial-registration] cloud sync deferred:', syncResult.message);
+    }
+  } catch (error) {
+    console.error('[trial-registration] cloud sync threw unexpectedly:', error);
   }
 
   return {

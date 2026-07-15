@@ -1,7 +1,8 @@
+import { performSignOut } from '@/actions/sign-out';
 import { DashboardNav } from '@/components/dashboard-nav';
 import { LicenseStatusBanner } from '@/components/license-status-banner';
 import { MessageLiveRefresh } from '@/components/message-live-refresh';
-import { auth, signOut } from '@/lib/auth';
+import { auth } from '@/lib/auth';
 import { isBillingPath, resolveSubscriptionAccess } from '@/lib/billing/subscription-gate';
 import { prisma } from '@/lib/prisma';
 import { getTranslations } from 'next-intl/server';
@@ -130,7 +131,7 @@ export default async function TenantDashboardLayout({ children }: { children: Re
             logoutLabel={tAuth('logout')}
             logoutAction={async () => {
               'use server';
-              await signOut({ redirectTo: '/login' });
+              await performSignOut('/login');
             }}
           />
         </div>

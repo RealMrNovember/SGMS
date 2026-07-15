@@ -1,6 +1,7 @@
+import { performSignOut } from '@/actions/sign-out';
 import { AdminSidebarNav } from '@/components/admin/admin-sidebar-nav';
 import { LocaleSwitcher } from '@/components/locale-switcher';
-import { auth, signOut } from '@/lib/auth';
+import { auth } from '@/lib/auth';
 import { getMasterAdminStats } from '@/lib/admin/master-admin-queries';
 import { getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
@@ -78,7 +79,7 @@ export default async function SuperAdminLayout({ children }: { children: React.R
             className="mt-4"
             action={async () => {
               'use server';
-              await signOut({ redirectTo: '/login' });
+              await performSignOut('/login');
             }}
           >
             <button type="submit" className="button w-full px-4 py-2 text-sm">
