@@ -58,10 +58,9 @@
     "brandTitle": "Quiet luxury,\nsharp operations.",
     "brandSubtitle": "A central platform crafted for premium gym management.",
     "demoSection": "Demo Access",
-    "demoAdmin": "Platform Admin",
     "demoOwner": "Gym Owner",
     "demoStaff": "Front Desk",
-    "demoAthlete": "Athlete",
+    "demoAthlete": "Customer (Athlete)",
     "backToSite": "Back to website"
   },
   "avatar": {
@@ -425,8 +424,8 @@
       "blocked": "Central license is invalid or expired. Panel is read-only; no new records or updates.",
       "blockedWithDate": "Central license is invalid or expired ({date}). Panel is read-only; no new records or updates.",
       "lastCheck": "Last check: {date}",
-      "trial": "Trial license active. Assign a production license before expiry.",
-      "trialWithDate": "Trial license active — expires: {date}. Assign a production license before expiry.",
+      "trial": "You're on a 14-day trial. Choose a subscription plan to keep going.",
+      "trialWithDate": "You're on a 14-day trial — expires {date}. Choose a subscription plan to keep going.",
       "billingLink": "Billing & Payment"
     },
     "hint": {

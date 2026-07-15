@@ -15,6 +15,7 @@ export default getRequestConfig(async () => {
     sessionLocale: session?.user?.locale,
     organizationId: session?.user?.organizationId,
     acceptLanguage: headerStore.get('accept-language'),
+    country: headerStore.get('cf-ipcountry'),
   });
 
   if (!hasLocale(routing.locales, locale)) {

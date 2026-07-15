@@ -35,6 +35,7 @@ export async function resolveUserLocaleChain(input: {
   sessionLocale?: string | null;
   organizationId?: string | null;
   acceptLanguage?: string | null;
+  country?: string | null;
 }): Promise<AppLocale> {
   const fromCookie = normalizeAppLocale(input.cookieLocale);
   if (fromCookie) {
@@ -51,9 +52,9 @@ export async function resolveUserLocaleChain(input: {
     return fromOrg;
   }
 
-  if (input.acceptLanguage) {
-    const { detectLocale } = await import('@/i18n/detect-locale');
-    return detectLocale(input.acceptLanguage);
+  if (input.acceptLanguage || input.country) {
+    const { detectAutoLocale } = await import('@/i18n/detect-locale');
+    return detectAutoLocale({ country: input.country, acceptLanguage: input.acceptLanguage });
   }
 
   return routing.defaultLocale;

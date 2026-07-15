@@ -56,10 +56,9 @@
     "brandTitle": "Lujo silencioso,\noperación precisa.",
     "brandSubtitle": "Plataforma central diseñada para la gestión premium de gimnasios.",
     "demoSection": "Acceso demo",
-    "demoAdmin": "Admin plataforma",
     "demoOwner": "Dueño del gym",
     "demoStaff": "Recepción",
-    "demoAthlete": "Atleta",
+    "demoAthlete": "Cliente (Atleta)",
     "backToSite": "Volver al sitio"
   },
   "avatar": {
@@ -414,8 +413,8 @@
       "blocked": "La licencia central es inválida o ha expirado. El panel está en modo solo lectura; no se permiten nuevos registros ni actualizaciones.",
       "blockedWithDate": "La licencia central es inválida o ha expirado ({date}). El panel está en modo solo lectura; no se permiten nuevos registros ni actualizaciones.",
       "lastCheck": "Última verificación: {date}",
-      "trial": "Licencia de prueba activa. Asigne una licencia de producción antes del vencimiento.",
-      "trialWithDate": "Licencia de prueba activa — expira: {date}. Asigne una licencia de producción antes del vencimiento."
+      "trial": "Está en una prueba de 14 días. Elija un plan de suscripción para continuar.",
+      "trialWithDate": "Está en una prueba de 14 días — expira: {date}. Elija un plan de suscripción para continuar."
     },
     "hint": {
       "adminBlocked": "Licencia central inválida — operaciones de escritura restringidas.",

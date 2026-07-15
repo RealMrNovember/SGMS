@@ -1,4 +1,4 @@
-import { detectLocale } from '@/i18n/detect-locale';
+import { detectAutoLocale } from '@/i18n/detect-locale';
 import { authConfig } from '@/lib/auth.config';
 import NextAuth from 'next-auth';
 import { NextResponse } from 'next/server';
@@ -11,7 +11,10 @@ const LOCALE_MAX_AGE = 60 * 60 * 24 * 365;
 
 function withLocaleCookie(request: NextRequest, response: NextResponse) {
   if (!request.cookies.get(LOCALE_COOKIE)) {
-    const locale = detectLocale(request.headers.get('accept-language'));
+    const locale = detectAutoLocale({
+      country: request.headers.get('cf-ipcountry'),
+      acceptLanguage: request.headers.get('accept-language'),
+    });
     response.cookies.set(LOCALE_COOKIE, locale, {
       path: '/',
       maxAge: LOCALE_MAX_AGE,

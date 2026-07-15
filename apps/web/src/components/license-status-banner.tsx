@@ -51,7 +51,10 @@ export async function LicenseStatusBanner({
 
   return (
     <div className="border-b border-amber-500/40 bg-amber-500/15 px-6 py-3 text-sm text-amber-100">
-      {expiresLabel ? t('banner.trialWithDate', { date: expiresLabel }) : t('banner.trial')}
+      {expiresLabel ? t('banner.trialWithDate', { date: expiresLabel }) : t('banner.trial')}{' '}
+      <a href="/dashboard/billing" className="ml-1 underline">
+        {t('banner.billingLink')}
+      </a>
     </div>
   );
 }

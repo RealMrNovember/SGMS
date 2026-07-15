@@ -58,10 +58,9 @@
     "brandTitle": "Sessiz lüks,\nkeskin operasyon.",
     "brandSubtitle": "Premium spor salonu yönetimi için tasarlanmış merkezi platform.",
     "demoSection": "Demo Giriş",
-    "demoAdmin": "Platform Admin",
     "demoOwner": "Salon Sahibi",
     "demoStaff": "Resepsiyon",
-    "demoAthlete": "Sporcu",
+    "demoAthlete": "Müşteri (Sporcu)",
     "backToSite": "Web sitesine dön"
   },
   "avatar": {
@@ -425,8 +424,8 @@
       "blocked": "Merkezi lisans geçersiz veya süresi doldu. Panel salt okunur modda; yeni kayıt ve güncelleme yapılamaz.",
       "blockedWithDate": "Merkezi lisans geçersiz veya süresi doldu ({date}). Panel salt okunur modda; yeni kayıt ve güncelleme yapılamaz.",
       "lastCheck": "Son kontrol: {date}",
-      "trial": "Deneme lisansı aktif. Süre dolmadan üretim lisansı tanımlayın.",
-      "trialWithDate": "Deneme lisansı aktif — bitiş: {date}. Süre dolmadan üretim lisansı tanımlayın.",
+      "trial": "14 günlük deneme sürümündesiniz. Devam etmek için bir abonelik planı seçin.",
+      "trialWithDate": "14 günlük deneme sürümündesiniz — bitiş: {date}. Devam etmek için bir abonelik planı seçin.",
       "billingLink": "Abonelik & Ödeme"
     },
     "hint": {

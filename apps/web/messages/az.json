@@ -56,10 +56,9 @@
     "brandTitle": "Sakit lüks,\ndəqiq əməliyyat.",
     "brandSubtitle": "Premium idman zalı idarəetməsi üçün mərkəzi platforma.",
     "demoSection": "Demo giriş",
-    "demoAdmin": "Platform Admin",
     "demoOwner": "Salon sahibi",
     "demoStaff": "Resepsiya",
-    "demoAthlete": "İdmançı",
+    "demoAthlete": "Müştəri (İdmançı)",
     "backToSite": "Sayta qayıt"
   },
   "avatar": {
@@ -414,8 +413,8 @@
       "blocked": "Mərkəzi lisenziya etibarsızdır və ya müddəti bitib. Panel yalnız oxuma rejimindədir; yeni qeyd və yeniləmə mümkün deyil.",
       "blockedWithDate": "Mərkəzi lisenziya etibarsızdır və ya müddəti bitib ({date}). Panel yalnız oxuma rejimindədir; yeni qeyd və yeniləmə mümkün deyil.",
       "lastCheck": "Son yoxlama: {date}",
-      "trial": "Sınaq lisenziyası aktivdir. Müddət bitməzdən əvvəl istehsal lisenziyası təyin edin.",
-      "trialWithDate": "Sınaq lisenziyası aktivdir — bitiş: {date}. Müddət bitməzdən əvvəl istehsal lisenziyası təyin edin."
+      "trial": "14 günlük sınaq müddətindəsiniz. Davam etmək üçün abunəlik planı seçin.",
+      "trialWithDate": "14 günlük sınaq müddətindəsiniz — bitiş: {date}. Davam etmək üçün abunəlik planı seçin."
     },
     "hint": {
       "adminBlocked": "Mərkəzi lisenziya etibarsızdır — yazma əməliyyatları məhdudlaşdırılıb.",

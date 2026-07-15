@@ -7,8 +7,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FormEvent, useState } from 'react';
 
-const DEMO_LABEL_KEYS: Record<DemoAccountKey, 'demoAdmin' | 'demoOwner' | 'demoStaff' | 'demoAthlete'> = {
-  admin: 'demoAdmin',
+const DEMO_LABEL_KEYS: Record<DemoAccountKey, 'demoOwner' | 'demoStaff' | 'demoAthlete'> = {
   owner: 'demoOwner',
   staff: 'demoStaff',
   athlete: 'demoAthlete',

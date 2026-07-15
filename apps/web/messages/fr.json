@@ -56,10 +56,9 @@
     "brandTitle": "Luxe discret,\noperations précises.",
     "brandSubtitle": "Plateforme centrale conçue pour la gestion premium de salles.",
     "demoSection": "Accès démo",
-    "demoAdmin": "Admin plateforme",
     "demoOwner": "Propriétaire",
     "demoStaff": "Accueil",
-    "demoAthlete": "Athlète",
+    "demoAthlete": "Client (Athlète)",
     "backToSite": "Retour au site"
   },
   "avatar": {
@@ -414,8 +413,8 @@
       "blocked": "La licence centrale est invalide ou expirée. Le panneau est en lecture seule ; aucune nouvelle donnée ni mise à jour.",
       "blockedWithDate": "La licence centrale est invalide ou expirée ({date}). Le panneau est en lecture seule ; aucune nouvelle donnée ni mise à jour.",
       "lastCheck": "Dernière vérification : {date}",
-      "trial": "Licence d'essai active. Attribuez une licence de production avant expiration.",
-      "trialWithDate": "Licence d'essai active — expire le : {date}. Attribuez une licence de production avant expiration."
+      "trial": "Vous êtes en essai de 14 jours. Choisissez un forfait pour continuer.",
+      "trialWithDate": "Vous êtes en essai de 14 jours — expire le {date}. Choisissez un forfait pour continuer."
     },
     "hint": {
       "adminBlocked": "Licence centrale invalide — opérations d'écriture restreintes.",
