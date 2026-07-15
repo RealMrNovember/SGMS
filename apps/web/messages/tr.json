@@ -25,6 +25,7 @@
     "members": "Üyeler",
     "plans": "Planlar",
     "programs": "Programlar",
+    "trainers": "PT Performansı",
     "messages": "Mesajlar",
     "checkIn": "Giriş",
     "team": "Personel",
@@ -573,6 +574,7 @@
       "items": {
         "crm": { "icon": "👥", "title": "Üye CRM & Ölçüm", "description": "Profil, avatar, sağlık ölçümleri ve üyelik planları. Resepsiyon ve PT için net görünüm." },
         "programs": { "icon": "🏋", "title": "Antrenman & Beslenme", "description": "PT atamaları, workout ve nutrition programları. Sporcu portalında anında erişim." },
+        "pt": { "icon": "🥇", "title": "PT Performans & Prim Yönetimi", "description": "Antrenörlerin aylık seans sayısı, saati, cirosu ve komisyonu otomatik hesaplanır — iptal ve no-show oranıyla birlikte." },
         "pos": { "icon": "💳", "title": "POS & Cari Hesap", "description": "Market, kafe, ekstra ders borçları. Tahsilat, kasa özeti ve üye bakiyesi tek ekranda." },
         "i18n": { "icon": "🌍", "title": "6 Dil Desteği", "description": "TR, EN, RU, FR, ES, AZ — expat üyeler ve uluslararası zincirler için hazır." },
         "mobile": { "icon": "📱", "title": "Mobil API & Sporcu Portalı", "description": "Bearer token API, ölçüm/program/mesaj self-service. Mobil uygulama için hazır altyapı." },
@@ -985,5 +987,73 @@
     "enable": "Tarayıcı bildirimlerini etkinleştir",
     "disable": "Tarayıcı bildirimlerini kapat",
     "deniedHint": "Bildirimler tarayıcı ayarlarından engellenmiş. Etkinleştirmek için tarayıcı site izinlerini kontrol edin."
+  },
+  "trainers": {
+    "title": "PT Performansı",
+    "subtitle": "{month} — antrenörlerinizin seans sayısı, çalıştığı saat, cirosu ve hak ettiği prim tek ekranda.",
+    "noProfile": "Komisyon tanımlanmadı",
+    "noProfileHint": "Bu PT için henüz bir komisyon modeli tanımlanmadı — OWNER veya ADMIN tanımlayabilir.",
+    "empty": {
+      "title": "Henüz PT kaydı yok",
+      "subtitle": "Ekibinize TRAINER rolünde bir personel eklediğinizde burada görünecek."
+    },
+    "kpi": {
+      "sessions": "Tamamlanan Seans",
+      "hours": "Çalışılan Saat",
+      "revenue": "Ciro",
+      "commission": "Hak Edilen Prim",
+      "canceled": "İptal",
+      "noShowRate": "No-show Oranı",
+      "canceledAndNoShow": "{canceled} iptal · {noShow} no-show"
+    },
+    "commissionForm": {
+      "title": "Komisyon Modeli",
+      "hint": "Bu PT'nin prim/komisyonu bu modele göre otomatik hesaplanır.",
+      "modelLabel": "Model",
+      "model": {
+        "FIXED_PER_SESSION": "Seans başına sabit tutar",
+        "PERCENTAGE_OF_REVENUE": "Cirodan yüzde",
+        "TIERED": "Kademeli (20+ seans sonrası +%5)"
+      },
+      "rateLabel": "Oran / Tutar",
+      "hourlyRateLabel": "Saatlik ücret (opsiyonel)",
+      "saving": "Kaydediliyor…",
+      "submit": "Komisyon Modelini Kaydet"
+    },
+    "scheduleForm": {
+      "title": "Yeni Seans Planla",
+      "memberLabel": "Üye",
+      "memberPlaceholder": "Üye seçin…",
+      "dateLabel": "Tarih & Saat",
+      "durationLabel": "Süre (dk)",
+      "saving": "Kaydediliyor…",
+      "submit": "Seansı Planla"
+    },
+    "sessionActions": {
+      "complete": "Tamamla",
+      "noShow": "No-show",
+      "cancelByMember": "Üye İptal Etti",
+      "amountPlaceholder": "Tutar ₺",
+      "confirm": "Onayla",
+      "cancel": "Vazgeç",
+      "saving": "Kaydediliyor…"
+    },
+    "sessions": {
+      "title": "Seans Geçmişi",
+      "empty": "Henüz seans kaydı yok.",
+      "colDate": "Tarih",
+      "colMember": "Üye",
+      "colDuration": "Süre",
+      "colStatus": "Durum",
+      "colRevenue": "Ciro",
+      "colCommission": "Prim",
+      "status": {
+        "SCHEDULED": "Planlandı",
+        "COMPLETED": "Tamamlandı",
+        "CANCELED_BY_MEMBER": "Üye İptal Etti",
+        "CANCELED_BY_TRAINER": "PT İptal Etti",
+        "NO_SHOW": "Gelmedi (No-show)"
+      }
+    }
   }
 }

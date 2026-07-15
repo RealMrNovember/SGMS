@@ -128,6 +128,24 @@ enum AuditAction {
   PARTNER_TRIAL_EXTENDED
   PUSH_SUBSCRIBED
   PUSH_UNSUBSCRIBED
+  TRAINER_PROFILE_UPDATED
+  PT_SESSION_SCHEDULED
+  PT_SESSION_COMPLETED
+  PT_SESSION_CANCELED
+}
+
+enum PtCommissionModel {
+  FIXED_PER_SESSION
+  PERCENTAGE_OF_REVENUE
+  TIERED
+}
+
+enum PtSessionStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELED_BY_MEMBER
+  CANCELED_BY_TRAINER
+  NO_SHOW
 }
 
 enum GymMemberStatus {
@@ -233,6 +251,9 @@ model User {
   passwordResetTokens PasswordResetToken[]
   partnerProfile      Partner?
   pushSubscriptions   PushSubscription[]
+  trainerProfiles     TrainerProfile[]
+  ptSessionsAsTrainer PtSession[]          @relation("PtSessionTrainer")
+  ptSessionsCreated   PtSession[]          @relation("PtSessionCreatedBy")
 
   @@index([status])
   @@index([isSuperAdmin])
@@ -284,6 +305,59 @@ model PushSubscription {
 
   @@index([userId])
   @@map("push_subscriptions")
+}
+
+// ---------------------------------------------------------------------------
+// TrainerProfile / PtSession — PT performans, komisyon ve prim yönetimi (Faz 21)
+// ---------------------------------------------------------------------------
+
+model TrainerProfile {
+  id                 String            @id @default(cuid())
+  organizationId     String            @map("organization_id")
+  userId             String            @map("user_id")
+  commissionModel    PtCommissionModel @default(FIXED_PER_SESSION) @map("commission_model")
+  /** FIXED_PER_SESSION için TRY tutar, PERCENTAGE_OF_REVENUE/TIERED için yüzde (0-100). */
+  baseCommissionRate Decimal           @default(0) @db.Decimal(7, 2) @map("base_commission_rate")
+  hourlyRate         Decimal?          @db.Decimal(10, 2) @map("hourly_rate")
+  isActive           Boolean           @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([organizationId, isActive])
+  @@map("trainer_profiles")
+}
+
+model PtSession {
+  id              String          @id @default(cuid())
+  organizationId  String          @map("organization_id")
+  trainerUserId   String          @map("trainer_user_id")
+  gymMemberId     String          @map("gym_member_id")
+  scheduledAt     DateTime        @map("scheduled_at")
+  durationMinutes Int             @default(60) @map("duration_minutes")
+  status          PtSessionStatus @default(SCHEDULED)
+  revenueAmount   Decimal?        @db.Decimal(10, 2) @map("revenue_amount")
+  commissionAmount Decimal?       @db.Decimal(10, 2) @map("commission_amount")
+  notes           String?
+  completedAt     DateTime?       @map("completed_at")
+  createdById     String          @map("created_by_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  trainer      User         @relation("PtSessionTrainer", fields: [trainerUserId], references: [id], onDelete: Cascade)
+  gymMember    GymMember    @relation(fields: [gymMemberId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation("PtSessionCreatedBy", fields: [createdById], references: [id])
+
+  @@index([organizationId, trainerUserId, scheduledAt])
+  @@index([organizationId, gymMemberId])
+  @@index([organizationId, status])
+  @@map("pt_sessions")
 }
 
 // ---------------------------------------------------------------------------
@@ -363,6 +437,8 @@ model Organization {
   transactions       Transaction[]
   checkIns           CheckIn[]
   syncBatches        SyncBatch[]
+  trainerProfiles    TrainerProfile[]
+  ptSessions         PtSession[]
 
   @@index([status])
   @@index([centralLicenseStatus])
@@ -560,6 +636,7 @@ model GymMember {
   expenses           Expense[]
   transactions       Transaction[]
   checkIns           CheckIn[]
+  ptSessions         PtSession[]
 
   @@unique([organizationId, nationalId])
   @@unique([organizationId, passportNumber])

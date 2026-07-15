@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
 const FEATURE_ICONS: Record<string, string> = {
-  trainers: '🏋️',
   hr: '🗂️',
   equipment: '🛠️',
   cleaning: '🧹',

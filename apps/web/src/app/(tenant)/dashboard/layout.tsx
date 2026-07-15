@@ -55,6 +55,7 @@ export default async function TenantDashboardLayout({ children }: { children: Re
         { href: '/dashboard/members', label: t('members') },
         { href: '/dashboard/plans', label: t('plans') },
         { href: '/dashboard/programs', label: t('programs') },
+        { href: '/dashboard/trainers', label: t('trainers') },
         { href: '/dashboard/messages', label: t('messages'), badge: unreadMessages },
         { href: '/dashboard/check-in', label: t('checkIn') },
         { href: '/dashboard/pos', label: t('pos') },
@@ -67,7 +68,7 @@ export default async function TenantDashboardLayout({ children }: { children: Re
   const comingSoonItems = locked
     ? []
     : (
-        ['trainers', 'hr', 'equipment', 'cashShifts', 'notifications', 'reports', 'insights'] as const
+        ['hr', 'equipment', 'cashShifts', 'notifications', 'reports', 'insights'] as const
       ).map((feature) => ({
         href: `/dashboard/coming-soon/${feature}`,
         label: tComingSoon(`features.${feature}.title`),

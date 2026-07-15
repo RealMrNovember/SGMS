@@ -25,6 +25,7 @@
     "members": "Members",
     "plans": "Plans",
     "programs": "Programs",
+    "trainers": "Trainer Performance",
     "messages": "Messages",
     "checkIn": "Check-in",
     "team": "Staff",
@@ -573,6 +574,7 @@
       "items": {
         "crm": { "icon": "👥", "title": "Member CRM & Metrics", "description": "Profiles, avatars, health measurements and membership plans with a clear staff view." },
         "programs": { "icon": "🏋", "title": "Workout & Nutrition", "description": "PT assignments, workout and nutrition programs with instant athlete portal access." },
+        "pt": { "icon": "🥇", "title": "PT Performance & Commission", "description": "Monthly session count, hours, revenue, and commission calculated automatically for every trainer — cancellation and no-show rate included." },
         "pos": { "icon": "💳", "title": "POS & Member Accounts", "description": "Market, café and extra session charges. Collections, daily cash summary and balances." },
         "i18n": { "icon": "🌍", "title": "6 Languages", "description": "TR, EN, RU, FR, ES, AZ — ready for expat members and international chains." },
         "mobile": { "icon": "📱", "title": "Mobile API & Athlete Portal", "description": "Bearer token API and self-service for measurements, programs and messages." },
@@ -982,5 +984,73 @@
     "enable": "Enable browser notifications",
     "disable": "Turn off browser notifications",
     "deniedHint": "Notifications are blocked in your browser. Check your site permissions to enable them."
+  },
+  "trainers": {
+    "title": "Trainer Performance",
+    "subtitle": "{month} — session count, hours worked, revenue, and commission for every trainer, on one screen.",
+    "noProfile": "No commission set",
+    "noProfileHint": "No commission model has been set for this trainer yet — an OWNER or ADMIN can set one.",
+    "empty": {
+      "title": "No trainers yet",
+      "subtitle": "Once you add a staff member with the TRAINER role, they'll show up here."
+    },
+    "kpi": {
+      "sessions": "Completed Sessions",
+      "hours": "Hours Worked",
+      "revenue": "Revenue",
+      "commission": "Commission Earned",
+      "canceled": "Canceled",
+      "noShowRate": "No-show Rate",
+      "canceledAndNoShow": "{canceled} canceled · {noShow} no-show"
+    },
+    "commissionForm": {
+      "title": "Commission Model",
+      "hint": "This trainer's commission is calculated automatically based on this model.",
+      "modelLabel": "Model",
+      "model": {
+        "FIXED_PER_SESSION": "Flat amount per session",
+        "PERCENTAGE_OF_REVENUE": "Percentage of revenue",
+        "TIERED": "Tiered (+5% after 20 sessions)"
+      },
+      "rateLabel": "Rate / Amount",
+      "hourlyRateLabel": "Hourly rate (optional)",
+      "saving": "Saving…",
+      "submit": "Save Commission Model"
+    },
+    "scheduleForm": {
+      "title": "Schedule a New Session",
+      "memberLabel": "Member",
+      "memberPlaceholder": "Select a member…",
+      "dateLabel": "Date & Time",
+      "durationLabel": "Duration (min)",
+      "saving": "Saving…",
+      "submit": "Schedule Session"
+    },
+    "sessionActions": {
+      "complete": "Complete",
+      "noShow": "No-show",
+      "cancelByMember": "Member Canceled",
+      "amountPlaceholder": "Amount",
+      "confirm": "Confirm",
+      "cancel": "Cancel",
+      "saving": "Saving…"
+    },
+    "sessions": {
+      "title": "Session History",
+      "empty": "No sessions yet.",
+      "colDate": "Date",
+      "colMember": "Member",
+      "colDuration": "Duration",
+      "colStatus": "Status",
+      "colRevenue": "Revenue",
+      "colCommission": "Commission",
+      "status": {
+        "SCHEDULED": "Scheduled",
+        "COMPLETED": "Completed",
+        "CANCELED_BY_MEMBER": "Member Canceled",
+        "CANCELED_BY_TRAINER": "Trainer Canceled",
+        "NO_SHOW": "No-show"
+      }
+    }
   }
 }

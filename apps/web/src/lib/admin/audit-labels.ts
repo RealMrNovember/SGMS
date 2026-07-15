@@ -13,7 +13,8 @@ export type AuditCategory =
   | 'auth'
   | 'security'
   | 'settings'
-  | 'partner';
+  | 'partner'
+  | 'trainer';
 
 export const AUDIT_CATEGORY_ACTIONS: Record<Exclude<AuditCategory, 'all'>, AuditAction[]> = {
   organization: ['ORGANIZATION_CREATED', 'ORGANIZATION_UPDATED'],
@@ -59,6 +60,12 @@ export const AUDIT_CATEGORY_ACTIONS: Record<Exclude<AuditCategory, 'all'>, Audit
     'PARTNER_TRIAL_EXTENDED',
     'PUSH_SUBSCRIBED',
     'PUSH_UNSUBSCRIBED',
+  ],
+  trainer: [
+    'TRAINER_PROFILE_UPDATED',
+    'PT_SESSION_SCHEDULED',
+    'PT_SESSION_COMPLETED',
+    'PT_SESSION_CANCELED',
   ],
 };
 
@@ -110,6 +117,10 @@ export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   PARTNER_TRIAL_EXTENDED: 'Temsilci deneme süresini uzattı',
   PUSH_SUBSCRIBED: 'Tarayıcı bildirimi etkinleştirildi',
   PUSH_UNSUBSCRIBED: 'Tarayıcı bildirimi kapatıldı',
+  TRAINER_PROFILE_UPDATED: 'PT komisyon modeli güncellendi',
+  PT_SESSION_SCHEDULED: 'PT seansı planlandı',
+  PT_SESSION_COMPLETED: 'PT seansı tamamlandı',
+  PT_SESSION_CANCELED: 'PT seansı iptal/no-show',
 };
 
 export const ALL_AUDIT_ACTIONS = Object.keys(AUDIT_ACTION_LABELS) as AuditAction[];
@@ -128,6 +139,7 @@ export const AUDIT_CATEGORY_LABELS: Record<AuditCategory, string> = {
   security: 'Güvenlik',
   settings: 'Ayarlar',
   partner: 'Temsilci',
+  trainer: 'PT Performansı',
 };
 
 export const LOGIN_FAILURE_LABELS: Record<string, string> = {

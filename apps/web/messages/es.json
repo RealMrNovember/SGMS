@@ -25,6 +25,7 @@
     "members": "Miembros",
     "plans": "Planes",
     "programs": "Programas",
+    "trainers": "Rendimiento de Entrenadores",
     "messages": "Mensajes",
     "team": "Personal",
     "pos": "Caja",
@@ -580,6 +581,11 @@
           "title": "Workout & Nutrition",
           "description": "PT assignments, workout and nutrition programs with instant athlete portal access."
         },
+        "pt": {
+          "icon": "🥇",
+          "title": "PT Performance & Commission",
+          "description": "Monthly session count, hours, revenue, and commission calculated automatically for every trainer — cancellation and no-show rate included."
+        },
         "pos": {
           "icon": "💳",
           "title": "POS & Member Accounts",
@@ -855,5 +861,73 @@
     "enable": "Activar notificaciones del navegador",
     "disable": "Desactivar notificaciones del navegador",
     "deniedHint": "Las notificaciones están bloqueadas en su navegador. Revise los permisos del sitio para activarlas."
+  },
+  "trainers": {
+    "title": "Rendimiento de Entrenadores",
+    "subtitle": "{month} — sesiones, horas trabajadas, ingresos y comisión de cada entrenador, en una pantalla.",
+    "noProfile": "Sin comisión definida",
+    "noProfileHint": "Aún no se ha definido un modelo de comisión para este entrenador — un OWNER o ADMIN puede definirlo.",
+    "empty": {
+      "title": "Aún no hay entrenadores",
+      "subtitle": "Cuando agregue personal con el rol TRAINER, aparecerá aquí."
+    },
+    "kpi": {
+      "sessions": "Sesiones Completadas",
+      "hours": "Horas Trabajadas",
+      "revenue": "Ingresos",
+      "commission": "Comisión Ganada",
+      "canceled": "Canceladas",
+      "noShowRate": "Tasa de Inasistencia",
+      "canceledAndNoShow": "{canceled} canceladas · {noShow} inasistencias"
+    },
+    "commissionForm": {
+      "title": "Modelo de Comisión",
+      "hint": "La comisión de este entrenador se calcula automáticamente según este modelo.",
+      "modelLabel": "Modelo",
+      "model": {
+        "FIXED_PER_SESSION": "Monto fijo por sesión",
+        "PERCENTAGE_OF_REVENUE": "Porcentaje de ingresos",
+        "TIERED": "Escalonado (+5% después de 20 sesiones)"
+      },
+      "rateLabel": "Tasa / Monto",
+      "hourlyRateLabel": "Tarifa por hora (opcional)",
+      "saving": "Guardando…",
+      "submit": "Guardar Modelo de Comisión"
+    },
+    "scheduleForm": {
+      "title": "Programar Nueva Sesión",
+      "memberLabel": "Miembro",
+      "memberPlaceholder": "Seleccione un miembro…",
+      "dateLabel": "Fecha y Hora",
+      "durationLabel": "Duración (min)",
+      "saving": "Guardando…",
+      "submit": "Programar Sesión"
+    },
+    "sessionActions": {
+      "complete": "Completar",
+      "noShow": "No asistió",
+      "cancelByMember": "Cancelado por el Miembro",
+      "amountPlaceholder": "Monto",
+      "confirm": "Confirmar",
+      "cancel": "Cancelar",
+      "saving": "Guardando…"
+    },
+    "sessions": {
+      "title": "Historial de Sesiones",
+      "empty": "Aún no hay sesiones.",
+      "colDate": "Fecha",
+      "colMember": "Miembro",
+      "colDuration": "Duración",
+      "colStatus": "Estado",
+      "colRevenue": "Ingresos",
+      "colCommission": "Comisión",
+      "status": {
+        "SCHEDULED": "Programada",
+        "COMPLETED": "Completada",
+        "CANCELED_BY_MEMBER": "Cancelado por el Miembro",
+        "CANCELED_BY_TRAINER": "Cancelado por el Entrenador",
+        "NO_SHOW": "No asistió"
+      }
+    }
   }
 }

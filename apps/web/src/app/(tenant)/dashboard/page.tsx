@@ -14,11 +14,11 @@ import { redirect } from 'next/navigation';
 const RECEPTION_ROLES = new Set<OrganizationRole>(['OWNER', 'ADMIN', 'STAFF', 'TRAINER']);
 const TEAM_MANAGER_ROLES = new Set<OrganizationRole>(['OWNER', 'ADMIN']);
 
-const COMING_SOON_TEASER_FEATURES = ['trainers', 'reports', 'insights', 'notifications'] as const;
+const COMING_SOON_TEASER_FEATURES = ['reports', 'insights', 'enterprise', 'notifications'] as const;
 const COMING_SOON_ICONS: Record<(typeof COMING_SOON_TEASER_FEATURES)[number], string> = {
-  trainers: '🏋️',
   reports: '📊',
   insights: '🤖',
+  enterprise: '🏢',
   notifications: '🔔',
 };
 

@@ -25,6 +25,7 @@
     "members": "Участники",
     "plans": "Планы",
     "programs": "Программы",
+    "trainers": "Эффективность тренеров",
     "messages": "Сообщения",
     "team": "Персонал",
     "pos": "Касса",
@@ -580,6 +581,11 @@
           "title": "Workout & Nutrition",
           "description": "PT assignments, workout and nutrition programs with instant athlete portal access."
         },
+        "pt": {
+          "icon": "🥇",
+          "title": "PT Performance & Commission",
+          "description": "Monthly session count, hours, revenue, and commission calculated automatically for every trainer — cancellation and no-show rate included."
+        },
         "pos": {
           "icon": "💳",
           "title": "POS & Member Accounts",
@@ -855,5 +861,73 @@
     "enable": "Включить уведомления браузера",
     "disable": "Отключить уведомления браузера",
     "deniedHint": "Уведомления заблокированы в вашем браузере. Проверьте разрешения сайта, чтобы включить их."
+  },
+  "trainers": {
+    "title": "Эффективность тренеров",
+    "subtitle": "{month} — количество занятий, отработанные часы, выручка и комиссия каждого тренера на одном экране.",
+    "noProfile": "Комиссия не задана",
+    "noProfileHint": "Для этого тренера ещё не задана модель комиссии — OWNER или ADMIN может её задать.",
+    "empty": {
+      "title": "Пока нет тренеров",
+      "subtitle": "Как только вы добавите сотрудника с ролью TRAINER, он появится здесь."
+    },
+    "kpi": {
+      "sessions": "Завершённые занятия",
+      "hours": "Отработано часов",
+      "revenue": "Выручка",
+      "commission": "Заработанная комиссия",
+      "canceled": "Отменено",
+      "noShowRate": "Доля неявок",
+      "canceledAndNoShow": "{canceled} отменено · {noShow} неявок"
+    },
+    "commissionForm": {
+      "title": "Модель комиссии",
+      "hint": "Комиссия этого тренера рассчитывается автоматически по этой модели.",
+      "modelLabel": "Модель",
+      "model": {
+        "FIXED_PER_SESSION": "Фиксированная сумма за занятие",
+        "PERCENTAGE_OF_REVENUE": "Процент от выручки",
+        "TIERED": "Ступенчатая (+5% после 20 занятий)"
+      },
+      "rateLabel": "Ставка / Сумма",
+      "hourlyRateLabel": "Почасовая ставка (необязательно)",
+      "saving": "Сохранение…",
+      "submit": "Сохранить модель комиссии"
+    },
+    "scheduleForm": {
+      "title": "Запланировать занятие",
+      "memberLabel": "Участник",
+      "memberPlaceholder": "Выберите участника…",
+      "dateLabel": "Дата и время",
+      "durationLabel": "Длительность (мин)",
+      "saving": "Сохранение…",
+      "submit": "Запланировать занятие"
+    },
+    "sessionActions": {
+      "complete": "Завершить",
+      "noShow": "Неявка",
+      "cancelByMember": "Отменил участник",
+      "amountPlaceholder": "Сумма",
+      "confirm": "Подтвердить",
+      "cancel": "Отмена",
+      "saving": "Сохранение…"
+    },
+    "sessions": {
+      "title": "История занятий",
+      "empty": "Пока нет занятий.",
+      "colDate": "Дата",
+      "colMember": "Участник",
+      "colDuration": "Длительность",
+      "colStatus": "Статус",
+      "colRevenue": "Выручка",
+      "colCommission": "Комиссия",
+      "status": {
+        "SCHEDULED": "Запланировано",
+        "COMPLETED": "Завершено",
+        "CANCELED_BY_MEMBER": "Отменил участник",
+        "CANCELED_BY_TRAINER": "Отменил тренер",
+        "NO_SHOW": "Неявка"
+      }
+    }
   }
 }

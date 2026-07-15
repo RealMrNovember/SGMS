@@ -56,7 +56,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 18 | Uyumluluk & Sağlamlaştırma (2FA, GDPR, E2E, Invoice) | 🔲 Planlandı | 0% |
 | 19 | SGMS Masaüstü — Genişletme | 🔲 Gelecek Vizyon | 0% |
 | 20 | SGMS Mobil Uygulama | 🔲 Gelecek Vizyon | 0% |
-| 21 | PT Performans, Komisyon & Prim Yönetimi | 🔲 Planlandı | 0% |
+| 21 | PT Performans, Komisyon & Prim Yönetimi | ✅ Tamamlandı | 100% (CSV export ve POS entegrasyonu v2'ye ertelendi) |
 | 22 | Personel Yönetimi / HR | 🔲 Planlandı | 0% |
 | 23 | Ekipman Yönetimi & Bakım Planları | 🔲 Planlandı | 0% |
 | 24 | Temizlik Yönetimi | 🔲 Planlandı | 0% |
@@ -652,20 +652,23 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 > **Kaynak:** Kullanıcı talebi, 2026-07-15 — *"PT tarafı daha derin olabilir... gerçek salonlarda bunlar önemli."* Bu bölüm, SGMS'i basit bir üye takip sisteminden gerçek bir **spor salonu ERP'sine** taşıyacak 14 yeni fazı, gerçek işletme senaryolarıyla birlikte tanımlar. Fazlar önceliklendirilmiştir ama bağımsız modüller olarak da başlatılabilir — hiçbiri bir öncekinin bitmesini zorunlu kılmaz (Faz 21 hariç, çünkü PT prim/komisyon hesaplaması POS/Transaction üzerine kuruludur).
 
-## 🔲 Faz 21 — PT (Personal Trainer) Performans, Komisyon & Prim Yönetimi (Öncelik: P1)
+## ✅ Faz 21 — PT (Personal Trainer) Performans, Komisyon & Prim Yönetimi (2026-07-15'te tamamlandı)
 
-> **Senaryo:** Salon sahibi ay sonunda "Mehmet Hoca bu ay kaç ders verdi, ne kadar ciro yaptı, primi ne kadar?" sorusuna bugün cevap veremiyor — yalnızca "bir antrenöre atanmış üyeler" görünüyor, performans verisi yok.
+> **Senaryo:** Salon sahibi ay sonunda "Mehmet Hoca bu ay kaç ders verdi, ne kadar ciro yaptı, primi ne kadar?" sorusuna artık tek ekrandan cevap verebiliyor.
 
-- [ ] `TrainerProfile` modeli (User'a 1-1 bağlı) — `commissionModel`: `FIXED_PER_SESSION` / `PERCENTAGE_OF_REVENUE` / `TIERED`, `baseCommissionRate`, `hourlyRate` (maaşlı personel için)
-- [ ] `PtSession` modeli — `trainerId`, `gymMemberId`, `scheduledAt`, `durationMinutes`, `status`: `COMPLETED`/`CANCELLED_BY_MEMBER`/`CANCELLED_BY_TRAINER`/`NO_SHOW`, `revenueAmount` (o seansa karşılık gelen `Expense`/`Transaction` ile ilişkili)
-- [ ] Otomatik hesaplananlar (aylık, PT bazında): toplam seans sayısı, toplam çalışılan saat, brüt ciro, hak edilen komisyon/prim, iptal edilen ders sayısı ve **no-show oranı** (üyenin gelmediği ama PT'nin saatinin boşa gittiği durumlar — no-show ücretlendirme politikası salon ayarlarında tanımlanabilir)
-- [ ] `/dashboard/trainers` — PT listesi + aylık performans kartları (OWNER/ADMIN görür); `/dashboard/trainers/[id]` — tek PT'nin detaylı karnesi
-- [ ] PT'nin kendi görünümü (`/athlete`'e benzer, ama personel tarafı): kendi seans takvimi, aylık prim özeti — bordroya taşınabilir CSV export
-- [ ] Aylık prim hesabı, POS/Kasa modülüyle (Faz 8) entegre — PT primi otomatik bir `Expense`/ödeme kalemine dönüşebilir (bordro değil, ama muhasebeye aktarılabilir bir özet)
+- [x] `TrainerProfile` modeli (organizasyon + User bazında benzersiz) — `commissionModel`: `FIXED_PER_SESSION` / `PERCENTAGE_OF_REVENUE` / `TIERED`, `baseCommissionRate`, `hourlyRate`
+- [x] `PtSession` modeli — `trainerUserId`, `gymMemberId`, `scheduledAt`, `durationMinutes`, `status`: `SCHEDULED`/`COMPLETED`/`CANCELED_BY_MEMBER`/`CANCELED_BY_TRAINER`/`NO_SHOW`, `revenueAmount`, `commissionAmount`
+- [x] Otomatik hesaplananlar (aylık, PT bazında): tamamlanan seans sayısı, çalışılan saat, brüt ciro, hak edilen komisyon/prim, iptal sayısı ve **no-show oranı** — `lib/trainers/queries.ts`
+- [x] Komisyon hesaplama motoru (`lib/trainers/commission.ts`, birim testli): sabit tutar, cirodan yüzde, ve basitleştirilmiş kademeli model (20+ seans sonrası +%5 — v1, daha esnek çok kademeli yapı ileride eklenebilir)
+- [x] `/dashboard/trainers` — PT roster'ı + aylık performans kartları (OWNER/ADMIN/STAFF görür); `/dashboard/trainers/[id]` — tek PT'nin detaylı karnesi, komisyon modeli tanımlama, seans planlama, tamamlama/iptal/no-show işaretleme
+- [x] PT'nin kendi görünümü: TRAINER rolüyle giriş yapan bir kullanıcı otomatik olarak kendi karnesine yönlendirilir, yalnızca kendi seanslarını planlayıp tamamlayabilir/iptal edebilir (başka PT'ninkine dokunamaz)
+- [x] Her işlem audit log'a yazılır (`TRAINER_PROFILE_UPDATED`, `PT_SESSION_SCHEDULED`, `PT_SESSION_COMPLETED`, `PT_SESSION_CANCELED`)
 
-**Kabul kriteri:** Salon sahibi ay sonunda her PT için ciro/seans/saat/prim/iptal/no-show özetini tek ekrandan görebiliyor
+**Ertelendi (v2):** bordroya taşınabilir CSV export · aylık prim özetinin POS/cari hesaba otomatik `Expense` kalemi olarak yansıması (şimdilik yalnızca raporlama amaçlı, gerçek ödeme POS'tan ayrı yürütülüyor)
 
-**Bağımlılık:** Faz 8 (POS/cari hesap) ✅ · Faz 17.4 (ders yönetimi, grup dersi veren PT'ler için)
+**Kabul kriteri:** ✅ Salon sahibi ay sonunda her PT için ciro/seans/saat/prim/iptal/no-show özetini tek ekrandan görebiliyor
+
+**Bağımlılık:** Faz 8 (POS/cari hesap) ✅ · Faz 17.4 (ders yönetimi, grup dersi veren PT'ler için — henüz yapılmadı, bağımsız ilerledi)
 
 ---
 
@@ -970,7 +973,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 2FA, GDPR self-servis, personel vardiya, sağlık formu | P2 | 18 | 🔲 |
 | SGMS Masaüstü genişletme (offline lisans, auto-update) | P2 | 19 | 🔲 gelecek vizyon |
 | SGMS Mobil Uygulama | P3 | 20 | 🔲 gelecek vizyon |
-| PT performans/komisyon/prim | P1 | 21 | 🔲 |
+| PT performans/komisyon/prim | P1 | 21 | ✅ tamamlandı — 2026-07-15 |
 | Personel/HR (izin, vardiya, performans) | P2 | 22 | 🔲 |
 | Ekipman envanteri & bakım planları (QR) | P2 | 23 | 🔲 |
 | Temizlik checklist/imza | P3 | 24 | 🔲 |
@@ -1008,14 +1011,15 @@ Emekli:
 Devam ediyor:
   Faz 16     CiciByte Cloud ticari entegrasyonu                ← ~80%, gerçek API anahtarı bekliyor
 
-Şimdi canlı (bu revizyonla production'a alındı):
-  Faz 34.1   Responsive dashboard nav + "Çok Yakında" sayfası    ✅ (bu oturumda tamamlandı)
+Şimdi canlı (production'da):
+  Faz 34.1   Responsive dashboard nav + "Çok Yakında" sayfası    ✅
+  Faz 35     Temsilci (Partner) Portalı                          ✅
+  Faz 27.1   Tarayıcı Web Push bildirimleri                      ✅ (~35% — SMS/WhatsApp/şablon kaldı)
+  Faz 21     PT performans/komisyon/prim yönetimi                ✅
 
 Sıradaki (öncelik sırası — profesyonel değerlendirme, P0 en önce):
   Faz 32     Ticarileştirme: paket + ek kapasite satışı          ← P0, gelir modeli (kullanıcı onayı gerekli)
   Faz 34     Tam responsive tasarım sistemi (sistematik tur)     ← P0, sürekli kalite katmanı
-  Faz 21     PT performans/komisyon/prim yönetimi                ← P1
-  Faz 27     Bildirim Merkezi (Push/SMS/WhatsApp/Mail)           ← P1
   Faz 28     İleri raporlama & Business Intelligence             ← P1
   Faz 30     Kurumsal hiyerarşi & çoklu şube/bölge               ← P1
   Faz 33     Rol bazlı dinamik kullanım kılavuzu                 ← P1

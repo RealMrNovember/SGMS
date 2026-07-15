@@ -25,6 +25,7 @@
     "members": "Membres",
     "plans": "Forfaits",
     "programs": "Programmes",
+    "trainers": "Performance des Coachs",
     "messages": "Messages",
     "team": "Personnel",
     "pos": "Caisse",
@@ -580,6 +581,11 @@
           "title": "Workout & Nutrition",
           "description": "PT assignments, workout and nutrition programs with instant athlete portal access."
         },
+        "pt": {
+          "icon": "🥇",
+          "title": "PT Performance & Commission",
+          "description": "Monthly session count, hours, revenue, and commission calculated automatically for every trainer — cancellation and no-show rate included."
+        },
         "pos": {
           "icon": "💳",
           "title": "POS & Member Accounts",
@@ -855,5 +861,73 @@
     "enable": "Activer les notifications du navigateur",
     "disable": "Désactiver les notifications du navigateur",
     "deniedHint": "Les notifications sont bloquées dans votre navigateur. Vérifiez les autorisations du site pour les activer."
+  },
+  "trainers": {
+    "title": "Performance des Coachs",
+    "subtitle": "{month} — nombre de séances, heures travaillées, chiffre d'affaires et commission de chaque coach, sur un écran.",
+    "noProfile": "Aucune commission définie",
+    "noProfileHint": "Aucun modèle de commission n'a encore été défini pour ce coach — un OWNER ou ADMIN peut en définir un.",
+    "empty": {
+      "title": "Aucun coach pour l'instant",
+      "subtitle": "Dès que vous ajoutez un membre du personnel avec le rôle TRAINER, il apparaîtra ici."
+    },
+    "kpi": {
+      "sessions": "Séances Terminées",
+      "hours": "Heures Travaillées",
+      "revenue": "Chiffre d'affaires",
+      "commission": "Commission Gagnée",
+      "canceled": "Annulées",
+      "noShowRate": "Taux d'Absence",
+      "canceledAndNoShow": "{canceled} annulées · {noShow} absences"
+    },
+    "commissionForm": {
+      "title": "Modèle de Commission",
+      "hint": "La commission de ce coach est calculée automatiquement selon ce modèle.",
+      "modelLabel": "Modèle",
+      "model": {
+        "FIXED_PER_SESSION": "Montant fixe par séance",
+        "PERCENTAGE_OF_REVENUE": "Pourcentage du chiffre d'affaires",
+        "TIERED": "Progressif (+5% après 20 séances)"
+      },
+      "rateLabel": "Taux / Montant",
+      "hourlyRateLabel": "Tarif horaire (optionnel)",
+      "saving": "Enregistrement…",
+      "submit": "Enregistrer le Modèle de Commission"
+    },
+    "scheduleForm": {
+      "title": "Planifier une Nouvelle Séance",
+      "memberLabel": "Membre",
+      "memberPlaceholder": "Sélectionner un membre…",
+      "dateLabel": "Date et Heure",
+      "durationLabel": "Durée (min)",
+      "saving": "Enregistrement…",
+      "submit": "Planifier la Séance"
+    },
+    "sessionActions": {
+      "complete": "Terminer",
+      "noShow": "Absence",
+      "cancelByMember": "Annulé par le Membre",
+      "amountPlaceholder": "Montant",
+      "confirm": "Confirmer",
+      "cancel": "Annuler",
+      "saving": "Enregistrement…"
+    },
+    "sessions": {
+      "title": "Historique des Séances",
+      "empty": "Aucune séance pour l'instant.",
+      "colDate": "Date",
+      "colMember": "Membre",
+      "colDuration": "Durée",
+      "colStatus": "Statut",
+      "colRevenue": "Chiffre d'affaires",
+      "colCommission": "Commission",
+      "status": {
+        "SCHEDULED": "Planifiée",
+        "COMPLETED": "Terminée",
+        "CANCELED_BY_MEMBER": "Annulé par le Membre",
+        "CANCELED_BY_TRAINER": "Annulé par le Coach",
+        "NO_SHOW": "Absence"
+      }
+    }
   }
 }

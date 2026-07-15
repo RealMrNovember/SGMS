@@ -25,6 +25,7 @@
     "members": "Üzvlər",
     "plans": "Planlar",
     "programs": "Proqramlar",
+    "trainers": "PT Performansı",
     "messages": "Mesajlar",
     "team": "Personal",
     "pos": "Kassa",
@@ -580,6 +581,11 @@
           "title": "Workout & Nutrition",
           "description": "PT assignments, workout and nutrition programs with instant athlete portal access."
         },
+        "pt": {
+          "icon": "🥇",
+          "title": "PT Performance & Commission",
+          "description": "Monthly session count, hours, revenue, and commission calculated automatically for every trainer — cancellation and no-show rate included."
+        },
         "pos": {
           "icon": "💳",
           "title": "POS & Member Accounts",
@@ -855,5 +861,73 @@
     "enable": "Brauzer bildirişlərini aktivləşdir",
     "disable": "Brauzer bildirişlərini bağla",
     "deniedHint": "Bildirişlər brauzerinizdə bloklanıb. Aktivləşdirmək üçün sayt icazələrini yoxlayın."
+  },
+  "trainers": {
+    "title": "PT Performansı",
+    "subtitle": "{month} — hər məşqçinin seans sayı, işlədiyi saat, gəliri və haqq etdiyi prim bir ekranda.",
+    "noProfile": "Komissiya təyin edilməyib",
+    "noProfileHint": "Bu məşqçi üçün hələ komissiya modeli təyin edilməyib — OWNER və ya ADMIN təyin edə bilər.",
+    "empty": {
+      "title": "Hələ məşqçi yoxdur",
+      "subtitle": "Komandanıza TRAINER rolunda personal əlavə etdiyinizdə burada görünəcək."
+    },
+    "kpi": {
+      "sessions": "Tamamlanan Seans",
+      "hours": "İşlənən Saat",
+      "revenue": "Gəlir",
+      "commission": "Haqq Edilən Prim",
+      "canceled": "Ləğv edilmiş",
+      "noShowRate": "No-show Nisbəti",
+      "canceledAndNoShow": "{canceled} ləğv · {noShow} no-show"
+    },
+    "commissionForm": {
+      "title": "Komissiya Modeli",
+      "hint": "Bu məşqçinin primi bu modelə görə avtomatik hesablanır.",
+      "modelLabel": "Model",
+      "model": {
+        "FIXED_PER_SESSION": "Seans başına sabit məbləğ",
+        "PERCENTAGE_OF_REVENUE": "Gəlirdən faiz",
+        "TIERED": "Kademeli (20+ seansdan sonra +%5)"
+      },
+      "rateLabel": "Faiz / Məbləğ",
+      "hourlyRateLabel": "Saatlıq ödəniş (opsional)",
+      "saving": "Yadda saxlanılır…",
+      "submit": "Komissiya Modelini Yadda Saxla"
+    },
+    "scheduleForm": {
+      "title": "Yeni Seans Planlaşdır",
+      "memberLabel": "Üzv",
+      "memberPlaceholder": "Üzv seçin…",
+      "dateLabel": "Tarix & Saat",
+      "durationLabel": "Müddət (dəq)",
+      "saving": "Yadda saxlanılır…",
+      "submit": "Seansı Planlaşdır"
+    },
+    "sessionActions": {
+      "complete": "Tamamla",
+      "noShow": "Gəlmədi",
+      "cancelByMember": "Üzv Ləğv Etdi",
+      "amountPlaceholder": "Məbləğ",
+      "confirm": "Təsdiqlə",
+      "cancel": "İmtina",
+      "saving": "Yadda saxlanılır…"
+    },
+    "sessions": {
+      "title": "Seans Tarixçəsi",
+      "empty": "Hələ seans qeydi yoxdur.",
+      "colDate": "Tarix",
+      "colMember": "Üzv",
+      "colDuration": "Müddət",
+      "colStatus": "Status",
+      "colRevenue": "Gəlir",
+      "colCommission": "Prim",
+      "status": {
+        "SCHEDULED": "Planlaşdırıldı",
+        "COMPLETED": "Tamamlandı",
+        "CANCELED_BY_MEMBER": "Üzv Ləğv Etdi",
+        "CANCELED_BY_TRAINER": "Məşqçi Ləğv Etdi",
+        "NO_SHOW": "Gəlmədi"
+      }
+    }
   }
 }
