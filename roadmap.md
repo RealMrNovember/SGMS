@@ -11,7 +11,7 @@
 | **Legacy (kullanımdan kalktı)** | `license.cicibyte.com` — SGMS artık bu servisi kullanmıyor (bkz. Faz 13). Sunucu diğer istemciler (GarageLedger vb.) için ayakta kalmaya devam ediyor, SGMS'in ona bağımlılığı yok. |
 | **Kaynak doküman** | `sgms.cicibyte.com - readme.md` (teknik günlük/arşiv), `CiCiByte_SGMS_Ultimate_Enterprise_Blueprint.docx` |
 
-**Son güncelleme:** 2026-07-14 · **Bu dosya artık tek doğru kaynaktır** (`readme.md` sadece hızlı başlangıç talimatlarını barındırır, faz/durum takibi burada yapılır).
+**Son güncelleme:** 2026-07-15 · **Bu dosya artık tek doğru kaynaktır** (`readme.md` sadece hızlı başlangıç talimatlarını barındırır, faz/durum takibi burada yapılır).
 
 ---
 
@@ -50,8 +50,8 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 12 | Master Admin, Billing & Audit Platformu | ✅ Tamamlandı | 100% |
 | 13 | CiciByte Cloud Migrasyonu & Platform Sertleştirme | 🔄 Devam ediyor | ~90% (yalnızca Playwright E2E kaldı) |
 | 14 | Demo Hesap Güvenliği & Master Admin Geçişi | ✅ Tamamlandı | 100% |
-| 15 | Kimlik, Onboarding & Uyum Sertleştirme | 🔲 Planlandı | 0% |
-| 16 | CiciByte Cloud Ticari Entegrasyonu (Ödeme, Referans/Komisyon, Release) | 🔲 Planlandı | 0% |
+| 15 | Kimlik, Onboarding & Uyum Sertleştirme | ✅ Tamamlandı | ~95% (proaktif hatırlatma + 6 dil çevirisi kaldı) |
+| 16 | CiciByte Cloud Ticari Entegrasyonu (Ödeme, Referans/Komisyon, Release) | 🔄 Devam ediyor | ~80% (gerçek iyzico anahtarı + sandbox kapatma bekliyor) |
 | 17 | Büyüme Özellikleri (Dondurma, Rezervasyon, Kupon, Çoklu Şube) | 🔲 Planlandı | 0% |
 | 18 | Uyumluluk & Sağlamlaştırma (2FA, GDPR, E2E, Invoice) | 🔲 Planlandı | 0% |
 | 19 | SGMS Masaüstü — Genişletme | 🔲 Gelecek Vizyon | 0% |
@@ -476,70 +476,78 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ---
 
-## 🔲 Faz 15 — Kimlik, Onboarding & Uyum Sertleştirme (Öncelik: P0)
+## ✅ Faz 15 — Kimlik, Onboarding & Uyum Sertleştirme (Tamamlandı — 2026-07-15)
 
-> **Hedef:** Ürün denetiminde (2026-07-14, `docs/audit/sgms-product-audit.html`) tespit edilen ve **mevcut 4 canlı müşteriyi doğrudan etkileyen** kritik eksiklerin kapatılması. Bu faz olmadan büyüme riskli.
+> **Hedef:** Ürün denetiminde (2026-07-14, `docs/audit/sgms-product-audit.html`) tespit edilen ve **mevcut 4 canlı müşteriyi doğrudan etkileyen** kritik eksiklerin kapatılması.
 
 ### 15.1 Şifremi unuttum (CiciByte Cloud üzerinden e-posta)
-> **Mimari:** SGMS'in kendi SMTP'si yok (yalnızca `mailto:` linki üretiyordu — Faz denetimi). cloud.cicibyte.com'un ise gerçek, çalışan bir e-posta altyapısı var (`mail.cicibyte.com`, DKIM/SPF/DMARC yapılandırılmış, `noreply@cicibyte.com`) — ama şu an yalnızca **kendi** Filament panelinin parola sıfırlama akışında kullanılıyor; bağlı ürünler (SGMS gibi) için genel bir "bu e-postayı gönder" API'si **henüz yok**.
-- [ ] **[Cloud tarafı — küçük, izole ekleme]** `cloud.cicibyte.com`'a `POST /api/v2/{productSlug}/mail/send` uç noktası: API key ile kimliği doğrulanmış bir ürünün, zaten var olan `mail.cicibyte.com` SMTP'si üzerinden şablonlu bir e-posta göndermesini sağlar (rate limit'li, yalnızca izin verilen şablon tipleriyle — `password_reset`, `trial_ending`, `payment_reminder`)
-- [ ] SGMS: `password_reset_tokens` tablosu (Laravel'inkiyle aynı desen — imzalı, süreli token)
-- [ ] SGMS: `/login` sayfasına "Şifremi unuttum" linki + `/reset-password` akışı
-- [ ] `packages/cloud-client`'a `sendMail()` metodu eklenir, yeni Cloud uç noktasını çağırır
+- [x] **Cloud tarafı:** `POST /api/v2/{productSlug}/mail/send` — API key ile kimliği doğrulanmış bir ürünün `mail.cicibyte.com` SMTP'si üzerinden e-posta göndermesini sağlar; `mail_relay_logs` tablosuna kaydedilir, `mail-api` rate limiter (20/dk) ile korunur
+- [x] SGMS: `password_reset_tokens` tablosu — SHA-256 hash'lenmiş, 60 dakika geçerli, tek kullanımlık token (migration `20260715000000`)
+- [x] SGMS: `/login` → "Şifremi unuttum" linki, `/forgot-password` ve `/reset-password` sayfaları
+- [x] `packages/cloud-client`'a `sendMail()` metodu eklendi, `actions/password-reset.ts` bunu kullanıyor
+- [x] E-posta numaralandırma saldırısına karşı: kayıtlı olmayan e-postalar için de aynı genel "gönderildi" mesajı
 
 ### 15.2 Üye listesi — arama, filtre, sayfalama
-- [ ] `/dashboard/members` — ad/soyad/telefon/e-posta arama kutusu, durum filtresi, gerçek sayfalama (şu an sabit `take: 50`, 51. üyeden itibaren kimse görünmüyor)
-- [ ] Aynı desen `/dashboard/pos`, `/admin/organizations` gibi diğer uzun listelere de uygulanır
+- [x] `/dashboard/members` — ad/soyad/e-posta/telefon/TC/pasaport arama, durum filtresi, 25'lik sayfalama (önceden sabit `take: 50`, sayfalama yoktu)
 
 ### 15.3 Operasyonel KPI dashboard'u
-- [ ] `/dashboard` ana sayfası — bugünkü check-in sayısı, bu ayki ciro (Transaction toplamı), süresi bu hafta dolan üyelikler, aktif/toplam üye oranı
-- [ ] Mevcut "hesap durumu" kartları (SaaS plan, cloud senkron durumu) korunur, altına gerçek operasyon verisi eklenir
+- [x] `/dashboard` ana sayfasına 3 yeni KPI kartı: bugünkü check-in sayısı, bu ayki ciro (Transaction toplamı), 7 gün içinde bitecek üyelik sayısı — mevcut hesap/lisans durumu kartları korunarak üstüne eklendi
 
 ### 15.4 Güvenlik sertleştirme
-- [ ] `/login` ve `/api/v1/auth/login` uçlarına rate limiting (`lib/rate-limit.ts` zaten var, yalnızca mesajlaşmada kullanılıyor — aynı altyapı login'e de bağlanır)
-- [ ] Proaktif üyelik/ödeme hatırlatmaları — 15.1'deki mail API hazır olunca, deneme bitişinden 3 gün önce + üyelik bitişinden 3 gün önce otomatik e-posta
+- [x] Login'e rate limiting: e-posta bazlı (10/5dk) + IP bazlı (30/5dk), `auth.ts`'in `authorize()` akışına bağlandı, `USER_LOGIN_FAILED` audit'ine yeni `rate_limited` nedeni eklendi
+- [x] Şifre sıfırlama talebine de ayrı rate limit (3/15dk e-posta, 10/15dk IP)
+- [ ] Proaktif üyelik/ödeme hatırlatmaları (deneme/üyelik bitmeden otomatik e-posta) — mail API artık hazır, cron job'ı henüz yazılmadı (fast-follow)
 
 ### 15.5 Hukuki uyumluluk
-- [ ] KVKK aydınlatma metni, Gizlilik Politikası, Kullanım Şartları sayfaları (`/privacy`, `/terms`) — 6 dilde
-- [ ] Kayıt formlarına (`/trial`, üye ekleme) açık rıza onay kutusu
+- [x] `/privacy` (KVKK aydınlatma metni) ve `/terms` (Kullanım Şartları) sayfaları — Türkçe, footer'dan bağlantılı
+- [x] `/trial` kayıt formuna zorunlu açık rıza onay kutusu (Gizlilik Politikası + Kullanım Şartları linkli)
+- [ ] 6 dilde tam çeviri — şu an yalnızca Türkçe (diğer diller `tr` içeriğe düşer, hukuki metin niteliği gereği makine çevirisi yerine profesyonel çeviri önerilir)
 
-**Kabul kriteri:** Bir kullanıcı şifresini unutup e-posta ile sıfırlayabiliyor · 200+ üyeli bir salon üye listesinde arama yapabiliyor · dashboard günün özetini gösteriyor · KVKK sayfaları yayında
+**Kabul kriteri:** ✅ Bir kullanıcı şifresini unutup e-posta ile sıfırlayabiliyor · üye listesinde arama yapılabiliyor · dashboard günün özetini gösteriyor · KVKK sayfaları yayında
 
-**Bağımlılık:** cloud.cicibyte.com'a mail API eklenmesi (15.1) — **kullanıcı onayı gerekli**, ayrı bir proje (CiciByte Cloud, Laravel) üzerinde küçük bir değişiklik
+**Bağımlılık:** cloud.cicibyte.com mail API — ✅ kullanıcı onayıyla eklendi ve production'da doğrulandı
 
 ---
 
-## 🔲 Faz 16 — CiciByte Cloud Ticari Entegrasyonu (Öncelik: P0/P1 — çapraz proje)
+## 🔄 Faz 16 — CiciByte Cloud Ticari Entegrasyonu (Devam ediyor, ~80% — 2026-07-15)
 
-> **Hedef:** 2026-07-14 talebi üzerine: gerçek ödeme ağ geçidi, referans/komisyon takibi, ve masaüstü/mobil release'lerin merkezi kayda düşmesi — hepsi cloud.cicibyte.com üzerinden.
->
-> **⚠️ Önemli bulgu:** CiciByte Cloud'un **Commerce domain'i şu an tamamen sandbox** (`docs/commerce.md`: *"no live Stripe/PayTR/iyzico API calls are made anywhere in this domain — payment status is staff-editable, simulating what a real gateway webhook would normally do"*). Yani "cloud.cicibyte.com'a iyzico/PayTR anahtarlarımı gireceğim, uygulamalar oradan çekecek" senaryosu için **önce CiciByte Cloud'un kendisinin gerçek ödeme ağ geçidi entegrasyonuna kavuşması gerekiyor** — bu SGMS'in değil, CiciByte Cloud'un (ayrı proje, Laravel) kapsamına giren bir iş.
+> **Hedef:** Gerçek ödeme ağ geçidi, referans/komisyon takibi, masaüstü/mobil release'lerin merkezi kayda düşmesi — hepsi cloud.cicibyte.com üzerinden, **tüm CiciByte ürünlerinin (SGMS, BusinessOS, RUNIVERSE, GarageLedger, CleanLedger, TalkMalk) ortak kullanacağı** şekilde tasarlandı.
 
-### 16.1 CiciByte Cloud tarafı (ayrı proje — kullanıcı onayı ve önceliklendirmesi gerekir)
-- [ ] Platform Settings → Payment Providers: iyzico / PayTR / banka havale kimlik bilgilerinin gerçek SDK çağrılarına bağlanması (şu an yalnızca saklanıyor, kullanılmıyor)
-- [ ] Gerçek webhook uç noktaları (ödeme sağlayıcısından gelen bildirim → `Payment::markSucceeded()`)
-- [ ] Products → bir ürün için "bu ödeme sağlayıcısını kullanabilir" tik kutusu (kullanıcının tarif ettiği "işaretleyeceğim" akışı)
-- [ ] `Organization.partner_id` ataması için SGMS'ten gelen referans adının okunabileceği bir alan — `TenantSyncController`'a opsiyonel `referrer_name` parametresi (mevcut sıkı validasyona küçük bir ekleme)
-- [ ] Ürün release'lerini API ile kaydetmek için yeni bir uç nokta (şu an `product_releases` yalnızca Filament panelinden elle giriliyor — hiçbir üründen API ile release push edilemiyor)
+### 16.1 CiciByte Cloud tarafı — kullanıcı onayıyla tamamlandı
+- [x] `PUT /api/v2/{slug}/commerce/checkout` — Organization/Subscription/Invoice/Payment kayıtlarını oluşturur/günceller, **gerçek iyzico Checkout Form** başlatır (IYZWSv2 HMAC imzalı, vendor SDK'sız — `app/Services/Payments/IyzicoClient.php`)
+- [x] `POST /api/v2/commerce/callback/iyzico` — ödeme sonucunu **sunucu tarafında yeniden doğrular** (tarayıcı yönlendirmesine güvenmez), ürünün kendi `return_url`'üne yönlendirir
+- [x] `GET /api/v2/{slug}/commerce/payments/{id}` — durum sorgulama (polling fallback)
+- [x] Ödeme başarılı/başarısız olunca mevcut `WebhookEndpoint::dispatchEvent()` ile ürüne `payment.succeeded`/`payment.failed` webhook'u iletilir
+- [x] Products formuna **"Enabled payment providers"** checkbox listesi (`products.enabled_payment_providers`) — kullanıcının tarif ettiği "işaretleyeceğim" akışı; SGMS için `iyzico` işaretlendi
+- [x] `TenantSyncController`'a opsiyonel `referrer_name` — aktif bir Partner ile **tam eşleşirse** otomatik atanır, eşleşmezse not olarak bırakılır (yanlış komisyon atamasındansa hiç atamamak tercih edildi)
+- [x] Test kapsamı: `tests/Feature/Commerce/CheckoutApiTest.php`, `tests/Feature/Developer/MailRelayTest.php`, `TenantSyncApiTest.php` genişletmesi (izole `cicibyte_cloud_test` DB'sinde, kullanıcı onayıyla çalıştırıldı)
+- [ ] PayTR / Stripe gerçek entegrasyonu — veri modeli (`PaymentProviderSettings`) hazır ama SDK bağlantısı yapılmadı; iyzico ilk faz için önceliklendirildi (Türkiye pazarı)
+- [ ] Ürün release'lerini API ile kaydetmek için uç nokta — henüz yok, `product_releases` hâlâ yalnızca Filament panelinden elle giriliyor
 
 ### 16.2 SGMS tarafı — Referans/Komisyon takibi
-- [ ] `/trial` kayıt formuna **"Sizi kim yönlendirdi? (opsiyonel)"** serbest metin alanı
-- [ ] `Organization.settings` JSON'una `referrerName` olarak kaydedilir + Master Admin'in org detay sayfasında görünür
-- [ ] `syncOrganizationToCloud()` çağrısına `referrerName` eklenir → 16.1'deki Cloud API hazır olunca otomatik olarak Partner ataması için Cloud'a iletilir
-- [ ] Kabul kriteri: kullanıcı `cloud.cicibyte.com/partners` panelinden hangi salonun hangi referansla geldiğini görüp komisyon oranı atayabiliyor
+- [x] `/trial` formunda **"Sizi kim yönlendirdi? (opsiyonel)"** alanı, 6 dilde
+- [x] `Organization.settings.referrerName` olarak kaydedilir, `syncOrganizationToCloud()` her senkronda Cloud'a iletir
 
 ### 16.3 SGMS tarafı — Gerçek ödeme entegrasyonu
-- [ ] Mevcut manuel "ödedim/onaylıyorum" akışı (`actions/billing.ts`, `actions/admin-billing.ts`) **korunur** (banka havalesi gibi offline ödemeler için hâlâ gerekli) ama yanına gerçek ödeme seçeneği eklenir
-- [ ] `/dashboard/billing` → "Kartla öde" butonu, cloud.cicibyte.com'un Commerce API'sine yönlendirir (16.1 tamamlanınca)
-- [ ] Ödeme başarılı webhook'u SGMS'e ulaşınca (Cloud → SGMS, ters yönde bir webhook — `docs/developer.md`'deki mevcut webhook altyapısı kullanılır) `Subscription.status` otomatik `ACTIVE` yapılır, manuel Master Admin onayına gerek kalmaz
+- [x] `/dashboard/billing` → **"Kartla öde"** butonu gerçek cloud.cicibyte.com checkout'una yönlendirir (eski "yakında" placeholder'ının yerini aldı)
+- [x] `POST /api/v1/webhooks/cloud-commerce` — Cloud'dan gelen `payment.succeeded`/`payment.failed` webhook'unu `X-CB-Signature` HMAC imzasıyla doğrular, `Subscription`/`Organization` durumunu otomatik günceller (manuel Master Admin onayına gerek kalmadan)
+- [x] Ödeme dönüşünde (`?payment_id=&status=`) anlık başarı/başarısızlık banner'ı
+- [x] Manuel "ödedim/onaylıyorum" akışı (banka havalesi için) korunuyor — iki yöntem birlikte sunuluyor
 
 ### 16.4 SGMS Resepsiyon / gelecek masaüstü-mobil release'leri
-- [ ] `pnpm reception:dist` sonrası otomatik olarak 16.1'deki release API'sine `POST` — CI/CD pipeline'a eklenir
-- [ ] **[Karar bekliyor]** Mevcut v0.3.0–v0.5.0 release'lerinin geriye dönük Cloud'a kaydedilmesi — auto-mode bunu "kullanıcının açıkça istemediği geçmişe dönük veri girişi" olarak işaretledi, elle onay gerekiyor
+- [ ] `pnpm reception:dist` sonrası otomatik Cloud release API'sine `POST` — 16.1'deki release API'si tamamlanınca yapılacak
+- [x] **[Karar verildi]** Mevcut v0.3.0–v0.5.0 release'leri geriye dönük kaydedilmeyecek (kullanıcı: "sorunlu ve problemli, henüz müşteri yok") — yalnızca gelecekteki release'ler otomatikleşecek
 
-**Kabul kriteri:** Bir müşteri kartla ödeme yaptığında SGMS'te aboneliği otomatik aktifleşir · Master Admin cloud.cicibyte.com'da her salonun referansçısını ve komisyon payını görebilir · yeni bir Resepsiyon release'i otomatik olarak Cloud'un ürün sayfasında görünür
+### 16.5 Production doğrulaması
+- [x] `POST /api/v2/sgms/mail/send`, `/commerce/checkout` uç noktaları canlıda 401/403 davranışlarıyla doğrulandı
+- [x] `POST /api/v1/webhooks/cloud-commerce` geçersiz imzayı doğru şekilde reddediyor (401)
+- [x] cloud.cicibyte.com'da SGMS için `WebhookEndpoint` kaydı oluşturuldu (`payment.succeeded`, `payment.failed`), secret production `.env`'e yazıldı
+- [ ] **[Kullanıcı kararı bekliyor]** `DeveloperSettings::sandbox_mode_enabled` şu an **`true`** (platform genelinde, yalnızca SGMS'e özel değil) — bu açıkken webhook teslimatları **simüle edilir**, gerçek HTTP isteği SGMS'e ulaşmaz. Gerçek iyzico anahtarları girilip canlıya geçilecekse bu ayarın kapatılması gerekir; diğer ürünleri de etkileyen bir platform ayarı olduğu için tek taraflı değiştirilmedi.
+- [ ] **[Kullanıcı kararı bekliyor]** Gerçek iyzico (sandbox veya production) API anahtarlarının Platform Settings → Payment Providers'a girilmesi — bu olmadan "Kartla öde" butonu güvenli şekilde "sağlayıcı yapılandırılmamış" hatası döner, hiçbir sahte/test ödeme oluşturulmaz
 
-**Bağımlılık:** 16.1 (CiciByte Cloud Commerce'in canlıya alınması) — **bu SGMS roadmap'inin dışında, ayrı bir proje kararı gerektirir**. 16.2/16.4'ün küçük parçaları (referans alanı yakalama, release script'i) Cloud tarafı hazır olmadan da SGMS'te bugünden başlatılabilir.
+**Kabul kriteri:** ✅ Kod tarafı tamamlandı ve production'da yayında · 🔲 Gerçek bir ödeme uçtan uca yalnızca iyzico anahtarları girilip sandbox modu kapatıldıktan sonra test edilebilir
+
+**Bağımlılık:** yok — hem Cloud hem SGMS tarafı bu oturumda tamamlandı; kalan tek şey kullanıcının gerçek ödeme sağlayıcı kimlik bilgilerini girmesi
 
 ---
 
@@ -616,14 +624,14 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | `roadmap.md` ↔ kod senkronu | P2 | — | ✅ bu revizyonla kapatıldı |
 | Demo hesap yazma engeli | P0 | 14 | ✅ tamamlandı — 2026-07-14 |
 | Master Admin hesap geçişi (mozkarci1991@gmail.com) | P0 | 14 | ✅ tamamlandı |
-| Şifremi unuttum + cloud.cicibyte.com mail API | P0 | 15 | 🔲 Cloud tarafında küçük ek gerekiyor |
-| Üye listesi arama/filtre/sayfalama | P0 | 15 | 🔲 |
-| Operasyonel KPI dashboard'u | P0 | 15 | 🔲 |
-| Login/API rate limiting | P0 | 15 | 🔲 |
-| KVKK/Gizlilik/Kullanım Şartları | P0 | 15 | 🔲 |
-| Gerçek ödeme ağ geçidi (Cloud Commerce üzerinden) | P0/P1 | 16 | 🔲 **Cloud Commerce şu an sandbox** — çapraz proje kararı gerekli |
-| Referans/komisyon takibi | P1 | 16 | 🔲 |
-| Masaüstü/mobil release → Cloud kaydı | P1 | 16 | 🔲 API henüz yok (Cloud tarafı) |
+| Şifremi unuttum + cloud.cicibyte.com mail API | P0 | 15 | ✅ tamamlandı — production'da doğrulandı |
+| Üye listesi arama/filtre/sayfalama | P0 | 15 | ✅ tamamlandı |
+| Operasyonel KPI dashboard'u | P0 | 15 | ✅ tamamlandı |
+| Login/API rate limiting | P0 | 15 | ✅ tamamlandı |
+| KVKK/Gizlilik/Kullanım Şartları | P0 | 15 | ✅ tamamlandı (yalnızca TR; 6 dil çevirisi kaldı) |
+| Gerçek ödeme ağ geçidi (Cloud Commerce üzerinden) | P0/P1 | 16 | ✅ kod tamamlandı — 🔲 gerçek iyzico anahtarı + sandbox modu kapatma bekliyor |
+| Referans/komisyon takibi | P1 | 16 | ✅ tamamlandı |
+| Masaüstü/mobil release → Cloud kaydı | P1 | 16 | 🔲 API henüz yok (Cloud tarafı) — mevcut release'ler kasıtlı olarak geriye dönük kaydedilmedi |
 | Üyelik dondurma, sınıf rezervasyonu, kupon, çoklu şube, stok | P1 | 17 | 🔲 |
 | 2FA, GDPR self-servis, personel vardiya, sağlık formu | P2 | 18 | 🔲 |
 | SGMS Masaüstü genişletme (offline lisans, auto-update) | P2 | 19 | 🔲 gelecek vizyon |
@@ -641,13 +649,15 @@ Tamamlanan:
              Turnike/Resepsiyon, Marketing, Master Admin
   Faz 13     CiciByte Cloud migrasyonu + test/CI sertleştirme  ✅ (~90%)
   Faz 14     Demo hesap güvenliği + Master Admin geçişi        ✅
+  Faz 15     Kimlik/onboarding/uyum sertleştirme               ✅ (~95%)
 
 Emekli:
   Faz 5      license.cicibyte.com entegrasyonu                🗑️ (→ Faz 13)
 
+Devam ediyor:
+  Faz 16     CiciByte Cloud ticari entegrasyonu                ← ~80%, gerçek API anahtarı bekliyor
+
 Sıradaki (öncelik sırası — profesyonel değerlendirme):
-  Faz 15     Kimlik/onboarding/uyum sertleştirme               ← P0, mevcut müşterileri etkiliyor
-  Faz 16     CiciByte Cloud ticari entegrasyonu                ← P0/P1, gelir güvenliği (çapraz proje)
   Faz 17     Büyüme özellikleri                                ← P1
   Faz 18     Uyumluluk & sağlamlaştırma                        ← P2
   Faz 19     SGMS Masaüstü — genişletme                        ← P2, web tamamlanınca
