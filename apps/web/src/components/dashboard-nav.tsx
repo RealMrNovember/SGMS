@@ -1,6 +1,7 @@
 'use client';
 
 import { LocaleSwitcher } from '@/components/locale-switcher';
+import { PushNotificationToggle } from '@/components/push-notification-toggle';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
@@ -62,6 +63,7 @@ export function DashboardNav({
         {comingSoonItems.length > 0 ? (
           <DesktopComingSoonMenu label={comingSoonGroupLabel ?? 'Coming Soon'} items={comingSoonItems} />
         ) : null}
+        <PushNotificationToggle />
         <LocaleSwitcher />
         <form action={logoutAction}>
           <button type="submit" className="button px-4 py-2 text-sm">
@@ -94,7 +96,10 @@ export function DashboardNav({
           />
           <div className="absolute inset-y-0 right-0 flex w-[85vw] max-w-sm flex-col gap-1 overflow-y-auto border-l border-[var(--border)] bg-[rgba(17,24,39,0.98)] px-5 py-6">
             <div className="mb-3 flex items-center justify-between">
-              <LocaleSwitcher compact />
+              <div className="flex items-center gap-2">
+                <PushNotificationToggle />
+                <LocaleSwitcher compact />
+              </div>
               <button
                 type="button"
                 onClick={() => setOpen(false)}

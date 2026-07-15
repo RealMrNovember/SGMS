@@ -807,5 +807,53 @@
         "description": "Guías detalladas y específicas para entrenadores, recepción, socios y propietarios de gimnasios."
       }
     }
+  },
+  "partner": {
+    "badge": "Portal de Socios",
+    "nav": {
+      "dashboard": "Mis Gimnasios"
+    },
+    "dashboardTitle": "Gimnasios que ha referido",
+    "dashboardSubtitle": "Gestione el período de prueba, el descuento y la capacidad de los gimnasios que se registraron a través de usted.",
+    "empty": {
+      "title": "Aún no tiene gimnasios asignados",
+      "subtitle": "Cuando un cliente lo indique como referente y el Administrador Maestro lo confirme, aparecerá aquí."
+    },
+    "table": {
+      "company": "Empresa",
+      "owner": "Propietario",
+      "plan": "Plan",
+      "members": "Miembros",
+      "manage": "Gestionar"
+    },
+    "detail": {
+      "owner": "Propietario",
+      "plan": "Plan",
+      "status": "Estado",
+      "members": "Uso de miembros",
+      "trialTitle": "Membresía / Período de Prueba",
+      "trialHint": "Extienda la prueba de su cliente dentro de su propia autoridad (hasta 30 días).",
+      "trialCurrentEnd": "Vencimiento actual",
+      "trialDaysLabel": "¿Cuántos días extender?",
+      "trialSubmit": "Extender Prueba",
+      "discountTitle": "Descuento Personalizado",
+      "discountHint": "Defina una tasa de descuento específica para este gimnasio (hasta 30%).",
+      "discountPercentLabel": "Tasa de descuento (%)",
+      "discountNoteLabel": "Nota (opcional)",
+      "discountNotePlaceholder": "Ej. Descuento de campaña de registro",
+      "discountSubmit": "Guardar Descuento",
+      "capacityTitle": "Capacidad Extra",
+      "capacityHint": "Otorgue a este gimnasio capacidad extra sobre el límite de su plan.",
+      "capacityMembersLabel": "Miembros extra",
+      "capacityStaffLabel": "Personal extra",
+      "capacityDevicesLabel": "Dispositivos extra",
+      "capacitySubmit": "Guardar Capacidad",
+      "saving": "Guardando…"
+    }
+  },
+  "push": {
+    "enable": "Activar notificaciones del navegador",
+    "disable": "Desactivar notificaciones del navegador",
+    "deniedHint": "Las notificaciones están bloqueadas en su navegador. Revise los permisos del sitio para activarlas."
   }
 }

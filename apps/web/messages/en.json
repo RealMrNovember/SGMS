@@ -738,6 +738,7 @@
     "communicationsTitle": "Communication templates",
     "communicationsSubtitle": "Ready email copy for customer outreach. Customer detail pages use personalized versions.",
     "plansNav": "SaaS Plans",
+    "partnersNav": "Partners",
     "plansTitle": "SaaS Plan Management",
     "plansSubtitle": "Edit trial and paid subscription pricing, limits, and visibility.",
     "billingRequestsTitle": "Payment requests",
@@ -933,5 +934,53 @@
         "description": "Dedicated, in-depth guides for trainers, front-desk staff, athletes, and gym owners."
       }
     }
+  },
+  "partner": {
+    "badge": "Partner Portal",
+    "nav": {
+      "dashboard": "My Gyms"
+    },
+    "dashboardTitle": "Gyms you referred",
+    "dashboardSubtitle": "Manage the trial period, discount, and capacity for gyms that signed up through you.",
+    "empty": {
+      "title": "No gyms assigned to you yet",
+      "subtitle": "Once a customer names you as their referrer and the Master Admin confirms it, they'll show up here."
+    },
+    "table": {
+      "company": "Company",
+      "owner": "Owner",
+      "plan": "Plan",
+      "members": "Members",
+      "manage": "Manage"
+    },
+    "detail": {
+      "owner": "Owner",
+      "plan": "Plan",
+      "status": "Status",
+      "members": "Member usage",
+      "trialTitle": "Membership / Trial Period",
+      "trialHint": "Extend your customer's trial within your own authority (up to 30 days).",
+      "trialCurrentEnd": "Current end date",
+      "trialDaysLabel": "Extend by how many days?",
+      "trialSubmit": "Extend Trial",
+      "discountTitle": "Custom Discount",
+      "discountHint": "Set a discount rate specific to this gym (up to 30%).",
+      "discountPercentLabel": "Discount rate (%)",
+      "discountNoteLabel": "Note (optional)",
+      "discountNotePlaceholder": "e.g. Sign-up campaign discount",
+      "discountSubmit": "Save Discount",
+      "capacityTitle": "Extra Capacity",
+      "capacityHint": "Grant this gym extra capacity on top of its plan limit.",
+      "capacityMembersLabel": "Extra members",
+      "capacityStaffLabel": "Extra staff",
+      "capacityDevicesLabel": "Extra devices",
+      "capacitySubmit": "Save Capacity",
+      "saving": "Saving…"
+    }
+  },
+  "push": {
+    "enable": "Enable browser notifications",
+    "disable": "Turn off browser notifications",
+    "deniedHint": "Notifications are blocked in your browser. Check your site permissions to enable them."
   }
 }

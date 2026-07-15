@@ -71,6 +71,15 @@ export default async function DashboardPage() {
   }
 
   const subscription = organization.subscriptions[0] ?? null;
+  const effectiveMaxMembers = subscription
+    ? subscription.plan.maxMembers + organization.extraMemberCapacity
+    : null;
+  const effectiveMaxStaff = subscription
+    ? subscription.plan.maxStaff + organization.extraStaffCapacity
+    : null;
+  const effectiveMaxDevices = subscription
+    ? subscription.plan.maxDevices + organization.extraDeviceCapacity
+    : null;
   const license = buildDashboardLicenseSummary({
     centralLicenseStatus: organization.centralLicenseStatus,
     centralLicenseType: organization.centralLicenseType,
@@ -230,8 +239,8 @@ export default async function DashboardPage() {
           </p>
           <p className="muted mt-2 text-xs">
             {t('limits.planLimit', {
-              members: subscription?.plan.maxMembers ?? '—',
-              staff: subscription?.plan.maxStaff ?? '—',
+              members: effectiveMaxMembers ?? '—',
+              staff: effectiveMaxStaff ?? '—',
             })}
           </p>
         </article>
@@ -281,9 +290,9 @@ export default async function DashboardPage() {
         <article className="card p-5">
           <h3 className="font-semibold">{t('limits.title')}</h3>
           <ul className="muted mt-3 space-y-2 text-sm">
-            <li>{t('limits.maxMembers', { count: subscription?.plan.maxMembers ?? '—' })}</li>
-            <li>{t('limits.maxDevices', { count: subscription?.plan.maxDevices ?? '—' })}</li>
-            <li>{t('limits.maxStaff', { count: subscription?.plan.maxStaff ?? '—' })}</li>
+            <li>{t('limits.maxMembers', { count: effectiveMaxMembers ?? '—' })}</li>
+            <li>{t('limits.maxDevices', { count: effectiveMaxDevices ?? '—' })}</li>
+            <li>{t('limits.maxStaff', { count: effectiveMaxStaff ?? '—' })}</li>
           </ul>
         </article>
 

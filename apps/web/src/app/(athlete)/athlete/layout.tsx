@@ -1,6 +1,7 @@
 import { AthleteNav } from '@/components/athlete-nav';
 import { LocaleSwitcher } from '@/components/locale-switcher';
 import { MessageLiveRefresh } from '@/components/message-live-refresh';
+import { PushNotificationToggle } from '@/components/push-notification-toggle';
 import { UserAvatar } from '@/components/user-avatar';
 import { auth, signOut } from '@/lib/auth';
 import { resolveSubscriptionAccess } from '@/lib/billing/subscription-gate';
@@ -70,6 +71,7 @@ export default async function AthleteLayout({ children }: { children: React.Reac
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <PushNotificationToggle />
             <LocaleSwitcher />
             <form
               action={async () => {

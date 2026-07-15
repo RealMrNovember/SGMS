@@ -9,6 +9,8 @@ declare module 'next-auth' {
       name: string;
       isSuperAdmin: boolean;
       isDemo: boolean;
+      isPartner: boolean;
+      partnerId: string | null;
       organizationId: string | null;
       organizationName: string | null;
       role: OrganizationRole | null;
@@ -20,6 +22,8 @@ declare module 'next-auth' {
   interface User {
     isSuperAdmin?: boolean;
     isDemo?: boolean;
+    isPartner?: boolean;
+    partnerId?: string | null;
     organizationId?: string | null;
     organizationName?: string | null;
     role?: OrganizationRole | null;
@@ -41,6 +45,8 @@ export const authConfig = {
         token.sub = user.id;
         token.isSuperAdmin = user.isSuperAdmin ?? false;
         token.isDemo = user.isDemo ?? false;
+        token.isPartner = user.isPartner ?? false;
+        token.partnerId = user.partnerId ?? null;
         token.organizationId = user.organizationId ?? null;
         token.organizationName = user.organizationName ?? null;
         token.role = user.role ?? null;
@@ -55,6 +61,8 @@ export const authConfig = {
         session.user.id = token.sub;
         session.user.isSuperAdmin = Boolean(token.isSuperAdmin);
         session.user.isDemo = Boolean(token.isDemo);
+        session.user.isPartner = Boolean(token.isPartner);
+        session.user.partnerId = (token.partnerId as string | null | undefined) ?? null;
         session.user.organizationId = (token.organizationId as string | null | undefined) ?? null;
         session.user.organizationName = (token.organizationName as string | null | undefined) ?? null;
         session.user.role = (token.role as OrganizationRole | null | undefined) ?? null;

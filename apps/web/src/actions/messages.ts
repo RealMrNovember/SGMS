@@ -3,6 +3,7 @@
 import { auth } from '@/lib/auth';
 import { consumeMessageRateLimit, consumeTypingRateLimit } from '@/lib/rate-limit';
 import { publishMessageEvent } from '@/lib/realtime/hub';
+import { sendPushToUser } from '@/lib/push/send';
 import { prisma } from '@/lib/prisma';
 import { getTenantWriteBlockReason } from '@/lib/tenant-access';
 import { revalidatePath } from 'next/cache';
@@ -110,6 +111,14 @@ export async function sendDirectMessage(
       content: message.content,
       createdAt: message.createdAt.toISOString(),
     },
+  });
+
+  const session = await auth();
+  void sendPushToUser(receiverId, {
+    title: session?.user?.name ? `${session.user.name}` : 'Yeni mesaj',
+    body: content.trim().slice(0, 140),
+    url: receiverAthlete ? '/athlete/messages' : '/dashboard/messages',
+    tag: 'sgms-message',
   });
 
   revalidatePath('/dashboard/messages');

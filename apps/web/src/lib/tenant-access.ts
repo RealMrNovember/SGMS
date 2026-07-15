@@ -62,8 +62,19 @@ export async function getActiveSubscriptionPlan(organizationId: string) {
   });
 }
 
+async function getOrganizationCapacityAddOns(organizationId: string) {
+  return prisma.organization.findUnique({
+    where: { id: organizationId },
+    select: {
+      extraMemberCapacity: true,
+      extraStaffCapacity: true,
+      extraDeviceCapacity: true,
+    },
+  });
+}
+
 export async function assertWithinStaffLimit(organizationId: string): Promise<string | null> {
-  const [staffCount, subscription] = await Promise.all([
+  const [staffCount, subscription, org] = await Promise.all([
     prisma.organizationMember.count({
       where: {
         organizationId,
@@ -72,9 +83,10 @@ export async function assertWithinStaffLimit(organizationId: string): Promise<st
       },
     }),
     getActiveSubscriptionPlan(organizationId),
+    getOrganizationCapacityAddOns(organizationId),
   ]);
 
-  const maxStaff = subscription?.plan.maxStaff ?? 0;
+  const maxStaff = (subscription?.plan.maxStaff ?? 0) + (org?.extraStaffCapacity ?? 0);
   if (staffCount >= maxStaff) {
     return `SaaS plan personel limitine ulaşıldı (maks. ${maxStaff}).`;
   }
@@ -83,14 +95,15 @@ export async function assertWithinStaffLimit(organizationId: string): Promise<st
 }
 
 export async function assertWithinMemberLimit(organizationId: string): Promise<string | null> {
-  const [memberCount, subscription] = await Promise.all([
+  const [memberCount, subscription, org] = await Promise.all([
     prisma.gymMember.count({
       where: { organizationId, status: { not: 'INACTIVE' } },
     }),
     getActiveSubscriptionPlan(organizationId),
+    getOrganizationCapacityAddOns(organizationId),
   ]);
 
-  const maxMembers = subscription?.plan.maxMembers ?? 0;
+  const maxMembers = (subscription?.plan.maxMembers ?? 0) + (org?.extraMemberCapacity ?? 0);
   if (memberCount >= maxMembers) {
     return `SaaS plan üye limitine ulaşıldı (maks. ${maxMembers}).`;
   }
@@ -99,14 +112,15 @@ export async function assertWithinMemberLimit(organizationId: string): Promise<s
 }
 
 export async function assertWithinDeviceLimit(organizationId: string): Promise<string | null> {
-  const [deviceCount, subscription] = await Promise.all([
+  const [deviceCount, subscription, org] = await Promise.all([
     prisma.device.count({
       where: { organizationId, status: { not: 'DISABLED' } },
     }),
     getActiveSubscriptionPlan(organizationId),
+    getOrganizationCapacityAddOns(organizationId),
   ]);
 
-  const maxDevices = subscription?.plan.maxDevices ?? 0;
+  const maxDevices = (subscription?.plan.maxDevices ?? 0) + (org?.extraDeviceCapacity ?? 0);
   if (deviceCount >= maxDevices) {
     return `SaaS plan cihaz limitine ulaşıldı (maks. ${maxDevices}).`;
   }

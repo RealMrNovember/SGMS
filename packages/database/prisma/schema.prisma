@@ -119,6 +119,15 @@ enum AuditAction {
   SETTINGS_CHANGED
   AUDIT_LOG_DELETED
   MESSAGE_REPORTED
+  PARTNER_CREATED
+  PARTNER_UPDATED
+  PARTNER_ASSIGNED
+  PARTNER_UNASSIGNED
+  PARTNER_DISCOUNT_UPDATED
+  PARTNER_CAPACITY_ADJUSTED
+  PARTNER_TRIAL_EXTENDED
+  PUSH_SUBSCRIBED
+  PUSH_UNSUBSCRIBED
 }
 
 enum GymMemberStatus {
@@ -198,6 +207,7 @@ model User {
   name            String
   isSuperAdmin    Boolean    @default(false) @map("is_super_admin")
   isDemo          Boolean    @default(false) @map("is_demo")
+  isPartner       Boolean    @default(false) @map("is_partner")
   status          UserStatus @default(ACTIVE)
   emailVerifiedAt DateTime?  @map("email_verified_at")
   lastLoginAt     DateTime?  @map("last_login_at")
@@ -221,10 +231,59 @@ model User {
   transactionsCreated Transaction[]       @relation("TransactionCreatedBy")
   staffCheckIns       CheckIn[]            @relation("StaffCheckIn")
   passwordResetTokens PasswordResetToken[]
+  partnerProfile      Partner?
+  pushSubscriptions   PushSubscription[]
 
   @@index([status])
   @@index([isSuperAdmin])
+  @@index([isPartner])
   @@map("users")
+}
+
+// ---------------------------------------------------------------------------
+// Partner — referans/temsilci hesabı. Kendi getirdiği (atanmış) organizasyonların
+// üyelik süresi, özel indirimi ve ek kapasitesini sınırlı ve denetimli şekilde
+// yönetebilir. Master Admin tarafından oluşturulur ve organizasyonlarla eşleştirilir.
+// ---------------------------------------------------------------------------
+
+model Partner {
+  id             String  @id @default(cuid())
+  userId         String  @unique @map("user_id")
+  name           String
+  code           String  @unique
+  commissionRate Decimal @default(0) @db.Decimal(5, 2) @map("commission_rate")
+  isActive       Boolean @default(true) @map("is_active")
+  notes          String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizations Organization[]
+
+  @@index([isActive])
+  @@map("partners")
+}
+
+// ---------------------------------------------------------------------------
+// PushSubscription — tarayıcı Web Push aboneliği (VAPID). Kullanıcı bazlı, çoklu
+// cihaz/tarayıcı desteklenir (aynı kullanıcı hem masaüstü hem telefon tarayıcısından
+// abone olabilir).
+// ---------------------------------------------------------------------------
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  userAgent String?  @map("user_agent")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("push_subscriptions")
 }
 
 // ---------------------------------------------------------------------------
@@ -274,9 +333,20 @@ model Organization {
   trialStartedAt       DateTime?            @map("trial_started_at")
   lastLicenseCheckAt   DateTime?            @map("last_license_check_at")
 
+  // Partner (temsilci) ataması — bu organizasyonu getiren temsilci, atandıysa
+  // üyelik süresi / özel indirim / ek kapasite konularında sınırlı yönetim yetkisine sahiptir.
+  partnerId String?  @map("partner_id")
+
+  // Plan'ın taban limitlerinin üzerine eklenen, organizasyona özel ek kapasite
+  // (temsilci veya Master Admin tarafından tanımlanır — bkz. lib/tenant-access.ts).
+  extraMemberCapacity Int @default(0) @map("extra_member_capacity")
+  extraStaffCapacity  Int @default(0) @map("extra_staff_capacity")
+  extraDeviceCapacity Int @default(0) @map("extra_device_capacity")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  partner            Partner?             @relation(fields: [partnerId], references: [id], onDelete: SetNull)
   members            OrganizationMember[]
   subscriptions      Subscription[]
   devices            Device[]
@@ -296,6 +366,7 @@ model Organization {
 
   @@index([status])
   @@index([centralLicenseStatus])
+  @@index([partnerId])
   @@map("organizations")
 }
 
@@ -375,6 +446,10 @@ model Subscription {
   currentPeriodEnd   DateTime? @map("current_period_end")
   canceledAt         DateTime? @map("canceled_at")
   cancelAtPeriodEnd  Boolean   @default(false) @map("cancel_at_period_end")
+
+  // Atanmış temsilci tarafından tanımlanan, bu organizasyona özel indirim (bkz. Partner).
+  partnerDiscountPercent Int?    @default(0) @map("partner_discount_percent")
+  partnerDiscountNote    String? @map("partner_discount_note")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

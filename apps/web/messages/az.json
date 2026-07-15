@@ -807,5 +807,53 @@
         "description": "Məşqçilər, qəbul, üzvlər və salon sahibləri üçün ayrıca hazırlanmış ətraflı bələdçilər."
       }
     }
+  },
+  "partner": {
+    "badge": "Tərəfdaş Paneli",
+    "nav": {
+      "dashboard": "Salonlarım"
+    },
+    "dashboardTitle": "Gətirdiyiniz salonlar",
+    "dashboardSubtitle": "Sizin vasitənizlə qeydiyyatdan keçən salonların sınaq müddətini, endirimini və tutumunu buradan idarə edin.",
+    "empty": {
+      "title": "Hələ sizə təyin edilmiş salon yoxdur",
+      "subtitle": "Müştəri qeydiyyat zamanı sizi yönləndirən kimi göstərəndə və Master Admin təsdiqləyəndə burada görünəcək."
+    },
+    "table": {
+      "company": "Şirkət",
+      "owner": "Sahibi",
+      "plan": "Plan",
+      "members": "Üzv",
+      "manage": "İdarə et"
+    },
+    "detail": {
+      "owner": "Sahibi",
+      "plan": "Plan",
+      "status": "Status",
+      "members": "Üzv istifadəsi",
+      "trialTitle": "Üzvlük / Sınaq Müddəti",
+      "trialHint": "Müştərinizin müddətini öz səlahiyyətiniz daxilində (maks. 30 gün) uzada bilərsiniz.",
+      "trialCurrentEnd": "Cari bitiş",
+      "trialDaysLabel": "Neçə gün uzadılsın?",
+      "trialSubmit": "Müddəti Uzat",
+      "discountTitle": "Xüsusi Endirim",
+      "discountHint": "Bu salon üçün xüsusi endirim faizi təyin edin (maks. %30).",
+      "discountPercentLabel": "Endirim faizi (%)",
+      "discountNoteLabel": "Qeyd (opsional)",
+      "discountNotePlaceholder": "Məs. Qeydiyyat kampaniyası endirimi",
+      "discountSubmit": "Endirimi Yadda Saxla",
+      "capacityTitle": "Əlavə Tutum",
+      "capacityHint": "Plan limitinin üzərinə bu salon üçün əlavə tutum təyin edin.",
+      "capacityMembersLabel": "Əlavə üzv",
+      "capacityStaffLabel": "Əlavə personal",
+      "capacityDevicesLabel": "Əlavə cihaz",
+      "capacitySubmit": "Tutumu Yadda Saxla",
+      "saving": "Yadda saxlanılır…"
+    }
+  },
+  "push": {
+    "enable": "Brauzer bildirişlərini aktivləşdir",
+    "disable": "Brauzer bildirişlərini bağla",
+    "deniedHint": "Bildirişlər brauzerinizdə bloklanıb. Aktivləşdirmək üçün sayt icazələrini yoxlayın."
   }
 }

@@ -189,6 +189,7 @@ export async function getOrganizationAdminDetail(id: string) {
           expenseCategories: true,
         },
       },
+      partner: { select: { id: true, name: true, code: true } },
     },
   });
 }
@@ -197,6 +198,23 @@ export async function listActivePlans(currency = 'TRY') {
   return prisma.plan.findMany({
     where: { isActive: true, currency },
     orderBy: { sortOrder: 'asc' },
+  });
+}
+
+export async function listActivePartners() {
+  return prisma.partner.findMany({
+    where: { isActive: true },
+    orderBy: { name: 'asc' },
+  });
+}
+
+export async function listAllPartners() {
+  return prisma.partner.findMany({
+    include: {
+      user: { select: { email: true, lastLoginAt: true } },
+      organizations: { select: { id: true, name: true } },
+    },
+    orderBy: { createdAt: 'desc' },
   });
 }
 

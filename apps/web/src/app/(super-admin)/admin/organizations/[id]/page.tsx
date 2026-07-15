@@ -1,6 +1,7 @@
 import { AdminBadge } from '@/components/admin/admin-badge';
 import { BillingRequestActions } from '@/components/admin/billing-request-actions';
 import { CopyEmailBlock } from '@/components/admin/copy-email-block';
+import { OrganizationPartnerPanel } from '@/components/admin/organization-partner-panel';
 import { OrganizationProfileForm } from '@/components/admin/organization-profile-form';
 import { OrganizationQuickActions } from '@/components/admin/organization-quick-actions';
 import { OrganizationSubscriptionPanel } from '@/components/admin/organization-subscription-panel';
@@ -17,7 +18,7 @@ import {
   subscriptionTone,
 } from '@/lib/admin/format';
 import { parseBillingSettings } from '@/lib/billing/settings';
-import { getOrganizationAdminDetail, listActivePlans } from '@/lib/admin/queries';
+import { getOrganizationAdminDetail, listActivePartners, listActivePlans } from '@/lib/admin/queries';
 import { siteConfig } from '@/lib/site-config';
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
@@ -36,9 +37,10 @@ export default async function AdminOrganizationDetailPage({
   const { id } = await params;
   const tAdmin = await getTranslations('admin');
 
-  const [org, plans] = await Promise.all([
+  const [org, plans, partners] = await Promise.all([
     getOrganizationAdminDetail(id),
     listActivePlans(),
+    listActivePartners(),
   ]);
 
   if (!org) {
@@ -156,6 +158,11 @@ export default async function AdminOrganizationDetailPage({
               : null
           }
           isTrialing={isTrialing}
+        />
+        <OrganizationPartnerPanel
+          organizationId={org.id}
+          currentPartnerId={org.partner?.id ?? null}
+          partners={partners}
         />
       </section>
 

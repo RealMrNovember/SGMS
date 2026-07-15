@@ -741,6 +741,7 @@
     "communicationsTitle": "İletişim şablonları",
     "communicationsSubtitle": "Müşteri iletişimi için hazır e-posta metinleri. Müşteri detay sayfasında kişiselleştirilmiş sürümler kullanılır.",
     "plansNav": "SaaS Paketleri",
+    "partnersNav": "Temsilciler",
     "plansTitle": "SaaS Paket Yönetimi",
     "plansSubtitle": "Deneme ve ücretli abonelik fiyatlarını, limitleri ve görünürlüğü buradan düzenleyin.",
     "billingRequestsTitle": "Ödeme talepleri",
@@ -936,5 +937,53 @@
         "description": "PT, resepsiyon, sporcu ve salon sahibi için ayrı ayrı hazırlanmış detaylı kullanım rehberleri."
       }
     }
+  },
+  "partner": {
+    "badge": "Temsilci Paneli",
+    "nav": {
+      "dashboard": "Salonlarım"
+    },
+    "dashboardTitle": "Getirdiğiniz salonlar",
+    "dashboardSubtitle": "Sizin üzerinizden kaydolan salonların üyelik süresi, indirimi ve kapasitesini buradan yönetebilirsiniz.",
+    "empty": {
+      "title": "Henüz size atanmış bir salon yok",
+      "subtitle": "Bir müşteri kaydolurken sizi yönlendiren olarak belirttiğinde, Master Admin onayının ardından burada görünecek."
+    },
+    "table": {
+      "company": "Firma",
+      "owner": "Sahibi",
+      "plan": "Plan",
+      "members": "Üye",
+      "manage": "Yönet"
+    },
+    "detail": {
+      "owner": "Sahibi",
+      "plan": "Plan",
+      "status": "Durum",
+      "members": "Üye kullanımı",
+      "trialTitle": "Üyelik / Deneme Süresi",
+      "trialHint": "Müşterinizin süresini kendi yetkiniz dahilinde (en fazla 30 gün) uzatabilirsiniz.",
+      "trialCurrentEnd": "Mevcut bitiş",
+      "trialDaysLabel": "Kaç gün uzatılsın?",
+      "trialSubmit": "Süreyi Uzat",
+      "discountTitle": "Özel İndirim",
+      "discountHint": "Bu salona özel bir indirim oranı tanımlayın (en fazla %30).",
+      "discountPercentLabel": "İndirim oranı (%)",
+      "discountNoteLabel": "Not (opsiyonel)",
+      "discountNotePlaceholder": "Örn. Kayıt kampanyası indirimi",
+      "discountSubmit": "İndirimi Kaydet",
+      "capacityTitle": "Ek Kapasite",
+      "capacityHint": "Plan limitinin üzerine bu salona özel ek kapasite tanımlayın.",
+      "capacityMembersLabel": "Ek üye",
+      "capacityStaffLabel": "Ek personel",
+      "capacityDevicesLabel": "Ek cihaz",
+      "capacitySubmit": "Kapasiteyi Kaydet",
+      "saving": "Kaydediliyor…"
+    }
+  },
+  "push": {
+    "enable": "Tarayıcı bildirimlerini etkinleştir",
+    "disable": "Tarayıcı bildirimlerini kapat",
+    "deniedHint": "Bildirimler tarayıcı ayarlarından engellenmiş. Etkinleştirmek için tarayıcı site izinlerini kontrol edin."
   }
 }

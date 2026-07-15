@@ -12,7 +12,8 @@ export type AuditCategory =
   | 'checkin'
   | 'auth'
   | 'security'
-  | 'settings';
+  | 'settings'
+  | 'partner';
 
 export const AUDIT_CATEGORY_ACTIONS: Record<Exclude<AuditCategory, 'all'>, AuditAction[]> = {
   organization: ['ORGANIZATION_CREATED', 'ORGANIZATION_UPDATED'],
@@ -48,6 +49,17 @@ export const AUDIT_CATEGORY_ACTIONS: Record<Exclude<AuditCategory, 'all'>, Audit
     'PASSWORD_RESET_COMPLETED',
   ],
   settings: ['SETTINGS_CHANGED'],
+  partner: [
+    'PARTNER_CREATED',
+    'PARTNER_UPDATED',
+    'PARTNER_ASSIGNED',
+    'PARTNER_UNASSIGNED',
+    'PARTNER_DISCOUNT_UPDATED',
+    'PARTNER_CAPACITY_ADJUSTED',
+    'PARTNER_TRIAL_EXTENDED',
+    'PUSH_SUBSCRIBED',
+    'PUSH_UNSUBSCRIBED',
+  ],
 };
 
 export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
@@ -89,6 +101,15 @@ export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   SETTINGS_CHANGED: 'Ayar değişikliği',
   AUDIT_LOG_DELETED: 'Denetim kaydı silindi',
   MESSAGE_REPORTED: 'Mesaj şikayeti',
+  PARTNER_CREATED: 'Temsilci oluşturuldu',
+  PARTNER_UPDATED: 'Temsilci güncellendi',
+  PARTNER_ASSIGNED: 'Temsilci salona atandı',
+  PARTNER_UNASSIGNED: 'Temsilci ataması kaldırıldı',
+  PARTNER_DISCOUNT_UPDATED: 'Temsilci indirimi güncellendi',
+  PARTNER_CAPACITY_ADJUSTED: 'Temsilci ek kapasite tanımladı',
+  PARTNER_TRIAL_EXTENDED: 'Temsilci deneme süresini uzattı',
+  PUSH_SUBSCRIBED: 'Tarayıcı bildirimi etkinleştirildi',
+  PUSH_UNSUBSCRIBED: 'Tarayıcı bildirimi kapatıldı',
 };
 
 export const ALL_AUDIT_ACTIONS = Object.keys(AUDIT_ACTION_LABELS) as AuditAction[];
@@ -106,6 +127,7 @@ export const AUDIT_CATEGORY_LABELS: Record<AuditCategory, string> = {
   auth: 'Oturum',
   security: 'Güvenlik',
   settings: 'Ayarlar',
+  partner: 'Temsilci',
 };
 
 export const LOGIN_FAILURE_LABELS: Record<string, string> = {

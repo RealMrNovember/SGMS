@@ -807,5 +807,53 @@
         "description": "Des guides détaillés dédiés aux coachs, à l'accueil, aux membres et aux propriétaires de salle."
       }
     }
+  },
+  "partner": {
+    "badge": "Portail Partenaire",
+    "nav": {
+      "dashboard": "Mes Salles"
+    },
+    "dashboardTitle": "Salles que vous avez parrainées",
+    "dashboardSubtitle": "Gérez la période d'essai, la remise et la capacité des salles inscrites via vous.",
+    "empty": {
+      "title": "Aucune salle ne vous est encore assignée",
+      "subtitle": "Lorsqu'un client vous indique comme parrain et que l'administrateur principal le confirme, elle apparaîtra ici."
+    },
+    "table": {
+      "company": "Entreprise",
+      "owner": "Propriétaire",
+      "plan": "Forfait",
+      "members": "Membres",
+      "manage": "Gérer"
+    },
+    "detail": {
+      "owner": "Propriétaire",
+      "plan": "Forfait",
+      "status": "Statut",
+      "members": "Utilisation des membres",
+      "trialTitle": "Abonnement / Période d'essai",
+      "trialHint": "Prolongez l'essai de votre client dans les limites de votre autorité (jusqu'à 30 jours).",
+      "trialCurrentEnd": "Fin actuelle",
+      "trialDaysLabel": "Prolonger de combien de jours ?",
+      "trialSubmit": "Prolonger l'essai",
+      "discountTitle": "Remise Personnalisée",
+      "discountHint": "Définissez un taux de remise spécifique à cette salle (jusqu'à 30 %).",
+      "discountPercentLabel": "Taux de remise (%)",
+      "discountNoteLabel": "Note (facultatif)",
+      "discountNotePlaceholder": "Ex. Remise de campagne d'inscription",
+      "discountSubmit": "Enregistrer la remise",
+      "capacityTitle": "Capacité Supplémentaire",
+      "capacityHint": "Accordez à cette salle une capacité supplémentaire au-delà de la limite de son forfait.",
+      "capacityMembersLabel": "Membres supplémentaires",
+      "capacityStaffLabel": "Personnel supplémentaire",
+      "capacityDevicesLabel": "Appareils supplémentaires",
+      "capacitySubmit": "Enregistrer la capacité",
+      "saving": "Enregistrement…"
+    }
+  },
+  "push": {
+    "enable": "Activer les notifications du navigateur",
+    "disable": "Désactiver les notifications du navigateur",
+    "deniedHint": "Les notifications sont bloquées dans votre navigateur. Vérifiez les autorisations du site pour les activer."
   }
 }

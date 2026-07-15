@@ -108,6 +108,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 organization: { select: { name: true } },
               },
             },
+            partnerProfile: {
+              select: { id: true, isActive: true },
+            },
           },
         });
 
@@ -182,12 +185,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           }
         }
 
+        const activePartnerProfile =
+          user.isPartner && user.partnerProfile?.isActive ? user.partnerProfile : null;
+
         return {
           id: user.id,
           email: user.email,
           name: user.name,
           isSuperAdmin: user.isSuperAdmin,
           isDemo: user.isDemo,
+          isPartner: Boolean(activePartnerProfile),
+          partnerId: activePartnerProfile?.id ?? null,
           organizationId: membership?.organizationId ?? gymMember?.organizationId ?? null,
           organizationName:
             membership?.organization.name ?? gymMember?.organization.name ?? null,

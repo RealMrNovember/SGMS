@@ -1,7 +1,38 @@
 import { verifyCheckInQrToken } from '@/lib/check-in/qr-token';
 import { publishCheckInEvent, type CheckInCreatedPayload } from '@/lib/realtime/hub';
+import { sendPushToUsers } from '@/lib/push/send';
 import { prisma } from '@/lib/prisma';
 import type { AccessDirection, AccessSubjectType, CheckInMethod, OrganizationRole } from '@sgms/database';
+
+const RECEPTION_PUSH_ROLES: OrganizationRole[] = ['OWNER', 'ADMIN', 'STAFF', 'TRAINER'];
+
+/** Resepsiyon rolündeki personele salon girişi/çıkışı bildirimi gönderir — masaüstü/mobil
+ * uygulama şart değil, tarayıcı push aboneliği yeterli. */
+async function notifyReceptionOfCheckIn(
+  organizationId: string,
+  payload: CheckInCreatedPayload,
+): Promise<void> {
+  try {
+    const staff = await prisma.organizationMember.findMany({
+      where: { organizationId, isActive: true, role: { in: RECEPTION_PUSH_ROLES } },
+      select: { userId: true },
+    });
+    if (staff.length === 0) return;
+
+    const directionLabel = payload.direction === 'ENTRY' ? 'girişi' : 'çıkışı';
+    await sendPushToUsers(
+      staff.map((s) => s.userId),
+      {
+        title: `Salon ${directionLabel}`,
+        body: `${payload.personName} salona ${directionLabel === 'girişi' ? 'girdi' : 'çıktı'}.`,
+        url: '/dashboard/check-in',
+        tag: 'sgms-checkin',
+      },
+    );
+  } catch (error) {
+    console.error('[push] check-in notify failed:', error);
+  }
+}
 
 export type ProcessCheckInInput = {
   organizationId: string;
@@ -378,6 +409,10 @@ export async function processCheckIn(input: ProcessCheckInInput): Promise<Proces
       organizationId: input.organizationId,
       checkIn: payload,
     });
+  }
+
+  if (subject.subjectType === 'GYM_MEMBER') {
+    void notifyReceptionOfCheckIn(input.organizationId, payload);
   }
 
   return {

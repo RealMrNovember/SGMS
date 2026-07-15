@@ -25,9 +25,12 @@ function withLocaleCookie(request: NextRequest, response: NextResponse) {
   return response;
 }
 
-function defaultDestination(isSuperAdmin: boolean, isAthlete: boolean) {
+function defaultDestination(isSuperAdmin: boolean, isPartner: boolean, isAthlete: boolean) {
   if (isSuperAdmin) {
     return '/admin';
+  }
+  if (isPartner) {
+    return '/partner';
   }
   if (isAthlete) {
     return '/athlete';
@@ -42,6 +45,7 @@ function isAthleteSession(auth: { user?: { gymMemberId?: string | null; role?: s
 export default auth((request) => {
   const isLoggedIn = !!request.auth;
   const isSuperAdmin = request.auth?.user?.isSuperAdmin === true;
+  const isPartner = request.auth?.user?.isPartner === true;
   const isAthlete = isAthleteSession(request.auth);
   const { pathname } = request.nextUrl;
 
@@ -71,7 +75,9 @@ export default auth((request) => {
   if (isLoggedIn && pathname === '/login') {
     return withLocaleCookie(
       request,
-      NextResponse.redirect(new URL(defaultDestination(isSuperAdmin, isAthlete), request.nextUrl.origin)),
+      NextResponse.redirect(
+        new URL(defaultDestination(isSuperAdmin, isPartner, isAthlete), request.nextUrl.origin),
+      ),
     );
   }
 
@@ -93,6 +99,20 @@ export default auth((request) => {
     return withLocaleCookie(
       request,
       NextResponse.redirect(new URL('/dashboard', request.nextUrl.origin)),
+    );
+  }
+
+  if (isLoggedIn && pathname.startsWith('/partner') && !isPartner) {
+    return withLocaleCookie(
+      request,
+      NextResponse.redirect(new URL('/dashboard', request.nextUrl.origin)),
+    );
+  }
+
+  if (isLoggedIn && (pathname.startsWith('/dashboard') || pathname.startsWith('/athlete')) && isPartner) {
+    return withLocaleCookie(
+      request,
+      NextResponse.redirect(new URL('/partner', request.nextUrl.origin)),
     );
   }
 
