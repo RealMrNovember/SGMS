@@ -49,6 +49,8 @@ export default async function TenantDashboardLayout({ children }: { children: Re
         },
       });
 
+  const canViewReports = session.user.role === 'OWNER' || session.user.role === 'ADMIN';
+
   const navItems = locked
     ? [{ href: '/dashboard/billing', label: tBilling('nav') }]
     : [
@@ -60,6 +62,7 @@ export default async function TenantDashboardLayout({ children }: { children: Re
         { href: '/dashboard/messages', label: t('messages'), badge: unreadMessages },
         { href: '/dashboard/check-in', label: t('checkIn') },
         { href: '/dashboard/pos', label: t('pos') },
+        ...(canViewReports ? [{ href: '/dashboard/reports', label: t('reports') }] : []),
         { href: '/dashboard/team', label: t('team') },
         { href: '/dashboard/settings', label: t('settings') },
         { href: '/dashboard/billing', label: tBilling('nav') },
@@ -69,7 +72,7 @@ export default async function TenantDashboardLayout({ children }: { children: Re
   const comingSoonItems = locked
     ? []
     : (
-        ['hr', 'equipment', 'cashShifts', 'notifications', 'reports', 'insights'] as const
+        ['hr', 'equipment', 'cashShifts', 'notifications', 'insights'] as const
       ).map((feature) => ({
         href: `/dashboard/coming-soon/${feature}`,
         label: tComingSoon(`features.${feature}.title`),

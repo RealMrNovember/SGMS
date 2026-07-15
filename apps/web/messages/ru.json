@@ -29,6 +29,7 @@
     "messages": "Сообщения",
     "team": "Персонал",
     "pos": "Касса",
+    "reports": "Отчёты",
     "adminOverview": "Обзор системы",
     "newCustomer": "Новый клиент",
     "comingSoonGroup": "Скоро"
@@ -591,6 +592,11 @@
           "title": "POS & Member Accounts",
           "description": "Market, café and extra session charges. Collections, daily cash summary and balances."
         },
+        "reports": {
+          "icon": "📊",
+          "title": "Расширенная аналитика и BI",
+          "description": "Тренды посещаемости, часы пик, самые продаваемые тренеры/товары и метрики вроде MRR, LTV и доли продлений."
+        },
         "i18n": {
           "icon": "🌍",
           "title": "6 Languages",
@@ -928,6 +934,61 @@
         "CANCELED_BY_TRAINER": "Отменил тренер",
         "NO_SHOW": "Неявка"
       }
+    }
+  },
+  "reports": {
+    "title": "Расширенная аналитика и BI",
+    "subtitle": "Тренды посещаемости, часы пик, самые продаваемые тренеры/товары и бизнес-метрики абонементов на одном экране.",
+    "export": "Экспорт в CSV",
+    "empty": "Нет данных за этот период.",
+    "range": {
+      "7d": "Последние 7 дней",
+      "30d": "Последние 30 дней",
+      "90d": "Последние 90 дней",
+      "month": "Этот месяц"
+    },
+    "kpi": {
+      "activeMembers": "Активные участники",
+      "newMembers": "Новые участники",
+      "churned": "Потерянные участники",
+      "renewalRate": "Доля продлений",
+      "expiredInPeriod": "У {count} абонементов истёк срок за этот период",
+      "mrr": "Ежемесячный регулярный доход (MRR)",
+      "avgTenure": "Средний срок абонемента",
+      "months": "{count} мес.",
+      "ltv": "Оценочная пожизненная ценность (LTV)",
+      "totalVisits": "Всего посещений"
+    },
+    "dailyVisitors": {
+      "title": "Дневной тренд посещаемости",
+      "colDate": "Дата",
+      "colCount": "Посещения"
+    },
+    "busiestHours": {
+      "title": "Часы пик"
+    },
+    "busiestDays": {
+      "title": "Самые загруженные дни"
+    },
+    "weekday": {
+      "sun": "Воскресенье",
+      "mon": "Понедельник",
+      "tue": "Вторник",
+      "wed": "Среда",
+      "thu": "Четверг",
+      "fri": "Пятница",
+      "sat": "Суббота"
+    },
+    "topTrainers": {
+      "title": "Тренеры с наибольшим доходом",
+      "colName": "Тренер",
+      "colSessions": "Занятия",
+      "colRevenue": "Выручка"
+    },
+    "topCategories": {
+      "title": "Самые продаваемые категории",
+      "colName": "Категория",
+      "colRevenue": "Выручка"
     }
   }
 }

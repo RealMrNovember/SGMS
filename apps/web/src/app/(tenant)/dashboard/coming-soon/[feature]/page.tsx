@@ -10,7 +10,6 @@ const FEATURE_ICONS: Record<string, string> = {
   cashShifts: '💵',
   digitalCard: '📱',
   notifications: '🔔',
-  reports: '📊',
   insights: '🤖',
   enterprise: '🏢',
   integrations: '🔌',

@@ -29,6 +29,7 @@
     "messages": "Mesajlar",
     "team": "Personal",
     "pos": "Kassa",
+    "reports": "Hesabatlar",
     "adminOverview": "Sistem icmalı",
     "newCustomer": "Yeni müştəri",
     "comingSoonGroup": "Tezliklə"
@@ -591,6 +592,11 @@
           "title": "POS & Member Accounts",
           "description": "Market, café and extra session charges. Collections, daily cash summary and balances."
         },
+        "reports": {
+          "icon": "📊",
+          "title": "Ətraflı Hesabat & Biznes Analitikası",
+          "description": "Ziyarətçi tendensiyası, yoğunluq saatları, ən çox satan PT/məhsul və MRR/LTV/yeniləmə nisbəti kimi üzvlük metrikaları."
+        },
         "i18n": {
           "icon": "🌍",
           "title": "6 Languages",
@@ -928,6 +934,61 @@
         "CANCELED_BY_TRAINER": "Məşqçi Ləğv Etdi",
         "NO_SHOW": "Gəlmədi"
       }
+    }
+  },
+  "reports": {
+    "title": "Ətraflı Hesabat & Biznes Analitikası",
+    "subtitle": "Ziyarətçi tendensiyası, yoğunluq saatları, ən çox satan PT/məhsul və üzvlük biznes metrikaları bir ekranda.",
+    "export": "CSV Yüklə",
+    "empty": "Bu dövr üçün məlumat yoxdur.",
+    "range": {
+      "7d": "Son 7 gün",
+      "30d": "Son 30 gün",
+      "90d": "Son 90 gün",
+      "month": "Bu ay"
+    },
+    "kpi": {
+      "activeMembers": "Aktiv Üzv",
+      "newMembers": "Yeni Üzv",
+      "churned": "İtirilən Üzv",
+      "renewalRate": "Yeniləmə Nisbəti",
+      "expiredInPeriod": "{count} üzvlüyün müddəti bu dövrdə bitdi",
+      "mrr": "Aylıq Təkrarlanan Gəlir (MRR)",
+      "avgTenure": "Orta Üzvlük Müddəti",
+      "months": "{count} ay",
+      "ltv": "Təxmini Ömür Boyu Dəyər (LTV)",
+      "totalVisits": "Ümumi Ziyarət"
+    },
+    "dailyVisitors": {
+      "title": "Günlük Ziyarətçi Tendensiyası",
+      "colDate": "Tarix",
+      "colCount": "Ziyarət"
+    },
+    "busiestHours": {
+      "title": "Yoğunluq Saatları"
+    },
+    "busiestDays": {
+      "title": "Ən Yoğun Günlər"
+    },
+    "weekday": {
+      "sun": "Bazar",
+      "mon": "Bazar ertəsi",
+      "tue": "Çərşənbə axşamı",
+      "wed": "Çərşənbə",
+      "thu": "Cümə axşamı",
+      "fri": "Cümə",
+      "sat": "Şənbə"
+    },
+    "topTrainers": {
+      "title": "Ən Çox Gəlir Gətirən PT'lər",
+      "colName": "PT",
+      "colSessions": "Seans",
+      "colRevenue": "Gəlir"
+    },
+    "topCategories": {
+      "title": "Ən Çox Satılan Kateqoriyalar",
+      "colName": "Kateqoriya",
+      "colRevenue": "Gəlir"
     }
   }
 }

@@ -29,6 +29,7 @@
     "messages": "Mensajes",
     "team": "Personal",
     "pos": "Caja",
+    "reports": "Informes",
     "adminOverview": "Resumen del sistema",
     "newCustomer": "Nuevo cliente",
     "comingSoonGroup": "Próximamente"
@@ -591,6 +592,11 @@
           "title": "POS & Member Accounts",
           "description": "Market, café and extra session charges. Collections, daily cash summary and balances."
         },
+        "reports": {
+          "icon": "📊",
+          "title": "Informes Avanzados y BI",
+          "description": "Tendencias de visitantes, horas pico, entrenadores/productos más vendidos y métricas como MRR, LTV y tasa de renovación."
+        },
         "i18n": {
           "icon": "🌍",
           "title": "6 Languages",
@@ -928,6 +934,61 @@
         "CANCELED_BY_TRAINER": "Cancelado por el Entrenador",
         "NO_SHOW": "No asistió"
       }
+    }
+  },
+  "reports": {
+    "title": "Informes Avanzados y BI",
+    "subtitle": "Tendencias de visitantes, horas pico, entrenadores/productos más vendidos y métricas de negocio de membresías en una pantalla.",
+    "export": "Exportar CSV",
+    "empty": "No hay datos para este período.",
+    "range": {
+      "7d": "Últimos 7 días",
+      "30d": "Últimos 30 días",
+      "90d": "Últimos 90 días",
+      "month": "Este mes"
+    },
+    "kpi": {
+      "activeMembers": "Miembros Activos",
+      "newMembers": "Nuevos Miembros",
+      "churned": "Miembros Perdidos",
+      "renewalRate": "Tasa de Renovación",
+      "expiredInPeriod": "{count} membresías vencieron este período",
+      "mrr": "Ingreso Recurrente Mensual (MRR)",
+      "avgTenure": "Antigüedad Promedio",
+      "months": "{count} meses",
+      "ltv": "Valor de Vida Estimado (LTV)",
+      "totalVisits": "Visitas Totales"
+    },
+    "dailyVisitors": {
+      "title": "Tendencia Diaria de Visitantes",
+      "colDate": "Fecha",
+      "colCount": "Visitas"
+    },
+    "busiestHours": {
+      "title": "Horas Pico"
+    },
+    "busiestDays": {
+      "title": "Días Más Concurridos"
+    },
+    "weekday": {
+      "sun": "Domingo",
+      "mon": "Lunes",
+      "tue": "Martes",
+      "wed": "Miércoles",
+      "thu": "Jueves",
+      "fri": "Viernes",
+      "sat": "Sábado"
+    },
+    "topTrainers": {
+      "title": "Entrenadores con Más Ingresos",
+      "colName": "Entrenador",
+      "colSessions": "Sesiones",
+      "colRevenue": "Ingresos"
+    },
+    "topCategories": {
+      "title": "Categorías Más Vendidas",
+      "colName": "Categoría",
+      "colRevenue": "Ingresos"
     }
   }
 }

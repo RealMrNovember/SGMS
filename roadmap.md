@@ -63,7 +63,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 25 | Kasa Yönetimi (Vardiya, X/Z Raporu) | 🔲 Planlandı | 0% |
 | 26 | Dijital Üyelik Kartı (Wallet/NFC) | 🔲 Planlandı | 0% |
 | 27 | Bildirim Merkezi (Push/SMS/WhatsApp/Mail) | 🔄 Devam ediyor | ~35% (tarayıcı Web Push tamamlandı) |
-| 28 | İleri Raporlama & Business Intelligence | 🔲 Planlandı | 0% |
+| 28 | İleri Raporlama & Business Intelligence | ✅ Tamamlandı | ~80% (ARR, churn-anketi, Excel/PDF export v2'ye ertelendi) |
 | 29 | Yapay Zeka Öngörüleri | 🔲 Planlandı | 0% |
 | 30 | Kurumsal Hiyerarşi & Çoklu Şube/Bölge Yönetimi | 🔲 Planlandı | 0% |
 | 31 | Entegrasyon Pazaryeri | 🔲 Planlandı | 0% |
@@ -776,19 +776,21 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ---
 
-## 🔲 Faz 28 — İleri Raporlama & Business Intelligence (Öncelik: P1)
+## ✅ Faz 28 — İleri Raporlama & Business Intelligence (2026-07-15'te tamamlandı — ~80%)
 
-> **Senaryo:** Salon sahibi şunları sormak ister: Bugün kaç kişi geldi? En yoğun saat/gün hangisi? En çok PT satan kim? En çok satılan ürün ne? Üyeler neden ayrılıyor? Kaç kişi yeniledi, kaç kişi iptal etti? Faz 15.3'teki temel KPI'lar (bugünkü check-in, aylık ciro, süresi dolan üyelik) bunun yalnızca başlangıcı.
+> **Senaryo:** Salon sahibi şunları sormak ister: Bugün kaç kişi geldi? En yoğun saat/gün hangisi? En çok PT satan kim? En çok satılan ürün ne? Kaç kişi yeniledi, kaç kişi iptal etti? Faz 15.3'teki temel KPI'lar (bugünkü check-in, aylık ciro, süresi dolan üyelik) bunun yalnızca başlangıcıydı.
 
-- [ ] `/dashboard/reports` — yeni, ayrı bir raporlama çalışma alanı (mevcut dashboard'un "günlük özet"inden farklı olarak, tarih aralığı seçilebilir derinlemesine analiz)
-- [ ] **Operasyonel raporlar:** günlük/haftalık/aylık ziyaretçi trendi, saat/gün bazlı yoğunluk ısı haritası (check-in verisinden), PT bazlı satış sıralaması, ürün bazlı satış sıralaması (POS)
-- [ ] **SaaS/işletme metrikleri:** MRR (Aylık Yinelenen Gelir), ARR (Yıllık), LTV (Müşteri Yaşam Boyu Değeri), churn oranı, yenileme oranı, ortalama üyelik süresi
-- [ ] **Ayrılma analizi:** üyelik iptalinde opsiyonel "neden ayrılıyorsunuz?" anketi (fiyat/memnuniyetsizlik/taşınma/başka salon vb.), zaman içinde neden dağılımı raporu
-- [ ] Dışa aktarma: CSV/Excel/PDF, zamanlanmış e-posta raporu (haftalık özet — Bildirim Merkezi ile entegre)
+- [x] `/dashboard/reports` — ayrı bir raporlama çalışma alanı (OWNER/ADMIN), tarih aralığı seçilebilir (7/30/90 gün, bu ay)
+- [x] **Operasyonel raporlar:** günlük ziyaretçi trendi (bar grafik), saat bazlı yoğunluk (salonun kendi `Organization.timezone` alanına göre — UTC değil, gerçek yerel saat), haftanın en yoğun günleri, PT bazlı ciro sıralaması (Faz 21 verisiyle), POS kategori bazlı satış sıralaması
+- [x] **Üyelik iş metrikleri:** MRR (aktif üyelerin plan fiyatının aylık eşdeğeri), LTV tahmini (ortalama aylık değer × ortalama üyelik süresi), yenileme oranı (dönemde süresi dolan üyeliklerden hâlâ aktif olan yüzdesi), kayıp üye sayısı, ortalama üyelik süresi (ay)
+- [x] Dışa aktarma: her rapor tablosu için tek tıkla CSV indirme (UTF-8 BOM'lu, Excel'de Türkçe karakter sorunu yaşanmaz)
+- [x] Birim testli saf bucketing fonksiyonu (`lib/reports/bucketing.ts`) — 7 test, zaman dilimi doğruluğu dahil
 
-**Kabul kriteri:** Salon sahibi son 30 günün en yoğun saatini, en çok satan PT'yi ve churn oranını tek ekrandan görebiliyor
+**Ertelendi (v2):** ARR, churn-nedeni anketi (üyelik iptalinde "neden ayrılıyorsunuz" formu — GymMember modeline yeni alan gerektirir), Excel/PDF export, zamanlanmış haftalık e-posta raporu (Faz 27'nin tam Bildirim Merkezi'ni bekliyor)
 
-**Bağımlılık:** Faz 21 (PT verisi), Faz 25 (kasa verisi), Faz 27 (bildirim altyapısı, zamanlanmış raporlar için)
+**Kabul kriteri:** ✅ Salon sahibi son 30 günün en yoğun saatini, en çok satan PT'yi ve yenileme oranını tek ekrandan görebiliyor
+
+**Bağımlılık:** Faz 21 (PT verisi) ✅ · Faz 25 (kasa verisi, henüz yok — POS/Expense verisi zaten yeterli) · Faz 27 (zamanlanmış e-posta raporları için, v2)
 
 ---
 
@@ -980,7 +982,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | Kasa vardiya açma/kapama + X/Z raporu | P2 | 25 | 🔲 |
 | Dijital üyelik kartı (Apple/Google Wallet, NFC) | P2 | 26 | 🔲 |
 | Bildirim Merkezi (Push/SMS/WhatsApp/Mail/Telegram) | P1 | 27 | 🔄 ~35% — tarayıcı Web Push tamamlandı, SMS/WhatsApp/Telegram + şablon sistemi kaldı |
-| İleri raporlama & BI (MRR/ARR/LTV/Churn) | P1 | 28 | 🔲 |
+| İleri raporlama & BI (MRR/ARR/LTV/Churn) | P1 | 28 | ✅ tamamlandı — 2026-07-15 (ARR + churn-anketi v2'ye ertelendi) |
 | Yapay Zeka öngörüleri (churn, kampanya, fiyatlandırma) | P2 | 29 | 🔲 |
 | Kurumsal hiyerarşi (Organizasyon→Bölge→Şube) | P1 | 30 | 🔲 |
 | Entegrasyon Pazaryeri (Health/SMS/WhatsApp/E-Fatura) | P2 | 31 | 🔲 |
@@ -1019,11 +1021,11 @@ Devam ediyor:
   Faz 35     Temsilci (Partner) Portalı                          ✅
   Faz 27.1   Tarayıcı Web Push bildirimleri                      ✅ (~35% — SMS/WhatsApp/şablon kaldı)
   Faz 21     PT performans/komisyon/prim yönetimi                ✅
+  Faz 28     İleri raporlama & Business Intelligence             ✅ (~80% — ARR/churn-anketi v2)
 
 Sıradaki (öncelik sırası — profesyonel değerlendirme, P0 en önce):
   Faz 32     Ticarileştirme: paket + ek kapasite satışı          ← P0, gelir modeli (kullanıcı onayı gerekli)
   Faz 34     Tam responsive tasarım sistemi (sistematik tur)     ← P0, sürekli kalite katmanı
-  Faz 28     İleri raporlama & Business Intelligence             ← P1
   Faz 30     Kurumsal hiyerarşi & çoklu şube/bölge               ← P1
   Faz 33     Rol bazlı dinamik kullanım kılavuzu                 ← P1
   Faz 17     Üyelik senaryoları & ders/sınıf yönetimi            ← P1

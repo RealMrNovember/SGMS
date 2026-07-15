@@ -29,6 +29,7 @@
     "messages": "Messages",
     "team": "Personnel",
     "pos": "Caisse",
+    "reports": "Rapports",
     "adminOverview": "Vue système",
     "newCustomer": "Nouveau client",
     "comingSoonGroup": "Bientôt disponible"
@@ -591,6 +592,11 @@
           "title": "POS & Member Accounts",
           "description": "Market, café and extra session charges. Collections, daily cash summary and balances."
         },
+        "reports": {
+          "icon": "📊",
+          "title": "Rapports Avancés et BI",
+          "description": "Tendances de visiteurs, heures de pointe, coachs/produits les plus vendus et indicateurs comme le MRR, le LTV et le taux de renouvellement."
+        },
         "i18n": {
           "icon": "🌍",
           "title": "6 Languages",
@@ -928,6 +934,61 @@
         "CANCELED_BY_TRAINER": "Annulé par le Coach",
         "NO_SHOW": "Absence"
       }
+    }
+  },
+  "reports": {
+    "title": "Rapports Avancés et BI",
+    "subtitle": "Tendances de visiteurs, heures de pointe, coachs/produits les plus vendus et indicateurs métier des abonnements, sur un seul écran.",
+    "export": "Exporter en CSV",
+    "empty": "Aucune donnée pour cette période.",
+    "range": {
+      "7d": "7 derniers jours",
+      "30d": "30 derniers jours",
+      "90d": "90 derniers jours",
+      "month": "Ce mois-ci"
+    },
+    "kpi": {
+      "activeMembers": "Membres Actifs",
+      "newMembers": "Nouveaux Membres",
+      "churned": "Membres Perdus",
+      "renewalRate": "Taux de Renouvellement",
+      "expiredInPeriod": "{count} abonnements ont expiré cette période",
+      "mrr": "Revenu Récurrent Mensuel (MRR)",
+      "avgTenure": "Ancienneté Moyenne",
+      "months": "{count} mois",
+      "ltv": "Valeur Vie Client Estimée (LTV)",
+      "totalVisits": "Visites Totales"
+    },
+    "dailyVisitors": {
+      "title": "Tendance Quotidienne des Visiteurs",
+      "colDate": "Date",
+      "colCount": "Visites"
+    },
+    "busiestHours": {
+      "title": "Heures de Pointe"
+    },
+    "busiestDays": {
+      "title": "Jours les Plus Fréquentés"
+    },
+    "weekday": {
+      "sun": "Dimanche",
+      "mon": "Lundi",
+      "tue": "Mardi",
+      "wed": "Mercredi",
+      "thu": "Jeudi",
+      "fri": "Vendredi",
+      "sat": "Samedi"
+    },
+    "topTrainers": {
+      "title": "Coachs les Plus Rentables",
+      "colName": "Coach",
+      "colSessions": "Séances",
+      "colRevenue": "Chiffre d'affaires"
+    },
+    "topCategories": {
+      "title": "Catégories les Plus Vendues",
+      "colName": "Catégorie",
+      "colRevenue": "Chiffre d'affaires"
     }
   }
 }

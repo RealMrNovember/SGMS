@@ -31,6 +31,7 @@
     "team": "Personel",
     "settings": "Ayarlar",
     "pos": "Kasa",
+    "reports": "Raporlar",
     "adminOverview": "Sistem Özeti",
     "newCustomer": "Yeni Müşteri",
     "comingSoonGroup": "Yakında"
@@ -576,6 +577,7 @@
         "programs": { "icon": "🏋", "title": "Antrenman & Beslenme", "description": "PT atamaları, workout ve nutrition programları. Sporcu portalında anında erişim." },
         "pt": { "icon": "🥇", "title": "PT Performans & Prim Yönetimi", "description": "Antrenörlerin aylık seans sayısı, saati, cirosu ve komisyonu otomatik hesaplanır — iptal ve no-show oranıyla birlikte." },
         "pos": { "icon": "💳", "title": "POS & Cari Hesap", "description": "Market, kafe, ekstra ders borçları. Tahsilat, kasa özeti ve üye bakiyesi tek ekranda." },
+        "reports": { "icon": "📊", "title": "İleri Raporlama & İş Zekası", "description": "Ziyaretçi trendi, yoğunluk saatleri, en çok satan PT/ürün ve MRR/LTV/yenileme oranı gibi üyelik iş metrikleri." },
         "i18n": { "icon": "🌍", "title": "6 Dil Desteği", "description": "TR, EN, RU, FR, ES, AZ — expat üyeler ve uluslararası zincirler için hazır." },
         "mobile": { "icon": "📱", "title": "Mobil API & Sporcu Portalı", "description": "Bearer token API, ölçüm/program/mesaj self-service. Mobil uygulama için hazır altyapı." },
         "realtime": { "icon": "⚡", "title": "Anlık Mesajlaşma", "description": "PT ↔ sporcu iletişimi. WebSocket (Soketi) ile anlık güncelleme; yapılandırılmazsa SSE yedek kanal." }
@@ -1054,6 +1056,61 @@
         "CANCELED_BY_TRAINER": "PT İptal Etti",
         "NO_SHOW": "Gelmedi (No-show)"
       }
+    }
+  },
+  "reports": {
+    "title": "İleri Raporlama & İş Zekası",
+    "subtitle": "Ziyaretçi trendi, yoğunluk saatleri, en çok satan PT/ürün ve üyelik iş metrikleri tek ekranda.",
+    "export": "CSV İndir",
+    "empty": "Bu dönem için veri yok.",
+    "range": {
+      "7d": "Son 7 gün",
+      "30d": "Son 30 gün",
+      "90d": "Son 90 gün",
+      "month": "Bu ay"
+    },
+    "kpi": {
+      "activeMembers": "Aktif Üye",
+      "newMembers": "Yeni Üye",
+      "churned": "Kaybedilen Üye",
+      "renewalRate": "Yenileme Oranı",
+      "expiredInPeriod": "{count} üyeliğin süresi bu dönemde doldu",
+      "mrr": "Aylık Yinelenen Gelir (MRR)",
+      "avgTenure": "Ortalama Üyelik Süresi",
+      "months": "{count} ay",
+      "ltv": "Tahmini Yaşam Boyu Değer (LTV)",
+      "totalVisits": "Toplam Ziyaret"
+    },
+    "dailyVisitors": {
+      "title": "Günlük Ziyaretçi Trendi",
+      "colDate": "Tarih",
+      "colCount": "Ziyaret"
+    },
+    "busiestHours": {
+      "title": "Yoğunluk Saatleri"
+    },
+    "busiestDays": {
+      "title": "En Yoğun Günler"
+    },
+    "weekday": {
+      "sun": "Pazar",
+      "mon": "Pazartesi",
+      "tue": "Salı",
+      "wed": "Çarşamba",
+      "thu": "Perşembe",
+      "fri": "Cuma",
+      "sat": "Cumartesi"
+    },
+    "topTrainers": {
+      "title": "En Çok Ciro Yapan PT'ler",
+      "colName": "PT",
+      "colSessions": "Seans",
+      "colRevenue": "Ciro"
+    },
+    "topCategories": {
+      "title": "En Çok Satan Kategoriler",
+      "colName": "Kategori",
+      "colRevenue": "Ciro"
     }
   }
 }

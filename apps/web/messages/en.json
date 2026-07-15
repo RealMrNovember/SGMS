@@ -31,6 +31,7 @@
     "team": "Staff",
     "settings": "Settings",
     "pos": "POS",
+    "reports": "Reports",
     "adminOverview": "System Overview",
     "newCustomer": "New Customer",
     "comingSoonGroup": "Coming Soon"
@@ -576,6 +577,7 @@
         "programs": { "icon": "🏋", "title": "Workout & Nutrition", "description": "PT assignments, workout and nutrition programs with instant athlete portal access." },
         "pt": { "icon": "🥇", "title": "PT Performance & Commission", "description": "Monthly session count, hours, revenue, and commission calculated automatically for every trainer — cancellation and no-show rate included." },
         "pos": { "icon": "💳", "title": "POS & Member Accounts", "description": "Market, café and extra session charges. Collections, daily cash summary and balances." },
+        "reports": { "icon": "📊", "title": "Advanced Reporting & BI", "description": "Visitor trends, busiest hours, top-selling trainers/products, and membership metrics like MRR, LTV, and renewal rate." },
         "i18n": { "icon": "🌍", "title": "6 Languages", "description": "TR, EN, RU, FR, ES, AZ — ready for expat members and international chains." },
         "mobile": { "icon": "📱", "title": "Mobile API & Athlete Portal", "description": "Bearer token API and self-service for measurements, programs and messages." },
         "realtime": { "icon": "⚡", "title": "Real-time Messaging", "description": "Coach ↔ athlete messaging with WebSocket (Soketi) live updates; SSE fallback when not configured." }
@@ -1051,6 +1053,61 @@
         "CANCELED_BY_TRAINER": "Trainer Canceled",
         "NO_SHOW": "No-show"
       }
+    }
+  },
+  "reports": {
+    "title": "Advanced Reporting & BI",
+    "subtitle": "Visitor trends, busiest hours, top-selling trainers/products, and membership business metrics on one screen.",
+    "export": "Export CSV",
+    "empty": "No data for this period.",
+    "range": {
+      "7d": "Last 7 days",
+      "30d": "Last 30 days",
+      "90d": "Last 90 days",
+      "month": "This month"
+    },
+    "kpi": {
+      "activeMembers": "Active Members",
+      "newMembers": "New Members",
+      "churned": "Churned Members",
+      "renewalRate": "Renewal Rate",
+      "expiredInPeriod": "{count} memberships expired this period",
+      "mrr": "Monthly Recurring Revenue (MRR)",
+      "avgTenure": "Average Tenure",
+      "months": "{count} months",
+      "ltv": "Estimated Lifetime Value (LTV)",
+      "totalVisits": "Total Visits"
+    },
+    "dailyVisitors": {
+      "title": "Daily Visitor Trend",
+      "colDate": "Date",
+      "colCount": "Visits"
+    },
+    "busiestHours": {
+      "title": "Busiest Hours"
+    },
+    "busiestDays": {
+      "title": "Busiest Days"
+    },
+    "weekday": {
+      "sun": "Sunday",
+      "mon": "Monday",
+      "tue": "Tuesday",
+      "wed": "Wednesday",
+      "thu": "Thursday",
+      "fri": "Friday",
+      "sat": "Saturday"
+    },
+    "topTrainers": {
+      "title": "Top-Earning Trainers",
+      "colName": "Trainer",
+      "colSessions": "Sessions",
+      "colRevenue": "Revenue"
+    },
+    "topCategories": {
+      "title": "Top-Selling Categories",
+      "colName": "Category",
+      "colRevenue": "Revenue"
     }
   }
 }
