@@ -27,7 +27,9 @@
     "programs": "Programmes",
     "trainers": "Performance des Coachs",
     "messages": "Messages",
+    "checkIn": "Entrée",
     "team": "Personnel",
+    "settings": "Paramètres",
     "pos": "Caisse",
     "reports": "Rapports",
     "enterprise": "Entreprise",
@@ -198,7 +200,8 @@
       "name": "Nom",
       "email": "E-mail",
       "role": "Rôle",
-      "joined": "Arrivée"
+      "joined": "Arrivée",
+      "rfid": "Carte tourniquet"
     },
     "invite": {
       "noPermission": "Le rôle OWNER ou ADMIN est requis pour inviter du personnel.",
@@ -306,7 +309,15 @@
       "roleStaff": "Personnel",
       "noMessagesYet": "Pas encore de messages"
     },
-    "markRead": "Marquer comme lu"
+    "markRead": "Marquer comme lu",
+    "report": {
+      "action": "Signaler",
+      "reasonLabel": "Motif",
+      "reasonPlaceholder": "Brève description…",
+      "submit": "Envoyer",
+      "submitting": "Envoi…",
+      "cancel": "Annuler"
+    }
   },
   "plans": {
     "backToOverview": "← Aperçu",
@@ -417,7 +428,8 @@
       "blockedWithDate": "La licence centrale est invalide ou expirée ({date}). Le panneau est en lecture seule ; aucune nouvelle donnée ni mise à jour.",
       "lastCheck": "Dernière vérification : {date}",
       "trial": "Vous êtes en essai de 14 jours. Choisissez un forfait pour continuer.",
-      "trialWithDate": "Vous êtes en essai de 14 jours — expire le {date}. Choisissez un forfait pour continuer."
+      "trialWithDate": "Vous êtes en essai de 14 jours — expire le {date}. Choisissez un forfait pour continuer.",
+      "billingLink": "Facturation & Paiement"
     },
     "hint": {
       "adminBlocked": "Licence centrale invalide — opérations d'écriture restreintes.",
@@ -541,7 +553,8 @@
       "login": "Sign in",
       "trial": "14-Day Trial",
       "loginShort": "Login",
-      "trialShort": "14 Days"
+      "trialShort": "14 Days",
+      "receptionDesktop": "Application Réception"
     },
     "hero": {
       "kicker": "Digital Gym Operating System",
@@ -767,7 +780,178 @@
     "auditTitle": "Audit log",
     "auditSubtitle": "Recent platform and customer events.",
     "communicationsTitle": "Communication templates",
-    "communicationsSubtitle": "Ready email copy for customer outreach. Customer detail pages use personalized versions."
+    "communicationsSubtitle": "Ready email copy for customer outreach. Customer detail pages use personalized versions.",
+    "auditSecurityNav": "Événements de sécurité",
+    "adminsNav": "Master Admins",
+    "adminsTitle": "Gestion des administrateurs principaux",
+    "adminsSubtitle": "Ajoutez, promouvez, réinitialisez les mots de passe ou révoquez des super-administrateurs de la plateforme. Chaque action est auditée.",
+    "adminsCardHint": "Ajoutez des administrateurs principaux et gérez les opérateurs existants de la plateforme.",
+    "auditCardHint": "Consultez tous les événements de la plateforme et des clients par catégorie.",
+    "auditCardMetric": "Audit catégorisé",
+    "auditSecurityCardHint": "Échecs de connexion, accès refusés et erreurs API.",
+    "auditSecurityCardMetric": "Flux de sécurité",
+    "moderationCardHint": "Signalements de messages envoyés par les utilisateurs des salles.",
+    "moderationCardMetric": "Modération de contenu",
+    "masterAdminCount": "{count} administrateurs principaux actifs",
+    "navGroupPlatform": "Plateforme",
+    "navGroupSecurity": "Sécurité & Audit",
+    "navGroupSystem": "Système",
+    "securityPulseTitle": "Pouls de sécurité",
+    "securityPulseHint": "Derniers événements de sécurité et d'accès",
+    "securityPulseEmpty": "Aucun événement de sécurité critique récemment.",
+    "auditRetention": "Les journaux d'audit sont conservés indéfiniment sauf suppression manuelle.",
+    "auditOrgTitle": "{name} — journal d'audit",
+    "auditOrgSubtitle": "Toutes les opérations et événements de sécurité pour cette salle.",
+    "moderationNav": "Modération des messages",
+    "moderationTitle": "Signalements de messages",
+    "moderationSubtitle": "Examinez les messages signalés par les utilisateurs des salles et mettez à jour leur statut.",
+    "moderationReportCount": "{count} signalements",
+    "moderationReason": "Signalement :",
+    "moderationParties": "De : {sender} → À : {receiver}",
+    "moderationMarkReviewed": "Marquer comme examiné",
+    "moderationDismiss": "Rejeter",
+    "moderationNote": "Note : {note}",
+    "moderationEmpty": "Aucun signalement ouvert.",
+    "plansNav": "Forfaits SaaS",
+    "partnersNav": "Partenaires",
+    "plansTitle": "Gestion des forfaits SaaS",
+    "plansSubtitle": "Modifiez les tarifs, limites et visibilité des abonnements d'essai et payants.",
+    "billingRequestsTitle": "Demandes de paiement",
+    "noBillingRequests": "Aucune demande de paiement."
+  },
+  "settings": {
+    "title": "Paramètres de la salle",
+    "subtitle": "Langue et préférences de fonctionnalités optionnelles pour {name}."
+  },
+  "billing": {
+    "nav": "Facturation & Paiement",
+    "title": "Facturation & Paiement",
+    "subtitle": "Choisissez un forfait, envoyez une demande de paiement ou contactez-nous sur WhatsApp.",
+    "lockedKicker": "Accès verrouillé",
+    "lockedTitle": "Votre période d'essai est terminée",
+    "lockedBanner": "Le panneau est verrouillé. Sélectionnez un forfait et envoyez une demande de paiement, ou contactez-nous sur WhatsApp. L'accès se déverrouille automatiquement après approbation.",
+    "layoutLockBanner": "Abonnement requis — seuls la facturation et le contact sont disponibles :",
+    "backToDashboard": "Retour au tableau de bord",
+    "trialReminder": "Il reste {days} jours d'essai.",
+    "monthly": "Mensuel",
+    "yearly": "Annuel",
+    "selectCycle": "Cycle de facturation",
+    "bankSoon": "Pour un virement bancaire, contactez-nous sur WhatsApp.",
+    "onlinePaySoon": "Paiement en ligne (bientôt disponible)",
+    "payWithCard": "Payer par carte",
+    "payWithCardHint": "Vous serez redirigé vers une page de paiement sécurisée (iyzico).",
+    "startingCheckout": "Redirection…",
+    "checkoutReturnSuccess": "Paiement reçu ! Votre abonnement s'activera dans quelques secondes.",
+    "checkoutReturnFailed": "Le paiement n'a pas pu être finalisé. Réessayez ou contactez le support.",
+    "requestTitle": "Demande de paiement",
+    "requestHint": "Votre demande apparaît chez Master Admin. Une fois approuvée, cette page se rafraîchit et votre panneau se déverrouille.",
+    "submitRequest": "Envoyer la demande de paiement",
+    "submitting": "Envoi…",
+    "notesPlaceholder": "Détails de facture, numéro fiscal ou notes…",
+    "whatsappTitle": "Contacter via WhatsApp",
+    "whatsappHint": "Écrivez à l'équipe CiCiByte sur WhatsApp pour un support immédiat.",
+    "whatsappButton": "Écrire sur WhatsApp",
+    "pendingTitle": "Demande en cours d'examen",
+    "pendingHint": "Nous avons reçu votre demande de paiement. Une fois approuvée, l'accès se déverrouille automatiquement (vérifié toutes les 15 s).",
+    "limits": "Jusqu'à {members} membres · {staff} personnel",
+    "athleteLockedTitle": "Abonnement de la salle en attente",
+    "athleteLockedHint": "L'essai ou l'abonnement de votre salle est terminé. Veuillez contacter la direction de la salle.",
+    "reason": {
+      "trialActive": "Essai en cours ({days} jours restants).",
+      "paidActive": "Vous avez un abonnement actif.",
+      "trialExpired": "Votre essai de 14 jours est terminé. Vos données sont conservées ; choisissez un forfait pour continuer.",
+      "subscriptionExpired": "Abonnement expiré. Vos données sont conservées.",
+      "paymentOverdue": "Paiement en retard. Veuillez renouveler votre abonnement.",
+      "licenseExpired": "Licence centrale expirée. Continuez via un paiement ou contactez-nous.",
+      "orgSuspended": "Compte suspendu. Contactez le support.",
+      "noSubscription": "Aucun abonnement actif trouvé."
+    }
+  },
+  "receptionDesktop": {
+    "badge": "Application Windows",
+    "title": "SGMS Reception",
+    "subtitle": "Recevez les événements d'entrée et de sortie du tourniquet sous forme de notifications Windows natives sur le PC de la réception. Fonctionne dans la barre système avec démarrage automatique optionnel.",
+    "download": "Télécharger pour Windows (v{version})",
+    "size": "{size} · {platforms}",
+    "features": {
+      "notify": "Notifications d'entrée / sortie en direct",
+      "tray": "Mode barre système et démarrage automatique Windows",
+      "brand": "Centre de contrôle à l'image de CiCiByte"
+    },
+    "loginHint": "Configuration du PC de réception",
+    "loginHintText": "Téléchargez l'application Windows pour que les événements du tourniquet parviennent à la réception même navigateur fermé. Connectez-vous avec votre compte personnel après l'installation.",
+    "checkInHint": "Installez sur le PC de la réception ; les événements du tourniquet arrivent en notifications Windows sans garder le navigateur ouvert.",
+    "footerLink": "SGMS Reception (Windows)"
+  },
+  "checkIn": {
+    "title": "Entrée en salle",
+    "subtitle": "Journal des entrées tourniquet, QR et RFID — vue réception en direct.",
+    "live": "En direct",
+    "stats": {
+      "today": "Entrées du jour",
+      "scenario": "Scénario réel",
+      "scenarioText": "Les sportifs scannent le QR sur leur téléphone ou présentent une carte RFID. La réception voit les entrées en direct ; les abonnements expirés sont refusés automatiquement."
+    },
+    "feed": {
+      "title": "Entrées du jour",
+      "subtitle": "50 derniers enregistrements (mise à jour en direct)",
+      "empty": "Aucune entrée aujourd'hui pour le moment."
+    },
+    "methods": {
+      "qr": "Code QR",
+      "rfid": "Carte RFID",
+      "manual": "Manuel (réception)",
+      "device": "Appareil"
+    },
+    "direction": {
+      "entry": "Entrée",
+      "exit": "Sortie"
+    },
+    "manual": {
+      "title": "Entrée manuelle",
+      "subtitle": "En cas d'échec de la carte ou du QR, la réception peut enregistrer une entrée en un clic.",
+      "selectMember": "Sélectionner un membre…",
+      "submit": "Enregistrer l'entrée",
+      "submitting": "Enregistrement…",
+      "success": "Entrée enregistrée.",
+      "successDuplicate": "Entrée enregistrée (déjà enregistrée dans la dernière heure).",
+      "error": "Impossible d'enregistrer l'entrée."
+    },
+    "devices": {
+      "title": "Tourniquets & appareils",
+      "subtitle": "Générez une clé API par tourniquet ; l'application de bureau appelle l'API d'entrée avec celle-ci.",
+      "viewOnly": "Liste des appareils (OWNER/ADMIN requis pour gérer).",
+      "empty": "Aucun appareil enregistré.",
+      "name": "Nom de l'appareil",
+      "namePlaceholder": "Tourniquet entrée principale",
+      "hardwareId": "ID matériel",
+      "location": "Emplacement",
+      "locationPlaceholder": "Entrée principale",
+      "type": "Type",
+      "types": {
+        "turnstile": "Tourniquet",
+        "kiosk": "Borne",
+        "scanner": "Scanner QR"
+      },
+      "register": "Enregistrer l'appareil",
+      "registering": "Enregistrement…",
+      "disable": "Désactiver"
+    },
+    "rfid": {
+      "label": "Carte RFID",
+      "placeholder": "UID ou numéro de carte",
+      "save": "Enregistrer",
+      "saving": "Enregistrement…",
+      "hint": "Le lecteur RFID du tourniquet envoie cette valeur comme rfidTag dans les requêtes d'entrée."
+    },
+    "athleteQr": {
+      "title": "QR d'entrée en salle",
+      "subtitle": "Scannez au tourniquet — le code se rafraîchit toutes les quelques minutes.",
+      "loading": "Préparation du QR…",
+      "loadError": "Impossible de charger le code QR.",
+      "expires": "Valide jusqu'à {time}",
+      "refresh": "Actualiser"
+    }
   },
   "comingSoon": {
     "eyebrow": "Sur la feuille de route",

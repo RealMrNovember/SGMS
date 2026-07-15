@@ -27,7 +27,9 @@
     "programs": "Programas",
     "trainers": "Rendimiento de Entrenadores",
     "messages": "Mensajes",
+    "checkIn": "Entrada",
     "team": "Personal",
+    "settings": "Configuración",
     "pos": "Caja",
     "reports": "Informes",
     "enterprise": "Empresa",
@@ -198,7 +200,8 @@
       "name": "Nombre",
       "email": "Correo",
       "role": "Rol",
-      "joined": "Ingreso"
+      "joined": "Ingreso",
+      "rfid": "Tarjeta de torniquete"
     },
     "invite": {
       "noPermission": "Se requiere rol OWNER o ADMIN para invitar personal.",
@@ -306,7 +309,15 @@
       "roleStaff": "Personal",
       "noMessagesYet": "Aún no hay mensajes"
     },
-    "markRead": "Marcar como leído"
+    "markRead": "Marcar como leído",
+    "report": {
+      "action": "Reportar",
+      "reasonLabel": "Motivo",
+      "reasonPlaceholder": "Breve descripción…",
+      "submit": "Enviar",
+      "submitting": "Enviando…",
+      "cancel": "Cancelar"
+    }
   },
   "plans": {
     "backToOverview": "← Resumen",
@@ -417,7 +428,8 @@
       "blockedWithDate": "La licencia central es inválida o ha expirado ({date}). El panel está en modo solo lectura; no se permiten nuevos registros ni actualizaciones.",
       "lastCheck": "Última verificación: {date}",
       "trial": "Está en una prueba de 14 días. Elija un plan de suscripción para continuar.",
-      "trialWithDate": "Está en una prueba de 14 días — expira: {date}. Elija un plan de suscripción para continuar."
+      "trialWithDate": "Está en una prueba de 14 días — expira: {date}. Elija un plan de suscripción para continuar.",
+      "billingLink": "Facturación y Pago"
     },
     "hint": {
       "adminBlocked": "Licencia central inválida — operaciones de escritura restringidas.",
@@ -541,7 +553,8 @@
       "login": "Sign in",
       "trial": "14-Day Trial",
       "loginShort": "Login",
-      "trialShort": "14 Days"
+      "trialShort": "14 Days",
+      "receptionDesktop": "Aplicación de Recepción"
     },
     "hero": {
       "kicker": "Digital Gym Operating System",
@@ -767,7 +780,178 @@
     "auditTitle": "Audit log",
     "auditSubtitle": "Recent platform and customer events.",
     "communicationsTitle": "Communication templates",
-    "communicationsSubtitle": "Ready email copy for customer outreach. Customer detail pages use personalized versions."
+    "communicationsSubtitle": "Ready email copy for customer outreach. Customer detail pages use personalized versions.",
+    "auditSecurityNav": "Eventos de seguridad",
+    "adminsNav": "Master Admins",
+    "adminsTitle": "Gestión de administradores maestros",
+    "adminsSubtitle": "Agregue, ascienda, restablezca contraseñas o revoque superadministradores de la plataforma. Cada acción queda auditada.",
+    "adminsCardHint": "Agregue administradores maestros y gestione los operadores existentes de la plataforma.",
+    "auditCardHint": "Revise todos los eventos de la plataforma y de los clientes por categoría.",
+    "auditCardMetric": "Auditoría categorizada",
+    "auditSecurityCardHint": "Inicios de sesión fallidos, accesos denegados y errores de API.",
+    "auditSecurityCardMetric": "Flujo de seguridad",
+    "moderationCardHint": "Reportes de mensajes enviados por usuarios del gimnasio.",
+    "moderationCardMetric": "Moderación de contenido",
+    "masterAdminCount": "{count} administradores maestros activos",
+    "navGroupPlatform": "Plataforma",
+    "navGroupSecurity": "Seguridad y Auditoría",
+    "navGroupSystem": "Sistema",
+    "securityPulseTitle": "Pulso de seguridad",
+    "securityPulseHint": "Últimos eventos de seguridad y acceso",
+    "securityPulseEmpty": "No hay eventos de seguridad críticos recientes.",
+    "auditRetention": "Los registros de auditoría se conservan indefinidamente a menos que se eliminen manualmente.",
+    "auditOrgTitle": "{name} — registro de auditoría",
+    "auditOrgSubtitle": "Todas las operaciones y eventos de seguridad de este gimnasio.",
+    "moderationNav": "Moderación de mensajes",
+    "moderationTitle": "Reportes de mensajes",
+    "moderationSubtitle": "Revise los mensajes reportados por usuarios del gimnasio y actualice su estado.",
+    "moderationReportCount": "{count} reportes",
+    "moderationReason": "Reporte:",
+    "moderationParties": "De: {sender} → Para: {receiver}",
+    "moderationMarkReviewed": "Marcar como revisado",
+    "moderationDismiss": "Descartar",
+    "moderationNote": "Nota: {note}",
+    "moderationEmpty": "No hay reportes abiertos.",
+    "plansNav": "Planes SaaS",
+    "partnersNav": "Socios",
+    "plansTitle": "Gestión de planes SaaS",
+    "plansSubtitle": "Edite precios, límites y visibilidad de las suscripciones de prueba y de pago.",
+    "billingRequestsTitle": "Solicitudes de pago",
+    "noBillingRequests": "No hay solicitudes de pago."
+  },
+  "settings": {
+    "title": "Configuración del gimnasio",
+    "subtitle": "Idioma y preferencias de funciones opcionales para {name}."
+  },
+  "billing": {
+    "nav": "Facturación y Pago",
+    "title": "Facturación y Pago",
+    "subtitle": "Elija un plan, envíe una solicitud de pago o contáctenos por WhatsApp.",
+    "lockedKicker": "Acceso bloqueado",
+    "lockedTitle": "Su período de prueba ha terminado",
+    "lockedBanner": "El panel está bloqueado. Seleccione un plan y envíe una solicitud de pago, o contáctenos por WhatsApp. El acceso se desbloquea automáticamente tras la aprobación.",
+    "layoutLockBanner": "Se requiere suscripción — solo facturación y contacto están disponibles:",
+    "backToDashboard": "Volver al panel",
+    "trialReminder": "Quedan {days} días de prueba.",
+    "monthly": "Mensual",
+    "yearly": "Anual",
+    "selectCycle": "Ciclo de facturación",
+    "bankSoon": "Para transferencia bancaria, contáctenos por WhatsApp.",
+    "onlinePaySoon": "Pago en línea (próximamente)",
+    "payWithCard": "Pagar con tarjeta",
+    "payWithCardHint": "Será redirigido a una página de pago segura (iyzico).",
+    "startingCheckout": "Redirigiendo…",
+    "checkoutReturnSuccess": "¡Pago recibido! Su suscripción se activará en unos segundos.",
+    "checkoutReturnFailed": "No se pudo completar el pago. Intente de nuevo o contacte con soporte.",
+    "requestTitle": "Solicitud de pago",
+    "requestHint": "Su solicitud aparece en Master Admin. Cuando sea aprobada, esta página se actualizará y su panel se desbloqueará.",
+    "submitRequest": "Enviar solicitud de pago",
+    "submitting": "Enviando…",
+    "notesPlaceholder": "Datos de factura, NIF o notas…",
+    "whatsappTitle": "Contactar por WhatsApp",
+    "whatsappHint": "Escriba al equipo de CiCiByte por WhatsApp para soporte inmediato.",
+    "whatsappButton": "Escribir por WhatsApp",
+    "pendingTitle": "Solicitud en revisión",
+    "pendingHint": "Recibimos su solicitud de pago. Cuando sea aprobada, el acceso se desbloqueará automáticamente (se verifica cada 15 s).",
+    "limits": "Hasta {members} miembros · {staff} personal",
+    "athleteLockedTitle": "Suscripción del gimnasio pendiente",
+    "athleteLockedHint": "El período de prueba o la suscripción de su gimnasio ha terminado. Contacte con la administración del gimnasio.",
+    "reason": {
+      "trialActive": "Prueba en curso (quedan {days} días).",
+      "paidActive": "Tiene una suscripción activa.",
+      "trialExpired": "Su prueba de 14 días ha terminado. Sus datos se conservan; elija un plan para continuar.",
+      "subscriptionExpired": "Suscripción vencida. Sus datos se conservan.",
+      "paymentOverdue": "Pago atrasado. Por favor renueve su suscripción.",
+      "licenseExpired": "Licencia central vencida. Continúe mediante pago o contáctenos.",
+      "orgSuspended": "Cuenta suspendida. Contacte con soporte.",
+      "noSubscription": "No se encontró suscripción activa."
+    }
+  },
+  "receptionDesktop": {
+    "badge": "Aplicación Windows",
+    "title": "SGMS Reception",
+    "subtitle": "Reciba eventos de entrada y salida del torniquete como notificaciones nativas de Windows en el PC de recepción. Funciona en la bandeja del sistema con inicio automático opcional.",
+    "download": "Descargar para Windows (v{version})",
+    "size": "{size} · {platforms}",
+    "features": {
+      "notify": "Notificaciones de entrada / salida en vivo",
+      "tray": "Modo bandeja e inicio automático de Windows",
+      "brand": "Centro de control con marca CiCiByte"
+    },
+    "loginHint": "Configuración del PC de recepción",
+    "loginHintText": "Descargue la aplicación de Windows para que los eventos del torniquete lleguen a recepción incluso con el navegador cerrado. Inicie sesión con su cuenta de personal tras la instalación.",
+    "checkInHint": "Instale en el PC de recepción; los eventos del torniquete llegan como notificaciones de Windows sin mantener el navegador abierto.",
+    "footerLink": "SGMS Reception (Windows)"
+  },
+  "checkIn": {
+    "title": "Entrada al gimnasio",
+    "subtitle": "Registro de torniquete, QR y RFID — vista de recepción en vivo.",
+    "live": "En vivo",
+    "stats": {
+      "today": "Entradas de hoy",
+      "scenario": "Flujo real",
+      "scenarioText": "Los deportistas escanean el QR en su teléfono o acercan una tarjeta RFID. Recepción ve las entradas en vivo; las membresías vencidas se rechazan automáticamente."
+    },
+    "feed": {
+      "title": "Entradas de hoy",
+      "subtitle": "Últimos 50 registros (se actualiza en vivo)",
+      "empty": "Aún no hay entradas hoy."
+    },
+    "methods": {
+      "qr": "Código QR",
+      "rfid": "Tarjeta RFID",
+      "manual": "Manual (recepción)",
+      "device": "Dispositivo"
+    },
+    "direction": {
+      "entry": "Entrada",
+      "exit": "Salida"
+    },
+    "manual": {
+      "title": "Entrada manual",
+      "subtitle": "Cuando la tarjeta o el QR fallan, recepción puede registrar la entrada con un clic.",
+      "selectMember": "Seleccionar miembro…",
+      "submit": "Registrar entrada",
+      "submitting": "Guardando…",
+      "success": "Entrada registrada.",
+      "successDuplicate": "Entrada registrada (también registrada en la última hora).",
+      "error": "No se pudo registrar la entrada."
+    },
+    "devices": {
+      "title": "Torniquetes y dispositivos",
+      "subtitle": "Genere una clave API por torniquete; el cliente de escritorio llama a la API de entrada con ella.",
+      "viewOnly": "Lista de dispositivos (se requiere OWNER/ADMIN para gestionar).",
+      "empty": "No hay dispositivos registrados.",
+      "name": "Nombre del dispositivo",
+      "namePlaceholder": "Torniquete entrada principal",
+      "hardwareId": "ID de hardware",
+      "location": "Ubicación",
+      "locationPlaceholder": "Entrada principal",
+      "type": "Tipo",
+      "types": {
+        "turnstile": "Torniquete",
+        "kiosk": "Quiosco",
+        "scanner": "Escáner QR"
+      },
+      "register": "Registrar dispositivo",
+      "registering": "Guardando…",
+      "disable": "Deshabilitar"
+    },
+    "rfid": {
+      "label": "Tarjeta RFID",
+      "placeholder": "UID o número de tarjeta",
+      "save": "Guardar",
+      "saving": "Guardando…",
+      "hint": "El lector RFID del torniquete envía este valor como rfidTag en las solicitudes de entrada."
+    },
+    "athleteQr": {
+      "title": "QR de entrada al gimnasio",
+      "subtitle": "Escanee en el torniquete — el código se actualiza cada pocos minutos.",
+      "loading": "Preparando QR…",
+      "loadError": "No se pudo cargar el código QR.",
+      "expires": "Válido hasta {time}",
+      "refresh": "Actualizar"
+    }
   },
   "comingSoon": {
     "eyebrow": "En la hoja de ruta",

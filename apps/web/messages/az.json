@@ -27,7 +27,9 @@
     "programs": "Proqramlar",
     "trainers": "PT Performansı",
     "messages": "Mesajlar",
+    "checkIn": "Giriş",
     "team": "Personal",
+    "settings": "Ayarlar",
     "pos": "Kassa",
     "reports": "Hesabatlar",
     "enterprise": "Korporativ",
@@ -198,7 +200,8 @@
       "name": "Ad",
       "email": "E-poçt",
       "role": "Rol",
-      "joined": "Qoşulma"
+      "joined": "Qoşulma",
+      "rfid": "Qapı kartı"
     },
     "invite": {
       "noPermission": "Personal dəvət etmək üçün OWNER və ya ADMIN rolu lazımdır.",
@@ -306,7 +309,15 @@
       "roleStaff": "Personal",
       "noMessagesYet": "Hələ mesaj yoxdur"
     },
-    "markRead": "Oxunmuş kimi işarələ"
+    "markRead": "Oxunmuş kimi işarələ",
+    "report": {
+      "action": "Şikayət et",
+      "reasonLabel": "Səbəb",
+      "reasonPlaceholder": "Qısa açıqlama…",
+      "submit": "Göndər",
+      "submitting": "Göndərilir…",
+      "cancel": "Ləğv et"
+    }
   },
   "plans": {
     "backToOverview": "← İcmal",
@@ -417,7 +428,8 @@
       "blockedWithDate": "Mərkəzi lisenziya etibarsızdır və ya müddəti bitib ({date}). Panel yalnız oxuma rejimindədir; yeni qeyd və yeniləmə mümkün deyil.",
       "lastCheck": "Son yoxlama: {date}",
       "trial": "14 günlük sınaq müddətindəsiniz. Davam etmək üçün abunəlik planı seçin.",
-      "trialWithDate": "14 günlük sınaq müddətindəsiniz — bitiş: {date}. Davam etmək üçün abunəlik planı seçin."
+      "trialWithDate": "14 günlük sınaq müddətindəsiniz — bitiş: {date}. Davam etmək üçün abunəlik planı seçin.",
+      "billingLink": "Ödəniş & Abunəlik"
     },
     "hint": {
       "adminBlocked": "Mərkəzi lisenziya etibarsızdır — yazma əməliyyatları məhdudlaşdırılıb.",
@@ -541,7 +553,8 @@
       "login": "Sign in",
       "trial": "14-Day Trial",
       "loginShort": "Login",
-      "trialShort": "14 Days"
+      "trialShort": "14 Days",
+      "receptionDesktop": "Resepşn Tətbiqi"
     },
     "hero": {
       "kicker": "Digital Gym Operating System",
@@ -767,7 +780,178 @@
     "auditTitle": "Audit log",
     "auditSubtitle": "Recent platform and customer events.",
     "communicationsTitle": "Communication templates",
-    "communicationsSubtitle": "Ready email copy for customer outreach. Customer detail pages use personalized versions."
+    "communicationsSubtitle": "Ready email copy for customer outreach. Customer detail pages use personalized versions.",
+    "auditSecurityNav": "Təhlükəsizlik hadisələri",
+    "adminsNav": "Master Adminlər",
+    "adminsTitle": "Master admin idarəetməsi",
+    "adminsSubtitle": "Platforma super adminlərini əlavə edin, yüksəldin, şifrələrini sıfırlayın və ya ləğv edin. Hər əməliyyat qeydə alınır.",
+    "adminsCardHint": "Master adminlər əlavə edin və mövcud platforma operatorlarını idarə edin.",
+    "auditCardHint": "Bütün platforma və kirayəçi hadisələrini kateqoriya üzrə nəzərdən keçirin.",
+    "auditCardMetric": "Kateqoriyalı audit",
+    "auditSecurityCardHint": "Uğursuz girişlər, giriş rədləri və API xətaları.",
+    "auditSecurityCardMetric": "Təhlükəsizlik axını",
+    "moderationCardHint": "Zal istifadəçiləri tərəfindən göndərilən mesaj şikayətləri.",
+    "moderationCardMetric": "Məzmun moderasiyası",
+    "masterAdminCount": "{count} aktiv master admin",
+    "navGroupPlatform": "Platforma",
+    "navGroupSecurity": "Təhlükəsizlik & Audit",
+    "navGroupSystem": "Sistem",
+    "securityPulseTitle": "Təhlükəsizlik nəbzi",
+    "securityPulseHint": "Son təhlükəsizlik və giriş hadisələri",
+    "securityPulseEmpty": "Son zamanlar kritik təhlükəsizlik hadisəsi yoxdur.",
+    "auditRetention": "Audit qeydləri əl ilə silinmədiyi müddətcə qeyri-müəyyən müddət saxlanılır.",
+    "auditOrgTitle": "{name} — audit qeydiyyatı",
+    "auditOrgSubtitle": "Bu zal üçün bütün əməliyyatlar və təhlükəsizlik hadisələri.",
+    "moderationNav": "Mesaj moderasiyası",
+    "moderationTitle": "Mesaj şikayətləri",
+    "moderationSubtitle": "Zal istifadəçilərinin şikayət etdiyi mesajları nəzərdən keçirin və statuslarını yeniləyin.",
+    "moderationReportCount": "{count} şikayət",
+    "moderationReason": "Şikayət:",
+    "moderationParties": "Göndərən: {sender} → Alan: {receiver}",
+    "moderationMarkReviewed": "Baxıldı kimi işarələ",
+    "moderationDismiss": "Rədd et",
+    "moderationNote": "Qeyd: {note}",
+    "moderationEmpty": "Açıq şikayət yoxdur.",
+    "plansNav": "SaaS Planları",
+    "partnersNav": "Tərəfdaşlar",
+    "plansTitle": "SaaS Plan İdarəetməsi",
+    "plansSubtitle": "Sınaq və ödənişli abunəliklərin qiymət, limit və görünürlüyünü redaktə edin.",
+    "billingRequestsTitle": "Ödəniş sorğuları",
+    "noBillingRequests": "Ödəniş sorğusu yoxdur."
+  },
+  "settings": {
+    "title": "Zal parametrləri",
+    "subtitle": "{name} üçün dil və əlavə funksiya seçimləri."
+  },
+  "billing": {
+    "nav": "Ödəniş & Abunəlik",
+    "title": "Ödəniş & Abunəlik",
+    "subtitle": "Plan seçin, ödəniş sorğusu göndərin və ya WhatsApp ilə bizimlə əlaqə saxlayın.",
+    "lockedKicker": "Giriş bloklanıb",
+    "lockedTitle": "Sınaq müddətiniz bitib",
+    "lockedBanner": "Panel bloklanıb. Plan seçin və ödəniş sorğusu göndərin, ya da WhatsApp ilə bizə yazın. Təsdiqdən sonra giriş avtomatik açılır.",
+    "layoutLockBanner": "Abunəlik tələb olunur — yalnız ödəniş və əlaqə mövcuddur:",
+    "backToDashboard": "Panelə qayıt",
+    "trialReminder": "Sınaq müddətinizin {days} günü qalıb.",
+    "monthly": "Aylıq",
+    "yearly": "İllik",
+    "selectCycle": "Ödəniş dövrü",
+    "bankSoon": "Bank köçürməsi üçün WhatsApp ilə bizimlə əlaqə saxlayın.",
+    "onlinePaySoon": "Onlayn ödəniş (tezliklə)",
+    "payWithCard": "Kartla ödə",
+    "payWithCardHint": "Təhlükəsiz ödəniş səhifəsinə (iyzico) yönləndiriləcəksiniz.",
+    "startingCheckout": "Yönləndirilir…",
+    "checkoutReturnSuccess": "Ödəniş qəbul edildi! Abunəliyiniz bir neçə saniyə ərzində aktivləşəcək.",
+    "checkoutReturnFailed": "Ödəniş tamamlana bilmədi. Yenidən cəhd edin və ya dəstəklə əlaqə saxlayın.",
+    "requestTitle": "Ödəniş sorğusu",
+    "requestHint": "Sorğunuz Master Admin-də görünəcək. Təsdiqləndikdən sonra bu səhifə yenilənəcək və paneliniz aktivləşəcək.",
+    "submitRequest": "Ödəniş sorğusu göndər",
+    "submitting": "Göndərilir…",
+    "notesPlaceholder": "Faktura məlumatları, VÖEN və ya qeydlər…",
+    "whatsappTitle": "WhatsApp ilə əlaqə",
+    "whatsappHint": "Dərhal dəstək üçün CiCiByte komandasına WhatsApp-da yazın.",
+    "whatsappButton": "WhatsApp-da yaz",
+    "pendingTitle": "Sorğu yoxlanılır",
+    "pendingHint": "Ödəniş sorğunuzu aldıq. Təsdiqləndikdən sonra giriş avtomatik açılacaq (hər 15 saniyədə yoxlanılır).",
+    "limits": "Maksimum {members} üzv · {staff} personal",
+    "athleteLockedTitle": "Zal abunəliyi gözlənilir",
+    "athleteLockedHint": "Zalınızın sınaq müddəti və ya abunəliyi bitib. Zal rəhbərliyi ilə əlaqə saxlayın.",
+    "reason": {
+      "trialActive": "Sınaq davam edir ({days} gün qalıb).",
+      "paidActive": "Aktiv abunəliyiniz var.",
+      "trialExpired": "14 günlük sınaq müddətiniz bitib. Məlumatlarınız saxlanılır; davam etmək üçün plan seçin.",
+      "subscriptionExpired": "Abunəlik bitib. Məlumatlarınız saxlanılır.",
+      "paymentOverdue": "Ödəniş gecikib. Zəhmət olmasa abunəliyinizi yeniləyin.",
+      "licenseExpired": "Mərkəzi lisenziyanın müddəti bitib. Ödəniş vasitəsilə davam edin və ya bizimlə əlaqə saxlayın.",
+      "orgSuspended": "Hesab dayandırılıb. Dəstəklə əlaqə saxlayın.",
+      "noSubscription": "Aktiv abunəlik tapılmadı."
+    }
+  },
+  "receptionDesktop": {
+    "badge": "Windows Tətbiqi",
+    "title": "SGMS Reception",
+    "subtitle": "Qapı giriş və çıxış hadisələrini resepşn kompüterində Windows bildirişi kimi alın. Sistem tepsisində işləyir, istəyə görə avtomatik başlama ilə.",
+    "download": "Windows üçün yüklə (v{version})",
+    "size": "{size} · {platforms}",
+    "features": {
+      "notify": "Canlı giriş / çıxış bildirişləri",
+      "tray": "Tepsi rejimi və Windows avtomatik başlama",
+      "brand": "CiCiByte brendli idarəetmə mərkəzi"
+    },
+    "loginHint": "Resepşn kompüteri qurulumu",
+    "loginHintText": "Brauzer bağlı olsa belə qapı hadisələrinin resepşnə çatması üçün Windows tətbiqini yükləyin. Quraşdırdıqdan sonra personal hesabınızla daxil olun.",
+    "checkInHint": "Resepşn kompüterinə quraşdırın; qapı hadisələri brauzer açıq olmadan Windows bildirişi kimi gəlir.",
+    "footerLink": "SGMS Reception (Windows)"
+  },
+  "checkIn": {
+    "title": "Zala giriş",
+    "subtitle": "Qapı, QR və RFID giriş qeydiyyatı — canlı resepşn görünüşü.",
+    "live": "Canlı",
+    "stats": {
+      "today": "Bugünkü girişlər",
+      "scenario": "Real ssenari",
+      "scenarioText": "İdmançılar telefonlarında QR skan edir və ya RFID kartını yaxınlaşdırır. Resepşn girişləri canlı görür; müddəti bitmiş üzvlüklər avtomatik rədd edilir."
+    },
+    "feed": {
+      "title": "Bugünkü girişlər",
+      "subtitle": "Son 50 qeyd (canlı yenilənir)",
+      "empty": "Bu gün hələ giriş qeydə alınmayıb."
+    },
+    "methods": {
+      "qr": "QR kod",
+      "rfid": "RFID kart",
+      "manual": "Əl ilə (resepşn)",
+      "device": "Cihaz"
+    },
+    "direction": {
+      "entry": "Giriş",
+      "exit": "Çıxış"
+    },
+    "manual": {
+      "title": "Əl ilə giriş",
+      "subtitle": "Kart və ya QR işləmədikdə resepşn bir kliklə girişi qeydə ala bilər.",
+      "selectMember": "Üzv seçin…",
+      "submit": "Girişi qeydə al",
+      "submitting": "Saxlanılır…",
+      "success": "Giriş qeydə alındı.",
+      "successDuplicate": "Giriş qeydə alındı (son bir saat ərzində artıq giriş edilib).",
+      "error": "Giriş qeydə alına bilmədi."
+    },
+    "devices": {
+      "title": "Qapılar & cihazlar",
+      "subtitle": "Hər qapı üçün API açarı yaradın; masaüstü tətbiqi bununla giriş API-sini çağırır.",
+      "viewOnly": "Cihaz siyahısı (idarə üçün OWNER/ADMIN tələb olunur).",
+      "empty": "Qeydiyyatdan keçmiş cihaz yoxdur.",
+      "name": "Cihaz adı",
+      "namePlaceholder": "Əsas giriş qapısı",
+      "hardwareId": "Avadanlıq ID-si",
+      "location": "Yerləşmə",
+      "locationPlaceholder": "Əsas giriş",
+      "type": "Növ",
+      "types": {
+        "turnstile": "Qapı",
+        "kiosk": "Kiosk",
+        "scanner": "QR skaner"
+      },
+      "register": "Cihazı qeydə al",
+      "registering": "Saxlanılır…",
+      "disable": "Deaktiv et"
+    },
+    "rfid": {
+      "label": "RFID kart",
+      "placeholder": "Kart UID və ya nömrəsi",
+      "save": "Saxla",
+      "saving": "Saxlanılır…",
+      "hint": "Qapının RFID oxuyucusu bu dəyəri giriş sorğularında rfidTag kimi göndərir."
+    },
+    "athleteQr": {
+      "title": "Zala giriş QR-i",
+      "subtitle": "Qapıda skan edin — kod bir neçə dəqiqədən bir yenilənir.",
+      "loading": "QR hazırlanır…",
+      "loadError": "QR kodu yüklənə bilmədi.",
+      "expires": "{time} vaxtına qədər etibarlıdır",
+      "refresh": "Yenilə"
+    }
   },
   "comingSoon": {
     "eyebrow": "Yol xəritəsində",
