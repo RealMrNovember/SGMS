@@ -21,6 +21,9 @@ export async function MarketingHeader() {
           <a href="#why-sgms" className="marketing-nav-link">
             {t('why')}
           </a>
+          <a href="#roadmap" className="marketing-nav-link">
+            {t('roadmap')}
+          </a>
           <a href="#reception-desktop" className="marketing-nav-link">
             {t('receptionDesktop')}
           </a>

@@ -1,5 +1,5 @@
+import { DashboardNav } from '@/components/dashboard-nav';
 import { LicenseStatusBanner } from '@/components/license-status-banner';
-import { LocaleSwitcher } from '@/components/locale-switcher';
 import { MessageLiveRefresh } from '@/components/message-live-refresh';
 import { auth, signOut } from '@/lib/auth';
 import { isBillingPath, resolveSubscriptionAccess } from '@/lib/billing/subscription-gate';
@@ -63,6 +63,16 @@ export default async function TenantDashboardLayout({ children }: { children: Re
         { href: '/dashboard/billing', label: tBilling('nav') },
       ];
 
+  const tComingSoon = await getTranslations('comingSoon');
+  const comingSoonItems = locked
+    ? []
+    : (
+        ['trainers', 'hr', 'equipment', 'cashShifts', 'notifications', 'reports', 'insights'] as const
+      ).map((feature) => ({
+        href: `/dashboard/coming-soon/${feature}`,
+        label: tComingSoon(`features.${feature}.title`),
+      }));
+
   const organization = await prisma.organization.findUnique({
     where: { id: session.user.organizationId },
     select: {
@@ -101,44 +111,31 @@ export default async function TenantDashboardLayout({ children }: { children: Re
       ) : null}
 
       <header className="border-b border-[var(--border)] bg-[rgba(17,24,39,0.85)] backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
-          <div>
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
+          <div className="min-w-0">
             <p className="badge">{tCommon('appName')}</p>
-            <h1 className="mt-2 text-lg font-semibold">
+            <h1 className="mt-2 truncate text-lg font-semibold">
               {session.user.organizationName ?? tAuth('noOrganization')}
             </h1>
-            <p className="muted text-sm">
+            <p className="muted truncate text-sm">
               {session.user.name} · {session.user.role ?? tAuth('noRole')}
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4">
-            {navItems.map((item) => (
-              <Link key={item.href} href={item.href} className="muted relative text-sm hover:text-white">
-                {item.label}
-                {'badge' in item && item.badge && item.badge > 0 ? (
-                  <span className="ml-1.5 inline-flex min-w-[1.1rem] items-center justify-center rounded-full bg-rose-500 px-1.5 py-0.5 text-[10px] font-semibold text-white">
-                    {item.badge > 99 ? '99+' : item.badge}
-                  </span>
-                ) : null}
-              </Link>
-            ))}
-            <LocaleSwitcher />
-            <form
-              action={async () => {
-                'use server';
-                await signOut({ redirectTo: '/login' });
-              }}
-            >
-              <button type="submit" className="button px-4 py-2 text-sm">
-                {tAuth('logout')}
-              </button>
-            </form>
-          </div>
+          <DashboardNav
+            navItems={navItems}
+            comingSoonItems={comingSoonItems}
+            comingSoonGroupLabel={t('comingSoonGroup')}
+            logoutLabel={tAuth('logout')}
+            logoutAction={async () => {
+              'use server';
+              await signOut({ redirectTo: '/login' });
+            }}
+          />
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-6 py-8">{children}</main>
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">{children}</main>
     </div>
   );
 }

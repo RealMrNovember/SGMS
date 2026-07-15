@@ -29,7 +29,8 @@
     "team": "Personnel",
     "pos": "Caisse",
     "adminOverview": "Vue système",
-    "newCustomer": "Nouveau client"
+    "newCustomer": "Nouveau client",
+    "comingSoonGroup": "Bientôt disponible"
   },
   "auth": {
     "login": "Connexion",
@@ -247,6 +248,24 @@
       "title": "Résumé de l'équipe",
       "empty": "Aucun personnel enregistré.",
       "manageLink": "Gestion du personnel →"
+    },
+    "quickActions": {
+      "title": "Actions rapides",
+      "newMember": "Ajouter un membre",
+      "checkIn": "Enregistrer une entrée",
+      "takePayment": "Encaisser un paiement",
+      "sendMessage": "Envoyer un message",
+      "viewTeam": "Gérer l'équipe"
+    },
+    "alerts": {
+      "expiringTitle": "{count} abonnements expirent sous 7 jours",
+      "expiringSubtitle": "Envoyez un rappel de renouvellement pour réduire le taux de résiliation.",
+      "expiringCta": "Voir les membres"
+    },
+    "comingSoonTeaser": {
+      "title": "Que réserve la feuille de route ?",
+      "subtitle": "Nous étendons SGMS en continu — ces modules arriveront bientôt sur votre tableau de bord.",
+      "cta": "Tout voir"
     }
   },
   "messages": {
@@ -515,6 +534,7 @@
       "features": "Features",
       "howItWorks": "How it works",
       "why": "Why SGMS",
+      "roadmap": "Feuille de route",
       "contact": "Contact",
       "login": "Sign in",
       "trial": "14-Day Trial",
@@ -623,6 +643,11 @@
         }
       }
     },
+    "roadmap": {
+      "kicker": "Feuille de route",
+      "title": "SGMS continue de grandir",
+      "subtitle": "En plus du CRM, de la caisse, de la messagerie et du mobile que vous utilisez déjà, nous construisons les modules qui transformeront votre salle en un véritable système d'exploitation. Les fonctionnalités ci-dessous sont en développement et arriveront progressivement sur votre tableau de bord."
+    },
     "cta": {
       "title": "Try every feature for {days} days",
       "subtitle": "Register as gym owner, invite your team and test real workflows.",
@@ -726,5 +751,62 @@
     "auditSubtitle": "Recent platform and customer events.",
     "communicationsTitle": "Communication templates",
     "communicationsSubtitle": "Ready email copy for customer outreach. Customer detail pages use personalized versions."
+  },
+  "comingSoon": {
+    "eyebrow": "Sur la feuille de route",
+    "badge": "Bientôt disponible",
+    "backToOverview": "← Retour au tableau de bord",
+    "seeRoadmap": "Voir la feuille de route",
+    "footer": "Ce module fait partie de notre démarche pour transformer votre salle en un véritable système d'exploitation. Vous serez averti dès sa mise en ligne.",
+    "features": {
+      "trainers": {
+        "title": "Performance et commissions des coachs",
+        "description": "Nombre de séances mensuelles, heures travaillées, chiffre d'affaires, commission et taux d'annulation/absence pour chaque coach, calculés automatiquement sur un seul écran."
+      },
+      "hr": {
+        "title": "Gestion du personnel",
+        "description": "Demandes de congés, planning hebdomadaire des équipes, évaluations de performance — la gestion de votre équipe, numérisée."
+      },
+      "equipment": {
+        "title": "Équipements et maintenance",
+        "description": "Un code QR, un statut de garantie, un historique d'entretien et un calendrier de maintenance pour chaque équipement. Signalez une panne en un geste."
+      },
+      "cleaning": {
+        "title": "Gestion du nettoyage",
+        "description": "Listes de contrôle de nettoyage par équipe, avec preuve photo et validation numérique."
+      },
+      "cashShifts": {
+        "title": "Gestion des caisses",
+        "description": "Ouverture/fermeture de caisse, comptage des espèces, détection des écarts et rapports X/Z."
+      },
+      "digitalCard": {
+        "title": "Carte de membre numérique",
+        "description": "Apple Wallet, Google Wallet et NFC — entrez dans la salle d'un seul geste depuis votre téléphone."
+      },
+      "notifications": {
+        "title": "Centre de notifications",
+        "description": "Notifications push, SMS, WhatsApp, e-mail et Telegram, gérées depuis un seul endroit."
+      },
+      "reports": {
+        "title": "Rapports avancés et Business Intelligence",
+        "description": "Heures de pointe, coachs les plus performants, chiffre d'affaires et valeur vie client (LTV), taux de renouvellement et de résiliation."
+      },
+      "insights": {
+        "title": "Analyses par intelligence artificielle",
+        "description": "Repérez les membres à risque de départ avant qu'ils ne partent et recevez des suggestions de campagnes de fidélisation automatiques."
+      },
+      "enterprise": {
+        "title": "Hiérarchie d'entreprise et multi-établissements",
+        "description": "Rapports consolidés au niveau établissement, région et entreprise — conçu pour les grandes chaînes."
+      },
+      "integrations": {
+        "title": "Place de marché d'intégrations",
+        "description": "Connectez Apple Health, Google Fit, des fournisseurs SMS/WhatsApp, des logiciels de comptabilité et plus encore."
+      },
+      "helpCenter": {
+        "title": "Centre d'aide par rôle",
+        "description": "Des guides détaillés dédiés aux coachs, à l'accueil, aux membres et aux propriétaires de salle."
+      }
+    }
   }
 }

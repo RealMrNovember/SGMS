@@ -29,7 +29,8 @@
     "team": "Personal",
     "pos": "Kassa",
     "adminOverview": "Sistem icmalı",
-    "newCustomer": "Yeni müştəri"
+    "newCustomer": "Yeni müştəri",
+    "comingSoonGroup": "Tezliklə"
   },
   "auth": {
     "login": "Daxil ol",
@@ -247,6 +248,24 @@
       "title": "Komanda xülasəsi",
       "empty": "Hələ personal qeydiyyatı yoxdur.",
       "manageLink": "Personal idarəetməsi →"
+    },
+    "quickActions": {
+      "title": "Sürətli əməliyyatlar",
+      "newMember": "Yeni üzv əlavə et",
+      "checkIn": "Giriş qeydə al",
+      "takePayment": "Ödəniş qəbul et",
+      "sendMessage": "Mesaj göndər",
+      "viewTeam": "Komandanı idarə et"
+    },
+    "alerts": {
+      "expiringTitle": "{count} üzvlüyün müddəti 7 gün ərzində bitir",
+      "expiringSubtitle": "Yeniləmə xatırlatması göndərərək üzv itkisinin qarşısını alın.",
+      "expiringCta": "Üzvlərə bax"
+    },
+    "comingSoonTeaser": {
+      "title": "Yol xəritəsində növbəti nədir?",
+      "subtitle": "SGMS-i davamlı olaraq genişləndiririk — aşağıdakı modullar tezliklə panelinizdə olacaq.",
+      "cta": "Hamısına bax"
     }
   },
   "messages": {
@@ -515,6 +534,7 @@
       "features": "Features",
       "howItWorks": "How it works",
       "why": "Why SGMS",
+      "roadmap": "Yol xəritəsi",
       "contact": "Contact",
       "login": "Sign in",
       "trial": "14-Day Trial",
@@ -623,6 +643,11 @@
         }
       }
     },
+    "roadmap": {
+      "kicker": "Yol xəritəsi",
+      "title": "SGMS böyüməyə davam edir",
+      "subtitle": "Bu gün istifadə etdiyiniz CRM, kassa, mesajlaşma və mobil əsasın üzərinə, salonunuzu tam funksiyalı əməliyyat sisteminə çevirəcək modulları qururuq. Aşağıdakı funksiyalar hazırlanma mərhələsindədir və bir-bir panelinizə əlavə olunacaq."
+    },
     "cta": {
       "title": "Try every feature for {days} days",
       "subtitle": "Register as gym owner, invite your team and test real workflows.",
@@ -726,5 +751,62 @@
     "auditSubtitle": "Recent platform and customer events.",
     "communicationsTitle": "Communication templates",
     "communicationsSubtitle": "Ready email copy for customer outreach. Customer detail pages use personalized versions."
+  },
+  "comingSoon": {
+    "eyebrow": "Yol xəritəsində",
+    "badge": "Tezliklə",
+    "backToOverview": "← Panelə qayıt",
+    "seeRoadmap": "Yol xəritəsinə bax",
+    "footer": "Bu modul, salonunuzu tam funksiyalı əməliyyat sisteminə çevirmək yolundakı addımlarımızdan biridir. Aktiv olan kimi sizə bildiriş göndəriləcək.",
+    "features": {
+      "trainers": {
+        "title": "Məşqçi performansı və komissiyası",
+        "description": "Hər məşqçi üçün aylıq seans sayı, işlənmiş saat, gəlir, komissiya və ləğv/gəlməmə nisbəti — bir ekranda avtomatik hesablanır."
+      },
+      "hr": {
+        "title": "Heyət idarəetməsi",
+        "description": "Məzuniyyət tələbləri, həftəlik növbə planı, performans qiymətləndirməsi — komandanızın idarəetməsi rəqəmsallaşır."
+      },
+      "equipment": {
+        "title": "Avadanlıq və texniki xidmət",
+        "description": "Hər avadanlıq üçün QR kod, zəmanət statusu, servis tarixçəsi və texniki xidmət təqvimi. Nasazlığı bir toxunuşla bildirin."
+      },
+      "cleaning": {
+        "title": "Təmizlik idarəetməsi",
+        "description": "Növbə əsaslı təmizlik yoxlama siyahıları, fotoşəkil sübutu və rəqəmsal təsdiq."
+      },
+      "cashShifts": {
+        "title": "Kassa növbə idarəetməsi",
+        "description": "Növbənin açılması/bağlanması, nağd pul sayımı, kəsir/artıq aşkarlanması və X/Z hesabatları."
+      },
+      "digitalCard": {
+        "title": "Rəqəmsal üzvlük kartı",
+        "description": "Apple Wallet, Google Wallet və NFC — telefonunuzdan bir toxunuşla salona giriş."
+      },
+      "notifications": {
+        "title": "Bildiriş Mərkəzi",
+        "description": "Push, SMS, WhatsApp, e-poçt və Telegram bildirişləri bir yerdən idarə olunur."
+      },
+      "reports": {
+        "title": "Ətraflı Hesabat və Biznes Analitikası",
+        "description": "Ən yoğun saatlar, ən çox satan məşqçilər, gəlir və müştəri dəyəri (LTV), yeniləmə və ləğvetmə nisbətləri."
+      },
+      "insights": {
+        "title": "Süni İntellekt Analitikası",
+        "description": "Ayrılma riski daşıyan üzvləri əvvəlcədən müəyyən edin və avtomatik geri qazanma kampaniyaları təklifləri alın."
+      },
+      "enterprise": {
+        "title": "Korporativ İyerarxiya və Çoxfilial",
+        "description": "Filial, region və şirkət səviyyəsində konsolidasiya edilmiş hesabat — böyük şəbəkələr üçün nəzərdə tutulub."
+      },
+      "integrations": {
+        "title": "İnteqrasiya Bazarı",
+        "description": "Apple Health, Google Fit, SMS/WhatsApp provayderləri, mühasibat proqramları və daha çoxu ilə qoşulun."
+      },
+      "helpCenter": {
+        "title": "Rol Əsaslı İstifadə Bələdçisi",
+        "description": "Məşqçilər, qəbul, üzvlər və salon sahibləri üçün ayrıca hazırlanmış ətraflı bələdçilər."
+      }
+    }
   }
 }

@@ -12,6 +12,15 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 const RECEPTION_ROLES = new Set<OrganizationRole>(['OWNER', 'ADMIN', 'STAFF', 'TRAINER']);
+const TEAM_MANAGER_ROLES = new Set<OrganizationRole>(['OWNER', 'ADMIN']);
+
+const COMING_SOON_TEASER_FEATURES = ['trainers', 'reports', 'insights', 'notifications'] as const;
+const COMING_SOON_ICONS: Record<(typeof COMING_SOON_TEASER_FEATURES)[number], string> = {
+  trainers: '🏋️',
+  reports: '📊',
+  insights: '🤖',
+  notifications: '🔔',
+};
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -26,6 +35,7 @@ export default async function DashboardPage() {
   const tNav = await getTranslations('nav');
   const tLicense = await getTranslations('license');
   const tCommon = await getTranslations('common');
+  const tComingSoon = await getTranslations('comingSoon');
   const locale = await getLocale();
   const dateLocale = intlLocaleFor(locale);
 
@@ -102,8 +112,67 @@ export default async function DashboardPage() {
         </p>
       </section>
 
+      {license.isOperational && kpis.membershipsExpiringSoonCount > 0 ? (
+        <section className="card flex flex-col gap-3 border-amber-500/40 bg-amber-500/5 p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="font-semibold text-amber-100">
+              {t('alerts.expiringTitle', { count: kpis.membershipsExpiringSoonCount })}
+            </p>
+            <p className="muted mt-1 text-sm">{t('alerts.expiringSubtitle')}</p>
+          </div>
+          <Link href="/dashboard/members" className="button shrink-0 px-4 py-2 text-sm whitespace-nowrap">
+            {t('alerts.expiringCta')} →
+          </Link>
+        </section>
+      ) : null}
+
       {role && RECEPTION_ROLES.has(role) && license.isOperational ? (
         <ReceptionDownloadPromo variant="card" />
+      ) : null}
+
+      {license.isOperational ? (
+        <section className="card p-5">
+          <h3 className="font-semibold">{t('quickActions.title')}</h3>
+          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            <Link
+              href="/dashboard/members"
+              className="button flex flex-col items-center gap-2 py-4 text-center text-xs sm:text-sm"
+            >
+              <span className="text-xl" aria-hidden="true">➕</span>
+              {t('quickActions.newMember')}
+            </Link>
+            <Link
+              href="/dashboard/check-in"
+              className="button flex flex-col items-center gap-2 py-4 text-center text-xs sm:text-sm"
+            >
+              <span className="text-xl" aria-hidden="true">🚪</span>
+              {t('quickActions.checkIn')}
+            </Link>
+            <Link
+              href="/dashboard/pos"
+              className="button flex flex-col items-center gap-2 py-4 text-center text-xs sm:text-sm"
+            >
+              <span className="text-xl" aria-hidden="true">💳</span>
+              {t('quickActions.takePayment')}
+            </Link>
+            <Link
+              href="/dashboard/messages"
+              className="button flex flex-col items-center gap-2 py-4 text-center text-xs sm:text-sm"
+            >
+              <span className="text-xl" aria-hidden="true">💬</span>
+              {t('quickActions.sendMessage')}
+            </Link>
+            {role && TEAM_MANAGER_ROLES.has(role) ? (
+              <Link
+                href="/dashboard/team"
+                className="button flex flex-col items-center gap-2 py-4 text-center text-xs sm:text-sm"
+              >
+                <span className="text-xl" aria-hidden="true">🗂️</span>
+                {t('quickActions.viewTeam')}
+              </Link>
+            ) : null}
+          </div>
+        </section>
       ) : null}
 
       <section className="grid gap-4 md:grid-cols-3">
@@ -235,6 +304,33 @@ export default async function DashboardPage() {
             {t('teamSummary.manageLink')}
           </Link>
         </article>
+      </section>
+
+      <section className="card p-5">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <div>
+            <h3 className="font-semibold">{t('comingSoonTeaser.title')}</h3>
+            <p className="muted mt-1 text-sm">{t('comingSoonTeaser.subtitle')}</p>
+          </div>
+          <Link href="/#roadmap" className="muted text-xs hover:text-white">
+            {t('comingSoonTeaser.cta')} →
+          </Link>
+        </div>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {COMING_SOON_TEASER_FEATURES.map((feature) => (
+            <Link
+              key={feature}
+              href={`/dashboard/coming-soon/${feature}`}
+              className="rounded-xl border border-[var(--border)] p-4 text-sm transition hover:border-[#c9a962]/40 hover:bg-white/5"
+            >
+              <span className="text-xl" aria-hidden="true">
+                {COMING_SOON_ICONS[feature]}
+              </span>
+              <p className="mt-2 font-medium">{tComingSoon(`features.${feature}.title`)}</p>
+              <span className="badge mt-2 inline-block text-[10px]">{tComingSoon('badge')}</span>
+            </Link>
+          ))}
+        </div>
       </section>
     </div>
   );

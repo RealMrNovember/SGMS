@@ -31,7 +31,8 @@
     "settings": "Settings",
     "pos": "POS",
     "adminOverview": "System Overview",
-    "newCustomer": "New Customer"
+    "newCustomer": "New Customer",
+    "comingSoonGroup": "Coming Soon"
   },
   "auth": {
     "login": "Sign In",
@@ -250,6 +251,24 @@
       "title": "Team summary",
       "empty": "No staff registered yet.",
       "manageLink": "Staff management →"
+    },
+    "quickActions": {
+      "title": "Quick actions",
+      "newMember": "Add new member",
+      "checkIn": "Log a check-in",
+      "takePayment": "Take a payment",
+      "sendMessage": "Send a message",
+      "viewTeam": "Manage team"
+    },
+    "alerts": {
+      "expiringTitle": "{count} memberships expire within 7 days",
+      "expiringSubtitle": "Send a renewal reminder to reduce member churn.",
+      "expiringCta": "View members"
+    },
+    "comingSoonTeaser": {
+      "title": "What's next on the roadmap?",
+      "subtitle": "We're continuously expanding SGMS — these modules are coming to your dashboard soon.",
+      "cta": "See all"
     }
   },
   "messages": {
@@ -527,6 +546,7 @@
       "features": "Features",
       "howItWorks": "How it works",
       "why": "Why SGMS",
+      "roadmap": "Roadmap",
       "contact": "Contact",
       "login": "Sign in",
       "trial": "14-Day Trial",
@@ -578,6 +598,11 @@
         "setup": { "title": "Add team and members", "description": "Staff roles, plans, POS categories. Explore quickly with demo data." },
         "operate": { "title": "Run daily operations", "description": "Check-in, metrics, programs, payments and messaging — one platform, any device." }
       }
+    },
+    "roadmap": {
+      "kicker": "Roadmap",
+      "title": "SGMS keeps growing",
+      "subtitle": "On top of the CRM, POS, messaging, and mobile foundation you use today, we're building the modules that will turn your gym into a fully-featured operating system. The features below are in development and will land in your dashboard one by one."
     },
     "cta": {
       "title": "Try every feature for {days} days",
@@ -851,6 +876,63 @@
       "loadError": "Could not load QR code.",
       "expires": "Valid until {time}",
       "refresh": "Refresh"
+    }
+  },
+  "comingSoon": {
+    "eyebrow": "On the Roadmap",
+    "badge": "Coming Soon",
+    "backToOverview": "← Back to dashboard",
+    "seeRoadmap": "See the roadmap",
+    "footer": "This module is part of our journey to turn your gym into a fully-featured operating system. You'll be notified the moment it goes live.",
+    "features": {
+      "trainers": {
+        "title": "Trainer Performance & Commission",
+        "description": "Monthly session count, hours worked, revenue, commission, and cancellation/no-show rate for every trainer — automatically calculated, on one screen."
+      },
+      "hr": {
+        "title": "Staff Management",
+        "description": "Leave requests, weekly shift schedules, performance reviews — managing your team, digitized."
+      },
+      "equipment": {
+        "title": "Equipment & Maintenance",
+        "description": "A QR code, warranty status, service history, and maintenance schedule for every piece of equipment. Report a breakdown with one tap."
+      },
+      "cleaning": {
+        "title": "Cleaning Management",
+        "description": "Shift-based cleaning checklists with photo evidence and digital sign-off."
+      },
+      "cashShifts": {
+        "title": "Cash Register Shifts",
+        "description": "Shift open/close, cash counting, shortage/excess detection, and X/Z reports."
+      },
+      "digitalCard": {
+        "title": "Digital Membership Card",
+        "description": "Apple Wallet, Google Wallet, and NFC — enter the gym with a single tap from your phone."
+      },
+      "notifications": {
+        "title": "Notification Center",
+        "description": "Push, SMS, WhatsApp, email, and Telegram notifications, all managed from one place."
+      },
+      "reports": {
+        "title": "Advanced Reporting & BI",
+        "description": "Busiest hours, top-selling trainers, revenue and lifetime value (LTV), renewal and churn rates."
+      },
+      "insights": {
+        "title": "AI Insights",
+        "description": "Spot members at risk of churning before they leave and get automatic win-back campaign suggestions."
+      },
+      "enterprise": {
+        "title": "Enterprise Hierarchy & Multi-Branch",
+        "description": "Consolidated reporting at the branch, region, and company level — built for large chains."
+      },
+      "integrations": {
+        "title": "Integration Marketplace",
+        "description": "Connect Apple Health, Google Fit, SMS/WhatsApp providers, accounting software, and more."
+      },
+      "helpCenter": {
+        "title": "Role-Based Help Center",
+        "description": "Dedicated, in-depth guides for trainers, front-desk staff, athletes, and gym owners."
+      }
     }
   }
 }

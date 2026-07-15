@@ -773,12 +773,18 @@ input {
 .marketing-header-nav {
   display: none;
   align-items: center;
-  gap: 1.5rem;
+  gap: 0.9rem;
 }
 
 @media (min-width: 768px) {
   .marketing-header-nav {
     display: flex;
+  }
+}
+
+@media (min-width: 1024px) {
+  .marketing-header-nav {
+    gap: 1.5rem;
   }
 }
 

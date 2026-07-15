@@ -31,7 +31,8 @@
     "settings": "Ayarlar",
     "pos": "Kasa",
     "adminOverview": "Sistem Özeti",
-    "newCustomer": "Yeni Müşteri"
+    "newCustomer": "Yeni Müşteri",
+    "comingSoonGroup": "Yakında"
   },
   "auth": {
     "login": "Giriş Yap",
@@ -250,6 +251,24 @@
       "title": "Ekip özeti",
       "empty": "Henüz personel kaydı yok.",
       "manageLink": "Personel yönetimi →"
+    },
+    "quickActions": {
+      "title": "Hızlı işlemler",
+      "newMember": "Yeni üye ekle",
+      "checkIn": "Giriş kaydet",
+      "takePayment": "Tahsilat al",
+      "sendMessage": "Mesaj gönder",
+      "viewTeam": "Ekibi yönet"
+    },
+    "alerts": {
+      "expiringTitle": "{count} üyeliğin süresi 7 gün içinde doluyor",
+      "expiringSubtitle": "Yenileme hatırlatması göndererek üye kaybını önleyin.",
+      "expiringCta": "Üyeleri gör"
+    },
+    "comingSoonTeaser": {
+      "title": "Yol haritasında sırada ne var?",
+      "subtitle": "SGMS'i sürekli genişletiyoruz — aşağıdaki modüller yakında panelinizde olacak.",
+      "cta": "Tamamını gör"
     }
   },
   "messages": {
@@ -527,6 +546,7 @@
       "features": "Özellikler",
       "howItWorks": "Nasıl Çalışır",
       "why": "Neden SGMS",
+      "roadmap": "Yol Haritası",
       "contact": "İletişim",
       "login": "Giriş Yap",
       "trial": "14 Gün Deneyin",
@@ -578,6 +598,11 @@
         "setup": { "title": "Ekibinizi ve üyelerinizi ekleyin", "description": "Personel rolleri, üyelik planları, POS kategorileri. Demo verilerle hızlı keşif mümkün." },
         "operate": { "title": "Günlük operasyonu yönetin", "description": "Check-in, ölçüm, program, tahsilat ve mesajlaşma — tek platformdan, her cihazdan." }
       }
+    },
+    "roadmap": {
+      "kicker": "Yol Haritası",
+      "title": "SGMS büyümeye devam ediyor",
+      "subtitle": "Bugün kullandığınız CRM, POS, mesajlaşma ve mobil altyapının üzerine; salonunuzu tam kapsamlı bir işletim sistemine dönüştürecek yeni modülleri inşa ediyoruz. Aşağıdaki özellikler geliştirme aşamasında ve panelinize sırasıyla eklenecek."
     },
     "cta": {
       "title": "{days} gün boyunca tüm özellikleri deneyin",
@@ -854,6 +879,63 @@
       "loadError": "QR kodu alınamadı.",
       "expires": "Geçerlilik: {time}",
       "refresh": "Yenile"
+    }
+  },
+  "comingSoon": {
+    "eyebrow": "Yol Haritasında",
+    "badge": "Çok Yakında",
+    "backToOverview": "← Panele dön",
+    "seeRoadmap": "Yol haritasını gör",
+    "footer": "Bu modül, salonunuzu tam kapsamlı bir işletim sistemine dönüştürme yolculuğumuzun bir parçası. Yayına girdiğinde bildirim alacaksınız.",
+    "features": {
+      "trainers": {
+        "title": "PT Performans & Prim Yönetimi",
+        "description": "Antrenörlerinizin aylık ders sayısı, çalıştığı saat, cirosu, primi ve iptal/no-show oranı — tek ekranda, otomatik hesaplanmış."
+      },
+      "hr": {
+        "title": "Personel Yönetimi",
+        "description": "İzin talepleri, haftalık vardiya planı, performans değerlendirmesi — ekibinizi yönetmenin dijital hâli."
+      },
+      "equipment": {
+        "title": "Ekipman & Bakım Yönetimi",
+        "description": "Her ekipmanın QR kodu, garanti durumu, servis geçmişi ve bakım takvimi. Arıza bildirimi tek dokunuşla."
+      },
+      "cleaning": {
+        "title": "Temizlik Yönetimi",
+        "description": "Vardiya bazlı temizlik kontrol listeleri, fotoğraflı kayıt ve dijital onay imzası."
+      },
+      "cashShifts": {
+        "title": "Kasa Vardiya Yönetimi",
+        "description": "Vardiya açma/kapama, nakit sayımı, açık/fazla tespiti ve X/Z raporları."
+      },
+      "digitalCard": {
+        "title": "Dijital Üyelik Kartı",
+        "description": "Apple Wallet, Google Wallet ve NFC ile telefonunuzdan tek dokunuşla salona giriş."
+      },
+      "notifications": {
+        "title": "Bildirim Merkezi",
+        "description": "Push, SMS, WhatsApp, e-posta ve Telegram bildirimleri tek yerden yönetilsin."
+      },
+      "reports": {
+        "title": "İleri Raporlama & İş Zekası",
+        "description": "En yoğun saatler, en çok satan PT, gelir/üye yaşam boyu değeri (LTV), yenileme ve iptal oranları."
+      },
+      "insights": {
+        "title": "Yapay Zeka Öngörüleri",
+        "description": "Ayrılma riski taşıyan üyeleri önceden tespit edin, otomatik geri kazanma kampanyaları önerileri alın."
+      },
+      "enterprise": {
+        "title": "Kurumsal Hiyerarşi & Çoklu Şube",
+        "description": "Şube, bölge ve şirket seviyesinde konsolide raporlama — büyük zincirler için tasarlandı."
+      },
+      "integrations": {
+        "title": "Entegrasyon Pazaryeri",
+        "description": "Apple Health, Google Fit, SMS/WhatsApp servisleri, muhasebe yazılımları ve daha fazlasıyla bağlanın."
+      },
+      "helpCenter": {
+        "title": "Rol Bazlı Kullanım Kılavuzu",
+        "description": "PT, resepsiyon, sporcu ve salon sahibi için ayrı ayrı hazırlanmış detaylı kullanım rehberleri."
+      }
     }
   }
 }

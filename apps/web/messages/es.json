@@ -29,7 +29,8 @@
     "team": "Personal",
     "pos": "Caja",
     "adminOverview": "Resumen del sistema",
-    "newCustomer": "Nuevo cliente"
+    "newCustomer": "Nuevo cliente",
+    "comingSoonGroup": "Próximamente"
   },
   "auth": {
     "login": "Iniciar sesión",
@@ -247,6 +248,24 @@
       "title": "Resumen del equipo",
       "empty": "Aún no hay personal registrado.",
       "manageLink": "Gestión de personal →"
+    },
+    "quickActions": {
+      "title": "Acciones rápidas",
+      "newMember": "Añadir nuevo miembro",
+      "checkIn": "Registrar entrada",
+      "takePayment": "Cobrar un pago",
+      "sendMessage": "Enviar un mensaje",
+      "viewTeam": "Gestionar equipo"
+    },
+    "alerts": {
+      "expiringTitle": "{count} membresías vencen en 7 días",
+      "expiringSubtitle": "Envíe un recordatorio de renovación para reducir la pérdida de socios.",
+      "expiringCta": "Ver miembros"
+    },
+    "comingSoonTeaser": {
+      "title": "¿Qué sigue en la hoja de ruta?",
+      "subtitle": "Estamos ampliando SGMS constantemente — estos módulos llegarán pronto a su panel.",
+      "cta": "Ver todo"
     }
   },
   "messages": {
@@ -515,6 +534,7 @@
       "features": "Features",
       "howItWorks": "How it works",
       "why": "Why SGMS",
+      "roadmap": "Hoja de ruta",
       "contact": "Contact",
       "login": "Sign in",
       "trial": "14-Day Trial",
@@ -623,6 +643,11 @@
         }
       }
     },
+    "roadmap": {
+      "kicker": "Hoja de ruta",
+      "title": "SGMS sigue creciendo",
+      "subtitle": "Sobre la base de CRM, caja, mensajería y móvil que ya utiliza, estamos construyendo los módulos que convertirán su gimnasio en un sistema operativo completo. Las siguientes funciones están en desarrollo y llegarán a su panel una por una."
+    },
     "cta": {
       "title": "Try every feature for {days} days",
       "subtitle": "Register as gym owner, invite your team and test real workflows.",
@@ -726,5 +751,62 @@
     "auditSubtitle": "Recent platform and customer events.",
     "communicationsTitle": "Communication templates",
     "communicationsSubtitle": "Ready email copy for customer outreach. Customer detail pages use personalized versions."
+  },
+  "comingSoon": {
+    "eyebrow": "En la hoja de ruta",
+    "badge": "Próximamente",
+    "backToOverview": "← Volver al panel",
+    "seeRoadmap": "Ver la hoja de ruta",
+    "footer": "Este módulo forma parte de nuestro camino para convertir su gimnasio en un sistema operativo completo. Le avisaremos en cuanto esté disponible.",
+    "features": {
+      "trainers": {
+        "title": "Rendimiento y comisiones de entrenadores",
+        "description": "Sesiones mensuales, horas trabajadas, ingresos, comisión y tasa de cancelación/inasistencia de cada entrenador, calculado automáticamente en una sola pantalla."
+      },
+      "hr": {
+        "title": "Gestión de personal",
+        "description": "Solicitudes de permiso, turnos semanales y evaluaciones de desempeño — la gestión de su equipo, digitalizada."
+      },
+      "equipment": {
+        "title": "Equipamiento y mantenimiento",
+        "description": "Código QR, estado de garantía, historial de servicio y calendario de mantenimiento para cada equipo. Reporte una avería con un toque."
+      },
+      "cleaning": {
+        "title": "Gestión de limpieza",
+        "description": "Listas de verificación de limpieza por turno, con evidencia fotográfica y firma digital."
+      },
+      "cashShifts": {
+        "title": "Gestión de turnos de caja",
+        "description": "Apertura/cierre de turno, conteo de efectivo, detección de faltantes/sobrantes e informes X/Z."
+      },
+      "digitalCard": {
+        "title": "Tarjeta de socio digital",
+        "description": "Apple Wallet, Google Wallet y NFC — entre al gimnasio con un solo toque desde su teléfono."
+      },
+      "notifications": {
+        "title": "Centro de notificaciones",
+        "description": "Notificaciones por push, SMS, WhatsApp, correo y Telegram, gestionadas desde un solo lugar."
+      },
+      "reports": {
+        "title": "Informes avanzados e inteligencia de negocio",
+        "description": "Horas de mayor afluencia, entrenadores más vendidos, ingresos y valor de vida del cliente (LTV), tasas de renovación y cancelación."
+      },
+      "insights": {
+        "title": "Perspectivas de inteligencia artificial",
+        "description": "Detecte a los socios con riesgo de baja antes de que se vayan y reciba sugerencias automáticas de campañas de recuperación."
+      },
+      "enterprise": {
+        "title": "Jerarquía corporativa y multi-sucursal",
+        "description": "Informes consolidados a nivel de sucursal, región y empresa — diseñado para grandes cadenas."
+      },
+      "integrations": {
+        "title": "Mercado de integraciones",
+        "description": "Conecte Apple Health, Google Fit, proveedores de SMS/WhatsApp, software contable y más."
+      },
+      "helpCenter": {
+        "title": "Centro de ayuda por rol",
+        "description": "Guías detalladas y específicas para entrenadores, recepción, socios y propietarios de gimnasios."
+      }
+    }
   }
 }

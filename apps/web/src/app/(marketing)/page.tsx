@@ -16,6 +16,22 @@ const STAT_KEYS = ['members', 'languages', 'uptime', 'trial'] as const;
 const STEP_KEYS = ['register', 'setup', 'operate'] as const;
 const WHY_KEYS = ['fragmented', 'international', 'finance', 'athlete'] as const;
 
+const ROADMAP_ICONS: Record<string, string> = {
+  trainers: '🏋️',
+  hr: '🗂️',
+  equipment: '🛠️',
+  cleaning: '🧹',
+  cashShifts: '💵',
+  digitalCard: '📱',
+  notifications: '🔔',
+  reports: '📊',
+  insights: '🤖',
+  enterprise: '🏢',
+  integrations: '🔌',
+  helpCenter: '📖',
+};
+const ROADMAP_KEYS = Object.keys(ROADMAP_ICONS) as (keyof typeof ROADMAP_ICONS)[];
+
 export default async function ShowcaseHomePage() {
   const session = await auth();
   if (session?.user) {
@@ -29,6 +45,7 @@ export default async function ShowcaseHomePage() {
   }
 
   const t = await getTranslations('marketing');
+  const tComingSoon = await getTranslations('comingSoon');
 
   return (
     <>
@@ -129,6 +146,32 @@ export default async function ShowcaseHomePage() {
             </MarketingReveal>
           ))}
         </MarketingStepsGrid>
+      </section>
+
+      <section id="roadmap" className="mx-auto max-w-6xl px-4 py-12 sm:px-5 sm:py-16 lg:px-8">
+        <MarketingReveal>
+          <div className="max-w-2xl">
+            <p className="marketing-kicker">{t('roadmap.kicker')}</p>
+            <h2 className="mt-4 text-2xl font-semibold tracking-tight sm:text-3xl">{t('roadmap.title')}</h2>
+            <p className="muted mt-4 text-sm leading-7">{t('roadmap.subtitle')}</p>
+          </div>
+        </MarketingReveal>
+
+        <MarketingStagger className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3" staggerMs={60}>
+          {ROADMAP_KEYS.map((key) => (
+            <div
+              key={key}
+              className="rounded-xl border border-[rgba(148,163,184,0.12)] bg-[rgba(11,18,32,0.55)] p-5"
+            >
+              <span className="text-xl" aria-hidden="true">
+                {ROADMAP_ICONS[key]}
+              </span>
+              <h3 className="mt-3 font-medium">{tComingSoon(`features.${key}.title`)}</h3>
+              <p className="muted mt-2 text-sm leading-6">{tComingSoon(`features.${key}.description`)}</p>
+              <span className="badge mt-3 inline-block text-[10px]">{tComingSoon('badge')}</span>
+            </div>
+          ))}
+        </MarketingStagger>
       </section>
 
       <section className="mx-auto max-w-6xl px-4 pb-24 sm:px-5 lg:px-8 lg:pb-20">

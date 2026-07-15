@@ -52,10 +52,24 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 14 | Demo Hesap Güvenliği & Master Admin Geçişi | ✅ Tamamlandı | 100% |
 | 15 | Kimlik, Onboarding & Uyum Sertleştirme | ✅ Tamamlandı | ~95% (proaktif hatırlatma + 6 dil çevirisi kaldı) |
 | 16 | CiciByte Cloud Ticari Entegrasyonu (Ödeme, Referans/Komisyon, Release) | 🔄 Devam ediyor | ~80% (gerçek iyzico anahtarı + sandbox kapatma bekliyor) |
-| 17 | Büyüme Özellikleri (Dondurma, Rezervasyon, Kupon, Çoklu Şube) | 🔲 Planlandı | 0% |
+| 17 | Üyelik Senaryoları & Ders/Sınıf Yönetimi | 🔲 Planlandı | 0% |
 | 18 | Uyumluluk & Sağlamlaştırma (2FA, GDPR, E2E, Invoice) | 🔲 Planlandı | 0% |
 | 19 | SGMS Masaüstü — Genişletme | 🔲 Gelecek Vizyon | 0% |
 | 20 | SGMS Mobil Uygulama | 🔲 Gelecek Vizyon | 0% |
+| 21 | PT Performans, Komisyon & Prim Yönetimi | 🔲 Planlandı | 0% |
+| 22 | Personel Yönetimi / HR | 🔲 Planlandı | 0% |
+| 23 | Ekipman Yönetimi & Bakım Planları | 🔲 Planlandı | 0% |
+| 24 | Temizlik Yönetimi | 🔲 Planlandı | 0% |
+| 25 | Kasa Yönetimi (Vardiya, X/Z Raporu) | 🔲 Planlandı | 0% |
+| 26 | Dijital Üyelik Kartı (Wallet/NFC) | 🔲 Planlandı | 0% |
+| 27 | Bildirim Merkezi (Push/SMS/WhatsApp/Mail) | 🔲 Planlandı | 0% |
+| 28 | İleri Raporlama & Business Intelligence | 🔲 Planlandı | 0% |
+| 29 | Yapay Zeka Öngörüleri | 🔲 Planlandı | 0% |
+| 30 | Kurumsal Hiyerarşi & Çoklu Şube/Bölge Yönetimi | 🔲 Planlandı | 0% |
+| 31 | Entegrasyon Pazaryeri | 🔲 Planlandı | 0% |
+| 32 | Ticarileştirme: Paket & Ek Kapasite Satışı | 🔲 Planlandı | 0% |
+| 33 | Dinamik Rol Bazlı Kullanım Kılavuzu | 🔲 Planlandı | 0% |
+| 34 | Tam Responsive Tasarım Sistemi | 🔄 Devam ediyor | ~10% (dashboard nav düzeltmesi tamamlandı) |
 
 > Fazlar 6/9/10'un durum özeti önceki revizyonlarda detay bölümleriyle **çelişiyordu** (özet tablo güncellenmeden unutulmuştu). Bu revizyon koda göre (tüm alt maddeler `[x]`, gerçek commit geçmişi) düzeltilmiştir.
 
@@ -551,19 +565,43 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ---
 
-## 🔲 Faz 17 — Büyüme Özellikleri (Öncelik: P1)
+## 🔲 Faz 17 — Üyelik Senaryoları & Ders/Sınıf Yönetimi (Öncelik: P1)
 
-> Ürün denetiminin "Önemli" bulgularından — bugün kırmıyor ama Franchise planının gerçek bir vaadi olması ve rekabet için gerekli.
+> **Kullanıcı notu (2026-07-15):** *"Adam 12 aylık aldı, 3 ay sonra askere gitti, üyelik donduruldu, sonra eşine devretti... kurumsal üyelik, aile paketi, çift paketi, çocuk üyeliği — bunlar oldukça yaygın."* Gerçek bir salonda üyelik tek bir "aktif/pasif" durumu değil; bir **yaşam döngüsü**dür. Bu faz, ürün denetiminin "Önemli" bulgusu olan büyüme özelliklerini gerçek hayat senaryolarıyla derinleştirir.
 
-- [ ] Üyelik dondurma/pause — `GymMemberStatus`'a `FROZEN` eklenir, dondurma süresi kadar `membershipEndsAt` otomatik kayar
-- [ ] Sınıf/ders rezervasyon sistemi — yeni `GymClass` + `ClassBooking` modelleri, kontenjan ve bekleme listesi
-- [ ] İndirim/kupon/referans kodu sistemi — `DiscountCode` modeli, `/trial` ve plan değişikliğinde uygulanabilir
-- [ ] Çoklu şube (franchise) veri modeli — `Organization` üstüne opsiyonel `parentOrganizationId` (self-relation), konsolide raporlama
-- [ ] POS stok/envanter takibi — `ExpenseCategory`'ye `stockQuantity`, satışta otomatik düşüm, düşük stok uyarısı
+### 17.1 Üyelik dondurma/erteleme
+- [ ] `GymMemberStatus`'a `FROZEN` eklenir; `MembershipFreeze` modeli (`startDate`, `endDate`, `reason`: `MILITARY`/`MEDICAL`/`TRAVEL`/`OTHER`, `approvedById`)
+- [ ] Dondurma süresi kadar `membershipEndsAt` otomatik ileri kayar (askerlik/sağlık raporu gibi belgeli durumlarda süre sınırı yok, kişisel tercihte örn. yılda max 60 gün gibi salon ayarı)
+- [ ] Sporcu portalından dondurma talebi oluşturma → resepsiyon/OWNER onayı akışı
 
-**Kabul kriteri:** Bir üye 1 aylık dondurma talep edebiliyor · pilates dersine kontenjan dahilinde kayıt olunabiliyor · 3 şubeli bir zincir tek panelden konsolide rapor görebiliyor
+### 17.2 Üyelik devri ve hak satışı
+- [ ] **Senaryo — devir:** Üye A, kalan 9 aylık üyeliğini eşi/aile bireyi Üye B'ye devrediyor. `MembershipTransfer` kaydı (`fromMemberId`, `toMemberId`, `transferredAt`, `remainingDays`, `approvedById`) — yeni üye mevcut kayıtları (ölçüm geçmişi vb.) devralmaz, yalnızca kalan süre ve plan aktarılır
+- [ ] **Senaryo — kalan hakkın iadesi/satışı:** Üye ayrılırken kalan gün karşılığı cari hesaba kısmi iade veya sonraki faturaya mahsup (`Expense` ile entegre)
 
-**Bağımlılık:** Faz 15 (arama/filtre altyapısı, yeni listelerde de kullanılacak)
+### 17.3 Kurumsal, aile, çift ve çocuk üyelikleri
+- [ ] `MembershipGroupType`: `INDIVIDUAL` / `COUPLE` / `FAMILY` / `CORPORATE`
+- [ ] `MembershipGroup` modeli — bir kurumsal/aile paketine bağlı birden fazla `GymMember`, ortak faturalandırma (tek `Organization`'a değil, tek bir grup cari hesabına borç yazılır) ve grup içi toplu iskonto oranı
+- [ ] Kurumsal üyelikte İK/firma yetkilisi için "şirket panosu" (kaç çalışanı üye, kullanım oranı) — büyük şirket anlaşmaları (banka, holding vb.) için satış aracı
+- [ ] Çocuk üyeliği: veli/vasi bilgisi zorunlu alan, 18 yaş altı için ayrı onay/rıza akışı (KVKK açısından da önemli — veli onayı olmadan çocuk verisi işlenemez)
+
+### 17.4 Ders/Sınıf Yönetimi (Group Class Scheduling)
+> **Senaryo:** Pazartesi 18:00 Pilates dersi, eğitmen Ayşe, A Salonu, 15 kişi kapasiteli. 15. kişi kayıt olduğunda sistem otomatik bekleme listesine alır; biri iptal ederse sıradaki kişiye SMS/push ile "yeriniz açıldı, 15 dakika içinde onaylayın" bildirimi gider.
+- [ ] `GymClass` modeli — `name` (Yoga/Pilates/Crossfit/Spinning/serbest), `trainerId`, `roomName`, `capacity`, `durationMinutes`, tekrarlayan program (`RRULE` benzeri haftalık şablon)
+- [ ] `ClassSession` — `GymClass`'ın belirli bir tarih/saatteki somut oturumu (eğitmen değişikliği, iptal, kapasite override edilebilir)
+- [ ] `ClassBooking` — üye kaydı, `status`: `BOOKED`/`WAITLISTED`/`CANCELLED`/`ATTENDED`/`NO_SHOW`, bekleme listesi otomatik sıraya alma + boşalınca otomasyon
+- [ ] Sporcu portalı: haftalık ders programı görünümü, tek tıkla kayıt/iptal
+- [ ] QR ile derse giriş — mevcut check-in altyapısı (Faz 10) genişletilir: `CheckIn`'e opsiyonel `classSessionId` bağlanır, derse kayıtlı olmayan biri QR okutursa net bir uyarı verir
+- [ ] Resepsiyon/PT paneli: günlük ders akışı, yoklama alma (attendance) ekranı
+
+### 17.5 İndirim/kupon/referans kodu sistemi
+- [ ] `DiscountCode` modeli — sabit tutar/yüzde, kullanım limiti, geçerlilik tarihi, `/trial` ve plan değişikliğinde uygulanabilir
+
+### 17.6 POS stok/envanter takibi
+- [ ] `ExpenseCategory`'ye `stockQuantity`, satışta otomatik düşüm, düşük stok uyarısı (dashboard KPI'sına eklenir)
+
+**Kabul kriteri:** Bir üye askerlik nedeniyle üyeliğini dondurabiliyor ve eşine devredebiliyor · bir şirket 50 çalışanı için kurumsal üyelik alıp kullanım oranını görebiliyor · pilates dersine kontenjan dahilinde kayıt olunup QR ile girilebiliyor, kontenjan dolunca bekleme listesi otomatik işliyor
+
+**Bağımlılık:** Faz 15 (arama/filtre altyapısı) · Faz 27 (Bildirim Merkezi — bekleme listesi bildirimleri için)
 
 ---
 
@@ -609,6 +647,272 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ---
 
+# Genişleme Vizyonu — "Tam Kapsamlı Spor Salonu İşletim Sistemi" (Faz 21-34)
+
+> **Kaynak:** Kullanıcı talebi, 2026-07-15 — *"PT tarafı daha derin olabilir... gerçek salonlarda bunlar önemli."* Bu bölüm, SGMS'i basit bir üye takip sisteminden gerçek bir **spor salonu ERP'sine** taşıyacak 14 yeni fazı, gerçek işletme senaryolarıyla birlikte tanımlar. Fazlar önceliklendirilmiştir ama bağımsız modüller olarak da başlatılabilir — hiçbiri bir öncekinin bitmesini zorunlu kılmaz (Faz 21 hariç, çünkü PT prim/komisyon hesaplaması POS/Transaction üzerine kuruludur).
+
+## 🔲 Faz 21 — PT (Personal Trainer) Performans, Komisyon & Prim Yönetimi (Öncelik: P1)
+
+> **Senaryo:** Salon sahibi ay sonunda "Mehmet Hoca bu ay kaç ders verdi, ne kadar ciro yaptı, primi ne kadar?" sorusuna bugün cevap veremiyor — yalnızca "bir antrenöre atanmış üyeler" görünüyor, performans verisi yok.
+
+- [ ] `TrainerProfile` modeli (User'a 1-1 bağlı) — `commissionModel`: `FIXED_PER_SESSION` / `PERCENTAGE_OF_REVENUE` / `TIERED`, `baseCommissionRate`, `hourlyRate` (maaşlı personel için)
+- [ ] `PtSession` modeli — `trainerId`, `gymMemberId`, `scheduledAt`, `durationMinutes`, `status`: `COMPLETED`/`CANCELLED_BY_MEMBER`/`CANCELLED_BY_TRAINER`/`NO_SHOW`, `revenueAmount` (o seansa karşılık gelen `Expense`/`Transaction` ile ilişkili)
+- [ ] Otomatik hesaplananlar (aylık, PT bazında): toplam seans sayısı, toplam çalışılan saat, brüt ciro, hak edilen komisyon/prim, iptal edilen ders sayısı ve **no-show oranı** (üyenin gelmediği ama PT'nin saatinin boşa gittiği durumlar — no-show ücretlendirme politikası salon ayarlarında tanımlanabilir)
+- [ ] `/dashboard/trainers` — PT listesi + aylık performans kartları (OWNER/ADMIN görür); `/dashboard/trainers/[id]` — tek PT'nin detaylı karnesi
+- [ ] PT'nin kendi görünümü (`/athlete`'e benzer, ama personel tarafı): kendi seans takvimi, aylık prim özeti — bordroya taşınabilir CSV export
+- [ ] Aylık prim hesabı, POS/Kasa modülüyle (Faz 8) entegre — PT primi otomatik bir `Expense`/ödeme kalemine dönüşebilir (bordro değil, ama muhasebeye aktarılabilir bir özet)
+
+**Kabul kriteri:** Salon sahibi ay sonunda her PT için ciro/seans/saat/prim/iptal/no-show özetini tek ekrandan görebiliyor
+
+**Bağımlılık:** Faz 8 (POS/cari hesap) ✅ · Faz 17.4 (ders yönetimi, grup dersi veren PT'ler için)
+
+---
+
+## 🔲 Faz 22 — Personel Yönetimi / HR (Öncelik: P2)
+
+> **Senaryo:** Resepsiyonist Ayşe hafta sonu izin istiyor, salon sahibi kimin hangi vardiyada olduğunu bir WhatsApp grubundan takip ediyor. 10+ personelli bir salonda bu sürdürülemez.
+
+- [ ] `LeaveRequest` — izin talebi (`type`: yıllık/mazeret/sağlık, `startDate`/`endDate`, `status`: beklemede/onaylı/reddedildi), OWNER/ADMIN onay akışı
+- [ ] `Shift` / `ShiftAssignment` — haftalık vardiya planlama takvimi, personel kendi vardiyasını görebilir, çakışma uyarısı
+- [ ] `PerformanceReview` — periyodik değerlendirme kaydı (serbest metin + puanlama), yalnızca OWNER/ADMIN erişimi
+- [ ] `DisciplinaryRecord` — uyarı/tutanak kaydı (hassas veri, sıkı yetkilendirme + audit log)
+- [ ] Maaş/prim alanı — SGMS bir bordro sistemi **olmayacak** (bu, muhasebe yazılımlarının işi — bkz. Faz 31 Entegrasyon Pazaryeri), ama temel `baseSalary` + prim özeti alanları tutulup dışa aktarılabilir (CSV/Excel), böylece mevcut muhasebe/bordro yazılımına aktarılabilir
+- [ ] `/dashboard/hr` — personel özet paneli: kim izinli, kim bugün vardiyada, bekleyen izin talepleri
+
+**Kabul kriteri:** Bir personel izin talebi oluşturup onay bekleyebiliyor · haftalık vardiya çizelgesi tüm ekip tarafından görülebiliyor
+
+**Bağımlılık:** Faz 1 (Team/personel modeli) ✅ — bu faz mevcut `OrganizationMember` üzerine inşa edilir
+
+---
+
+## 🔲 Faz 23 — Ekipman Yönetimi & Bakım Planları (Öncelik: P2)
+
+> **Senaryo:** Koşu bandı arızalandı → servis çağrıldı → garantisi var mı? → son bakım tarihi ne zamandı? → bir sonraki bakım ne zaman? Bugün bu bilgi bir Excel dosyasında ya da hiçbir yerde yok. Ekipman yönetimi, büyük gym zincirlerinde standart bir modüldür.
+
+### 23.1 Ekipman Envanteri
+- [ ] `GymEquipment` modeli — `name`, `category` (kardiyo/ağırlık/grup dersi ekipmanı), `serialNumber`, `purchaseDate`, `purchasePrice`, `warrantyExpiresAt`, `location` (hangi salon/oda), `qrCode` (benzersiz, ekipman üzerine yapıştırılan fiziksel QR ile eşleşir), fotoğraflar (mevcut avatar/storage altyapısı — `lib/storage.ts` — yeniden kullanılır)
+- [ ] `EquipmentStatus`: `OPERATIONAL` / `UNDER_MAINTENANCE` / `OUT_OF_SERVICE` / `RETIRED`
+
+### 23.2 Servis ve Bakım Geçmişi
+- [ ] `EquipmentServiceLog` — `reportedAt`, `reportedById` (QR okutup arıza bildiren personel), `issueDescription`, `serviceProvider`, `serviceDate`, `cost`, `warrantyClaim` (bool), fotoğraf ekleme
+- [ ] `MaintenanceSchedule` — periyodik bakım planı (yalnızca ekipman değil, **tesisin geneli**: klima, sauna, havuz, buhar odası, filtreler) — `frequency` (aylık/3 aylık/yıllık), `nextDueDate`, otomatik hatırlatma (Faz 27 Bildirim Merkezi ile)
+- [ ] QR okutarak arıza bildirme: personel telefonuyla ekipman üzerindeki QR'ı okutur → o ekipmanın sayfası açılır → "Arıza Bildir" butonu → fotoğraf + açıklama
+
+**Kabul kriteri:** Bir koşu bandının QR kodu okutulduğunda garanti durumu, son/sonraki bakım tarihi ve servis geçmişi görülebiliyor · bakımı yaklaşan ekipmanlar için otomatik hatırlatma gidiyor
+
+**Bağımlılık:** Faz 27 (Bildirim Merkezi, bakım hatırlatmaları için) — modülün kendisi bağımsız başlatılabilir
+
+---
+
+## 🔲 Faz 24 — Temizlik Yönetimi (Öncelik: P3)
+
+> **Senaryo:** Sabah vardiyasında temizlik personeli soyunma odası, duş, havuz ve kardiyo alanını temizler, her birini işaretleyip imzalar. Büyük zincirlerde (özellikle havuzlu/spa'lı tesislerde) bu bir hijyen/denetim gerekliliğidir.
+
+- [ ] `CleaningChecklistTemplate` — salon bazında tanımlanabilir kontrol listesi şablonu (ör. "Sabah Açılış", "Akşam Kapanış"), madde listesi (soyunma odası, duş, havuz, kardiyo alanı vb.)
+- [ ] `CleaningChecklistRun` — bir vardiyada doldurulan somut kayıt: her madde için işaretleme + opsiyonel fotoğraf + personelin dijital imzası (mevcut oturum/kimlik doğrulamasıyla — gerçek imza atma değil, "onaylıyorum" tıklaması + zaman damgası + kullanıcı kimliği, hukuken yeterli bir denetim izi)
+- [ ] `/dashboard/cleaning` — günlük checklist durumu, tamamlanmamış maddeler için OWNER/ADMIN'e uyarı
+
+**Kabul kriteri:** Sabah vardiyası temizlik listesini işaretleyip onaylayabiliyor, salon sahibi günün tüm checklist'lerinin tamamlanma durumunu görebiliyor
+
+**Bağımlılık:** yok — bağımsız, düşük karmaşıklıkta bir modül
+
+---
+
+## 🔲 Faz 25 — Kasa Yönetimi (Vardiya, X/Z Raporu) (Öncelik: P2)
+
+> **Senaryo:** Sabah kasaya 1000 TL nakit konuyor. Akşam sayımda 980 TL çıkıyor. Neden? Kasada açık mı var, fazla mı var, hangi vardiyada oldu? Mevcut POS (Faz 8) yalnızca borç/tahsilat kaydediyor — gerçek bir "kasa açılış/kapanış" disiplini yok.
+
+- [ ] `CashRegisterShift` modeli — `openedById`, `openedAt`, `openingBalance` (sayılan nakit), `closedById`, `closedAt`, `closingBalanceExpected` (sistem hesaplaması: açılış + nakit tahsilatlar − nakit iadeler), `closingBalanceCounted` (personelin fiilen saydığı), `discrepancy` (fark, otomatik hesaplanır ve **sıfır değilse** vurgulanır)
+- [ ] Vardiya kapanışında **X Raporu** (vardiya devam ederken ara özet, kasayı sıfırlamaz) ve **Z Raporu** (vardiya kapanış — gün/vardiya sonu kesin özet, ödeme yöntemine göre kırılım: nakit/kart/havale)
+- [ ] Her `Transaction`, açık bir `CashRegisterShift`'e bağlanır — vardiya kapalıyken POS'ta nakit tahsilat girilemez (kart/havale girilebilir)
+- [ ] `/dashboard/pos` üzerine vardiya açma/kapama akışı eklenir, `/dashboard/pos/shifts` — geçmiş vardiya raporları arşivi
+
+**Kabul kriteri:** Bir resepsiyonist vardiya açıp kapatabiliyor, kapanışta beklenen/sayılan tutar farkı otomatik hesaplanıp gösteriliyor, Z raporu PDF/CSV olarak alınabiliyor
+
+**Bağımlılık:** Faz 8 (POS & Transaction modeli) ✅
+
+---
+
+## 🔲 Faz 26 — Dijital Üyelik Kartı (Öncelik: P2)
+
+> **Senaryo:** Üye salona giderken fiziksel kart taşımak istemiyor, telefonunun kilit ekranından tek dokunuşla giriş yapmak istiyor.
+
+- [ ] **Apple Wallet / Google Wallet** entegrasyonu — mevcut QR check-in token'ı (Faz 10, `lib/check-in/qr-token.ts`) bir `.pkpass` (Apple) / Google Wallet nesnesine gömülür; üyelik durumu değiştiğinde (dondurma, süre bitişi) kart otomatik güncellenir/geçersiz kılınır
+- [ ] **NFC kart** desteği — mevcut `rfidTag` altyapısı (Faz 10) zaten hazır; fiziksel NFC kart basımı için üçüncü parti kart üretici entegrasyonu (opsiyonel, salon tercihine bağlı)
+- [ ] **iOS/Android widget** — sporcu mobil uygulaması (Faz 20) çıkınca, ana ekrandan tek dokunuşla QR gösterimi
+
+**Kabul kriteri:** Bir üye Apple Wallet'a eklediği SGMS kartıyla turnikeden geçebiliyor, üyeliği donunca kart otomatik pasif görünüyor
+
+**Bağımlılık:** Faz 10 (QR/RFID altyapısı) ✅ · Faz 20 (mobil uygulama, widget için)
+
+---
+
+## 🔲 Faz 27 — Bildirim Merkezi (Öncelik: P1)
+
+> **Hedef:** Push, SMS, WhatsApp, e-posta ve (opsiyonel) Telegram bildirimlerinin **tek bir yerden** yönetilmesi — bugün her kanal (varsa) ayrı ayrı, tutarsız şekilde tetikleniyor.
+
+- [ ] `NotificationTemplate` — kanal bazlı şablon (`channel`: `EMAIL`/`SMS`/`WHATSAPP`/`PUSH`/`TELEGRAM`, `trigger`: `TRIAL_ENDING`/`MEMBERSHIP_EXPIRING`/`CLASS_WAITLIST_OPENED`/`MAINTENANCE_DUE`/`PAYMENT_FAILED`/... — Faz 15-26'daki her modülün tetiklediği olaylar burada toplanır)
+- [ ] `NotificationLog` — gönderim geçmişi, teslim durumu (gönderildi/başarısız/okundu — kanal destekliyorsa)
+- [ ] Kanal sağlayıcıları: E-posta zaten hazır (Faz 15.1, cloud.cicibyte.com mail-relay); SMS ve WhatsApp Business API için Faz 31 Entegrasyon Pazaryeri'nde sağlayıcı seçimi (Twilio, Netgsm, WhatsApp Cloud API gibi) yapılır — bu faz, **soyutlama katmanını** kurar (`NotificationDispatcher` arayüzü), gerçek sağlayıcı entegrasyonu Faz 31'de eklenir
+- [ ] `/dashboard/settings` → Bildirim tercihleri: hangi olay hangi kanaldan gitsin (salon bazında yapılandırılabilir)
+- [ ] Kullanıcı (üye/personel) kendi bildirim tercihini yönetebilir (`/athlete/account`, `/dashboard/settings`)
+
+**Kabul kriteri:** Bir üyenin üyeliği bitmeden 3 gün önce hem e-posta hem (yapılandırıldıysa) SMS/WhatsApp bildirimi otomatik gidiyor · tüm gönderim geçmişi tek ekrandan izlenebiliyor
+
+**Bağımlılık:** Faz 15.1 (mail-relay) ✅ — SMS/WhatsApp sağlayıcıları Faz 31'de eklenecek
+
+---
+
+## 🔲 Faz 28 — İleri Raporlama & Business Intelligence (Öncelik: P1)
+
+> **Senaryo:** Salon sahibi şunları sormak ister: Bugün kaç kişi geldi? En yoğun saat/gün hangisi? En çok PT satan kim? En çok satılan ürün ne? Üyeler neden ayrılıyor? Kaç kişi yeniledi, kaç kişi iptal etti? Faz 15.3'teki temel KPI'lar (bugünkü check-in, aylık ciro, süresi dolan üyelik) bunun yalnızca başlangıcı.
+
+- [ ] `/dashboard/reports` — yeni, ayrı bir raporlama çalışma alanı (mevcut dashboard'un "günlük özet"inden farklı olarak, tarih aralığı seçilebilir derinlemesine analiz)
+- [ ] **Operasyonel raporlar:** günlük/haftalık/aylık ziyaretçi trendi, saat/gün bazlı yoğunluk ısı haritası (check-in verisinden), PT bazlı satış sıralaması, ürün bazlı satış sıralaması (POS)
+- [ ] **SaaS/işletme metrikleri:** MRR (Aylık Yinelenen Gelir), ARR (Yıllık), LTV (Müşteri Yaşam Boyu Değeri), churn oranı, yenileme oranı, ortalama üyelik süresi
+- [ ] **Ayrılma analizi:** üyelik iptalinde opsiyonel "neden ayrılıyorsunuz?" anketi (fiyat/memnuniyetsizlik/taşınma/başka salon vb.), zaman içinde neden dağılımı raporu
+- [ ] Dışa aktarma: CSV/Excel/PDF, zamanlanmış e-posta raporu (haftalık özet — Bildirim Merkezi ile entegre)
+
+**Kabul kriteri:** Salon sahibi son 30 günün en yoğun saatini, en çok satan PT'yi ve churn oranını tek ekrandan görebiliyor
+
+**Bağımlılık:** Faz 21 (PT verisi), Faz 25 (kasa verisi), Faz 27 (bildirim altyapısı, zamanlanmış raporlar için)
+
+---
+
+## 🔲 Faz 29 — Yapay Zeka Öngörüleri (Öncelik: P2 — farklılaştırıcı özellik)
+
+> **Vizyon:** *"AI; son 30 günde gelmeyen üyeleri tespit etti → otomatik kampanya öner → bu üye üyeliğini iptal edecek gibi → bu PT'nin performansı düştü → bu ay protein satışları arttı → fiyatı %5 artırırsanız geliriniz artabilir."* Bu, SGMS'i rakiplerinden ayıracak katman.
+
+- [ ] **Devamsızlık tespiti:** son N günde check-in yapmamış aktif üyelerin otomatik listelenmesi + "geri kazanma" kampanya önerisi (indirim kodu/mesaj taslağı)
+- [ ] **Churn tahmini (basit model, kural tabanlı başlangıç):** check-in sıklığı düşüşü + ödeme gecikmesi + PT seans iptal oranı gibi sinyallerin ağırlıklı skoru — "bu üye önümüzdeki 30 gün içinde ayrılma riski taşıyor" etiketi (gelişmiş ML modeli fast-follow; ilk sürüm açıklanabilir kural tabanlı skor olmalı — "kara kutu" değil)
+- [ ] **PT performans anomali tespiti:** bir PT'nin aylık ders/ciro trendinde ani düşüş tespit edilirse OWNER'a bildirim
+- [ ] **Satış trend analizi:** POS verisinden ürün bazlı trend ("bu ay protein satışları %20 arttı")
+- [ ] **Fiyatlandırma önerisi (bilgilendirici, otomatik uygulanmaz):** talep/doluluk verisine göre "plan fiyatını %X artırırsanız, geçmiş trend baz alındığında geliriniz artabilir" — **öneri sunar, karar her zaman salon sahibine aittir**
+- [ ] `/dashboard/insights` — AI öngörüleri tek panelde, her öneri "neden bu sonuç" açıklamasıyla (şeffaflık — kullanıcı güveni için kritik)
+
+**Kabul kriteri:** Sistem 30 gündür gelmeyen üyeleri otomatik listeleyip bir kampanya taslağı önerebiliyor · churn riski taşıyan üyeler önceden işaretleniyor
+
+**Bağımlılık:** Faz 28 (raporlama altyapısı — AI, ham veri üzerine değil, zaten hesaplanmış metrikler üzerine kurulur)
+
+---
+
+## 🔲 Faz 30 — Kurumsal Hiyerarşi & Çoklu Şube/Bölge Yönetimi (Öncelik: P1 — Franchise planının gerçek vaadi)
+
+> **Senaryo:** 100 şubeli bir zincir (ör. büyük bir gym markası) — her şubede bir Şube Müdürü, üstünde Bölge Müdürü, üstünde Ülke Müdürü/CEO, ayrıca Finans ve İK ekipleri farklı gösterge panelleri görüyor. Bugün SGMS'te `Organization` = tek salon; holding yapısı yok.
+
+- [ ] **Veri modeli:** `Organization`'a opsiyonel `parentOrganizationId` (self-relation) — bir "Şirket" (holding) kaydı, altında "Bölge" kayıtları, altında gerçek şubeler (bugünkü `Organization` anlamında)
+- [ ] Yeni rol seviyeleri: `BRANCH_MANAGER` (bugünkü OWNER'a eşdeğer, tek şube), `REGIONAL_MANAGER` (birden fazla şubeyi görür, salt okunur konsolide + kendi bölgesinde yönetim), `COMPANY_ADMIN` (tüm hiyerarşiyi görür)
+- [ ] Konsolide raporlama: `Faz 28`'deki tüm raporlar, şube/bölge/şirket seviyesinde filtrelenip toplanabilir
+- [ ] Şube bazlı fiyatlandırma/plan farklılıkları desteklenir (her şube kendi `Subscription`'ına sahip olmaya devam eder, ama fatura tek bir merkezi hesaba konsolide edilebilir)
+- [ ] Finans/İK gibi fonksiyonel roller — yalnızca kendi alanlarındaki veriye (cari hesap/Faz 22 HR) erişir, operasyonel verilere (üye detayı vb.) erişemez
+
+**Kabul kriteri:** Bir "Ülke Müdürü" rolü 100 şubenin konsolide cirosunu görebiliyor, bir "Bölge Müdürü" yalnızca kendi bölgesindeki 10 şubeyi görebiliyor, bir şube müdürü yalnızca kendi şubesini görebiliyor
+
+**Bağımlılık:** Faz 28 (raporlama, konsolidasyonun üzerine kurulacağı temel) · mevcut Franchise planı (Faz 1'den beri satılıyor ama bu fazdan önce gerçek bir mimari karşılığı yoktu)
+
+---
+
+## 🔲 Faz 31 — Entegrasyon Pazaryeri (Öncelik: P2 — uzun vadeli platform değeri)
+
+> **Vizyon:** SGMS bugün kendi içinde yaşıyor. Gerçek bir salon ekosisteminde bağlanılması gereken çok sayıda dış sistem var.
+
+### 31.1 Sağlık/fitness cihazları
+- [ ] Apple Health, Google Fit, Garmin, Fitbit — üyenin kendi rızasıyla adım/nabız/kalori verisini SGMS'e senkronize etmesi (sporcu portalı ölçüm geçmişini zenginleştirir)
+
+### 31.2 Ödeme ve muhasebe
+- [ ] Faz 16'daki iyzico entegrasyonuna ek olarak PayTR, Stripe (cloud.cicibyte.com Commerce üzerinden, zaten veri modeli hazır)
+- [ ] Muhasebe yazılımları (Logo, Mikro, Paraşüt gibi Türkiye'de yaygın olanlar) ile senkron — `Transaction`/`Invoice` verisinin dışa aktarımı
+- [ ] **E-Fatura** entegrasyonu — GİB uyumlu e-fatura/e-arşiv kesimi (Faz 18'deki opsiyonel `Invoice` modelinin üzerine inşa edilir)
+
+### 31.3 İletişim
+- [ ] SMS servisleri (Netgsm, İleti Merkezi gibi Türkiye'de yaygın sağlayıcılar)
+- [ ] WhatsApp Business API (resmi Meta API — Faz 27 Bildirim Merkezi'nin soyutlama katmanına eklenir)
+- [ ] Bildirim Merkezi'nin (Faz 27) soyut `NotificationDispatcher` arayüzüne somut sağlayıcı implementasyonları
+
+### 31.4 Fiziksel güvenlik
+- [ ] Kamera sistemleri (üye sayımı, güvenlik — üçüncü parti API'ler üzerinden, ör. doluluk analizi)
+- [ ] Akıllı kilit sistemleri (dolap/soyunma odası kilitleri, üye kimliğiyle eşleşen dijital kilit açma)
+
+### 31.5 Marketplace altyapısı
+- [ ] `Integration` modeli — her entegrasyonun bağlantı durumu, API anahtarları (şifreli saklanır), aktif/pasif
+- [ ] `/dashboard/integrations` — kullanıcının kendi entegrasyonlarını yönetebileceği bir "mağaza" arayüzü (her kart: logo, açıklama, "Bağlan" butonu)
+
+**Kabul kriteri:** Bir salon sahibi kendi Netgsm hesabını bağlayıp SMS gönderimini aktifleştirebiliyor · bir üye Apple Health'i bağlayıp adım verisini SGMS'te görebiliyor
+
+**Bağımlılık:** Faz 27 (Bildirim Merkezi soyutlaması), Faz 16 (Commerce altyapısı deseni — entegrasyon kimlik bilgisi yönetimi aynı güvenli saklama desenini kullanır)
+
+---
+
+## 🔲 Faz 32 — Ticarileştirme: Paket Yapısı, Ek Kapasite Satışı & Pazar Konumlandırma (Öncelik: P0 — gelir modeli)
+
+> **Pazar araştırması (2026-07):** Uluslararası rakipler — Mindbody $129-469/ay, Glofox ~$110-350/ay, Zenoti (kurumsal) $400-1.800/ay; genel pazar girişi $0-100/lokasyon/ay'dan başlayıp kurumsal seviyede $300-1.000+/ay'a çıkıyor. Türkiye'deki yerel rakipler (Gymsoft vb.) çok daha düşük, tek katmanlı fiyatlandırma (~690₺/ay) kullanıyor ve genellikle üye/PT sayısına göre şeffaf olmayan fiyatlandırma sunuyor. **SGMS'in mevcut fiyatlandırması (999-9999₺/ay = ~$29-349) bu iki uç arasında, "Türkiye'de premium ama uluslararası ölçekte erişilebilir" konumlanmayı zaten doğru şekilde yakalamış durumda** — büyük bir fiyat değişikliğine gerek yok, ama paket **yapısı** gerçek satış ihtiyaçlarını karşılamıyor.
+>
+> *(Kaynaklar: [Gymdesk — Gym Software Cost 2026](https://gymdesk.com/blog/gym-management-software-cost), [Swipe Savvy — Mindbody vs Glofox 2026](https://swipesavvy.com/resources/blog/savvy-life-gym-fitness-management/), [Zenoti — Best Gym Software 2026](https://www.zenoti.com/thecheckin/best-fitness-gym-software-2026))*
+
+### 32.1 Mevcut 4 katman korunuyor, içerik zenginleştiriliyor
+| Plan | Fiyat (TRY/ay) | Hedef kitle | Bu fazdan sonra eklenen ayırt edici özellikler |
+|---|---|---|---|
+| **Starter** | 999₺ (~$29) | Tek şube, ≤150 üye stüdyo | Temel CRM + check-in (bugünkü kapsam) |
+| **Pro** | 2.499₺ (~$79) | Büyüyen tek salon, 150-500 üye | + PT performans/komisyon (Faz 21), Ders Yönetimi (Faz 17.4), Bildirim Merkezi temel (Faz 27) |
+| **Enterprise** | 5.999₺ (~$199) | Çok personelli tek/çift şube | + HR (Faz 22), Ekipman & Bakım (Faz 23), Kasa/Vardiya (Faz 25), İleri Raporlama (Faz 28) |
+| **Franchise** | 9.999₺ (~$349) | Zincir/holding | + Kurumsal Hiyerarşi (Faz 30), AI Öngörüleri (Faz 29), Entegrasyon Pazaryeri (Faz 31) |
+
+### 32.2 Ek kapasite satışı (add-on marketplace)
+> **Senaryo:** Pro paketteki bir salon 500 üye sınırına yaklaşıyor ama Enterprise'a geçmeye henüz hazır değil — sadece "50 üye daha" almak istiyor.
+- [ ] `PlanAddOn` modeli — `type`: `EXTRA_MEMBERS` (blok halinde, ör. +50 üye), `EXTRA_STAFF` (+1 personel koltuğu), `EXTRA_DEVICES` (+1 turnike/cihaz), `EXTRA_BRANCH` (Faz 30 sonrası, +1 şube)
+- [ ] `OrganizationAddOn` — bir organizasyonun satın aldığı ek kapasiteler, `Subscription`'a ek olarak faturalandırılır (aynı cloud.cicibyte.com Commerce akışından — Faz 16)
+- [ ] `/dashboard/billing` → "Kapasite Yönetimi" bölümü: mevcut kullanım (örn. "487/500 üye"), "+50 üye ekle" butonu, anlık `Plan.maxMembers + toplam OrganizationAddOn` hesaplaması
+
+### 32.3 PT'nin personel limitine dahil olup olmadığının netleştirilmesi
+> **Kullanıcı sorusu:** *"Personel sayısına PT dahil mi değil mi bunları da bilebilmeli."*
+- [ ] `Plan`'a `ptCountsTowardStaffLimit: boolean` eklenir. **Öneri:** Starter'da PT, personel limitine dahildir (küçük stüdyoda ayrım gereksiz karmaşıklık); Pro ve üzeri planlarda PT'ler **ayrı bir limitte** sayılır (`maxTrainers` alanı eklenir) — çünkü gerçek salonlarda PT sayısı, idari personelden çok daha hızlı büyür (10 admin personele karşı 40 PT olması yaygın) ve bunu idari personel limitine dahil etmek paketleri gereksiz pahalılaştırır
+- [ ] Fatura/kapasite ekranında bu ayrım açıkça gösterilir: "Personel: 8/10 · PT: 23/30" gibi
+
+**Kabul kriteri:** Bir Pro paket müşterisi panelden "+50 üye" satın alıp anında limitinin arttığını görebiliyor · bir salon sahibi PT'lerinin idari personel limitine dahil olup olmadığını net şekilde görebiliyor
+
+**Bağımlılık:** Faz 16 (Commerce checkout altyapısı — add-on satın alma da aynı akıştan geçer) · bu faz **pricing/paket değişikliği içerdiğinden, canlı ödeme yapan müşterileri etkileyebilir — uygulamadan önce kullanıcı onayı gerektirir**
+
+---
+
+## 🔲 Faz 33 — Dinamik, Rol Bazlı Kullanım Kılavuzu (Help Center) (Öncelik: P1)
+
+> **Hedef:** Her kullanıcı tipi SGMS'i farklı amaçla kullanır — bir PT'nin ihtiyacı olan bilgiyle bir salon sahibinin ihtiyacı olan bilgi tamamen farklıdır. Tek, genel bir "yardım" sayfası yerine **role özel, bağlamsal** bir kılavuz sistemi.
+
+- [ ] `HelpArticle` modeli — `audience`: `OWNER`/`ADMIN`/`STAFF`/`TRAINER`/`ATHLETE`/`RECEPTION`, `category`, `title`, `bodyMarkdown`, çok dilli (6 dil), `relatedFeatureFlag` (Faz 32'deki "yakında" özellikleriyle ilişkilendirilebilir — bkz. aşağıdaki Tasarım & UX bölümü)
+- [ ] `/help` — role göre otomatik filtrelenen kılavuz merkezi; her sayfanın sağ üstünde **bağlamsal yardım** ikonu (ör. `/dashboard/pos` sayfasındaki "?" ikonu doğrudan POS kılavuzuna götürür)
+- [ ] 4 ayrı "başlangıç rehberi" (onboarding checklist tarzı): **Salon Sahibi Rehberi** (kurulum, ekip davet etme, plan yönetimi), **Resepsiyon Rehberi** (check-in, POS, üye kaydı), **PT Rehberi** (program atama, ölçüm girişi, ders yönetimi), **Sporcu Rehberi** (mobil check-in, mesajlaşma, ölçüm takibi)
+- [ ] İçerik yönetimi: Master Admin panelinden `HelpArticle` CRUD (kod değişikliği gerektirmeden içerik güncellenebilir)
+- [ ] Arama: kılavuz içeriğinde tam metin arama
+
+**Kabul kriteri:** Yeni işe başlayan bir resepsiyonist, kendi rolüne özel bir başlangıç rehberiyle karşılanıyor · herhangi bir sayfada "?" ikonuna tıklandığında o sayfaya özel yardım açılıyor
+
+**Bağımlılık:** yok — bağımsız, ama Faz 32'nin "yakında" özellik etiketleriyle doğal olarak bütünleşir
+
+---
+
+## 🔲 Faz 34 — Tam Responsive Tasarım Sistemi & Arayüz Yenileme (Öncelik: P0 — kullanıcı deneyimi)
+
+> **Denetim bulgusu (2026-07-15):** Mevcut `/dashboard` üst navigasyonu (`layout.tsx`) 10 menü öğesini + dil seçici + çıkış butonunu tek bir `flex flex-wrap` satırına sığdırmaya çalışıyor — mobil ekranda (375px) bu, çok satırlı, dağınık bir menüye dönüşüyor. Yeni modüller (Faz 21-31) eklendikçe bu sorun katlanarak büyüyecekti. **Bu fazın ilk parçası bu oturumda doğrudan uygulandı** (aşağıya bakınız); geri kalanı sistematik bir tasarım sistemi turudur.
+
+### 34.1 Bu oturumda tamamlanan acil düzeltmeler
+- [x] Tenant dashboard navigasyonu: mobilde açılır menü (hamburger + kayan panel), masaüstünde yatay menü — `apps/web/src/components/dashboard-nav.tsx`
+- [x] Yeni modüller için nav'a bindirme yapmadan **"Yakında" grubu** — ayrı, katlanabilir bir bölüm altında toplanır, ana menüyü kalabalıklaştırmaz
+- [x] "Çok Yakında" sayfası (`/dashboard/coming-soon/[feature]`) — her yeni modül (PT Yönetimi, Ders Programı, HR, Ekipman, Kasa/Vardiya, Bildirim Merkezi, İleri Raporlama, AI Öngörüler) için markaya uygun, bilgilendirici bir bekleme sayfası
+
+### 34.2 Sistematik tasarım sistemi turu (sonraki oturumlar)
+- [ ] Tüm veri tablolarının mobilde (768px altı) kart görünümüne dönüşmesi (yatay scroll yerine) — üye listesi, POS, audit log, ekipman listesi
+- [ ] Dokunmatik hedef boyutlarının (min. 44×44px) tüm buton/link'lerde denetimi
+- [ ] `/admin` (Super Admin) panelinin de aynı responsive nav desenine geçirilmesi
+- [ ] Form bileşenlerinin (özellikle çok alanlı formlar: üye ekleme, ekipman ekleme) mobilde tek sütuna düşen, adım adım (wizard) akışa dönüştürülmesi
+- [ ] Karanlık/aydınlık tema tutarlılığı denetimi (mevcut tasarım koyu tema odaklı — aydınlık mod talebi gelirse)
+- [ ] Performans: mobil ağlarda ilk yükleme süresi hedefi (Core Web Vitals — LCP < 2.5s)
+
+**Kabul kriteri:** ✅ Dashboard navigasyonu artık 375px genişlikte bile kullanılabilir · 🔲 tüm tablolar mobilde kart görünümüne geçmiş olacak (sonraki tur)
+
+**Bağımlılık:** yok — bu faz diğer tüm fazların üzerine sürekli uygulanan bir kalite katmanıdır, tek seferlik "bitti" denecek bir faz değildir
+
+---
+
 ## Teknik Borç & Paralel İyileştirmeler
 
 | Öğe | Öncelik | Faz | Durum |
@@ -632,10 +936,24 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | Gerçek ödeme ağ geçidi (Cloud Commerce üzerinden) | P0/P1 | 16 | ✅ kod tamamlandı — 🔲 gerçek iyzico anahtarı + sandbox modu kapatma bekliyor |
 | Referans/komisyon takibi | P1 | 16 | ✅ tamamlandı |
 | Masaüstü/mobil release → Cloud kaydı | P1 | 16 | 🔲 API henüz yok (Cloud tarafı) — mevcut release'ler kasıtlı olarak geriye dönük kaydedilmedi |
-| Üyelik dondurma, sınıf rezervasyonu, kupon, çoklu şube, stok | P1 | 17 | 🔲 |
+| Üyelik dondurma/devir/kurumsal, ders/sınıf yönetimi, kupon, stok | P1 | 17 | 🔲 |
 | 2FA, GDPR self-servis, personel vardiya, sağlık formu | P2 | 18 | 🔲 |
 | SGMS Masaüstü genişletme (offline lisans, auto-update) | P2 | 19 | 🔲 gelecek vizyon |
 | SGMS Mobil Uygulama | P3 | 20 | 🔲 gelecek vizyon |
+| PT performans/komisyon/prim | P1 | 21 | 🔲 |
+| Personel/HR (izin, vardiya, performans) | P2 | 22 | 🔲 |
+| Ekipman envanteri & bakım planları (QR) | P2 | 23 | 🔲 |
+| Temizlik checklist/imza | P3 | 24 | 🔲 |
+| Kasa vardiya açma/kapama + X/Z raporu | P2 | 25 | 🔲 |
+| Dijital üyelik kartı (Apple/Google Wallet, NFC) | P2 | 26 | 🔲 |
+| Bildirim Merkezi (Push/SMS/WhatsApp/Mail/Telegram) | P1 | 27 | 🔲 |
+| İleri raporlama & BI (MRR/ARR/LTV/Churn) | P1 | 28 | 🔲 |
+| Yapay Zeka öngörüleri (churn, kampanya, fiyatlandırma) | P2 | 29 | 🔲 |
+| Kurumsal hiyerarşi (Organizasyon→Bölge→Şube) | P1 | 30 | 🔲 |
+| Entegrasyon Pazaryeri (Health/SMS/WhatsApp/E-Fatura) | P2 | 31 | 🔲 |
+| Paket + ek kapasite satışı (add-on) + PT/personel limit ayrımı | P0 | 32 | 🔲 gelir modeli — kullanıcı onayı gerektirir |
+| Rol bazlı dinamik kullanım kılavuzu (Help Center) | P1 | 33 | 🔲 |
+| Tam responsive tasarım sistemi | P0 | 34 | 🔄 dashboard nav düzeltmesi tamamlandı, sistematik tur sürüyor |
 | PHP → Static (aaPanel) | P3 | 3 | ✅ `docs/deployment/AAPANEL-PHP-STATIC.md` |
 
 ---
@@ -657,11 +975,32 @@ Emekli:
 Devam ediyor:
   Faz 16     CiciByte Cloud ticari entegrasyonu                ← ~80%, gerçek API anahtarı bekliyor
 
-Sıradaki (öncelik sırası — profesyonel değerlendirme):
-  Faz 17     Büyüme özellikleri                                ← P1
-  Faz 18     Uyumluluk & sağlamlaştırma                        ← P2
-  Faz 19     SGMS Masaüstü — genişletme                        ← P2, web tamamlanınca
-  Faz 20     SGMS Mobil Uygulama                                ← P3, web+masaüstü tamamlanınca
+Şimdi canlı (bu revizyonla production'a alındı):
+  Faz 34.1   Responsive dashboard nav + "Çok Yakında" sayfası    ✅ (bu oturumda tamamlandı)
+
+Sıradaki (öncelik sırası — profesyonel değerlendirme, P0 en önce):
+  Faz 32     Ticarileştirme: paket + ek kapasite satışı          ← P0, gelir modeli (kullanıcı onayı gerekli)
+  Faz 34     Tam responsive tasarım sistemi (sistematik tur)     ← P0, sürekli kalite katmanı
+  Faz 21     PT performans/komisyon/prim yönetimi                ← P1
+  Faz 27     Bildirim Merkezi (Push/SMS/WhatsApp/Mail)           ← P1
+  Faz 28     İleri raporlama & Business Intelligence             ← P1
+  Faz 30     Kurumsal hiyerarşi & çoklu şube/bölge               ← P1
+  Faz 33     Rol bazlı dinamik kullanım kılavuzu                 ← P1
+  Faz 17     Üyelik senaryoları & ders/sınıf yönetimi            ← P1
+  Faz 22     Personel Yönetimi / HR                              ← P2
+  Faz 23     Ekipman yönetimi & bakım planları                   ← P2
+  Faz 25     Kasa yönetimi (vardiya, X/Z raporu)                 ← P2
+  Faz 26     Dijital üyelik kartı (Wallet/NFC)                   ← P2
+  Faz 29     Yapay Zeka öngörüleri                                ← P2, Faz 28 verisine dayanır
+  Faz 31     Entegrasyon Pazaryeri                                ← P2, Faz 27 soyutlamasına dayanır
+  Faz 18     Uyumluluk & sağlamlaştırma (2FA, GDPR, Invoice)      ← P2
+  Faz 24     Temizlik yönetimi                                    ← P3
+  Faz 19     SGMS Masaüstü — genişletme                          ← P2, web tamamlanınca
+  Faz 20     SGMS Mobil Uygulama                                  ← P3, web+masaüstü tamamlanınca
+
+Not: Fazlar bağımsız modüller olarak paralel de ilerletilebilir — Faz 21 (PT) hariç
+hiçbiri bir öncekinin bitmesini şart koşmaz. Sıralama, en yüksek iş değeri /
+en düşük bağımlılık oranına göre önerilmiştir; kullanıcı önceliği değiştirebilir.
 ```
 
 ---
