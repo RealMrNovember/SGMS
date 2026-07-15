@@ -65,7 +65,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 27 | Bildirim Merkezi (Push/SMS/WhatsApp/Mail) | 🔄 Devam ediyor | ~35% (tarayıcı Web Push tamamlandı) |
 | 28 | İleri Raporlama & Business Intelligence | ✅ Tamamlandı | ~80% (ARR, churn-anketi, Excel/PDF export v2'ye ertelendi) |
 | 29 | Yapay Zeka Öngörüleri | 🔲 Planlandı | 0% |
-| 30 | Kurumsal Hiyerarşi & Çoklu Şube/Bölge Yönetimi | 🔲 Planlandı | 0% |
+| 30 | Kurumsal Hiyerarşi & Çoklu Şube/Bölge Yönetimi | ✅ Tamamlandı | v1 (branch pricing/finans-İK rolleri v2'ye ertelendi) |
 | 31 | Entegrasyon Pazaryeri | 🔲 Planlandı | 0% |
 | 32 | Ticarileştirme: Paket & Ek Kapasite Satışı | 🔲 Planlandı | 0% |
 | 33 | Dinamik Rol Bazlı Kullanım Kılavuzu | 🔲 Planlandı | 0% |
@@ -811,19 +811,21 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ---
 
-## 🔲 Faz 30 — Kurumsal Hiyerarşi & Çoklu Şube/Bölge Yönetimi (Öncelik: P1 — Franchise planının gerçek vaadi)
+## ✅ Faz 30 — Kurumsal Hiyerarşi & Çoklu Şube/Bölge Yönetimi (2026-07-15'te tamamlandı — v1)
 
-> **Senaryo:** 100 şubeli bir zincir (ör. büyük bir gym markası) — her şubede bir Şube Müdürü, üstünde Bölge Müdürü, üstünde Ülke Müdürü/CEO, ayrıca Finans ve İK ekipleri farklı gösterge panelleri görüyor. Bugün SGMS'te `Organization` = tek salon; holding yapısı yok.
+> **Senaryo:** 100 şubeli bir zincir (ör. büyük bir gym markası) — her şubede bir Şube Müdürü, üstünde Bölge Müdürü, üstünde Ülke Müdürü/CEO farklı gösterge panelleri görüyor. Bugüne kadar SGMS'te `Organization` = tek salon; holding yapısı yoktu.
 
-- [ ] **Veri modeli:** `Organization`'a opsiyonel `parentOrganizationId` (self-relation) — bir "Şirket" (holding) kaydı, altında "Bölge" kayıtları, altında gerçek şubeler (bugünkü `Organization` anlamında)
-- [ ] Yeni rol seviyeleri: `BRANCH_MANAGER` (bugünkü OWNER'a eşdeğer, tek şube), `REGIONAL_MANAGER` (birden fazla şubeyi görür, salt okunur konsolide + kendi bölgesinde yönetim), `COMPANY_ADMIN` (tüm hiyerarşiyi görür)
-- [ ] Konsolide raporlama: `Faz 28`'deki tüm raporlar, şube/bölge/şirket seviyesinde filtrelenip toplanabilir
-- [ ] Şube bazlı fiyatlandırma/plan farklılıkları desteklenir (her şube kendi `Subscription`'ına sahip olmaya devam eder, ama fatura tek bir merkezi hesaba konsolide edilebilir)
-- [ ] Finans/İK gibi fonksiyonel roller — yalnızca kendi alanlarındaki veriye (cari hesap/Faz 22 HR) erişir, operasyonel verilere (üye detayı vb.) erişemez
+- [x] **Veri modeli:** `Organization.parentOrganizationId` (self-relation, additive) — zincirleme ile keyfi derinlikte ağaç (Şirket → Bölge → Şube), mevcut `OrganizationRole` (OWNER/ADMIN/STAFF/TRAINER/VIEWER) yetki sistemine dokunulmadı
+- [x] Yeni, ayrı `HierarchyMember` modeli + `HierarchyRole` enum (`COMPANY_ADMIN`, `REGIONAL_MANAGER`) — bir düğüme (şirket/bölge) atanan kullanıcı, o düğümün tüm alt ağacı üzerinde salt-okunur konsolide görünürlük kazanır; kendi şubesindeki mevcut rolünden tamamen bağımsız ek bir katman
+- [x] Konsolide raporlama: `/dashboard/enterprise` — aktif üye, personel, ciro (PAYMENT işlemleri) ve ziyaret toplamları, alt ağaç genelinde toplanıp şube bazında dökümü gösterilir (tarih aralığı 7/30/90 gün, bu ay)
+- [x] Master Admin UI: `admin/organizations/[id]` sayfasına ebeveyn organizasyon atama (döngü koruması ile) ve `HierarchyMember` atama/kaldırma paneli eklendi
+- [x] Ağaç gezinimi Prisma'nın recursive CTE desteklememesi nedeniyle JS tarafında seviye seviye yapılır (`lib/enterprise/hierarchy.ts`) — gerçekçi hiyerarşi boyutları (~100 şube) için yeterli
 
-**Kabul kriteri:** Bir "Ülke Müdürü" rolü 100 şubenin konsolide cirosunu görebiliyor, bir "Bölge Müdürü" yalnızca kendi bölgesindeki 10 şubeyi görebiliyor, bir şube müdürü yalnızca kendi şubesini görebiliyor
+**Ertelendi (v2):** `BRANCH_MANAGER` rol değişimi (mevcut OWNER zaten bu işlevi görüyor), şube bazlı fiyatlandırma/tek merkezi faturaya konsolidasyon, Finans/İK'ya özel fonksiyonel roller (Faz 22 HR'a bağımlı)
 
-**Bağımlılık:** Faz 28 (raporlama, konsolidasyonun üzerine kurulacağı temel) · mevcut Franchise planı (Faz 1'den beri satılıyor ama bu fazdan önce gerçek bir mimari karşılığı yoktu)
+**Kabul kriteri:** ✅ Bir `COMPANY_ADMIN`/`REGIONAL_MANAGER` ataması olan kullanıcı, atandığı düğümün altındaki tüm şubelerin konsolide üye/personel/ciro/ziyaret verisini `/dashboard/enterprise`'da görebiliyor; Master Admin organizasyonları hiyerarşiye bağlayıp yetki atayabiliyor
+
+**Bağımlılık:** Faz 28 (raporlama, konsolidasyonun üzerine kurulduğu temel) ✅ · mevcut Franchise planı (Faz 1'den beri satılıyor, bu fazla ilk kez gerçek bir mimari karşılığı kazandı)
 
 ---
 
@@ -1022,11 +1024,11 @@ Devam ediyor:
   Faz 27.1   Tarayıcı Web Push bildirimleri                      ✅ (~35% — SMS/WhatsApp/şablon kaldı)
   Faz 21     PT performans/komisyon/prim yönetimi                ✅
   Faz 28     İleri raporlama & Business Intelligence             ✅ (~80% — ARR/churn-anketi v2)
+  Faz 30     Kurumsal hiyerarşi & çoklu şube/bölge               ✅ (v1 — bkz. ertelenenler)
 
 Sıradaki (öncelik sırası — profesyonel değerlendirme, P0 en önce):
   Faz 32     Ticarileştirme: paket + ek kapasite satışı          ← P0, gelir modeli (kullanıcı onayı gerekli)
   Faz 34     Tam responsive tasarım sistemi (sistematik tur)     ← P0, sürekli kalite katmanı
-  Faz 30     Kurumsal hiyerarşi & çoklu şube/bölge               ← P1
   Faz 33     Rol bazlı dinamik kullanım kılavuzu                 ← P1
   Faz 17     Üyelik senaryoları & ders/sınıf yönetimi            ← P1
   Faz 22     Personel Yönetimi / HR                              ← P2
