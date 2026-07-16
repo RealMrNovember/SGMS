@@ -1,6 +1,11 @@
 import Pusher from 'pusher';
 import { orgStaffChannel, userMessageChannel } from '@/lib/realtime/channels';
-import type { CheckInCreatedEvent, MessageCreatedEvent, MessageTypingEvent } from '@/lib/realtime/hub';
+import type {
+  CheckInCreatedEvent,
+  MessageCreatedEvent,
+  MessageReadEvent,
+  MessageTypingEvent,
+} from '@/lib/realtime/hub';
 
 let cached: Pusher | null | undefined;
 
@@ -121,6 +126,25 @@ export async function publishTypingEventToSoketi(event: MessageTypingEvent): Pro
         type: event.type,
         senderId: event.senderId,
         receiverId: event.receiverId,
+        organizationId: event.organizationId,
+      }),
+    ),
+  );
+}
+
+export async function publishMessageReadEventToSoketi(event: MessageReadEvent): Promise<void> {
+  const pusher = getPusherServer();
+  if (!pusher) {
+    return;
+  }
+
+  await Promise.all(
+    event.userIds.map((userId) =>
+      pusher.trigger(userMessageChannel(event.organizationId, userId), event.type, {
+        type: event.type,
+        readerId: event.readerId,
+        peerId: event.peerId,
+        readAt: event.readAt,
         organizationId: event.organizationId,
       }),
     ),

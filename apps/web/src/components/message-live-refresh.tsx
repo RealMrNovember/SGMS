@@ -44,9 +44,11 @@ export function MessageLiveRefresh({
 
       const onMessage = () => refresh();
       channel.bind('message.created', onMessage);
+      channel.bind('message.read', onMessage);
 
       return () => {
         channel.unbind('message.created', onMessage);
+        channel.unbind('message.read', onMessage);
         pusher.unsubscribe(channelName);
         pusher.disconnect();
       };

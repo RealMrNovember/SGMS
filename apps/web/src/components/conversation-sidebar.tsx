@@ -1,5 +1,6 @@
+import { UserAvatar } from '@/components/user-avatar';
 import type { ConversationSummary } from '@/lib/messaging/conversations';
-import { peerInitials } from '@/lib/messaging/conversations';
+import { ArrowLeft } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 
@@ -20,8 +21,11 @@ export async function ConversationSidebar({
     <aside className="flex h-full min-h-0 flex-col border-b border-[var(--border)] lg:border-b-0 lg:border-r">
       <div className="border-b border-[var(--border)] px-4 py-3">
         {backHref ? (
-          <Link href={backHref} className="muted mb-2 inline-block text-xs hover:text-white lg:hidden">
-            {t('backToList')}
+          <Link
+            href={backHref}
+            className="muted mb-2 inline-flex items-center gap-1 text-xs hover:text-white lg:hidden"
+          >
+            <ArrowLeft size={14} aria-hidden="true" /> {t('backToList')}
           </Link>
         ) : null}
         <h3 className="text-sm font-semibold">{t('conversations')}</h3>
@@ -49,9 +53,11 @@ export async function ConversationSidebar({
                       isActive ? 'bg-white/[0.05]' : ''
                     }`}
                   >
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--accent)]/20 text-xs font-semibold text-[var(--accent)]">
-                      {peerInitials(conversation.peer.name)}
-                    </span>
+                    <UserAvatar
+                      name={conversation.peer.name}
+                      avatarUrl={conversation.peer.avatarUrl}
+                      size="sm"
+                    />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-2">
                         <p className="truncate text-sm font-medium">{conversation.peer.name}</p>

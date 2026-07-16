@@ -8,12 +8,10 @@ export function MessageTypingBar({
   peerId,
   userId,
   organizationId,
-  label = 'yazıyor…',
 }: {
   peerId: string;
   userId: string;
   organizationId: string;
-  label?: string;
 }) {
   const [typing, setTyping] = useState(false);
   const soketiKey = process.env.NEXT_PUBLIC_SOKETI_KEY;
@@ -100,5 +98,13 @@ export function MessageTypingBar({
     return null;
   }
 
-  return <p className="muted px-4 py-1 text-xs italic">{label}</p>;
+  return (
+    <div className="px-4 py-2" aria-label="typing" role="status">
+      <span className="typing-dots">
+        <span />
+        <span />
+        <span />
+      </span>
+    </div>
+  );
 }

@@ -1,4 +1,9 @@
-import { publishCheckInEventToSoketi, publishMessageEventToSoketi, publishTypingEventToSoketi } from '@/lib/realtime/pusher-server';
+import {
+  publishCheckInEventToSoketi,
+  publishMessageEventToSoketi,
+  publishMessageReadEventToSoketi,
+  publishTypingEventToSoketi,
+} from '@/lib/realtime/pusher-server';
 
 export type RealtimeMessagePayload = {
   id: string;
@@ -23,7 +28,20 @@ export type MessageTypingEvent = {
   receiverId: string;
 };
 
-export type RealtimeEvent = MessageCreatedEvent | MessageTypingEvent | CheckInCreatedEvent;
+export type MessageReadEvent = {
+  type: 'message.read';
+  organizationId: string;
+  userIds: string[];
+  readerId: string;
+  peerId: string;
+  readAt: string;
+};
+
+export type RealtimeEvent =
+  | MessageCreatedEvent
+  | MessageTypingEvent
+  | MessageReadEvent
+  | CheckInCreatedEvent;
 
 export type CheckInCreatedPayload = {
   id: string;
@@ -119,6 +137,17 @@ export function publishTypingEvent(event: MessageTypingEvent) {
 
   void publishTypingEventToSoketi(event).catch(() => {
     // optional
+  });
+}
+
+export function publishMessageReadEvent(event: MessageReadEvent) {
+  const payload = `data: ${JSON.stringify(event)}\n\n`;
+  for (const userId of event.userIds) {
+    broadcast(userListeners, userId, payload);
+  }
+
+  void publishMessageReadEventToSoketi(event).catch(() => {
+    // Soketi optional — SSE remains primary fallback
   });
 }
 

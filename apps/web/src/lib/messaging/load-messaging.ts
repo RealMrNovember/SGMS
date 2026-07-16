@@ -3,6 +3,7 @@ import {
   buildConversationSummaries,
   type PeerProfile,
 } from '@/lib/messaging/conversations';
+import { publishMessageReadEvent } from '@/lib/realtime/hub';
 
 export async function loadPeerDirectory(
   organizationId: string,
@@ -12,7 +13,7 @@ export async function loadPeerDirectory(
   const [staffMembers, athleteMembers] = await Promise.all([
     prisma.organizationMember.findMany({
       where: { organizationId, isActive: true, userId: { not: currentUserId } },
-      include: { user: { select: { id: true, name: true, email: true } } },
+      include: { user: { select: { id: true, name: true, email: true, avatarUrl: true } } },
     }),
     prisma.gymMember.findMany({
       where: {
@@ -20,7 +21,7 @@ export async function loadPeerDirectory(
         status: 'ACTIVE',
         AND: [{ userId: { not: null } }, { userId: { not: currentUserId } }],
       },
-      include: { user: { select: { id: true, name: true, email: true } } },
+      include: { user: { select: { id: true, name: true, email: true, avatarUrl: true } } },
     }),
   ]);
 
@@ -32,6 +33,7 @@ export async function loadPeerDirectory(
     peerMeta.set(member.user.id, {
       name: member.user.name ?? member.user.email,
       subtitle,
+      avatarUrl: member.user.avatarUrl,
     });
     recipients.push({
       id: member.user.id,
@@ -44,6 +46,7 @@ export async function loadPeerDirectory(
     peerMeta.set(athlete.user.id, {
       name: athlete.user.name ?? athlete.user.email,
       subtitle: athleteLabel,
+      avatarUrl: athlete.user.avatarUrl,
     });
     recipients.push({
       id: athlete.user.id,
@@ -67,8 +70,8 @@ export async function loadConversationSummaries(
     orderBy: { createdAt: 'desc' },
     take: 400,
     include: {
-      sender: { select: { id: true, name: true, email: true } },
-      receiver: { select: { id: true, name: true, email: true } },
+      sender: { select: { id: true, name: true, email: true, avatarUrl: true } },
+      receiver: { select: { id: true, name: true, email: true, avatarUrl: true } },
     },
   });
 
@@ -90,7 +93,13 @@ export async function loadThreadMessages(
     },
     orderBy: { createdAt: 'asc' },
     take: 200,
-    include: {
+    select: {
+      id: true,
+      content: true,
+      createdAt: true,
+      senderId: true,
+      deliveredAt: true,
+      readAt: true,
       sender: { select: { name: true, email: true } },
     },
   });
@@ -101,13 +110,25 @@ export async function markPeerMessagesRead(
   currentUserId: string,
   peerId: string,
 ) {
-  await prisma.directMessage.updateMany({
+  const readAt = new Date();
+  const { count } = await prisma.directMessage.updateMany({
     where: {
       organizationId,
       senderId: peerId,
       receiverId: currentUserId,
       isRead: false,
     },
-    data: { isRead: true, readAt: new Date() },
+    data: { isRead: true, readAt },
   });
+
+  if (count > 0) {
+    publishMessageReadEvent({
+      type: 'message.read',
+      organizationId,
+      userIds: [peerId],
+      readerId: currentUserId,
+      peerId: currentUserId,
+      readAt: readAt.toISOString(),
+    });
+  }
 }

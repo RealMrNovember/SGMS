@@ -57,7 +57,7 @@ export default async function MessagesPage({
       : undefined;
 
   let threadMessages: Awaited<ReturnType<typeof loadThreadMessages>> = [];
-  let activePeer: { id: string; name: string; subtitle?: string } | null = null;
+  let activePeer: { id: string; name: string; subtitle?: string; avatarUrl?: string | null } | null = null;
 
   if (activePeerId) {
     await markPeerMessagesRead(organizationId, userId, activePeerId);
@@ -66,7 +66,7 @@ export default async function MessagesPage({
     const fromConversation = conversations.find((c) => c.peer.id === activePeerId)?.peer;
     const fromDirectory = peerMeta.get(activePeerId);
     activePeer = fromConversation ?? (fromDirectory
-      ? { id: activePeerId, name: fromDirectory.name, subtitle: fromDirectory.subtitle }
+      ? { id: activePeerId, name: fromDirectory.name, subtitle: fromDirectory.subtitle, avatarUrl: fromDirectory.avatarUrl }
       : null);
   }
 

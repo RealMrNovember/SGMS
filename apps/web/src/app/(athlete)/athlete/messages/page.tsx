@@ -38,7 +38,7 @@ export default async function AthleteMessagesPage({
   const gymMember = await prisma.gymMember.findFirst({
     where: { id: session.user.gymMemberId, organizationId },
     include: {
-      trainer: { select: { id: true, name: true, email: true } },
+      trainer: { select: { id: true, name: true, email: true, avatarUrl: true } },
     },
   });
 
@@ -49,12 +49,13 @@ export default async function AthleteMessagesPage({
   const orgSettings = parseOrganizationSettings(org?.settings);
   const enableReports = orgSettings.features?.messageReports !== false;
 
-  const peerMeta = new Map<string, { name: string; subtitle?: string }>();
+  const peerMeta = new Map<string, { name: string; subtitle?: string; avatarUrl?: string | null }>();
 
   if (gymMember?.trainer) {
     peerMeta.set(gymMember.trainer.id, {
       name: displayName(gymMember.trainer),
       subtitle: tMessages('thread.roleTrainer'),
+      avatarUrl: gymMember.trainer.avatarUrl,
     });
   }
 
@@ -67,6 +68,7 @@ export default async function AthleteMessagesPage({
         id: gymMember.trainer.id,
         name: displayName(gymMember.trainer),
         subtitle: tMessages('thread.roleTrainer'),
+        avatarUrl: gymMember.trainer.avatarUrl,
       },
       lastMessage: tMessages('thread.noMessagesYet'),
       lastMessageAt: new Date(0),
@@ -78,7 +80,7 @@ export default async function AthleteMessagesPage({
     withPeerId && peerMeta.has(withPeerId) ? withPeerId : undefined;
 
   let threadMessages: Awaited<ReturnType<typeof loadThreadMessages>> = [];
-  let activePeer: { id: string; name: string; subtitle?: string } | null = null;
+  let activePeer: { id: string; name: string; subtitle?: string; avatarUrl?: string | null } | null = null;
 
   if (activePeerId) {
     await markPeerMessagesRead(organizationId, userId, activePeerId);
@@ -87,7 +89,7 @@ export default async function AthleteMessagesPage({
     const fromConversation = conversations.find((c) => c.peer.id === activePeerId)?.peer;
     const fromDirectory = peerMeta.get(activePeerId);
     activePeer = fromConversation ?? (fromDirectory
-      ? { id: activePeerId, name: fromDirectory.name, subtitle: fromDirectory.subtitle }
+      ? { id: activePeerId, name: fromDirectory.name, subtitle: fromDirectory.subtitle, avatarUrl: fromDirectory.avatarUrl }
       : null);
   }
 

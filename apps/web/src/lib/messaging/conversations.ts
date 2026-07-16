@@ -2,6 +2,7 @@ export type PeerProfile = {
   id: string;
   name: string;
   subtitle?: string;
+  avatarUrl?: string | null;
 };
 
 export type ConversationSummary = {
@@ -18,20 +19,12 @@ type MessageRow = {
   isRead: boolean;
   senderId: string;
   receiverId: string;
-  sender: { id: string; name: string | null; email: string };
-  receiver: { id: string; name: string | null; email: string };
+  sender: { id: string; name: string | null; email: string; avatarUrl: string | null };
+  receiver: { id: string; name: string | null; email: string; avatarUrl: string | null };
 };
 
 export function displayName(user: { name: string | null; email: string }): string {
   return user.name?.trim() || user.email;
-}
-
-export function peerInitials(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length >= 2) {
-    return `${parts[0]![0]}${parts[1]![0]}`.toUpperCase();
-  }
-  return name.slice(0, 2).toUpperCase();
 }
 
 export function buildConversationSummaries(
@@ -51,6 +44,7 @@ export function buildConversationSummaries(
       id: peerId,
       name: displayName(peerUser),
       subtitle: meta?.subtitle,
+      avatarUrl: meta?.avatarUrl ?? peerUser.avatarUrl,
     };
 
     const existing = byPeer.get(peerId);

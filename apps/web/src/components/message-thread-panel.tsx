@@ -1,6 +1,8 @@
 import { MessageCompose } from '@/components/message-compose';
 import { MessageReportButton } from '@/components/message-report-button';
+import { UserAvatar } from '@/components/user-avatar';
 import { displayName } from '@/lib/messaging/conversations';
+import { ArrowLeft, Check, CheckCheck } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 
@@ -9,8 +11,20 @@ type ThreadMessage = {
   content: string;
   createdAt: Date;
   senderId: string;
+  deliveredAt: Date | null;
+  readAt: Date | null;
   sender: { name: string | null; email: string };
 };
+
+function MessageStatusTicks({ deliveredAt, readAt }: { deliveredAt: Date | null; readAt: Date | null }) {
+  if (readAt) {
+    return <CheckCheck size={13} className="shrink-0 text-[var(--accent)]" aria-hidden="true" />;
+  }
+  if (deliveredAt) {
+    return <CheckCheck size={13} className="shrink-0 text-white/50" aria-hidden="true" />;
+  }
+  return <Check size={13} className="shrink-0 text-white/50" aria-hidden="true" />;
+}
 
 export async function MessageThreadPanel({
   messages,
@@ -23,7 +37,7 @@ export async function MessageThreadPanel({
 }: {
   messages: ThreadMessage[];
   currentUserId: string;
-  peer: { id: string; name: string; subtitle?: string };
+  peer: { id: string; name: string; subtitle?: string; avatarUrl?: string | null };
   dateLocale: string;
   listHref: string;
   canCompose: boolean;
@@ -34,9 +48,10 @@ export async function MessageThreadPanel({
   return (
     <section className="flex min-h-0 flex-1 flex-col">
       <header className="flex items-center gap-3 border-b border-[var(--border)] px-4 py-3">
-        <Link href={listHref} className="muted text-sm hover:text-white lg:hidden">
-          ←
+        <Link href={listHref} className="muted hover:text-white lg:hidden">
+          <ArrowLeft size={18} aria-hidden="true" />
         </Link>
+        <UserAvatar name={peer.name} avatarUrl={peer.avatarUrl} size="sm" />
         <div className="min-w-0">
           <p className="truncate font-medium">{peer.name}</p>
           {peer.subtitle ? <p className="muted truncate text-xs">{peer.subtitle}</p> : null}
@@ -67,8 +82,13 @@ export async function MessageThreadPanel({
                     </p>
                   ) : null}
                   <p className="whitespace-pre-wrap">{message.content}</p>
-                  <p className={`mt-1.5 text-[10px] ${isMine ? 'text-white/60' : 'muted'}`}>
+                  <p
+                    className={`mt-1.5 flex items-center gap-1 text-[10px] ${isMine ? 'justify-end text-white/60' : 'muted'}`}
+                  >
                     {message.createdAt.toLocaleString(dateLocale)}
+                    {isMine ? (
+                      <MessageStatusTicks deliveredAt={message.deliveredAt} readAt={message.readAt} />
+                    ) : null}
                   </p>
                   {!isMine && enableReports ? (
                     <MessageReportButton messageId={message.id} />
