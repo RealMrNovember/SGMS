@@ -43,7 +43,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 5 | ~~Merkezi Lisans Entegrasyonu (license.cicibyte.com)~~ | 🗑️ Emekli (bkz. Faz 13) | — |
 | 6 | Uluslararasılaşma (i18n) & Medya/Kimlik | 🔄 Devam ediyor | ~90% (6 dil + medya/kimlik tamamlandı; İtalyanca/Portekizce + küresel lokasyon veritabanı sırada) |
 | 7 | Mobil & Sporcu Auth (API-First) | ✅ Tamamlandı | 100% |
-| 8 | POS, Kasa, Cari Hesap & Abonelik/Ödeme | 🔄 Devam ediyor | ~80% (Invoice modeli + ödeme planı/taksit + salon bazlı online ödeme sağlayıcısı sırada) |
+| 8 | POS, Kasa, Cari Hesap & Abonelik/Ödeme | 🔄 Devam ediyor | ~90% (ödeme planı/taksit tamamlandı — Invoice modeli + 8.7 salon bazlı online ödeme sağlayıcısı sırada) |
 | 9 | Gerçek Zamanlı İletişim (Real-time Chat) | ✅ Tamamlandı | 100% |
 | 10 | IoT, Kapı, Turnike & SGMS Resepsiyon | ✅ Tamamlandı | 100% |
 | 11 | Marketing & Showcase Sitesi | ✅ Tamamlandı | 100% |
@@ -304,7 +304,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ---
 
-## ✅ Faz 8 — POS, Kasa, Cari Hesap & Abonelik/Ödeme (Tamamlandı, Invoice hariç)
+## 🔄 Faz 8 — POS, Kasa, Cari Hesap & Abonelik/Ödeme (Invoice ve 8.7 hariç tamamlandı)
 
 > **Hedef:** Salon içi market/kafe/ekstra PT borçları (cari hesap) + SaaS abonelik/ödeme yönetimi.
 
@@ -339,17 +339,17 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 **Kabul kriteri:** ✅ Resepsiyon "Su - 15 TL" ekler → sporcu panelinde borç görünür → tahsilat sonrası bakiye sıfırlanır · deneme/ödeme süresi dolunca panel salt-okunur moda düşer, Master Admin onayıyla açılır
 
-### 8.6 Ödeme Planı / Taksitli Tahsilat — yeni, 2026-07-16 eklendi
+### 8.6 Ödeme Planı / Taksitli Tahsilat — tamamlandı, 2026-07-16
 
-> **Kullanıcı senaryosu (2026-07-16):** *"Salon müşterisi bugün kaydını başlattı ama '3 gün sonra ya da haftaya öderim' dedi. Resepsiyon görevlisi o müşteri için ödeme planı oluşturabilmeli, yönetebilmeli, ödenen/ödenmeyen/kalan borcu görebilmeli."* Faz 8.1'deki `Expense`/`Transaction` çifti bunun için sağlam bir temel — yalnızca **vade tarihi** ve **kısmi ödeme** eksik; sıfırdan bir ödeme motoru gerekmiyor.
-- [ ] `Expense` modeline opsiyonel `dueDate` alanı eklenir — vadesi geçmiş (`dueDate` < bugün, hâlâ `OPEN`) kalemler Cari Hesap panelinde ve `/dashboard/pos`'ta kırmızı/uyarı rozetiyle öne çıkar
-- [ ] Yeni `PaymentPlan` modeli — bir üyeye ait birden çok `Expense` satırını tek bir plan altında gruplar (ör. "Üyelik ücreti — 3 taksit"); her taksit kendi `dueDate`'i olan ayrı bir `Expense` satırı olarak üretilir, mevcut FIFO tahsilat/void mantığı (`actions/expenses.ts`) değişmeden yeniden kullanılır
-- [ ] `recordPayment` akışına **kısmi ödeme** desteği eklenir — bugün yalnızca bir `Expense`'i tam kapatabiliyor; taksit senaryosunda "300 TL borcun 150 TL'sini şimdi öde" gibi kısmi tahsilat gerekiyor (kalan tutar aynı `Expense` satırında `OPEN` kalır, ikinci bir `Transaction` kısmi tutarla kaydedilir)
-- [ ] Sporcu detay CRM'deki Cari Hesap paneline **"Ödeme Planı Oluştur"** aksiyonu — resepsiyon/salon sahibi taksit sayısı + ilk vade tarihini girer, sistem taksitleri otomatik üretir
-- [ ] Resepsiyon KPI dashboard'una (Faz 15.3) **"Vadesi Yaklaşan/Geçen Ödemeler"** widget'ı — hangi üyenin ne kadar borcu var, vadesi ne zaman
-- [ ] Sporcu portalındaki mevcut borç listesine (Faz 8.3) taksit planı görünümü eklenir — üye kendi ödeme takvimini görür
+> **Kullanıcı senaryosu (2026-07-16):** *"Salon müşterisi bugün kaydını başlattı ama '3 gün sonra ya da haftaya öderim' dedi. Resepsiyon görevlisi o müşteri için ödeme planı oluşturabilmeli, yönetebilmeli, ödenen/ödenmeyen/kalan borcu görebilmeli."* Faz 8.1'deki `Expense`/`Transaction` çifti bunun için sağlam bir temel olarak kullanıldı — sıfırdan bir ödeme motoru inşa edilmedi.
+- [x] `Expense` modeline opsiyonel `dueDate` + `paidAmount` alanları eklendi — vadesi geçmiş (`dueDate` < bugün, hâlâ `OPEN`) kalemler Cari Hesap panelinde, `/dashboard/pos`'ta ve yeni `/dashboard/payment-plans` sayfasında kırmızı/uyarı rozetiyle öne çıkıyor
+- [x] Yeni `PaymentPlan` modeli — bir üyeye ait birden çok `Expense` satırını tek bir plan altında gruplar (haftalık/aylık/özel gün aralığı kademeli), her taksit kendi `dueDate`'i olan ayrı bir `Expense` satırı
+- [x] `recordPayment` akışına **gerçek kısmi ödeme** desteği eklendi — önceki FIFO mantığındaki bir hata da bu sırada düzeltildi: ödeme tam karşılayamadığı en eski borcu artık sessizce atlamıyor, kısmen kapatıyor (`lib/billing/settle-payment.ts`, hem web hem API v1 `transactions` bu ortak fonksiyonu kullanıyor, 6 Vitest testiyle doğrulandı)
+- [x] Sporcu detay CRM'deki Cari Hesap paneline **"Ödeme Planı Oluştur"** aksiyonu — resepsiyon/salon sahibi taksit sayısı + ilk vade tarihini girer, sistem taksitleri otomatik üretir; her taksit için inline kısmi/tam ödeme formu
+- [x] Ana dashboard KPI grid'ine **"Vadesi Geçen Taksit"** kartı + amber uyarı bandı, ve kalıcı sol menü öğesi olarak yeni **`/dashboard/payment-plans`** genel bakış sayfası — organizasyon genelinde tüm bekleyen/geciken taksitler tek listede (kullanıcı kararıyla sadece KPI linki değil, kalıcı nav öğesi)
+- [x] Sporcu portalındaki mevcut borç listesine (Faz 8.3) salt-okunur taksit planı görünümü eklendi — üye kendi ödeme takvimini görür
 
-**Mimari not:** Var olan `Expense`/`Transaction`/FIFO altyapısı korunur, üstüne ince bir `PaymentPlan` gruplama katmanı + `dueDate`/kısmi-ödeme eklenir — mevcut cari hesap mantığını kırmadan genişletir.
+**Mimari not:** Var olan `Expense`/`Transaction`/FIFO altyapısı korundu, üstüne ince bir `PaymentPlan` gruplama katmanı + `dueDate`/`paidAmount` eklendi — mevcut cari hesap mantığı kırılmadı, yalnızca genişletildi.
 
 ### 8.7 Salon Bazlı Online Ödeme Sağlayıcı Entegrasyonu (Iyzico/PayTR/Banka) — yeni, 2026-07-16 eklendi
 
@@ -1098,7 +1098,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | ESLint yapılandırması | P1 | 13 | ✅ hiç yoktu, bu revizyonla eklendi |
 | E2E (Playwright): login, CRM ölçüm, expense | P2 | 18 | 🔲 |
 | `Invoice` modeli | P2 | 18 | 🔲 opsiyonel |
-| Ödeme planı/taksit yönetimi (vade tarihi + kısmi ödeme) | P1 | 8 | 🔲 yeni, 2026-07-16 eklendi |
+| Ödeme planı/taksit yönetimi (vade tarihi + kısmi ödeme) | P0 | 8 | ✅ tamamlandı — 2026-07-16 |
 | Salon bazlı online ödeme sağlayıcı entegrasyonu (Iyzico/PayTR/Banka) | P1 | 8 | 🔲 yeni, 2026-07-16 eklendi — Faz 8.6'ya bağımlı |
 | RFID okuyucu donanım bağlantı ayarları (Ayarlar paneli) | P2 | 31 | 🔲 yeni, 2026-07-16 eklendi
 | `readme.md` sadeleştirme | P2 | 13 | ✅ bu revizyonla kapatıldı |
@@ -1172,6 +1172,7 @@ Devam ediyor:
   Faz 16     CiciByte Cloud ticari entegrasyonu                ← ~80%, gerçek API anahtarı bekliyor
 
 Şimdi canlı (production'da):
+  Faz 8.6    Ödeme planı / taksitli tahsilat + kısmi ödeme        ✅
   Faz 34.1   Responsive dashboard nav + "Çok Yakında" sayfası    ✅
   Faz 34.2   Sol menü + dark/light tema + ikon sistemi (tüm yüzeyler) ✅ (~70%)
   Faz 34.3   Responsive tablo/kart + wizard formlar (Tier 1)     ✅ (Tier 2 ertelendi)
@@ -1183,7 +1184,6 @@ Devam ediyor:
 
 Sıradaki (öncelik sırası — profesyonel değerlendirme, P0 en önce):
   Faz 32     Ticarileştirme: paket + ek kapasite satışı          ← P0, gelir modeli (kullanıcı onayı gerekli)
-  Faz 8.6    Ödeme planı / taksitli tahsilat                     ← P0, kullanıcının doğrudan günlük operasyon talebi
   Faz 34.4   Mesajlaşma arayüzü modernizasyonu (WhatsApp tarzı)  ← P0, kullanıcı memnuniyetsizliğine doğrudan yanıt
   [Repo]     Git contributors düzenlemesi (cursoragent kaldırma) ← P0, ⚠️ onay gerekli (destructive, force-push)
 
