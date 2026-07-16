@@ -482,6 +482,7 @@ model Organization {
   gymMembers         GymMember[]
   healthMeasurements HealthMeasurement[]
   trainingPrograms   TrainingProgram[]
+  exerciseSetLogs    ExerciseSetLog[]
   directMessages     DirectMessage[]
   messageReports     MessageReport[]
   apiTokens          ApiToken[]
@@ -687,6 +688,7 @@ model GymMember {
   trainer            User?               @relation("GymMemberTrainer", fields: [trainerId], references: [id], onDelete: SetNull)
   healthMeasurements HealthMeasurement[]
   trainingPrograms   TrainingProgram[]
+  exerciseSetLogs    ExerciseSetLog[]
   apiTokens          ApiToken[]
   expenses           Expense[]
   transactions       Transaction[]
@@ -755,12 +757,41 @@ model TrainingProgram {
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   gymMember    GymMember    @relation(fields: [gymMemberId], references: [id], onDelete: Cascade)
   trainer      User         @relation("TrainingProgramTrainer", fields: [trainerId], references: [id], onDelete: Restrict)
+  exerciseSetLogs ExerciseSetLog[]
 
   @@index([organizationId, gymMemberId, isActive])
   @@index([organizationId, trainerId, isActive])
   @@index([gymMemberId, type, isActive])
   @@index([trainerId, startDate])
   @@map("training_programs")
+}
+
+// ---------------------------------------------------------------------------
+// ExerciseSetLog — sporcunun kendi ilerleme takibi (PT içerik editörüne dokunmaz)
+// ---------------------------------------------------------------------------
+
+model ExerciseSetLog {
+  id                String   @id @default(cuid())
+  organizationId    String   @map("organization_id")
+  trainingProgramId String   @map("training_program_id")
+  gymMemberId       String   @map("gym_member_id")
+  dayIndex          Int      @map("day_index")
+  exerciseIndex     Int      @map("exercise_index")
+  performedDate     DateTime @map("performed_date") @db.Date
+  completedSets     Int      @default(0) @map("completed_sets")
+  totalSets         Int      @map("total_sets")
+  weightUsed        Decimal? @map("weight_used") @db.Decimal(6, 2)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  organization    Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  trainingProgram TrainingProgram @relation(fields: [trainingProgramId], references: [id], onDelete: Cascade)
+  gymMember       GymMember       @relation(fields: [gymMemberId], references: [id], onDelete: Cascade)
+
+  @@unique([trainingProgramId, gymMemberId, dayIndex, exerciseIndex, performedDate])
+  @@index([organizationId, gymMemberId, performedDate])
+  @@map("exercise_set_logs")
 }
 
 // ---------------------------------------------------------------------------

@@ -440,6 +440,13 @@
       "summaryWorkout": "{count} días de entrenamiento",
       "summaryNutrition": "{count} comidas",
       "goal": "Objetivo y notas"
+    },
+    "interactive": {
+      "goal": "Objetivo y notas",
+      "markSet": "Marcar serie {completed}/{total}",
+      "done": "Hecho",
+      "weightPlaceholder": "kg",
+      "resting": "Descanso {seconds} s"
     }
   },
   "license": {

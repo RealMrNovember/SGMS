@@ -440,6 +440,13 @@
       "summaryWorkout": "{count} antrenman günü",
       "summaryNutrition": "{count} öğün",
       "goal": "Hedef & notlar"
+    },
+    "interactive": {
+      "goal": "Hedef ve notlar",
+      "markSet": "Seti işaretle {completed}/{total}",
+      "done": "Tamamlandı",
+      "weightPlaceholder": "kg",
+      "resting": "Dinleniyor {seconds} sn"
     }
   },
   "license": {

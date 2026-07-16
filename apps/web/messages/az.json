@@ -440,6 +440,13 @@
       "summaryWorkout": "{count} məşq günü",
       "summaryNutrition": "{count} öğün",
       "goal": "Məqsəd və qeydlər"
+    },
+    "interactive": {
+      "goal": "Hədəf və qeydlər",
+      "markSet": "Seti işarələ {completed}/{total}",
+      "done": "Tamamlandı",
+      "weightPlaceholder": "kg",
+      "resting": "Dincəlmə {seconds} san"
     }
   },
   "license": {

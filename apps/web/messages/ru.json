@@ -440,6 +440,13 @@
       "summaryWorkout": "{count} тренировочных дней",
       "summaryNutrition": "{count} приёмов пищи",
       "goal": "Цель и заметки"
+    },
+    "interactive": {
+      "goal": "Цель и заметки",
+      "markSet": "Отметить подход {completed}/{total}",
+      "done": "Готово",
+      "weightPlaceholder": "кг",
+      "resting": "Отдых {seconds} с"
     }
   },
   "license": {
