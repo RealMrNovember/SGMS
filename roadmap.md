@@ -69,7 +69,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 31 | Entegrasyon Pazaryeri | 🔲 Planlandı | 0% |
 | 32 | Ticarileştirme: Paket & Ek Kapasite Satışı | 🔲 Planlandı | 0% |
 | 33 | Dinamik Rol Bazlı Kullanım Kılavuzu | 🔲 Planlandı | 0% |
-| 34 | Tam Responsive Tasarım Sistemi | 🔄 Devam ediyor | ~70% (sol menü + dark/light tema + ikon sistemi tüm yüzeylerde tamamlandı) |
+| 34 | Tam Responsive Tasarım Sistemi | 🔄 Devam ediyor | ~85% (sol menü/tema/ikon + mobil tablo/kart + mesajlaşma modernizasyonu tamamlandı — sporcu profil özyönetimi + interaktif program görünümü kaldı) |
 | 35 | Temsilci (Partner) Portalı | ✅ Tamamlandı | 100% |
 
 > Fazlar 6/9/10'un durum özeti önceki revizyonlarda detay bölümleriyle **çelişiyordu** (özet tablo güncellenmeden unutulmuştu). Bu revizyon koda göre (tüm alt maddeler `[x]`, gerçek commit geçmişi) düzeltilmiştir.
@@ -1040,13 +1040,17 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 > **Kasıtlı olarak yapılmadı:** `trial-registration-form.tsx` wizard'a çevrilmedi — dönüşüm formlarına eklenen her ekstra adım gerçek dünyada kayıt oranını düşürür (bilinen UX riski), form zaten makul uzunlukta (7 alan).
 
-### 34.4 Mesajlaşma Arayüzü Modernizasyonu (WhatsApp/Telegram tarzı) — yeni, 2026-07-16 eklendi
+### 34.4 Mesajlaşma Arayüzü Modernizasyonu (WhatsApp/Telegram tarzı) — tamamlandı, 2026-07-16
 
-> **Kullanıcı notu (2026-07-16):** *"Mevcut mesajlaşma arayüzü çok eski usül hissettiriyor."* Faz 9'un real-time altyapısı (Soketi + Redis, <2sn teslimat) zaten sağlam — eksik olan yalnızca arayüz. Bu, mevcut `/dashboard/messages` ve `/athlete/messages` sayfalarının **veri katmanına dokunmadan**, salt görsel bir yeniden inşasıdır.
-- [ ] İki panelli düzen: solda sohbet listesi (son mesaj önizlemesi, okunmamış rozeti, arama), sağda seçili sohbetin akışı — mevcut sayfa-değiştirmeli/ayrı-sekmeli inbox/sent yapısının yerini alır
-- [ ] Mesaj balonları (gönderen/alan ayrımı, zaman damgası, teslim/okundu tikleri — mevcut `deliveredAt`/`readAt` alanları zaten var, yalnızca görsel karşılığı eksik), yazıyor... göstergesi (mevcut typing indicator altyapısı zaten var — Faz 9.3)
-- [ ] Mobilde tam ekran sohbet görünümü (liste ↔ sohbet arası geri butonuyla geçiş), masaüstünde yan yana
-- [ ] Faz 34'ün yeni `GymLoader`/ikon sistemiyle görsel tutarlılık
+> **Kullanıcı notu (2026-07-16):** *"Mevcut mesajlaşma arayüzü çok eski usül hissettiriyor."* Faz 9'un real-time altyapısı (Soketi + Redis, <2sn teslimat) zaten sağlam — eksik olan yalnızca arayüz. **Araştırma sırasında ortaya çıktı:** iki panelli düzen, sohbet listesi gruplaması ve mobilde tam ekran geçişi (`hidden lg:block` + geri linki) **zaten mevcuttu ve doğru çalışıyordu** — bu maddeler yeniden inşa edilmedi, yalnızca doğrulandı. Gerçek eksikler tikler, gerçek zamanlı okundu bildirimi ve görsel cilaydı.
+- [x] İki panelli düzen + mobilde tam ekran sohbet görünümü — zaten mevcut, korundu (yeniden inşa gerekmedi)
+- [x] Mesaj balonlarına teslim/okundu tikleri eklendi (`deliveredAt`/`readAt` zaten vardı, yalnızca görselleştirilmedi) — tek gri tik (sunucuya ulaştı), çift gri tik (teslim edildi), çift renkli tik (okundu)
+- [x] Yeni `message.read` gerçek zamanlı olayı (`hub.ts`/`pusher-server.ts`, mevcut `message.typing` deseninin birebir kopyası) — alıcı mesajı okuduğunda gönderenin ekranındaki tikler sayfa yenilemeden anında güncelleniyor
+- [x] Sohbet listesi ve sohbet başlığında düz baş-harf yuvarlağı yerine gerçek `UserAvatar` (mevcut bileşen, `User.avatarUrl`)
+- [x] Geri linkinde düz "←" yerine `ArrowLeft` ikonu, "yazıyor…" metni yerine 3-nokta zıplama animasyonlu balon (`prefers-reduced-motion` destekli)
+- [x] Ölü kod temizliği: kullanılmayan `mark-read-button.tsx` silindi
+
+**Kapsam dışı (v2'ye ertelendi):** tam optimistic-UI/WebSocket-driven mesaj ekleme (şu an her yeni mesajda `router.refresh()` tam sayfa yenilemesi var — yeterince hızlı, düşük riskli, korunuyor); gerçek push-delivery-ack tabanlı "teslim edildi" semantiği (bugün `deliveredAt` mesaj oluşturulduğu an set ediliyor, gerçek cihaz-teslim onayı değil).
 
 ### 34.5 Sporcu Profil Özyönetimi — yeni, 2026-07-16 eklendi
 
@@ -1140,7 +1144,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | Rol bazlı dinamik kullanım kılavuzu (Help Center) | P1 | 33 | 🔲 |
 | Ayarlar ekranı modernizasyonu (rol bazlı, kategorili) | P1 | 33 | 🔲 |
 | Tam responsive tasarım sistemi | P0 | 34 | 🔄 ~70% — sol menü + dark/light tema + ikon sistemi tüm yüzeylerde tamamlandı, tablo/form mobil turu kaldı |
-| Mesajlaşma arayüzü modernizasyonu (WhatsApp/Telegram tarzı) | P0 | 34 | 🔲 |
+| Mesajlaşma arayüzü modernizasyonu (WhatsApp/Telegram tarzı) | P0 | 34 | ✅ tamamlandı — 2026-07-16 |
 | Sporcu profil özyönetimi (parola/avatar/doğum tarihi) | P1 | 34 | 🔲 |
 | İnteraktif antrenman programı görünümü (video + set/tekrar) | P2 | 34 | 🔲 |
 | Temsilci (Partner) Portalı | P1 | 35 | ✅ tamamlandı — 2026-07-15 |
@@ -1176,6 +1180,7 @@ Devam ediyor:
   Faz 34.1   Responsive dashboard nav + "Çok Yakında" sayfası    ✅
   Faz 34.2   Sol menü + dark/light tema + ikon sistemi (tüm yüzeyler) ✅ (~70%)
   Faz 34.3   Responsive tablo/kart + wizard formlar (Tier 1)     ✅ (Tier 2 ertelendi)
+  Faz 34.4   Mesajlaşma arayüzü modernizasyonu (tik/avatar/canlı okundu) ✅
   Faz 35     Temsilci (Partner) Portalı                          ✅
   Faz 27.1   Tarayıcı Web Push bildirimleri                      ✅ (~35% — SMS/WhatsApp/şablon kaldı)
   Faz 21     PT performans/komisyon/prim yönetimi                ✅
@@ -1184,7 +1189,6 @@ Devam ediyor:
 
 Sıradaki (öncelik sırası — profesyonel değerlendirme, P0 en önce):
   Faz 32     Ticarileştirme: paket + ek kapasite satışı          ← P0, gelir modeli (kullanıcı onayı gerekli)
-  Faz 34.4   Mesajlaşma arayüzü modernizasyonu (WhatsApp tarzı)  ← P0, kullanıcı memnuniyetsizliğine doğrudan yanıt
   [Repo]     Git contributors düzenlemesi (cursoragent kaldırma) ← P0, ⚠️ onay gerekli (destructive, force-push)
 
   Faz 8.7    Salon bazlı online ödeme sağlayıcısı (Iyzico/PayTR) ← P1, Faz 8.6'ya bağımlı, Faz 16.3 deseni yeniden kullanılır
