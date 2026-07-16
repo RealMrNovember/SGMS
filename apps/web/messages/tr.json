@@ -18,7 +18,12 @@
     "noPlan": "Plan yok",
     "noEmail": "E-posta yok",
     "ellipsis": "…",
-    "membersLinked": "{count} üye bu plana bağlı"
+    "membersLinked": "{count} üye bu plana bağlı",
+    "theme": {
+      "light": "Açık Mod",
+      "dark": "Koyu Mod",
+      "toggle": "Temayı değiştir"
+    }
   },
   "nav": {
     "overview": "Özet",
@@ -35,7 +40,15 @@
     "enterprise": "Kurumsal",
     "adminOverview": "Sistem Özeti",
     "newCustomer": "Yeni Müşteri",
-    "comingSoonGroup": "Yakında"
+    "comingSoonGroup": "Yakında",
+    "more": "Diğer",
+    "collapseSidebar": "Menüyü daralt",
+    "expandSidebar": "Menüyü genişlet",
+    "groups": {
+      "dailyOps": "Günlük İşlemler",
+      "management": "Yönetim",
+      "analytics": "Analiz"
+    }
   },
   "auth": {
     "login": "Giriş Yap",

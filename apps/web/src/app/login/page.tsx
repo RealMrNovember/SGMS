@@ -1,4 +1,5 @@
 import { LocaleSwitcher } from '@/components/locale-switcher';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { SgmsLogo } from '@/components/brand/sgms-logo';
 import { LoginForm } from '@/components/login-form';
 import { ReceptionDownloadPromo } from '@/components/reception/reception-download-promo';
@@ -20,7 +21,10 @@ export default async function LoginPage() {
           <Link href="/" className="transition-opacity hover:opacity-90">
             <SgmsLogo size="sm" href={null} showWordmark />
           </Link>
-          <LocaleSwitcher compact />
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <LocaleSwitcher />
+          </div>
         </div>
 
         <div className="relative z-10 mt-auto pt-16">

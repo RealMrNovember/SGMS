@@ -3,6 +3,7 @@ import { AthleteNav } from '@/components/athlete-nav';
 import { LocaleSwitcher } from '@/components/locale-switcher';
 import { MessageLiveRefresh } from '@/components/message-live-refresh';
 import { PushNotificationToggle } from '@/components/push-notification-toggle';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { UserAvatar } from '@/components/user-avatar';
 import { auth } from '@/lib/auth';
 import { resolveSubscriptionAccess } from '@/lib/billing/subscription-gate';
@@ -61,7 +62,7 @@ export default async function AthleteLayout({ children }: { children: React.Reac
         userId={session.user.id}
         organizationId={session.user.organizationId}
       />
-      <header className="border-b border-[var(--border)] bg-[rgba(17,24,39,0.9)] backdrop-blur">
+      <header className="border-b border-[var(--border)] bg-[var(--sidebar-bg)] backdrop-blur">
         <div className="mx-auto flex max-w-lg items-center justify-between gap-4 px-4 py-4">
           <div className="flex items-center gap-3">
             <UserAvatar name={session.user.name} size="md" />
@@ -72,6 +73,7 @@ export default async function AthleteLayout({ children }: { children: React.Reac
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <PushNotificationToggle />
             <LocaleSwitcher />
             <form

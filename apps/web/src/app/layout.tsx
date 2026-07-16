@@ -2,6 +2,7 @@ import { Providers } from '@/components/providers';
 import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
+import { cookies } from 'next/headers';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -38,9 +39,11 @@ export const viewport = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const locale = await getLocale();
   const messages = await getMessages();
+  const cookieStore = await cookies();
+  const theme = cookieStore.get('theme')?.value === 'light' ? 'light' : 'dark';
 
   return (
-    <html lang={locale}>
+    <html lang={locale} data-theme={theme}>
       <body>
         <NextIntlClientProvider messages={messages}>
           <Providers>{children}</Providers>

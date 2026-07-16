@@ -18,7 +18,12 @@
     "noPlan": "No plan",
     "noEmail": "No email",
     "ellipsis": "…",
-    "membersLinked": "{count} members on this plan"
+    "membersLinked": "{count} members on this plan",
+    "theme": {
+      "light": "Light mode",
+      "dark": "Dark mode",
+      "toggle": "Toggle theme"
+    }
   },
   "nav": {
     "overview": "Overview",
@@ -35,7 +40,15 @@
     "enterprise": "Enterprise",
     "adminOverview": "System Overview",
     "newCustomer": "New Customer",
-    "comingSoonGroup": "Coming Soon"
+    "comingSoonGroup": "Coming Soon",
+    "more": "More",
+    "collapseSidebar": "Collapse sidebar",
+    "expandSidebar": "Expand sidebar",
+    "groups": {
+      "dailyOps": "Daily Operations",
+      "management": "Management",
+      "analytics": "Analytics"
+    }
   },
   "auth": {
     "login": "Sign In",

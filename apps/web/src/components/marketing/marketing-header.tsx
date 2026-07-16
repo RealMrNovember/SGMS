@@ -1,4 +1,5 @@
 import { LocaleSwitcher } from '@/components/locale-switcher';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { SgmsLogo } from '@/components/brand/sgms-logo';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
@@ -33,7 +34,8 @@ export async function MarketingHeader() {
         </nav>
 
         <div className="marketing-header-actions">
-          <LocaleSwitcher compact />
+          <ThemeToggle />
+          <LocaleSwitcher />
           <Link href="/login" className="marketing-auth-btn marketing-auth-btn--ghost">
             <span className="marketing-auth-short">{t('loginShort')}</span>
             <span className="marketing-auth-full">{t('login')}</span>

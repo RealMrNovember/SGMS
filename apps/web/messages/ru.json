@@ -18,7 +18,12 @@
     "noPlan": "Без плана",
     "noEmail": "Нет email",
     "ellipsis": "…",
-    "membersLinked": "{count} участников на этом плане"
+    "membersLinked": "{count} участников на этом плане",
+    "theme": {
+      "light": "Светлая тема",
+      "dark": "Тёмная тема",
+      "toggle": "Переключить тему"
+    }
   },
   "nav": {
     "overview": "Обзор",
@@ -35,7 +40,15 @@
     "enterprise": "Корпоративный",
     "adminOverview": "Обзор системы",
     "newCustomer": "Новый клиент",
-    "comingSoonGroup": "Скоро"
+    "comingSoonGroup": "Скоро",
+    "more": "Ещё",
+    "collapseSidebar": "Свернуть меню",
+    "expandSidebar": "Развернуть меню",
+    "groups": {
+      "dailyOps": "Ежедневные операции",
+      "management": "Управление",
+      "analytics": "Аналитика"
+    }
   },
   "auth": {
     "login": "Войти",

@@ -18,7 +18,12 @@
     "noPlan": "Aucun forfait",
     "noEmail": "Pas d'e-mail",
     "ellipsis": "…",
-    "membersLinked": "{count} membres sur ce forfait"
+    "membersLinked": "{count} membres sur ce forfait",
+    "theme": {
+      "light": "Mode clair",
+      "dark": "Mode sombre",
+      "toggle": "Changer de thème"
+    }
   },
   "nav": {
     "overview": "Aperçu",
@@ -35,7 +40,15 @@
     "enterprise": "Entreprise",
     "adminOverview": "Vue système",
     "newCustomer": "Nouveau client",
-    "comingSoonGroup": "Bientôt disponible"
+    "comingSoonGroup": "Bientôt disponible",
+    "more": "Plus",
+    "collapseSidebar": "Réduire le menu",
+    "expandSidebar": "Développer le menu",
+    "groups": {
+      "dailyOps": "Opérations quotidiennes",
+      "management": "Gestion",
+      "analytics": "Analyses"
+    }
   },
   "auth": {
     "login": "Connexion",
