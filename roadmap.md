@@ -1002,12 +1002,20 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 - [x] Yeni çeviri anahtarları 6 dilin tamamına eklendi, derin anahtar-parity scripti ile 0 eksik doğrulandı
 - [x] RSC sınırı hatası (ikon bileşenleri sunucu bileşeninden istemciye fonksiyon referansı olarak geçiriliyordu) tespit edilip düzeltildi — production log izlemesiyle yakalandı
 
-### 34.3 Sıradaki tur (henüz yapılmadı)
-- [ ] Tüm veri tablolarının mobilde (768px altı) kart görünümüne dönüşmesi (yatay scroll yerine) — üye listesi, POS, audit log
-- [ ] Dokunmatik hedef boyutlarının (min. 44×44px) tüm buton/link'lerde denetimi
-- [ ] Form bileşenlerinin (çok alanlı formlar) mobilde adım adım (wizard) akışa dönüştürülmesi
+### 34.3 Mobil tablo/kart görünümü, dokunmatik hedef denetimi, wizard formlar (Tier 1 tamamlandı, 2026-07-16)
+
+> POS (`pos-terminal.tsx`) ve audit log (`audit-log-feed.tsx`) araştırma sırasında zaten kart tabanlı olduğu görüldü (`.admin-audit-feed__item` deseni) — bu ikisi zaten hedefteki görünümdeydi, yeni iş gerekmedi. Gerçekte ham `<table>` kullanan 15 dosya bulundu; bu turda **tenant tarafı (Tier 1)** dönüştürüldü, **Master Admin/Temsilci tarafı (Tier 2)** bilinçli olarak ertelendi (aşağıya bakın).
+
+- [x] Paylaşılan `.data-card-list`/`.data-card` CSS deseni (`globals.css`) — mevcut audit-feed kart görünümünden ilham alan, her tabloda yeniden kullanılan sınıflar
+- [x] Dokunmatik hedef denetimi: `.icon-btn` 37.6px → 44px, `.app-sidebar-collapse-btn` min-height 44px, admin satır aksiyon butonları (`organization-team-member-row.tsx`, `master-admin-panel.tsx`) — bu düzeltme ucuz olduğu için Tier 2 dosyalarında da uygulandı
+- [x] Tier 1 tablo → kart dönüşümü: üye listesi, personel listesi, programlar, PT seansları, ölçüm geçmişi (2 kullanım yeri), kurumsal şube tablosu — hepsi `hidden md:block` (masaüstü tablo) + `data-card-list md:hidden` (mobil kart) ikili render deseniyle
+- [x] Genel `FormWizard` bileşeni (`components/form-wizard.tsx`) — harici kütüphane yok, native `:invalid`/`reportValidity()` ile adım doğrulama, mevcut `useActionState`/server action deseniyle tam uyumlu
+- [x] `add-member-form.tsx` 3 adıma bölündü (Kişisel Bilgiler / Üyelik / Notlar & Onay), `create-program-form.tsx` 2 adıma bölündü (Program Bilgileri / İçerik — `program-content-builder.tsx` değişmeden 2. adıma taşındı)
+- [ ] **Sonraki tur (Tier 2, ertelendi):** Master Admin org listesi, temsilci/partner listesi, master admin paneli, admin-taraflı ekip yönetimi, program content builder egzersiz tablosu, reports tabloları — gerekçe: bu ekranları gerçek kullanım senaryosunda CiciByte iç ekibi masaüstünden kullanıyor, salon personeli/sahibi mobilden asıl kendi tenant ekranlarına bakıyor
 - [ ] Marketing/login sayfalarının görsel dilinin (hero, animasyonlar) yeni ikon sistemiyle daha da zenginleştirilmesi
 - [ ] Performans: mobil ağlarda ilk yükleme süresi hedefi (Core Web Vitals — LCP < 2.5s)
+
+> **Kasıtlı olarak yapılmadı:** `trial-registration-form.tsx` wizard'a çevrilmedi — dönüşüm formlarına eklenen her ekstra adım gerçek dünyada kayıt oranını düşürür (bilinen UX riski), form zaten makul uzunlukta (7 alan).
 
 ### 34.4 Mesajlaşma Arayüzü Modernizasyonu (WhatsApp/Telegram tarzı) — yeni, 2026-07-16 eklendi
 
@@ -1140,6 +1148,7 @@ Devam ediyor:
 Şimdi canlı (production'da):
   Faz 34.1   Responsive dashboard nav + "Çok Yakında" sayfası    ✅
   Faz 34.2   Sol menü + dark/light tema + ikon sistemi (tüm yüzeyler) ✅ (~70%)
+  Faz 34.3   Responsive tablo/kart + wizard formlar (Tier 1)     ✅ (Tier 2 ertelendi)
   Faz 35     Temsilci (Partner) Portalı                          ✅
   Faz 27.1   Tarayıcı Web Push bildirimleri                      ✅ (~35% — SMS/WhatsApp/şablon kaldı)
   Faz 21     PT performans/komisyon/prim yönetimi                ✅
@@ -1148,7 +1157,6 @@ Devam ediyor:
 
 Sıradaki (öncelik sırası — profesyonel değerlendirme, P0 en önce):
   Faz 32     Ticarileştirme: paket + ek kapasite satışı          ← P0, gelir modeli (kullanıcı onayı gerekli)
-  Faz 34.3   Responsive tasarım sistemi — tablo/form mobil turu  ← P0, sürekli kalite katmanı
   Faz 34.4   Mesajlaşma arayüzü modernizasyonu (WhatsApp tarzı)  ← P0, kullanıcı memnuniyetsizliğine doğrudan yanıt
   [Repo]     Git contributors düzenlemesi (cursoragent kaldırma) ← P0, ⚠️ onay gerekli (destructive, force-push)
 
