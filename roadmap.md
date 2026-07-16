@@ -69,7 +69,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 31 | Entegrasyon Pazaryeri | 🔲 Planlandı | 0% |
 | 32 | Ticarileştirme: Paket & Ek Kapasite Satışı | 🔲 Planlandı | 0% |
 | 33 | Dinamik Rol Bazlı Kullanım Kılavuzu | 🔲 Planlandı | 0% |
-| 34 | Tam Responsive Tasarım Sistemi | 🔄 Devam ediyor | ~90% (sol menü/tema/ikon + mobil tablo/kart + mesajlaşma modernizasyonu + sporcu profil özyönetimi tamamlandı — yalnızca interaktif program görünümü kaldı) |
+| 34 | Tam Responsive Tasarım Sistemi | ✅ Tamamlandı | ~97% (sol menü/tema/ikon + mobil tablo/kart + mesajlaşma + profil özyönetimi + interaktif program görünümü tamamlandı — yalnızca video desteği/ilerleme geçmişi Tier 2'ye ertelendi) |
 | 35 | Temsilci (Partner) Portalı | ✅ Tamamlandı | 100% |
 
 > Fazlar 6/9/10'un durum özeti önceki revizyonlarda detay bölümleriyle **çelişiyordu** (özet tablo güncellenmeden unutulmuştu). Bu revizyon koda göre (tüm alt maddeler `[x]`, gerçek commit geçmişi) düzeltilmiştir.
@@ -1002,7 +1002,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ---
 
-## 🔄 Faz 34 — Tam Responsive Tasarım Sistemi & Arayüz Yenileme (Öncelik: P0 — kullanıcı deneyimi) — ~70%
+## ✅ Faz 34 — Tam Responsive Tasarım Sistemi & Arayüz Yenileme (Öncelik: P0 — kullanıcı deneyimi) — ~97%
 
 > **Denetim bulgusu (2026-07-15):** Mevcut `/dashboard` üst navigasyonu (`layout.tsx`) 10 menü öğesini + dil seçici + çıkış butonunu tek bir `flex flex-wrap` satırına sığdırmaya çalışıyor — mobil ekranda (375px) bu, çok satırlı, dağınık bir menüye dönüşüyor. Yeni modüller (Faz 21-31) eklendikçe bu sorun katlanarak büyüyecekti.
 >
@@ -1061,14 +1061,15 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 **Kapsam dışı (v2'ye ertelendi):** Giriş kimlik bilgisi olan `User.email`'in doğrulamalı değişimi — yeni bir token modeli/migration, yeni bir mail şablonu ve yeni bir onay sayfası gerektirir (doğrulanmamış e-posta değişimi hesap ele geçirme riski taşır); iletişim bilgisi olan `GymMember.email`/`phone` alanları bu turda güncellenebiliyor, yalnızca giriş e-postası dokunulmadı.
 
-### 34.6 İnteraktif Antrenman Programı Görünümü — yeni, 2026-07-16 eklendi
+### 34.6 İnteraktif Antrenman Programı Görünümü — Tier 1 tamamlandı, 2026-07-16
 
-> **Kullanıcı notu (2026-07-16):** *"PT'nin yazdığı programların sporcu tarafındaki görünümü çok daha modern, interaktif ve detaylı incelenebilir bir arayüze kavuşturulacak."* Faz 4.2'deki program içerik editörü (`program-content-builder.tsx`) PT tarafında zaten esnek bir veri yapısı üretiyor — eksik olan, sporcunun bunu **kullanırken** gördüğü arayüz.
-- [ ] Set/tekrar/ağırlık için etkileşimli işaretleme (bir seti tamamladığında tek dokunuşla işaretleme, dinlenme süresi sayacı)
-- [ ] Egzersiz başına opsiyonel video/görsel bağlantısı (PT tarafından eklenebilir — YouTube/Vimeo embed veya yüklenen kısa klip, mevcut storage altyapısı)
-- [ ] İlerleme geçmişi: bir egzersizin geçmiş seans verileriyle (ağırlık/tekrar artışı) karşılaştırmalı görünümü
+> **Kullanıcı notu (2026-07-16):** *"PT'nin yazdığı programların sporcu tarafındaki görünümü çok daha modern, interaktif ve detaylı incelenebilir bir arayüze kavuşturulacak."* Faz 4.2'deki program içerik editörü (`program-content-builder.tsx`) PT tarafında zaten esnek bir veri yapısı üretiyor — eksik olan, sporcunun bunu **kullanırken** gördüğü arayüz. **Araştırma sırasında ortaya çıkan gerçek:** "tek dokunuşla işaretleme"nin sayfa yenilendiğinde kaybolmaması için PT içerik editörüne dokunmadan, sporcunun kendi ilerlemesini tutan **yeni ve küçük bir tablo** (`ExerciseSetLog`) gerekti — bu "yalnızca arayüz" değil, ince bir veri katmanı + arayüzdü.
+- [x] Set/tekrar için tek dokunuşla işaretleme — kalıcı (`ExerciseSetLog`, gün/egzersiz/tarih bazlı, PT'nin içerik editörü değişmeden)
+- [x] Set tamamlanınca egzersizin `rest` metninden (ör. "90 sn") ayrıştırılan bir geri sayım sayacı — tamamen istemci tarafı, kalıcılık gerekmez
+- [x] Ağırlık takibi — roadmap'in istediği "set/tekrar/**ağırlık**" isteği PT'nin reçetesine sabit bir alan olarak değil, **sporcunun her seti tamamlarken opsiyonel olarak girdiği gerçek kullanılan ağırlık** olarak karşılandı (progresif yüklenme takibi, gerçek salon senaryosuna daha uygun)
+- [ ] **Sonraki tur (Tier 2, ertelendi):** Egzersiz başına opsiyonel video/görsel bağlantısı; bir egzersizin geçmiş seanslarla (ağırlık/tekrar artışı) karşılaştırmalı ilerleme geçmişi görünümü; PT/personel tarafında sporcunun ilerlemesinin görünürlüğü (`dashboard/members/[id]/page.tsx`) — `ExerciseSetLog` verisi zaten bunun için hazır, yalnızca bir okuma arayüzü eksik
 
-**Kabul kriteri:** ✅ Dashboard/Partner/Admin/Athlete artık ortak, ikonlu, dark/light temalı bir sol-menü + mobil alt-menü sistemine sahip · 🔲 veri tabloları mobilde kart görünümüne geçmiş olacak (sonraki tur) · 🔲 mesajlaşma WhatsApp-tarzı iki panelli bir arayüze kavuşmuş olacak · 🔲 sporcular kendi profillerini (parola, avatar, doğum tarihi) yönetebiliyor olacak · 🔲 antrenman programları set/tekrar etkileşimi ve video desteğiyle görüntülenebiliyor olacak
+**Kabul kriteri:** ✅ Dashboard/Partner/Admin/Athlete artık ortak, ikonlu, dark/light temalı bir sol-menü + mobil alt-menü sistemine sahip · ✅ veri tabloları mobilde kart görünümüne geçti (Tier 1) · ✅ mesajlaşma WhatsApp-tarzı iki panelli bir arayüze kavuştu (tik/avatar/canlı okundu) · ✅ sporcular kendi profillerini (parola, avatar, iletişim bilgisi, doğum tarihi) yönetebiliyor · ✅ antrenman programları set/tekrar/ağırlık etkileşimi + dinlenme sayacıyla görüntülenebiliyor (video desteği ve PT-tarafı görünürlük sonraki tura ertelendi)
 
 **Bağımlılık:** yok — bu faz diğer tüm fazların üzerine sürekli uygulanan bir kalite katmanıdır, tek seferlik "bitti" denecek bir faz değildir
 
@@ -1149,7 +1150,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | Tam responsive tasarım sistemi | P0 | 34 | 🔄 ~70% — sol menü + dark/light tema + ikon sistemi tüm yüzeylerde tamamlandı, tablo/form mobil turu kaldı |
 | Mesajlaşma arayüzü modernizasyonu (WhatsApp/Telegram tarzı) | P0 | 34 | ✅ tamamlandı — 2026-07-16 |
 | Sporcu profil özyönetimi (parola/avatar/doğum tarihi) | P1 | 34 | ✅ tamamlandı — 2026-07-16 (giriş e-postası doğrulamalı değişimi v2'ye ertelendi) |
-| İnteraktif antrenman programı görünümü (video + set/tekrar) | P2 | 34 | 🔲 |
+| İnteraktif antrenman programı görünümü (set/tekrar/ağırlık + dinlenme sayacı) | P2 | 34 | ✅ tamamlandı — 2026-07-16 (video desteği + PT-tarafı görünürlük Tier 2'ye ertelendi) |
 | Temsilci (Partner) Portalı | P1 | 35 | ✅ tamamlandı — 2026-07-15 |
 | Production `ExpenseStatus` enum case-drift düzeltmesi (`/dashboard/pos` hatası) | P0 | — | ✅ tamamlandı — 2026-07-15, kök neden: 2026-06-30'daki elle migration kurtarma |
 | 14 günlük deneme kaydı: `registerTrialOrganization`'da hiç try/catch yoktu — herhangi bir DB hatası kullanıcıya ham hata ekranı olarak yansıyor ve hesap oluşmuyordu | P0 | — | ✅ tamamlandı — 2026-07-15, transaction + cloud sync artık ayrı ayrı yakalanıyor, kullanıcıya her zaman dostane mesaj dönüyor |
@@ -1185,6 +1186,7 @@ Devam ediyor:
   Faz 34.3   Responsive tablo/kart + wizard formlar (Tier 1)     ✅ (Tier 2 ertelendi)
   Faz 34.4   Mesajlaşma arayüzü modernizasyonu (tik/avatar/canlı okundu) ✅
   Faz 34.5   Sporcu profil özyönetimi (avatar/iletişim/parola)    ✅
+  Faz 34.6   İnteraktif antrenman görünümü (set/tekrar/ağırlık)   ✅ (video + Tier 2 ertelendi)
   Faz 35     Temsilci (Partner) Portalı                          ✅
   Faz 27.1   Tarayıcı Web Push bildirimleri                      ✅ (~35% — SMS/WhatsApp/şablon kaldı)
   Faz 21     PT performans/komisyon/prim yönetimi                ✅
