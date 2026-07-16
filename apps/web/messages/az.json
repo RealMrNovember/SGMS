@@ -67,7 +67,8 @@
     "adminTitle": "Sistem idarəetməsi",
     "adminSubtitle": "İdman zallarını və SaaS icarəçilərini mərkəzləşdirilmiş idarə edin.",
     "noOrganization": "Təşkilat seçilməyib",
-    "noRole": "Rol yoxdur"
+    "noRole": "Rol yoxdur",
+    "forgotPassword": "Şifrəni unutmusunuz?"
   },
   "login": {
     "brandKicker": "CiCiByte · SGMS",

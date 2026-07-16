@@ -67,7 +67,8 @@
     "adminTitle": "Gestión del sistema",
     "adminSubtitle": "Gestione centralmente gimnasios y inquilinos SaaS.",
     "noOrganization": "Ninguna organización seleccionada",
-    "noRole": "Sin rol"
+    "noRole": "Sin rol",
+    "forgotPassword": "¿Olvidaste tu contraseña?"
   },
   "login": {
     "brandKicker": "CiCiByte · SGMS",

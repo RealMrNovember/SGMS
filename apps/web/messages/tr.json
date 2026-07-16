@@ -67,7 +67,8 @@
     "adminTitle": "System Management",
     "adminSubtitle": "GYM firmalarını ve SaaS kiracılarını merkezi olarak yönetin.",
     "noOrganization": "Organizasyon seçilmedi",
-    "noRole": "Rol yok"
+    "noRole": "Rol yok",
+    "forgotPassword": "Şifremi unuttum"
   },
   "login": {
     "brandKicker": "CiCiByte · SGMS",

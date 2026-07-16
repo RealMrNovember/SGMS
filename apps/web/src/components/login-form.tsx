@@ -107,7 +107,7 @@ export function LoginForm() {
               {t('password')}
             </label>
             <Link href="/forgot-password" className="muted text-xs hover:text-white">
-              Şifremi unuttum
+              {t('forgotPassword')}
             </Link>
           </div>
           <input

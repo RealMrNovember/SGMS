@@ -67,7 +67,8 @@
     "adminTitle": "Управление системой",
     "adminSubtitle": "Централизованное управление спортзалами и SaaS-арендаторами.",
     "noOrganization": "Организация не выбрана",
-    "noRole": "Нет роли"
+    "noRole": "Нет роли",
+    "forgotPassword": "Забыли пароль?"
   },
   "login": {
     "brandKicker": "CiCiByte · SGMS",

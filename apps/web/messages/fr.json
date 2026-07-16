@@ -67,7 +67,8 @@
     "adminTitle": "Gestion système",
     "adminSubtitle": "Gérez centralement les salles de sport et les locataires SaaS.",
     "noOrganization": "Aucune organisation sélectionnée",
-    "noRole": "Aucun rôle"
+    "noRole": "Aucun rôle",
+    "forgotPassword": "Mot de passe oublié ?"
   },
   "login": {
     "brandKicker": "CiCiByte · SGMS",

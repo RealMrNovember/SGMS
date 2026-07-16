@@ -1,5 +1,6 @@
 import { SgmsLogo } from '@/components/brand/sgms-logo';
 import { ResetPasswordForm } from '@/components/reset-password-form';
+import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
@@ -10,6 +11,7 @@ export default async function ResetPasswordPage({
   searchParams: Promise<{ token?: string }>;
 }) {
   const { token } = await searchParams;
+  const t = await getTranslations('auth');
 
   return (
     <main className="login-shell">
@@ -46,7 +48,7 @@ export default async function ResetPasswordPage({
                 Geçersiz bağlantı. Lütfen şifremi unuttum sayfasından yeni bir talep oluşturun.
               </p>
               <Link href="/forgot-password" className="button button-gold block w-full text-center">
-                Şifremi unuttum
+                {t('forgotPassword')}
               </Link>
             </div>
           )}

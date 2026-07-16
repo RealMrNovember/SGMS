@@ -67,7 +67,8 @@
     "adminTitle": "System Management",
     "adminSubtitle": "Centrally manage gym companies and SaaS tenants.",
     "noOrganization": "No organization selected",
-    "noRole": "No role"
+    "noRole": "No role",
+    "forgotPassword": "Forgot password?"
   },
   "login": {
     "brandKicker": "CiCiByte · SGMS",
