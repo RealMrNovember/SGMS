@@ -510,6 +510,23 @@
       "bodyFat": "Body fat",
       "muscle": "Muscle",
       "notes": "Notes"
+    },
+    "profile": {
+      "avatarTitle": "Profile Photo",
+      "title": "Profile Information",
+      "subtitle": "Update your display name and contact details.",
+      "displayName": "Display name",
+      "save": "Save",
+      "phone": "Phone",
+      "contactEmail": "Contact email",
+      "contactEmailHint": "This is a contact detail only — not your login email.",
+      "birthDate": "Date of birth",
+      "passwordTitle": "Change Password",
+      "passwordSubtitle": "Enter your current password and choose a new one.",
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "newPasswordConfirmation": "Confirm new password",
+      "changePassword": "Change password"
     }
   },
   "expenses": {

@@ -510,6 +510,23 @@
       "bodyFat": "Yağ",
       "muscle": "Əzələ",
       "notes": "Qeyd"
+    },
+    "profile": {
+      "avatarTitle": "Profil Şəkli",
+      "title": "Profil Məlumatları",
+      "subtitle": "Görünən adınızı və əlaqə məlumatlarınızı yeniləyin.",
+      "displayName": "Görünən ad",
+      "save": "Yadda saxla",
+      "phone": "Telefon",
+      "contactEmail": "Əlaqə e-poçtu",
+      "contactEmailHint": "Bu yalnız əlaqə məlumatıdır — giriş e-poçtunuz deyil.",
+      "birthDate": "Doğum tarixi",
+      "passwordTitle": "Parolu Dəyiş",
+      "passwordSubtitle": "Cari parolunuzu daxil edin və yeni bir parol seçin.",
+      "currentPassword": "Cari parol",
+      "newPassword": "Yeni parol",
+      "newPasswordConfirmation": "Yeni parolu təsdiqləyin",
+      "changePassword": "Parolu dəyiş"
     }
   },
   "expenses": {

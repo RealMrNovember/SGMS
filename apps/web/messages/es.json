@@ -510,6 +510,23 @@
       "bodyFat": "Grasa",
       "muscle": "Músculo",
       "notes": "Notas"
+    },
+    "profile": {
+      "avatarTitle": "Foto de perfil",
+      "title": "Información del perfil",
+      "subtitle": "Actualice su nombre visible y datos de contacto.",
+      "displayName": "Nombre visible",
+      "save": "Guardar",
+      "phone": "Teléfono",
+      "contactEmail": "Correo de contacto",
+      "contactEmailHint": "Esto es solo un dato de contacto — no su correo de inicio de sesión.",
+      "birthDate": "Fecha de nacimiento",
+      "passwordTitle": "Cambiar contraseña",
+      "passwordSubtitle": "Ingrese su contraseña actual y elija una nueva.",
+      "currentPassword": "Contraseña actual",
+      "newPassword": "Nueva contraseña",
+      "newPasswordConfirmation": "Confirmar nueva contraseña",
+      "changePassword": "Cambiar contraseña"
     }
   },
   "expenses": {

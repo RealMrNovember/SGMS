@@ -510,6 +510,23 @@
       "bodyFat": "Graisse",
       "muscle": "Muscle",
       "notes": "Notes"
+    },
+    "profile": {
+      "avatarTitle": "Photo de profil",
+      "title": "Informations du profil",
+      "subtitle": "Mettez à jour votre nom affiché et vos coordonnées.",
+      "displayName": "Nom affiché",
+      "save": "Enregistrer",
+      "phone": "Téléphone",
+      "contactEmail": "E-mail de contact",
+      "contactEmailHint": "Ceci est uniquement une coordonnée — pas votre e-mail de connexion.",
+      "birthDate": "Date de naissance",
+      "passwordTitle": "Changer le mot de passe",
+      "passwordSubtitle": "Saisissez votre mot de passe actuel et choisissez-en un nouveau.",
+      "currentPassword": "Mot de passe actuel",
+      "newPassword": "Nouveau mot de passe",
+      "newPasswordConfirmation": "Confirmer le nouveau mot de passe",
+      "changePassword": "Changer le mot de passe"
     }
   },
   "expenses": {

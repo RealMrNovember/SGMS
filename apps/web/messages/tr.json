@@ -510,6 +510,23 @@
       "bodyFat": "Yağ",
       "muscle": "Kas",
       "notes": "Not"
+    },
+    "profile": {
+      "avatarTitle": "Profil Fotoğrafı",
+      "title": "Profil Bilgileri",
+      "subtitle": "Görünen adınızı ve iletişim bilgilerinizi güncelleyin.",
+      "displayName": "Görünen ad",
+      "save": "Kaydet",
+      "phone": "Telefon",
+      "contactEmail": "İletişim e-postası",
+      "contactEmailHint": "Bu yalnızca bir iletişim bilgisidir — giriş e-postanız değildir.",
+      "birthDate": "Doğum tarihi",
+      "passwordTitle": "Parola Değiştir",
+      "passwordSubtitle": "Mevcut parolanızı girin ve yeni bir parola belirleyin.",
+      "currentPassword": "Mevcut parola",
+      "newPassword": "Yeni parola",
+      "newPasswordConfirmation": "Yeni parola (tekrar)",
+      "changePassword": "Parolayı değiştir"
     }
   },
   "expenses": {

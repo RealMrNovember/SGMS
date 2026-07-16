@@ -36,7 +36,7 @@ async function resolveGymMemberAvatarTarget(
   gymMemberId: string,
   organizationId: string,
   actorUserId: string,
-  role: OrganizationRole,
+  role: OrganizationRole | null,
   request?: Request,
 ) {
   const member = await prisma.gymMember.findFirst({
@@ -49,7 +49,7 @@ async function resolveGymMemberAvatarTarget(
   }
 
   const isSelf = member.userId === actorUserId;
-  const canManage = canManageMembers(role) || (role === 'TRAINER' && canReadHealthData(role));
+  const canManage = role != null && (canManageMembers(role) || (role === 'TRAINER' && canReadHealthData(role)));
 
   if (!isSelf && !canManage) {
     return { error: apiErrorI18n('avatarUpdateForbidden', 403, request) } as const;
@@ -114,13 +114,24 @@ export async function POST(request: Request) {
       return apiErrorI18n('gymMemberIdRequired', 400, request);
     }
 
-    const tenantAuth = await requireTenantApiContext(request);
-    if ('response' in tenantAuth) {
-      return tenantAuth.response;
-    }
+    if (session.user.gymMemberId === gymMemberId && session.user.organizationId) {
+      // Sporcu kendi fotoğrafını yüklüyor — personel API bağlamı gerekmez.
+      target = await resolveGymMemberAvatarTarget(
+        gymMemberId,
+        session.user.organizationId,
+        session.user.id,
+        null,
+        request,
+      );
+    } else {
+      const tenantAuth = await requireTenantApiContext(request);
+      if ('response' in tenantAuth) {
+        return tenantAuth.response;
+      }
 
-    const { organizationId, role, userId } = tenantAuth.context;
-    target = await resolveGymMemberAvatarTarget(gymMemberId, organizationId, userId, role, request);
+      const { organizationId, role, userId } = tenantAuth.context;
+      target = await resolveGymMemberAvatarTarget(gymMemberId, organizationId, userId, role, request);
+    }
   } else {
     const tenantAuth = await requireTenantApiContext(request);
     if ('response' in tenantAuth) {

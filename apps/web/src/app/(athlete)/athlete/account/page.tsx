@@ -1,7 +1,11 @@
+import { AthletePasswordForm } from '@/components/athlete-password-form';
+import { AthleteProfileForm } from '@/components/athlete-profile-form';
+import { AvatarUpload } from '@/components/avatar-upload';
 import { auth } from '@/lib/auth';
 import { intlLocaleFor } from '@/lib/format-locale';
 import { decimalToNumber, getMemberAccountSummary } from '@/lib/member-balance';
 import { getMemberPaymentPlans } from '@/lib/payment-plans';
+import { prisma } from '@/lib/prisma';
 import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -17,9 +21,19 @@ export default async function AthleteAccountPage() {
   const locale = await getLocale();
   const dateLocale = intlLocaleFor(locale);
 
-  const [summary, paymentPlans] = await Promise.all([
+  const [summary, paymentPlans, profile] = await Promise.all([
     getMemberAccountSummary(session.user.organizationId, session.user.gymMemberId),
     getMemberPaymentPlans(session.user.organizationId, session.user.gymMemberId),
+    prisma.gymMember.findFirst({
+      where: { id: session.user.gymMemberId, organizationId: session.user.organizationId },
+      select: {
+        phone: true,
+        email: true,
+        birthDate: true,
+        avatarUrl: true,
+        user: { select: { name: true } },
+      },
+    }),
   ]);
 
   const openBalance = decimalToNumber(summary.openBalance);
@@ -38,6 +52,29 @@ export default async function AthleteAccountPage() {
         </Link>
         <h2 className="mt-3 text-xl font-semibold">{tAthlete('pages.account')}</h2>
       </div>
+
+      <section className="card p-5">
+        <h3 className="font-semibold">{tAthlete('profile.avatarTitle')}</h3>
+        <div className="mt-3">
+          <AvatarUpload
+            name={profile?.user?.name ?? tAthlete('pages.account')}
+            currentUrl={profile?.avatarUrl}
+            targetType="gym_member"
+            gymMemberId={session.user.gymMemberId}
+            canUpload
+            size="lg"
+          />
+        </div>
+      </section>
+
+      <AthleteProfileForm
+        name={profile?.user?.name ?? ''}
+        phone={profile?.phone ?? null}
+        email={profile?.email ?? null}
+        birthDate={profile?.birthDate ? profile.birthDate.toISOString().slice(0, 10) : null}
+      />
+
+      <AthletePasswordForm />
 
       <section className="card p-5 text-center">
         <p className="muted text-sm">{t('openBalance')}</p>

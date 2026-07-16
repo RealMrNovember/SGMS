@@ -510,6 +510,23 @@
       "bodyFat": "Жир",
       "muscle": "Мышцы",
       "notes": "Заметки"
+    },
+    "profile": {
+      "avatarTitle": "Фото профиля",
+      "title": "Информация профиля",
+      "subtitle": "Обновите отображаемое имя и контактные данные.",
+      "displayName": "Отображаемое имя",
+      "save": "Сохранить",
+      "phone": "Телефон",
+      "contactEmail": "Контактный email",
+      "contactEmailHint": "Это только контактные данные — не ваш email для входа.",
+      "birthDate": "Дата рождения",
+      "passwordTitle": "Изменить пароль",
+      "passwordSubtitle": "Введите текущий пароль и выберите новый.",
+      "currentPassword": "Текущий пароль",
+      "newPassword": "Новый пароль",
+      "newPasswordConfirmation": "Подтвердите новый пароль",
+      "changePassword": "Изменить пароль"
     }
   },
   "expenses": {
