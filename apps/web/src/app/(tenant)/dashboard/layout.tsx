@@ -81,32 +81,32 @@ export default async function TenantDashboardLayout({ children }: { children: Re
       ).map((feature) => ({
         href: `/dashboard/coming-soon/${feature}`,
         label: tComingSoon(`features.${feature}.title`),
-        icon: Sparkles,
+        icon: <Sparkles />,
       }));
 
   const navGroups: AppNavGroup[] = locked
-    ? [{ items: [{ href: '/dashboard/billing', label: tBilling('nav'), icon: Wallet, exact: true }] }]
+    ? [{ items: [{ href: '/dashboard/billing', label: tBilling('nav'), icon: <Wallet />, exact: true }] }]
     : [
         {
-          items: [{ href: '/dashboard', label: t('overview'), icon: LayoutDashboard, exact: true }],
+          items: [{ href: '/dashboard', label: t('overview'), icon: <LayoutDashboard />, exact: true }],
         },
         {
           title: t('groups.dailyOps'),
           items: [
-            { href: '/dashboard/check-in', label: t('checkIn'), icon: ScanLine },
-            { href: '/dashboard/members', label: t('members'), icon: Users },
-            { href: '/dashboard/pos', label: t('pos'), icon: CreditCard },
-            { href: '/dashboard/messages', label: t('messages'), icon: MessageSquare, badge: unreadMessages },
+            { href: '/dashboard/check-in', label: t('checkIn'), icon: <ScanLine /> },
+            { href: '/dashboard/members', label: t('members'), icon: <Users /> },
+            { href: '/dashboard/pos', label: t('pos'), icon: <CreditCard /> },
+            { href: '/dashboard/messages', label: t('messages'), icon: <MessageSquare />, badge: unreadMessages },
           ],
         },
         {
           title: t('groups.management'),
           items: [
-            { href: '/dashboard/programs', label: t('programs'), icon: ClipboardList },
-            { href: '/dashboard/trainers', label: t('trainers'), icon: Dumbbell },
-            { href: '/dashboard/team', label: t('team'), icon: IdCard },
-            { href: '/dashboard/plans', label: t('plans'), icon: Layers },
-            { href: '/dashboard/settings', label: t('settings'), icon: Settings },
+            { href: '/dashboard/programs', label: t('programs'), icon: <ClipboardList /> },
+            { href: '/dashboard/trainers', label: t('trainers'), icon: <Dumbbell /> },
+            { href: '/dashboard/team', label: t('team'), icon: <IdCard /> },
+            { href: '/dashboard/plans', label: t('plans'), icon: <Layers /> },
+            { href: '/dashboard/settings', label: t('settings'), icon: <Settings /> },
           ],
         },
         ...(canViewReports || canViewEnterprise
@@ -114,26 +114,26 @@ export default async function TenantDashboardLayout({ children }: { children: Re
               {
                 title: t('groups.analytics'),
                 items: [
-                  ...(canViewReports ? [{ href: '/dashboard/reports', label: t('reports'), icon: BarChart3 }] : []),
+                  ...(canViewReports ? [{ href: '/dashboard/reports', label: t('reports'), icon: <BarChart3 /> }] : []),
                   ...(canViewEnterprise
-                    ? [{ href: '/dashboard/enterprise', label: t('enterprise'), icon: Building2 }]
+                    ? [{ href: '/dashboard/enterprise', label: t('enterprise'), icon: <Building2 /> }]
                     : []),
                 ],
               },
             ]
           : []),
         {
-          items: [{ href: '/dashboard/billing', label: tBilling('nav'), icon: Wallet }, ...comingSoonItems],
+          items: [{ href: '/dashboard/billing', label: tBilling('nav'), icon: <Wallet /> }, ...comingSoonItems],
         },
       ];
 
   const primaryMobileItems = locked
     ? navGroups[0].items
     : [
-        { href: '/dashboard', label: t('overview'), icon: LayoutDashboard, exact: true },
-        { href: '/dashboard/check-in', label: t('checkIn'), icon: ScanLine },
-        { href: '/dashboard/members', label: t('members'), icon: Users },
-        { href: '/dashboard/pos', label: t('pos'), icon: CreditCard },
+        { href: '/dashboard', label: t('overview'), icon: <LayoutDashboard />, exact: true },
+        { href: '/dashboard/check-in', label: t('checkIn'), icon: <ScanLine /> },
+        { href: '/dashboard/members', label: t('members'), icon: <Users /> },
+        { href: '/dashboard/pos', label: t('pos'), icon: <CreditCard /> },
       ];
 
   const organization = await prisma.organization.findUnique({

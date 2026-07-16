@@ -24,7 +24,7 @@ export default async function PartnerLayout({ children }: { children: React.Reac
 
   const navGroups: AppNavGroup[] = [
     {
-      items: [{ href: '/partner', label: t('nav.dashboard'), icon: LayoutDashboard, exact: true }],
+      items: [{ href: '/partner', label: t('nav.dashboard'), icon: <LayoutDashboard />, exact: true }],
     },
   ];
 

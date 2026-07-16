@@ -41,35 +41,35 @@ export default async function SuperAdminLayout({ children }: { children: React.R
     {
       title: tAdmin('navGroupPlatform'),
       items: [
-        { href: '/admin', label: t('adminOverview'), icon: LayoutDashboard, exact: true },
-        { href: '/admin/organizations', label: tAdmin('customers'), icon: Building2 },
-        { href: '/admin/plans', label: tAdmin('plansNav'), icon: Layers },
-        { href: '/admin/partners', label: tAdmin('partnersNav'), icon: Handshake },
+        { href: '/admin', label: t('adminOverview'), icon: <LayoutDashboard />, exact: true },
+        { href: '/admin/organizations', label: tAdmin('customers'), icon: <Building2 /> },
+        { href: '/admin/plans', label: tAdmin('plansNav'), icon: <Layers /> },
+        { href: '/admin/partners', label: tAdmin('partnersNav'), icon: <Handshake /> },
       ],
     },
     {
       title: tAdmin('navGroupSecurity'),
       items: [
-        { href: '/admin/audit', label: tAdmin('auditNav'), icon: ScrollText },
-        { href: '/admin/audit?category=security', label: tAdmin('auditSecurityNav'), icon: ShieldAlert },
-        { href: '/admin/moderation', label: tAdmin('moderationNav'), icon: Flag },
+        { href: '/admin/audit', label: tAdmin('auditNav'), icon: <ScrollText /> },
+        { href: '/admin/audit?category=security', label: tAdmin('auditSecurityNav'), icon: <ShieldAlert /> },
+        { href: '/admin/moderation', label: tAdmin('moderationNav'), icon: <Flag /> },
       ],
     },
     {
       title: tAdmin('navGroupSystem'),
       items: [
-        { href: '/admin/admins', label: tAdmin('adminsNav'), icon: UserCog },
-        { href: '/admin/communications', label: tAdmin('communicationsNav'), icon: Mail },
-        { href: '/admin/organizations/new', label: t('newCustomer'), icon: PlusCircle },
+        { href: '/admin/admins', label: tAdmin('adminsNav'), icon: <UserCog /> },
+        { href: '/admin/communications', label: tAdmin('communicationsNav'), icon: <Mail /> },
+        { href: '/admin/organizations/new', label: t('newCustomer'), icon: <PlusCircle /> },
       ],
     },
   ];
 
   const primaryMobileItems = [
-    { href: '/admin', label: t('adminOverview'), icon: LayoutDashboard, exact: true },
-    { href: '/admin/organizations', label: tAdmin('customers'), icon: Building2 },
-    { href: '/admin/audit', label: tAdmin('auditNav'), icon: ScrollText },
-    { href: '/admin/moderation', label: tAdmin('moderationNav'), icon: Flag },
+    { href: '/admin', label: t('adminOverview'), icon: <LayoutDashboard />, exact: true },
+    { href: '/admin/organizations', label: tAdmin('customers'), icon: <Building2 /> },
+    { href: '/admin/audit', label: tAdmin('auditNav'), icon: <ScrollText /> },
+    { href: '/admin/moderation', label: tAdmin('moderationNav'), icon: <Flag /> },
   ];
 
   const logoutAction = async () => {

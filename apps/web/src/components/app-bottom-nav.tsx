@@ -38,11 +38,10 @@ export function AppBottomNav({ primaryItems, groups }: Props) {
       <nav className="app-bottom-nav">
         <div className="app-bottom-nav-grid mx-auto max-w-lg">
           {primaryItems.map((item) => {
-            const Icon = item.icon;
             const active = isActive(pathname, item);
             return (
               <Link key={item.href} href={item.href} className="app-bottom-nav-link" data-active={active ? 'true' : 'false'}>
-                <Icon />
+                {item.icon}
                 <span>{item.label}</span>
               </Link>
             );
@@ -85,7 +84,6 @@ export function AppBottomNav({ primaryItems, groups }: Props) {
                   {group.title ? <p className="app-sidebar-group-title">{group.title}</p> : null}
                   <div className="space-y-0.5">
                     {group.items.map((item) => {
-                      const Icon = item.icon;
                       const active = isActive(pathname, item);
                       return (
                         <Link
@@ -94,7 +92,7 @@ export function AppBottomNav({ primaryItems, groups }: Props) {
                           className="app-sidebar-link"
                           data-active={active ? 'true' : 'false'}
                         >
-                          <Icon />
+                          {item.icon}
                           <span className="app-sidebar-label">{item.label}</span>
                         </Link>
                       );

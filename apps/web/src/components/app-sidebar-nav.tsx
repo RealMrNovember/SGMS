@@ -1,15 +1,16 @@
 'use client';
 
-import { ChevronsLeft, ChevronsRight, type LucideIcon } from 'lucide-react';
+import { ChevronsLeft, ChevronsRight } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 export type AppNavItem = {
   href: string;
   label: string;
-  icon: LucideIcon;
+  icon: ReactNode;
   exact?: boolean;
   badge?: number;
 };
@@ -58,7 +59,6 @@ export function AppSidebarNav({ groups }: { groups: AppNavGroup[] }) {
               const active = item.exact
                 ? pathname === item.href
                 : pathname === item.href || pathname.startsWith(`${item.href}/`);
-              const Icon = item.icon;
 
               return (
                 <Link
@@ -68,7 +68,7 @@ export function AppSidebarNav({ groups }: { groups: AppNavGroup[] }) {
                   data-active={active ? 'true' : 'false'}
                   title={item.label}
                 >
-                  <Icon />
+                  {item.icon}
                   <span className="app-sidebar-label">{item.label}</span>
                   <NavBadge value={item.badge} />
                 </Link>
