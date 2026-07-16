@@ -1,3 +1,5 @@
+'use server';
+
 import { slugify } from '@/lib/slug';
 import { prisma } from '@/lib/prisma';
 import { siteConfig } from '@/lib/site-config';
