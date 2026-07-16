@@ -43,7 +43,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 5 | ~~Merkezi Lisans Entegrasyonu (license.cicibyte.com)~~ | 🗑️ Emekli (bkz. Faz 13) | — |
 | 6 | Uluslararasılaşma (i18n) & Medya/Kimlik | 🔄 Devam ediyor | ~90% (6 dil + medya/kimlik tamamlandı; İtalyanca/Portekizce + küresel lokasyon veritabanı sırada) |
 | 7 | Mobil & Sporcu Auth (API-First) | ✅ Tamamlandı | 100% |
-| 8 | POS, Kasa, Cari Hesap & Abonelik/Ödeme | ✅ Tamamlandı | ~95% (Invoice modeli hariç) |
+| 8 | POS, Kasa, Cari Hesap & Abonelik/Ödeme | 🔄 Devam ediyor | ~80% (Invoice modeli + ödeme planı/taksit + salon bazlı online ödeme sağlayıcısı sırada) |
 | 9 | Gerçek Zamanlı İletişim (Real-time Chat) | ✅ Tamamlandı | 100% |
 | 10 | IoT, Kapı, Turnike & SGMS Resepsiyon | ✅ Tamamlandı | 100% |
 | 11 | Marketing & Showcase Sitesi | ✅ Tamamlandı | 100% |
@@ -338,6 +338,28 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 - [x] Her abonelik durum değişikliği artık **cloud.cicibyte.com'a otomatik senkronize edilir** (bkz. Faz 13)
 
 **Kabul kriteri:** ✅ Resepsiyon "Su - 15 TL" ekler → sporcu panelinde borç görünür → tahsilat sonrası bakiye sıfırlanır · deneme/ödeme süresi dolunca panel salt-okunur moda düşer, Master Admin onayıyla açılır
+
+### 8.6 Ödeme Planı / Taksitli Tahsilat — yeni, 2026-07-16 eklendi
+
+> **Kullanıcı senaryosu (2026-07-16):** *"Salon müşterisi bugün kaydını başlattı ama '3 gün sonra ya da haftaya öderim' dedi. Resepsiyon görevlisi o müşteri için ödeme planı oluşturabilmeli, yönetebilmeli, ödenen/ödenmeyen/kalan borcu görebilmeli."* Faz 8.1'deki `Expense`/`Transaction` çifti bunun için sağlam bir temel — yalnızca **vade tarihi** ve **kısmi ödeme** eksik; sıfırdan bir ödeme motoru gerekmiyor.
+- [ ] `Expense` modeline opsiyonel `dueDate` alanı eklenir — vadesi geçmiş (`dueDate` < bugün, hâlâ `OPEN`) kalemler Cari Hesap panelinde ve `/dashboard/pos`'ta kırmızı/uyarı rozetiyle öne çıkar
+- [ ] Yeni `PaymentPlan` modeli — bir üyeye ait birden çok `Expense` satırını tek bir plan altında gruplar (ör. "Üyelik ücreti — 3 taksit"); her taksit kendi `dueDate`'i olan ayrı bir `Expense` satırı olarak üretilir, mevcut FIFO tahsilat/void mantığı (`actions/expenses.ts`) değişmeden yeniden kullanılır
+- [ ] `recordPayment` akışına **kısmi ödeme** desteği eklenir — bugün yalnızca bir `Expense`'i tam kapatabiliyor; taksit senaryosunda "300 TL borcun 150 TL'sini şimdi öde" gibi kısmi tahsilat gerekiyor (kalan tutar aynı `Expense` satırında `OPEN` kalır, ikinci bir `Transaction` kısmi tutarla kaydedilir)
+- [ ] Sporcu detay CRM'deki Cari Hesap paneline **"Ödeme Planı Oluştur"** aksiyonu — resepsiyon/salon sahibi taksit sayısı + ilk vade tarihini girer, sistem taksitleri otomatik üretir
+- [ ] Resepsiyon KPI dashboard'una (Faz 15.3) **"Vadesi Yaklaşan/Geçen Ödemeler"** widget'ı — hangi üyenin ne kadar borcu var, vadesi ne zaman
+- [ ] Sporcu portalındaki mevcut borç listesine (Faz 8.3) taksit planı görünümü eklenir — üye kendi ödeme takvimini görür
+
+**Mimari not:** Var olan `Expense`/`Transaction`/FIFO altyapısı korunur, üstüne ince bir `PaymentPlan` gruplama katmanı + `dueDate`/kısmi-ödeme eklenir — mevcut cari hesap mantığını kırmadan genişletir.
+
+### 8.7 Salon Bazlı Online Ödeme Sağlayıcı Entegrasyonu (Iyzico/PayTR/Banka) — yeni, 2026-07-16 eklendi
+
+> **Kullanıcı notu (2026-07-16):** *"Şirket sahibinin panelinden ayarlar içerisinden online ödeme alacağı banka/Iyzico/Paytr gibi platformların API'lerini bağlayabilmesi lazım."* **Önemli ayrım:** Bu, Faz 16'daki CiciByte Cloud entegrasyonuyla (SGMS'in CiciByte'a kendi abonelik ödemesini yapması, platform-seviyesinde tek bir iyzico hesabı) **karıştırılmamalı** — burada her salonun **kendi** Iyzico/PayTR/banka sözleşmesiyle **kendi üyesinden** doğrudan tahsilat yapabilmesi hedefleniyor (tenant-seviyesinde, çoklu sağlayıcılı).
+- [ ] Yeni `TenantPaymentProviderSettings` modeli — `organizationId`, `provider` (`IYZICO`/`PAYTR`/`BANK_TRANSFER`), şifrelenmiş API anahtarı/secret, `isActive` — Faz 16.3'teki `IyzicoClient` (IYZWSv2 HMAC, vendor SDK'sız) deseni **yeniden kullanılır**, yeni bir istemci sıfırdan yazılmaz
+- [ ] `/dashboard/settings` → Entegrasyonlar sekmesine (bkz. 33.1) salon sahibinin kendi API anahtarlarını girebileceği bir bölüm — anahtarlar yalnızca sunucu tarafında çözülür, hiçbir zaman client'a gönderilmez
+- [ ] Faz 8.6'daki ödeme planı/borç kalemleri için sporcu portalında **"Kartla Öde"** butonu — salonun kendi yapılandırdığı sağlayıcı üzerinden checkout başlatır, sunucu tarafında doğrulanır (Faz 16.3'teki callback-doğrulama desenini birebir izler)
+- [ ] Sağlayıcı yapılandırılmamışsa buton güvenli şekilde gizlenir/"sağlayıcı yapılandırılmamış" mesajı gösterir — asla sahte/test ödeme oluşturulmaz (Faz 16'daki aynı güvenlik ilkesi)
+
+**Bağımlılık:** Faz 8.6 (ödeme planı — borç kaleminin kendisi önce var olmalı) · Faz 16.3 (yeniden kullanılacak Iyzico client deseni) · Faz 33.1 (Entegrasyonlar sekmesi bu ayarların barınacağı yer)
 
 ---
 
@@ -898,6 +920,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 - [ ] `GET/POST /api/v2/hardware/*` — mevcut Faz 10 check-in/device modelinin üzerine, **versiyonlanmış** (v1 webhook'u bozmadan) ve dışarıdan sorgulanabilir bir API katmanı: üye/kart geçerlilik sorgusu, cihaz durumu, check-in geçmişi
 - [ ] `/dashboard/settings` (veya yeni `/dashboard/devices`) → **"Cihazlar / Turnike Entegrasyonu"** paneli: salon sahibinin kendi API anahtarını görüntülemesi/yenilemesi, kendi webhook URL'sini tanımlaması (üçüncü parti turnike yazılımına SGMS'in olayları göndermesi için — check-in gerçekleştiğinde salonun kendi sistemine de bildirim gitsin)
 - [ ] Mevcut `Device` modeli (Faz 10) bu yeni panelin veri kaynağı olarak yeniden kullanılır — yeni bir cihaz modeli gerekmez, yalnızca sahibinin kendi kendine yönetebileceği bir arayüz eklenir
+- [ ] **RFID okuyucu bağlantı ayarları** (yeni, 2026-07-16) — kart *atama* zaten var (`member-rfid-form.tsx`/`staff-rfid-field.tsx`, Faz 10), eksik olan salon sahibinin okuyucu **donanımını** yapılandırabilmesi: bağlantı modu (USB/Seri/Ağ üzerinden turnike), kart format doğrulama kuralı (ör. Wiegand 26-bit vs. üreticiye özel), aynı "Cihazlar" panelinde bir alt bölüm olarak
 
 ### 31.1 Sağlık/fitness cihazları
 - [ ] Apple Health, Google Fit, Garmin, Fitbit — üyenin kendi rızasıyla adım/nabız/kalori verisini SGMS'e senkronize etmesi (sporcu portalı ölçüm geçmişini zenginleştirir)
@@ -970,7 +993,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 ### 33.1 Profesyonel "Ayarlar" Ekranı Modernizasyonu — yeni, 2026-07-16 eklendi
 
 > **Kullanıcı notu (2026-07-16):** *"Müşteriler ve personeller ayarlar menüsüne girdiğinde çok profesyonel bir ekranla karşılaşmalı."* Faz 34'teki sol-menü/tema yenilemesi mevcut sayfaların **kabuğunu** modernize etti; `/dashboard/settings`'in kendi iç düzeni ise hâlâ eski, tek-sütun bir form listesi. Bu madde, o sayfanın Faz 33 kılavuz sistemiyle **birlikte** yeniden tasarlanmasını kapsar.
-- [ ] `/dashboard/settings` — kategorilere ayrılmış (Genel, Ekip & Roller, Bildirimler, Fatura, Entegrasyonlar — Faz 31.0, Güvenlik) sekmeli/bölümlü bir düzen; her bölümün yanında ilgili `HelpArticle`'a doğrudan bağlantı
+- [ ] `/dashboard/settings` — kategorilere ayrılmış (Genel, Ekip & Roller, Bildirimler, Fatura, Entegrasyonlar — Faz 31.0 donanım/RFID + Faz 8.7 ödeme sağlayıcıları, Güvenlik) sekmeli/bölümlü bir düzen; her bölümün yanında ilgili `HelpArticle`'a doğrudan bağlantı
 - [ ] Rol bazlı görünürlük: bir STAFF/TRAINER, yalnızca kendi rolüyle ilgili ayar bölümlerini görür (OWNER'a özel faturalandırma/entegrasyon ayarları gizlenir, karmaşa azalır)
 
 **Kabul kriteri:** Yeni işe başlayan bir resepsiyonist, kendi rolüne özel bir başlangıç rehberiyle karşılanıyor · herhangi bir sayfada "?" ikonuna tıklandığında o sayfaya özel yardım açılıyor · 🔲 ayarlar ekranı role göre filtrelenen, kategorilere ayrılmış profesyonel bir düzene kavuşmuş olacak
@@ -1075,6 +1098,9 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | ESLint yapılandırması | P1 | 13 | ✅ hiç yoktu, bu revizyonla eklendi |
 | E2E (Playwright): login, CRM ölçüm, expense | P2 | 18 | 🔲 |
 | `Invoice` modeli | P2 | 18 | 🔲 opsiyonel |
+| Ödeme planı/taksit yönetimi (vade tarihi + kısmi ödeme) | P1 | 8 | 🔲 yeni, 2026-07-16 eklendi |
+| Salon bazlı online ödeme sağlayıcı entegrasyonu (Iyzico/PayTR/Banka) | P1 | 8 | 🔲 yeni, 2026-07-16 eklendi — Faz 8.6'ya bağımlı |
+| RFID okuyucu donanım bağlantı ayarları (Ayarlar paneli) | P2 | 31 | 🔲 yeni, 2026-07-16 eklendi
 | `readme.md` sadeleştirme | P2 | 13 | ✅ bu revizyonla kapatıldı |
 | 8 dile genişletme (İtalyanca, Portekizce) + küresel lokasyon veritabanı | P1 | 6 | 🔲 |
 | `roadmap.md` ↔ kod senkronu | P2 | — | ✅ bu revizyonla kapatıldı |
@@ -1157,9 +1183,11 @@ Devam ediyor:
 
 Sıradaki (öncelik sırası — profesyonel değerlendirme, P0 en önce):
   Faz 32     Ticarileştirme: paket + ek kapasite satışı          ← P0, gelir modeli (kullanıcı onayı gerekli)
+  Faz 8.6    Ödeme planı / taksitli tahsilat                     ← P0, kullanıcının doğrudan günlük operasyon talebi
   Faz 34.4   Mesajlaşma arayüzü modernizasyonu (WhatsApp tarzı)  ← P0, kullanıcı memnuniyetsizliğine doğrudan yanıt
   [Repo]     Git contributors düzenlemesi (cursoragent kaldırma) ← P0, ⚠️ onay gerekli (destructive, force-push)
 
+  Faz 8.7    Salon bazlı online ödeme sağlayıcısı (Iyzico/PayTR) ← P1, Faz 8.6'ya bağımlı, Faz 16.3 deseni yeniden kullanılır
   Faz 14.3   Demo PT girişi (login ekranı)                       ← P1, düşük efor / yüksek satış-öncesi değer
   Faz 12.4   Master Admin kalıcı silme (hard-delete)             ← P1, düşük efor, veri hijyeni
   Faz 34.5   Sporcu profil özyönetimi                            ← P1, mevcut altyapıyı yeniden kullanır
@@ -1179,7 +1207,7 @@ Sıradaki (öncelik sırası — profesyonel değerlendirme, P0 en önce):
   Faz 25     Kasa yönetimi (vardiya, X/Z raporu)                 ← P2
   Faz 26     Dijital üyelik kartı (Wallet/NFC)                   ← P2
   Faz 29     Yapay Zeka öngörüleri                                ← P2, Faz 28 verisine dayanır
-  Faz 31     Entegrasyon Pazaryeri + 31.0 donanım API v2          ← P2, Faz 27 soyutlamasına dayanır
+  Faz 31     Entegrasyon Pazaryeri + 31.0 donanım API v2/RFID     ← P2, Faz 27 soyutlamasına dayanır
   Faz 18     Uyumluluk & sağlamlaştırma (2FA, GDPR, Invoice)      ← P2
   Faz 24     Temizlik yönetimi                                    ← P3
   Faz 19     SGMS Masaüstü — genişletme                          ← P2, web tamamlanınca
