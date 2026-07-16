@@ -11,7 +11,7 @@
 | **Legacy (kullanımdan kalktı)** | `license.cicibyte.com` — SGMS artık bu servisi kullanmıyor (bkz. Faz 13). Sunucu diğer istemciler (GarageLedger vb.) için ayakta kalmaya devam ediyor, SGMS'in ona bağımlılığı yok. |
 | **Kaynak doküman** | `sgms.cicibyte.com - readme.md` (teknik günlük/arşiv), `CiCiByte_SGMS_Ultimate_Enterprise_Blueprint.docx` |
 
-**Son güncelleme:** 2026-07-15 · **Bu dosya artık tek doğru kaynaktır** (`readme.md` sadece hızlı başlangıç talimatlarını barındırır, faz/durum takibi burada yapılır).
+**Son güncelleme:** 2026-07-16 · **Bu dosya artık tek doğru kaynaktır** (`readme.md` sadece hızlı başlangıç talimatlarını barındırır, faz/durum takibi burada yapılır).
 
 ---
 
@@ -41,15 +41,15 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 3 | Production & Operasyon | ✅ Tamamlandı | 100% |
 | 4 | Tenant UI — Core İş Mantığı (CRM) | ✅ Tamamlandı | 100% |
 | 5 | ~~Merkezi Lisans Entegrasyonu (license.cicibyte.com)~~ | 🗑️ Emekli (bkz. Faz 13) | — |
-| 6 | Uluslararasılaşma (i18n) & Medya/Kimlik | ✅ Tamamlandı | 100% |
+| 6 | Uluslararasılaşma (i18n) & Medya/Kimlik | 🔄 Devam ediyor | ~90% (6 dil + medya/kimlik tamamlandı; İtalyanca/Portekizce + küresel lokasyon veritabanı sırada) |
 | 7 | Mobil & Sporcu Auth (API-First) | ✅ Tamamlandı | 100% |
 | 8 | POS, Kasa, Cari Hesap & Abonelik/Ödeme | ✅ Tamamlandı | ~95% (Invoice modeli hariç) |
 | 9 | Gerçek Zamanlı İletişim (Real-time Chat) | ✅ Tamamlandı | 100% |
 | 10 | IoT, Kapı, Turnike & SGMS Resepsiyon | ✅ Tamamlandı | 100% |
 | 11 | Marketing & Showcase Sitesi | ✅ Tamamlandı | 100% |
-| 12 | Master Admin, Billing & Audit Platformu | ✅ Tamamlandı | 100% |
+| 12 | Master Admin, Billing & Audit Platformu | 🔄 Devam ediyor | ~95% (kalıcı silme/hard-delete sırada) |
 | 13 | CiciByte Cloud Migrasyonu & Platform Sertleştirme | 🔄 Devam ediyor | ~90% (yalnızca Playwright E2E kaldı) |
-| 14 | Demo Hesap Güvenliği & Master Admin Geçişi | ✅ Tamamlandı | 100% |
+| 14 | Demo Hesap Güvenliği & Master Admin Geçişi | 🔄 Devam ediyor | ~90% (Demo PT girişi sırada) |
 | 15 | Kimlik, Onboarding & Uyum Sertleştirme | ✅ Tamamlandı | ~95% (proaktif hatırlatma + 6 dil çevirisi kaldı) |
 | 16 | CiciByte Cloud Ticari Entegrasyonu (Ödeme, Referans/Komisyon, Release) | 🔄 Devam ediyor | ~80% (gerçek iyzico anahtarı + sandbox kapatma bekliyor) |
 | 17 | Üyelik Senaryoları & Ders/Sınıf Yönetimi | 🔲 Planlandı | 0% |
@@ -262,7 +262,23 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 - [x] Yalnızca kendi avatarı veya yetkili personel yükleyebilir
 - [x] Tenant prefix: `{organizationId}/avatars/{entityId}.webp`
 
-**Kabul kriteri:** ✅ 6 dilde login + dashboard · üye listesinde avatar görünür · dil profilden değiştirilebilir
+### 6.3 Dil Genişletmesi — İtalyanca & Portekizce (yeni, 2026-07-16 eklendi)
+
+> **Pazar notu:** Rakip analizi (Gymie ve global rakipler İtalya/Portekiz/Brezilya pazarlarında güçlü) — 8 dilli bir SaaS, 6 dilliye göre daha geniş bir Avrupa/Latin Amerika kitlesine hitap eder.
+
+- [ ] `apps/web/messages/it.json`, `apps/web/messages/pt.json` — mevcut 6 dosyayla birebir aynı anahtar şemasında (bu oturumda kurulan derin anahtar-parity doğrulama scripti ile 0 eksik anahtar garantisi)
+- [ ] `routing.ts` / `next-intl` locale listesine `it`, `pt` eklenir — `detectAutoLocale` (Faz "konum/tarayıcı diline göre otomatik seçim") ülke haritasına İtalya/Portekiz/Brezilya eklenir
+- [ ] `LocaleSwitcher` popover'ına yeni diller eklenir (kod değişikliği yok, `routing.locales` üzerinden otomatik türer)
+- [ ] Marketing/showcase sitesi dahil **tüm** namespace'lerin (auth, dashboard, admin, athlete, marketing, expenses, checkIn, billing, receptionDesktop vb.) eksiksiz çevirisi — bu oturumda TR/RU/FR/ES/AZ'de bulunan eksik-anahtar sınıfı hataların (bkz. Faz 34 kök neden analizi) İtalyanca/Portekizcede baştan yaşanmaması için **her iki dil de üretime çıkmadan önce parity script ile doğrulanacak**
+
+### 6.4 Küresel Lokasyon Veritabanı — Ülke → Şehir → İlçe (yeni, 2026-07-16 eklendi)
+
+> **Senaryo:** 8 dilli, uluslararası bir SaaS olarak üye/organizasyon adres formlarında serbest metin yerine yapılandırılmış, aranabilir bir konum seçimi sunmak — hem veri kalitesi hem de gelecekteki bölgesel raporlama (Faz 28/30) için gereklidir.
+- [ ] `Country` / `City` / `District` modelleri (Prisma) — açık kaynak bir coğrafi veri setinden (ör. GeoNames) seed edilir, `Organization.city`/`GymMember.nationality` gibi mevcut serbest-metin alanların yerini opsiyonel olarak alır (geriye dönük uyumluluk için serbest metin alanı korunur, yapılandırılmış seçim tercih edilir)
+- [ ] Çok dilli isimlendirme — her lokasyonun adı 8 dilde gösterilir (kullanıcının aktif diline göre)
+- [ ] Adres formlarında (üye kaydı — Faz 1/4, organizasyon kaydı — `/trial`) arama destekli (typeahead) Ülke → Şehir → İlçe seçici
+
+**Kabul kriteri:** ✅ 6 dilde login + dashboard · üye listesinde avatar görünür · dil profilden değiştirilebilir · 🔲 İtalyanca/Portekizce 8. ve 9. dil olarak tüm yüzeylerde eksiksiz · 🔲 adres formlarında yapılandırılmış Ülke/Şehir/İlçe seçimi
 
 ---
 
@@ -411,7 +427,14 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 ### 12.3 Moderasyon
 - [x] `/admin/moderation` — mesaj şikayetleri (`MessageReport`)
 
-**Kabul kriteri:** ✅ Master Admin tek panelden tüm organizasyonları, abonelikleri, planları ve audit geçmişini yönetebilir
+### 12.4 Kalıcı Silme (Hard Delete) — yeni, 2026-07-16 eklendi
+
+> **Senaryo:** Deneme süresi boyunca hiç giriş yapılmamış, sahte/test amaçlı oluşturulmuş bir organizasyon veritabanında süresiz kalıyor — Master Admin bunu yalnızca `SUSPENDED`/`ARCHIVED` durumuna çekebiliyor, tamamen silemiyor. Test/demo kirliliğinin temizlenmesi ve KVKK/GDPR'nin "verinin tamamen silinmesi" hakkı için gerçek bir hard-delete gerekiyor.
+- [ ] `admin/organizations/[id]` sayfasına, çok adımlı onay gerektiren (org adını yazarak doğrulama — yanlışlıkla tıklamayı engeller) bir **"Kalıcı Olarak Sil"** butonu
+- [ ] Silme işlemi, tüm bağlı kayıtları (üyeler, ölçümler, mesajlar, işlemler — cascade) transaction içinde temizler; işlem öncesi son bir `AuditLog` kaydı (organizasyon dışı, platform-seviyesinde saklanan) düşülür ki silme eylemi kimin tarafından ne zaman yapıldığı hâlâ izlenebilsin
+- [ ] Yalnızca Master Admin yetkisi — demo hesaplar (mevcut `isDemo` engeli) bu butona hiçbir şekilde erişemez
+
+**Kabul kriteri:** ✅ Master Admin tek panelden tüm organizasyonları, abonelikleri, planları ve audit geçmişini yönetebilir · 🔲 sahte/test organizasyonlar onaylı bir akışla kalıcı olarak silinebiliyor
 
 ---
 
@@ -485,7 +508,14 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 - [x] `admin@cicibyte.com` → `mozkarci1991@gmail.com` (production'da e-posta + parola güncellendi, `isSuperAdmin: true` korundu, org üyelikleri temizlendi — seed script'in orijinal davranışı)
 - [x] Yeni parola kullanıcıya iletildi (bu konuşmada — kalıcı olarak saklanmadı)
 
-**Kabul kriteri:** ✅ Demo giriş butonlarından hiçbiri artık herhangi bir kayıt oluşturamıyor/güncelleyemiyor/silemiyor · `mozkarci1991@gmail.com` production'da Master Admin olarak giriş yapabiliyor
+### 14.3 Demo PT Girişi — yeni, 2026-07-16 eklendi
+
+> **Senaryo:** Sistemi değerlendiren bir potansiyel müşteri (ör. büyük bir zincirin PT departmanı) bugün yalnızca Salon Sahibi/Resepsiyon/Sporcu demo hesaplarını deneyebiliyor — bir PT'nin kendi karnesini, seans planlamasını ve müşterisine program yazma akışını (Faz 21) görmesinin tek yolu gerçek bir hesap açmak. Bu, satış öncesi değerlendirmeyi zorlaştırıyor.
+- [ ] `demo-accounts.ts`'e `'trainer'` anahtarı eklenir (mevcut `owner`/`staff`/`athlete` demo hesaplarıyla aynı salt-okunur `isDemo: true` deseninde)
+- [ ] `/login` sayfasındaki demo giriş butonlarına **"PT (Personal Trainer)"** eklenir — tıklanınca doğrudan Faz 21'deki `/dashboard/trainers/[id]` karnesine yönlendirir
+- [ ] Diğer demo hesaplarla aynı yazma kısıtlaması (`isDemo` guard) otomatik uygulanır — ek kod gerekmez
+
+**Kabul kriteri:** ✅ Demo giriş butonlarından hiçbiri artık herhangi bir kayıt oluşturamıyor/güncelleyemiyor/silemiyor · `mozkarci1991@gmail.com` production'da Master Admin olarak giriş yapabiliyor · 🔲 giriş ekranında bir "PT" demo butonu da bulunuyor
 
 **Bağımlılık:** yok — bağımsız, acil güvenlik düzeltmesi
 
@@ -570,6 +600,14 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 > **Kullanıcı notu (2026-07-15):** *"Adam 12 aylık aldı, 3 ay sonra askere gitti, üyelik donduruldu, sonra eşine devretti... kurumsal üyelik, aile paketi, çift paketi, çocuk üyeliği — bunlar oldukça yaygın."* Gerçek bir salonda üyelik tek bir "aktif/pasif" durumu değil; bir **yaşam döngüsü**dür. Bu faz, ürün denetiminin "Önemli" bulgusu olan büyüme özelliklerini gerçek hayat senaryolarıyla derinleştirir.
 
+### 17.0 Potansiyel Müşteri (Lead) Takibi — yeni, 2026-07-16 eklendi (pazar analizi — Gymie karşılaştırması)
+
+> **Senaryo:** Bir aday salonu gezer, fiyat teklifi alır ama o gün kayıt olmaz. Bugün SGMS'te bu kişi hiçbir yerde tutulmuyor — resepsiyon bir defter veya WhatsApp'tan hatırlamaya çalışıyor. Rakip ürünlerin (Gymie dahil) neredeyse tamamında bu bir çekirdek CRM özelliğidir; üyelik döngüsünün **en başındaki** adımdır, bu yüzden Faz 17'nin ilk maddesi olarak konumlandırıldı.
+- [ ] `Lead` modeli — `name`, `phone`, `email`, `source` (walk-in/referans/sosyal medya/web sitesi), `interestedPlan`, `status`: `NEW`/`CONTACTED`/`FOLLOW_UP_SCHEDULED`/`CONVERTED`/`LOST`, `assignedToId` (hangi resepsiyonist/satış temsilcisi takip ediyor)
+- [ ] `LeadFollowUp` — planlanan geri dönüş kaydı (`scheduledAt`, `method`: arama/mesaj/e-posta, `notes`, `completedAt`) — Faz 27 Bildirim Merkezi'yle entegre: takip zamanı geldiğinde ilgili personele hatırlatma gider
+- [ ] `/dashboard/leads` — kanban tarzı basit bir pipeline görünümü (Yeni → İletişime Geçildi → Takip Planlandı → Üye Oldu / Kayıp), her aday karta tek tıkla not/arama kaydı düşülebilir
+- [ ] Bir `Lead` üye olduğunda tek tıkla gerçek bir `GymMember` kaydına dönüştürülür (veri tekrar girilmez)
+
 ### 17.1 Üyelik dondurma/erteleme
 - [ ] `GymMemberStatus`'a `FROZEN` eklenir; `MembershipFreeze` modeli (`startDate`, `endDate`, `reason`: `MILITARY`/`MEDICAL`/`TRAVEL`/`OTHER`, `approvedById`)
 - [ ] Dondurma süresi kadar `membershipEndsAt` otomatik ileri kayar (askerlik/sağlık raporu gibi belgeli durumlarda süre sınırı yok, kişisel tercihte örn. yılda max 60 gün gibi salon ayarı)
@@ -600,9 +638,16 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 ### 17.6 POS stok/envanter takibi
 - [ ] `ExpenseCategory`'ye `stockQuantity`, satışta otomatik düşüm, düşük stok uyarısı (dashboard KPI'sına eklenir)
 
-**Kabul kriteri:** Bir üye askerlik nedeniyle üyeliğini dondurabiliyor ve eşine devredebiliyor · bir şirket 50 çalışanı için kurumsal üyelik alıp kullanım oranını görebiliyor · pilates dersine kontenjan dahilinde kayıt olunup QR ile girilebiliyor, kontenjan dolunca bekleme listesi otomatik işliyor
+### 17.7 Misafir Geçiş İzni (Guest Pass) — yeni, 2026-07-16 eklendi
 
-**Bağımlılık:** Faz 15 (arama/filtre altyapısı) · Faz 27 (Bildirim Merkezi — bekleme listesi bildirimleri için)
+> **Senaryo:** Bir üyenin arkadaşı salonu bir günlüğüne denemek istiyor, ya da bir aday resepsiyonla görüşmeden önce salonu gezmek istiyor. Bugün bu kişi ya kayıt dışı elle turnikeden geçiriliyor (denetimsiz) ya da hiç giremiyor.
+- [ ] `GuestPass` modeli — `issuedById` (resepsiyonist), `guestName`, `hostMemberId` (opsiyonel — hangi üyenin misafiri), `validFrom`/`validUntil` (genelde tek gün, saatlik de olabilir), `qrToken` (mevcut Faz 10 QR check-in altyapısıyla aynı HMAC imzalı token deseni)
+- [ ] Resepsiyon paneli: tek tıkla misafir izni oluşturma → anlık QR gösterimi (yazdırma veya telefona gönderme)
+- [ ] Check-in sırasında `GuestPass` süresi dolmuşsa turnike/resepsiyon net bir "misafir izni süresi doldu" uyarısı verir — üye check-in akışıyla karışmaz, ayrı bir `CheckIn.subjectType` değeri (`GUEST`) kullanılır
+
+**Kabul kriteri:** Bir üye askerlik nedeniyle üyeliğini dondurabiliyor ve eşine devredebiliyor · bir şirket 50 çalışanı için kurumsal üyelik alıp kullanım oranını görebiliyor · pilates dersine kontenjan dahilinde kayıt olunup QR ile girilebiliyor, kontenjan dolunca bekleme listesi otomatik işliyor · bir aday salonu gezip fiyat aldıktan sonra sistemde bir "Lead" olarak takip ediliyor · resepsiyon bir misafire tek tıkla günlük geçiş izni verebiliyor
+
+**Bağımlılık:** Faz 15 (arama/filtre altyapısı) · Faz 27 (Bildirim Merkezi — bekleme listesi ve lead takip bildirimleri için) · Faz 10 (QR check-in altyapısı — Guest Pass için)
 
 ---
 
@@ -611,11 +656,18 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 - [ ] 2FA (en azından Master Admin ve OWNER rolü için — TOTP, `otplib` veya benzeri)
 - [ ] Kendi kendine veri indirme / hesap silme (KVKK/GDPR self-servis — `/dashboard/settings` altına)
 - [ ] Personel vardiya planlama — basit haftalık takvim
-- [ ] Sağlık formu / rıza metni — üye kaydında imza/onay kaydı
+- [ ] Sağlık formu / rıza metni — üye kaydında imza/onay kaydı, **artık aşağıdaki otomatik PDF motoruyla somut bir çıktıya bağlanıyor**
 - [ ] Playwright E2E — login, CRM ölçüm ekleme, expense akışı (Faz 13.4'ten kalan)
 - [ ] `Invoice` modeli (Faz 8'den kalan tek opsiyonel kalem) — e-fatura/resmi fatura kaydı
 
-**Kabul kriteri:** Master Admin girişinde 2FA zorunlu · bir üye kendi verisini indirebiliyor · CI'da Playwright suite'i yeşil
+### 18.1 Otomatik PDF Üretimi (Üyelik Sözleşmesi / Risk Kabul Formu) — yeni, 2026-07-16 eklendi
+
+> **Senaryo:** Üye kaydı sırasında ıslak imza için basılabilir, salonun kendi marka kimliğini taşıyan bir "Üyelik Sözleşmesi" veya "Risk Kabul Formu" çıktısı bugün elle Word/Excel'de hazırlanıyor. Faz 8.4'te üye ekstresi için zaten bir PDF motoru (`lib/member-statement-pdf.ts`) kurulmuş durumda — bu, aynı altyapının sözleşme/form şablonlarına genişletilmesidir.
+- [ ] `ContractTemplate` modeli — salon bazında özelleştirilebilir şablon (değişkenler: üye adı, plan, tarih, fiyat vb. — mevcut e-posta şablon sistemiyle — `lib/admin/email-templates.ts` — aynı değişken-doldurma deseni)
+- [ ] PDF üretim motoru mevcut `lib/member-statement-pdf.ts` altyapısı genişletilerek kurulur (React PDF/Puppeteer arasında mevcut kütüphaneyle tutarlı olan tercih edilir — ek bağımlılık riski minimize edilir)
+- [ ] Üye kaydı tamamlandığında veya kayıt formunda "Sözleşmeyi indir/yazdır" butonu; sağlık formu/rıza metni onayı bu PDF'e otomatik gömülür (checkbox + zaman damgası + kullanıcı kimliği — Faz 24'teki dijital imza desenine benzer bir denetim izi)
+
+**Kabul kriteri:** Master Admin girişinde 2FA zorunlu · bir üye kendi verisini indirebiliyor · CI'da Playwright suite'i yeşil · 🔲 üye kaydında tek tıkla, salon markasını taşıyan bir üyelik sözleşmesi PDF'i indirilebiliyor
 
 **Bağımlılık:** Faz 15-17 tamamlanmış olmalı (bu faz üstüne inşa edilen bir olgunluk katmanı)
 
@@ -770,7 +822,14 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 - [ ] `/dashboard/settings` → Bildirim tercihleri: hangi olay hangi kanaldan gitsin (salon bazında yapılandırılabilir)
 - [ ] Kullanıcı (üye/personel) kendi bildirim tercihini yönetebilir (`/athlete/account`, `/dashboard/settings`)
 
-**Kabul kriteri:** ✅ Bir üye turnikeden geçtiğinde resepsiyon anlık tarayıcı bildirimi alıyor · 🔲 üyelik bitmeden 3 gün önce e-posta/SMS/WhatsApp otomatik gitmiyor henüz (şablon/tetikleyici sistemi kurulmadı)
+### 27.3 Zamanlanmış/Kuyruk Tabanlı Otomatik Tetikleyiciler — yeni, 2026-07-16 eklendi
+
+> **Senaryo:** "Üyeliğinin bitmesine 3 gün kalanlara otomatik SMS/e-posta gönder" gibi zaman tabanlı kurallar, PM2/cron'da sürekli çalışan bir sürece değil, **serverless bir kuyruk/zamanlayıcıya** ihtiyaç duyar — sunucu yeniden başlasa bile kaçırılan bir tetikleyici kalmaz, yeniden deneme (retry) otomatik yönetilir.
+- [ ] Değerlendirme: **Inngest** (event-driven, TypeScript-native, yerel geliştirmede de çalışır) vs **Upstash QStash** (basit HTTP tabanlı gecikmeli görev, mevcut altyapıyla — zaten Redis kullanılıyor — doğal uyum) vs **Trigger.dev** (uzun süreli iş akışları için) — **öneri: Upstash QStash**, çünkü proje zaten Redis/Upstash ekosistemine yakın (bkz. `packages/database`'deki mevcut Redis kullanımı) ve kurulumu en basit olan bu
+- [ ] `27.2`'deki `NotificationTemplate`/`trigger` sistemi bu kuyruğun **üzerine** inşa edilir — her tetikleyici (`TRIAL_ENDING`, `MEMBERSHIP_EXPIRING` vb.) günlük bir zamanlanmış görev tarafından taranır, eşleşen kayıtlar için kuyruğa mesaj bırakılır, worker uç noktası (`/api/v1/queue/*`) asıl gönderimi yapar
+- [ ] Yeniden deneme politikası (SMS/WhatsApp sağlayıcısı geçici olarak başarısız olursa otomatik 3 deneme, üstel gecikmeyle)
+
+**Kabul kriteri:** ✅ Bir üye turnikeden geçtiğinde resepsiyon anlık tarayıcı bildirimi alıyor · 🔲 üyelik bitmeden 3 gün önce e-posta/SMS/WhatsApp otomatik gitmiyor henüz (şablon/tetikleyici sistemi kurulmadı) · 🔲 zamanlanmış tetikleyiciler bir kuyruk motoruyla (QStash/Inngest) güvenilir şekilde çalışmıyor henüz
 
 **Bağımlılık:** Faz 15.1 (mail-relay) ✅ — SMS/WhatsApp sağlayıcıları Faz 31'de eklenecek
 
@@ -832,6 +891,13 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 ## 🔲 Faz 31 — Entegrasyon Pazaryeri (Öncelik: P2 — uzun vadeli platform değeri)
 
 > **Vizyon:** SGMS bugün kendi içinde yaşıyor. Gerçek bir salon ekosisteminde bağlanılması gereken çok sayıda dış sistem var.
+
+### 31.0 Harici Donanım API v2 & Cihaz Entegrasyon Arayüzü — yeni, 2026-07-16 eklendi
+
+> **Senaryo:** Bir salon sahibi kendi turnike üreticisiyle zaten çalışıyor ve o üreticinin sistemi SGMS'e "sorgu" atabilmek istiyor (ör. bir kart numarasının geçerli olup olmadığını kontrol etmek) — bugün Faz 10'daki webhook (`POST /api/v1/webhooks/turnstile`) yalnızca **içeri** veri alıyor, dışarıdan **sorgulanabilir**, versiyonlanmış bir API yok. Ayrıca salon sahibi kendi API anahtarını/webhook URL'sini yönetebileceği bir arayüzden yoksun — bugün bunu yalnızca Master Admin/geliştirici elle yapabiliyor.
+- [ ] `GET/POST /api/v2/hardware/*` — mevcut Faz 10 check-in/device modelinin üzerine, **versiyonlanmış** (v1 webhook'u bozmadan) ve dışarıdan sorgulanabilir bir API katmanı: üye/kart geçerlilik sorgusu, cihaz durumu, check-in geçmişi
+- [ ] `/dashboard/settings` (veya yeni `/dashboard/devices`) → **"Cihazlar / Turnike Entegrasyonu"** paneli: salon sahibinin kendi API anahtarını görüntülemesi/yenilemesi, kendi webhook URL'sini tanımlaması (üçüncü parti turnike yazılımına SGMS'in olayları göndermesi için — check-in gerçekleştiğinde salonun kendi sistemine de bildirim gitsin)
+- [ ] Mevcut `Device` modeli (Faz 10) bu yeni panelin veri kaynağı olarak yeniden kullanılır — yeni bir cihaz modeli gerekmez, yalnızca sahibinin kendi kendine yönetebileceği bir arayüz eklenir
 
 ### 31.1 Sağlık/fitness cihazları
 - [ ] Apple Health, Google Fit, Garmin, Fitbit — üyenin kendi rızasıyla adım/nabız/kalori verisini SGMS'e senkronize etmesi (sporcu portalı ölçüm geçmişini zenginleştirir)
@@ -895,13 +961,19 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 > **Hedef:** Her kullanıcı tipi SGMS'i farklı amaçla kullanır — bir PT'nin ihtiyacı olan bilgiyle bir salon sahibinin ihtiyacı olan bilgi tamamen farklıdır. Tek, genel bir "yardım" sayfası yerine **role özel, bağlamsal** bir kılavuz sistemi.
 
-- [ ] `HelpArticle` modeli — `audience`: `OWNER`/`ADMIN`/`STAFF`/`TRAINER`/`ATHLETE`/`RECEPTION`, `category`, `title`, `bodyMarkdown`, çok dilli (6 dil), `relatedFeatureFlag` (Faz 32'deki "yakında" özellikleriyle ilişkilendirilebilir — bkz. aşağıdaki Tasarım & UX bölümü)
+- [ ] `HelpArticle` modeli — `audience`: `OWNER`/`ADMIN`/`STAFF`/`TRAINER`/`ATHLETE`/`RECEPTION`, `category`, `title`, `bodyMarkdown`, çok dilli (8 dil — Faz 6.3'teki İtalyanca/Portekizce dahil), `relatedFeatureFlag` (Faz 32'deki "yakında" özellikleriyle ilişkilendirilebilir)
 - [ ] `/help` — role göre otomatik filtrelenen kılavuz merkezi; her sayfanın sağ üstünde **bağlamsal yardım** ikonu (ör. `/dashboard/pos` sayfasındaki "?" ikonu doğrudan POS kılavuzuna götürür)
 - [ ] 4 ayrı "başlangıç rehberi" (onboarding checklist tarzı): **Salon Sahibi Rehberi** (kurulum, ekip davet etme, plan yönetimi), **Resepsiyon Rehberi** (check-in, POS, üye kaydı), **PT Rehberi** (program atama, ölçüm girişi, ders yönetimi), **Sporcu Rehberi** (mobil check-in, mesajlaşma, ölçüm takibi)
 - [ ] İçerik yönetimi: Master Admin panelinden `HelpArticle` CRUD (kod değişikliği gerektirmeden içerik güncellenebilir)
 - [ ] Arama: kılavuz içeriğinde tam metin arama
 
-**Kabul kriteri:** Yeni işe başlayan bir resepsiyonist, kendi rolüne özel bir başlangıç rehberiyle karşılanıyor · herhangi bir sayfada "?" ikonuna tıklandığında o sayfaya özel yardım açılıyor
+### 33.1 Profesyonel "Ayarlar" Ekranı Modernizasyonu — yeni, 2026-07-16 eklendi
+
+> **Kullanıcı notu (2026-07-16):** *"Müşteriler ve personeller ayarlar menüsüne girdiğinde çok profesyonel bir ekranla karşılaşmalı."* Faz 34'teki sol-menü/tema yenilemesi mevcut sayfaların **kabuğunu** modernize etti; `/dashboard/settings`'in kendi iç düzeni ise hâlâ eski, tek-sütun bir form listesi. Bu madde, o sayfanın Faz 33 kılavuz sistemiyle **birlikte** yeniden tasarlanmasını kapsar.
+- [ ] `/dashboard/settings` — kategorilere ayrılmış (Genel, Ekip & Roller, Bildirimler, Fatura, Entegrasyonlar — Faz 31.0, Güvenlik) sekmeli/bölümlü bir düzen; her bölümün yanında ilgili `HelpArticle`'a doğrudan bağlantı
+- [ ] Rol bazlı görünürlük: bir STAFF/TRAINER, yalnızca kendi rolüyle ilgili ayar bölümlerini görür (OWNER'a özel faturalandırma/entegrasyon ayarları gizlenir, karmaşa azalır)
+
+**Kabul kriteri:** Yeni işe başlayan bir resepsiyonist, kendi rolüne özel bir başlangıç rehberiyle karşılanıyor · herhangi bir sayfada "?" ikonuna tıklandığında o sayfaya özel yardım açılıyor · 🔲 ayarlar ekranı role göre filtrelenen, kategorilere ayrılmış profesyonel bir düzene kavuşmuş olacak
 
 **Bağımlılık:** yok — bağımsız, ama Faz 32'nin "yakında" özellik etiketleriyle doğal olarak bütünleşir
 
@@ -937,7 +1009,28 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 - [ ] Marketing/login sayfalarının görsel dilinin (hero, animasyonlar) yeni ikon sistemiyle daha da zenginleştirilmesi
 - [ ] Performans: mobil ağlarda ilk yükleme süresi hedefi (Core Web Vitals — LCP < 2.5s)
 
-**Kabul kriteri:** ✅ Dashboard/Partner/Admin/Athlete artık ortak, ikonlu, dark/light temalı bir sol-menü + mobil alt-menü sistemine sahip · 🔲 veri tabloları mobilde kart görünümüne geçmiş olacak (sonraki tur)
+### 34.4 Mesajlaşma Arayüzü Modernizasyonu (WhatsApp/Telegram tarzı) — yeni, 2026-07-16 eklendi
+
+> **Kullanıcı notu (2026-07-16):** *"Mevcut mesajlaşma arayüzü çok eski usül hissettiriyor."* Faz 9'un real-time altyapısı (Soketi + Redis, <2sn teslimat) zaten sağlam — eksik olan yalnızca arayüz. Bu, mevcut `/dashboard/messages` ve `/athlete/messages` sayfalarının **veri katmanına dokunmadan**, salt görsel bir yeniden inşasıdır.
+- [ ] İki panelli düzen: solda sohbet listesi (son mesaj önizlemesi, okunmamış rozeti, arama), sağda seçili sohbetin akışı — mevcut sayfa-değiştirmeli/ayrı-sekmeli inbox/sent yapısının yerini alır
+- [ ] Mesaj balonları (gönderen/alan ayrımı, zaman damgası, teslim/okundu tikleri — mevcut `deliveredAt`/`readAt` alanları zaten var, yalnızca görsel karşılığı eksik), yazıyor... göstergesi (mevcut typing indicator altyapısı zaten var — Faz 9.3)
+- [ ] Mobilde tam ekran sohbet görünümü (liste ↔ sohbet arası geri butonuyla geçiş), masaüstünde yan yana
+- [ ] Faz 34'ün yeni `GymLoader`/ikon sistemiyle görsel tutarlılık
+
+### 34.5 Sporcu Profil Özyönetimi — yeni, 2026-07-16 eklendi
+
+> **Senaryo:** Bir üye telefon numarasını değiştirdi veya profil fotoğrafını güncellemek istiyor — bugün bunun için resepsiyona gitmesi gerekiyor. Kendi kendine yönetebilmesi hem üyenin hem resepsiyonun işini azaltır.
+- [ ] `/athlete/account` genişletilir: parola değiştirme (mevcut `password-reset` altyapısıyla aynı güvenlik kurallarını paylaşır), kullanıcı adı/e-posta güncelleme (e-posta değişiminde mevcut e-posta doğrulama deseni), doğum tarihi düzenleme, avatar yükleme (Faz 6.2'deki mevcut `lib/storage.ts`/R2 altyapısı doğrudan yeniden kullanılır — yeni depolama işi gerekmez)
+- [ ] Hassas alan değişiklikleri (e-posta, parola) audit log'a düşer — kimlik hırsızlığı/şüpheli değişiklik durumunda iz bırakır
+
+### 34.6 İnteraktif Antrenman Programı Görünümü — yeni, 2026-07-16 eklendi
+
+> **Kullanıcı notu (2026-07-16):** *"PT'nin yazdığı programların sporcu tarafındaki görünümü çok daha modern, interaktif ve detaylı incelenebilir bir arayüze kavuşturulacak."* Faz 4.2'deki program içerik editörü (`program-content-builder.tsx`) PT tarafında zaten esnek bir veri yapısı üretiyor — eksik olan, sporcunun bunu **kullanırken** gördüğü arayüz.
+- [ ] Set/tekrar/ağırlık için etkileşimli işaretleme (bir seti tamamladığında tek dokunuşla işaretleme, dinlenme süresi sayacı)
+- [ ] Egzersiz başına opsiyonel video/görsel bağlantısı (PT tarafından eklenebilir — YouTube/Vimeo embed veya yüklenen kısa klip, mevcut storage altyapısı)
+- [ ] İlerleme geçmişi: bir egzersizin geçmiş seans verileriyle (ağırlık/tekrar artışı) karşılaştırmalı görünümü
+
+**Kabul kriteri:** ✅ Dashboard/Partner/Admin/Athlete artık ortak, ikonlu, dark/light temalı bir sol-menü + mobil alt-menü sistemine sahip · 🔲 veri tabloları mobilde kart görünümüne geçmiş olacak (sonraki tur) · 🔲 mesajlaşma WhatsApp-tarzı iki panelli bir arayüze kavuşmuş olacak · 🔲 sporcular kendi profillerini (parola, avatar, doğum tarihi) yönetebiliyor olacak · 🔲 antrenman programları set/tekrar etkileşimi ve video desteğiyle görüntülenebiliyor olacak
 
 **Bağımlılık:** yok — bu faz diğer tüm fazların üzerine sürekli uygulanan bir kalite katmanıdır, tek seferlik "bitti" denecek bir faz değildir
 
@@ -975,9 +1068,12 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | E2E (Playwright): login, CRM ölçüm, expense | P2 | 18 | 🔲 |
 | `Invoice` modeli | P2 | 18 | 🔲 opsiyonel |
 | `readme.md` sadeleştirme | P2 | 13 | ✅ bu revizyonla kapatıldı |
+| 8 dile genişletme (İtalyanca, Portekizce) + küresel lokasyon veritabanı | P1 | 6 | 🔲 |
 | `roadmap.md` ↔ kod senkronu | P2 | — | ✅ bu revizyonla kapatıldı |
 | Demo hesap yazma engeli | P0 | 14 | ✅ tamamlandı — 2026-07-14 |
 | Master Admin hesap geçişi (mozkarci1991@gmail.com) | P0 | 14 | ✅ tamamlandı |
+| Master Admin kalıcı silme (hard-delete) | P1 | 12 | 🔲 |
+| Demo PT girişi (login ekranı) | P1 | 14 | 🔲 |
 | Şifremi unuttum + cloud.cicibyte.com mail API | P0 | 15 | ✅ tamamlandı — production'da doğrulandı |
 | Üye listesi arama/filtre/sayfalama | P0 | 15 | ✅ tamamlandı |
 | Operasyonel KPI dashboard'u | P0 | 15 | ✅ tamamlandı |
@@ -987,7 +1083,10 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | Referans/komisyon takibi | P1 | 16 | ✅ tamamlandı |
 | Masaüstü/mobil release → Cloud kaydı | P1 | 16 | 🔲 API henüz yok (Cloud tarafı) — mevcut release'ler kasıtlı olarak geriye dönük kaydedilmedi |
 | Üyelik dondurma/devir/kurumsal, ders/sınıf yönetimi, kupon, stok | P1 | 17 | 🔲 |
+| Lead/potansiyel müşteri takibi (follow-up hatırlatmalı) | P1 | 17 | 🔲 |
+| Misafir geçiş izni (Guest Pass) | P2 | 17 | 🔲 |
 | 2FA, GDPR self-servis, personel vardiya, sağlık formu | P2 | 18 | 🔲 |
+| Otomatik PDF sözleşme/risk formu üretimi | P1 | 18 | 🔲 |
 | SGMS Masaüstü genişletme (offline lisans, auto-update) | P2 | 19 | 🔲 gelecek vizyon |
 | SGMS Mobil Uygulama | P3 | 20 | 🔲 gelecek vizyon |
 | PT performans/komisyon/prim | P1 | 21 | ✅ tamamlandı — 2026-07-15 |
@@ -997,13 +1096,19 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | Kasa vardiya açma/kapama + X/Z raporu | P2 | 25 | 🔲 |
 | Dijital üyelik kartı (Apple/Google Wallet, NFC) | P2 | 26 | 🔲 |
 | Bildirim Merkezi (Push/SMS/WhatsApp/Mail/Telegram) | P1 | 27 | 🔄 ~35% — tarayıcı Web Push tamamlandı, SMS/WhatsApp/Telegram + şablon sistemi kaldı |
+| Serverless kuyruk motoru (QStash/Inngest) — zamanlanmış bildirimler | P1 | 27 | 🔲 |
 | İleri raporlama & BI (MRR/ARR/LTV/Churn) | P1 | 28 | ✅ tamamlandı — 2026-07-15 (ARR + churn-anketi v2'ye ertelendi) |
 | Yapay Zeka öngörüleri (churn, kampanya, fiyatlandırma) | P2 | 29 | 🔲 |
 | Kurumsal hiyerarşi (Organizasyon→Bölge→Şube) | P1 | 30 | ✅ tamamlandı — 2026-07-15 (v1) |
 | Entegrasyon Pazaryeri (Health/SMS/WhatsApp/E-Fatura) | P2 | 31 | 🔲 |
+| Harici donanım API v2 + cihaz entegrasyon arayüzü | P2 | 31 | 🔲 |
 | Paket + ek kapasite satışı (add-on) + PT/personel limit ayrımı | P0 | 32 | 🔲 gelir modeli — kullanıcı onayı gerektirir |
 | Rol bazlı dinamik kullanım kılavuzu (Help Center) | P1 | 33 | 🔲 |
+| Ayarlar ekranı modernizasyonu (rol bazlı, kategorili) | P1 | 33 | 🔲 |
 | Tam responsive tasarım sistemi | P0 | 34 | 🔄 ~70% — sol menü + dark/light tema + ikon sistemi tüm yüzeylerde tamamlandı, tablo/form mobil turu kaldı |
+| Mesajlaşma arayüzü modernizasyonu (WhatsApp/Telegram tarzı) | P0 | 34 | 🔲 |
+| Sporcu profil özyönetimi (parola/avatar/doğum tarihi) | P1 | 34 | 🔲 |
+| İnteraktif antrenman programı görünümü (video + set/tekrar) | P2 | 34 | 🔲 |
 | Temsilci (Partner) Portalı | P1 | 35 | ✅ tamamlandı — 2026-07-15 |
 | Production `ExpenseStatus` enum case-drift düzeltmesi (`/dashboard/pos` hatası) | P0 | — | ✅ tamamlandı — 2026-07-15, kök neden: 2026-06-30'daki elle migration kurtarma |
 | 14 günlük deneme kaydı: `registerTrialOrganization`'da hiç try/catch yoktu — herhangi bir DB hatası kullanıcıya ham hata ekranı olarak yansıyor ve hesap oluşmuyordu | P0 | — | ✅ tamamlandı — 2026-07-15, transaction + cloud sync artık ayrı ayrı yakalanıyor, kullanıcıya her zaman dostane mesaj dönüyor |
@@ -1011,6 +1116,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | Çıkış yaptıktan sonra sayfa yenilenince tekrar giriş yapılmış görünme riski — next-auth@5 beta'nın Server Action içinden tetiklenen signOut+redirect kombinasyonunda çerez temizleme bazı reverse-proxy kurulumlarında güvenilir değil | P0 | — | ✅ savunmacı düzeltme tamamlandı — 2026-07-15: `performSignOut()` bilinen tüm NextAuth çerezlerini elle temizliyor; ayrıca nginx no-cache kuralına eksik olan `/athlete` ve `/partner` yolları eklendi (yalnızca login/dashboard/admin kapsıyordu) |
 | Konum (Cloudflare geo) + tarayıcı diline göre otomatik site dili | P2 | — | ✅ tamamlandı — 2026-07-15 |
 | PHP → Static (aaPanel) | P3 | 3 | ✅ `docs/deployment/AAPANEL-PHP-STATIC.md` |
+| **Git Contributors Düzenlemesi** — GitHub'ın "Contributors" grafiğinde `cursoragent` görünüyor çünkü 34 eski commit'te `Co-authored-by: Cursor <cursoragent@cursor.com>` trailer'ı var (bu oturumdan önceki bir geliştirme evresinden kalma). Tek gerçek sahip/geliştirici `RealMrNovember` (Mikail) olmalı. | P0 | — | 🔲 **⚠️ Dikkat — destructive işlem:** bu, mevcut 34 commit'in tarihini `git filter-repo`/`git rebase` ile yeniden yazmayı ve **force-push** yapmayı gerektirir; tüm commit hash'leri değişir. Kullanıcı onayı olmadan uygulanmayacak — yalnızca not düşüldü |
 
 ---
 
@@ -1043,14 +1149,29 @@ Devam ediyor:
 Sıradaki (öncelik sırası — profesyonel değerlendirme, P0 en önce):
   Faz 32     Ticarileştirme: paket + ek kapasite satışı          ← P0, gelir modeli (kullanıcı onayı gerekli)
   Faz 34.3   Responsive tasarım sistemi — tablo/form mobil turu  ← P0, sürekli kalite katmanı
-  Faz 33     Rol bazlı dinamik kullanım kılavuzu                 ← P1
-  Faz 17     Üyelik senaryoları & ders/sınıf yönetimi            ← P1
+  Faz 34.4   Mesajlaşma arayüzü modernizasyonu (WhatsApp tarzı)  ← P0, kullanıcı memnuniyetsizliğine doğrudan yanıt
+  [Repo]     Git contributors düzenlemesi (cursoragent kaldırma) ← P0, ⚠️ onay gerekli (destructive, force-push)
+
+  Faz 14.3   Demo PT girişi (login ekranı)                       ← P1, düşük efor / yüksek satış-öncesi değer
+  Faz 12.4   Master Admin kalıcı silme (hard-delete)             ← P1, düşük efor, veri hijyeni
+  Faz 34.5   Sporcu profil özyönetimi                            ← P1, mevcut altyapıyı yeniden kullanır
+  Faz 33     Rol bazlı dinamik kullanım kılavuzu + 33.1 ayarlar  ← P1
+             ekranı modernizasyonu
+  Faz 17.0   Lead/potansiyel müşteri takibi (follow-up)          ← P1, doğrudan gelir dönüşümü
+  Faz 27.3   Serverless kuyruk motoru (QStash/Inngest)           ← P1, Faz 27.2'nin önkoşulu
+  Faz 18.1   Otomatik PDF sözleşme/risk formu üretimi            ← P1, mevcut PDF altyapısını genişletir
+  Faz 6.3/.4 Dil genişletmesi (İtalyanca/Portekizce) +           ← P1, pazar genişletme
+             küresel lokasyon veritabanı
+  Faz 17     Üyelik senaryoları & ders/sınıf yönetimi (kalan)    ← P1, büyük kapsam
+
+  Faz 34.6   İnteraktif antrenman programı görünümü              ← P2
+  Faz 17.7   Misafir geçiş izni (Guest Pass)                     ← P2, düşük efor
   Faz 22     Personel Yönetimi / HR                              ← P2
   Faz 23     Ekipman yönetimi & bakım planları                   ← P2
   Faz 25     Kasa yönetimi (vardiya, X/Z raporu)                 ← P2
   Faz 26     Dijital üyelik kartı (Wallet/NFC)                   ← P2
   Faz 29     Yapay Zeka öngörüleri                                ← P2, Faz 28 verisine dayanır
-  Faz 31     Entegrasyon Pazaryeri                                ← P2, Faz 27 soyutlamasına dayanır
+  Faz 31     Entegrasyon Pazaryeri + 31.0 donanım API v2          ← P2, Faz 27 soyutlamasına dayanır
   Faz 18     Uyumluluk & sağlamlaştırma (2FA, GDPR, Invoice)      ← P2
   Faz 24     Temizlik yönetimi                                    ← P3
   Faz 19     SGMS Masaüstü — genişletme                          ← P2, web tamamlanınca
