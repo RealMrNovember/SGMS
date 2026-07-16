@@ -50,7 +50,8 @@
       "dailyOps": "Ежедневные операции",
       "management": "Управление",
       "analytics": "Аналитика"
-    }
+    },
+    "paymentPlans": "Планы платежей"
   },
   "auth": {
     "login": "Войти",
@@ -247,7 +248,9 @@
       "revenueThisMonth": "Revenue This Month",
       "revenueLink": "View cash summary",
       "expiringSoon": "Memberships Expiring in 7 Days",
-      "expiringSoonLink": "View members"
+      "expiringSoonLink": "View members",
+      "overdueInstallments": "Просроченные платежи",
+      "overdueInstallmentsLink": "Смотреть планы платежей"
     },
     "cards": {
       "organization": "Организация",
@@ -284,7 +287,10 @@
     "alerts": {
       "expiringTitle": "У {count} абонементов истекает срок в течение 7 дней",
       "expiringSubtitle": "Отправьте напоминание о продлении, чтобы снизить отток участников.",
-      "expiringCta": "Смотреть участников"
+      "expiringCta": "Смотреть участников",
+      "overdueTitle": "{count} платежей просрочено",
+      "overdueSubtitle": "Соберите остаток задолженности или свяжитесь с участником.",
+      "overdueCta": "Смотреть планы платежей"
     },
     "comingSoonTeaser": {
       "title": "Что дальше в дорожной карте?",
@@ -530,6 +536,34 @@
       "cash": "Наличные",
       "card": "Карта",
       "transfer": "Перевод"
+    },
+    "paymentPlan": {
+      "title": "Планы платежей",
+      "subtitle": "Составьте график платежей для участников, которые заплатят позже.",
+      "empty": "Пока нет планов платежей.",
+      "planStatus": {
+        "ACTIVE": "Активен",
+        "COMPLETED": "Завершён",
+        "CANCELLED": "Отменён"
+      },
+      "installmentCountLabel": "{count} платежей",
+      "cancelPlan": "Отменить план",
+      "installmentLabel": "Платёж {index}/{count}",
+      "status": {
+        "OPEN": "Открыт",
+        "PAID": "Оплачен",
+        "VOID": "Отменён",
+        "OVERDUE": "Просрочен"
+      },
+      "pay": "Оплатить",
+      "totalAmount": "Общая сумма",
+      "installmentCount": "Количество платежей",
+      "cadenceWeekly": "Еженедельно",
+      "cadenceMonthly": "Ежемесячно",
+      "cadenceCustom": "Произвольно (дни)",
+      "intervalDays": "Дней между платежами (только для произвольного)",
+      "description": "Описание (необязательно)",
+      "create": "Создать план"
     }
   },
   "pos": {
@@ -562,7 +596,8 @@
       "count": "{count} операций",
       "openCount": "{count} открытых",
       "noPayments": "Сегодня оплат нет"
-    }
+    },
+    "overdueInstallmentBadge": "Просроченный платёж"
   },
   "marketing": {
     "nav": {
@@ -1230,6 +1265,21 @@
       "colStaff": "Персонал",
       "colRevenue": "Выручка",
       "colCheckIns": "Посещения"
+    }
+  },
+  "paymentPlans": {
+    "backToOverview": "← Обзор",
+    "title": "Планы платежей",
+    "subtitle": "Все невыплаченные платежи по вашим участникам.",
+    "empty": "Нет невыплаченных платежей.",
+    "overdue": "Просрочен",
+    "upcoming": "Предстоящий",
+    "columns": {
+      "member": "Участник",
+      "dueDate": "Срок оплаты",
+      "amount": "Сумма",
+      "status": "Статус",
+      "action": "Действие"
     }
   }
 }

@@ -8,6 +8,7 @@ import { auth } from '@/lib/auth';
 import { intlLocaleFor } from '@/lib/format-locale';
 import { decimalToNumber, getMemberAccountSummary } from '@/lib/member-balance';
 import { memberCountryLabel } from '@/lib/member-countries';
+import { getMemberPaymentPlans } from '@/lib/payment-plans';
 import { prisma } from '@/lib/prisma';
 import type { OrganizationRole } from '@sgms/database';
 import { getLocale, getTranslations } from 'next-intl/server';
@@ -44,7 +45,7 @@ export default async function MemberDetailPage({
   const locale = await getLocale();
   const dateLocale = intlLocaleFor(locale);
 
-  const [member, accountSummary, expenseCategories] = await Promise.all([
+  const [member, accountSummary, expenseCategories, paymentPlans] = await Promise.all([
     prisma.gymMember.findFirst({
       where: { id, organizationId },
       include: {
@@ -69,6 +70,7 @@ export default async function MemberDetailPage({
       orderBy: { sortOrder: 'asc' },
       select: { id: true, name: true, defaultAmount: true },
     }),
+    getMemberPaymentPlans(organizationId, id),
   ]);
 
   if (!member) {
@@ -217,6 +219,13 @@ export default async function MemberDetailPage({
           type: tx.type,
           paymentMethod: tx.paymentMethod,
           createdAt: tx.createdAt.toISOString(),
+        }))}
+        paymentPlans={paymentPlans.map((plan) => ({
+          ...plan,
+          installments: plan.installments.map((installment) => ({
+            ...installment,
+            dueDate: installment.dueDate ? installment.dueDate.toISOString() : null,
+          })),
         }))}
       />
 

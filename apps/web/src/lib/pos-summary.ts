@@ -43,7 +43,7 @@ export async function getDailyPosSummary(organizationId: string, date = new Date
     }),
     prisma.expense.aggregate({
       where: { organizationId, status: 'OPEN' },
-      _sum: { amount: true },
+      _sum: { amount: true, paidAmount: true },
       _count: true,
     }),
   ]);
@@ -54,7 +54,8 @@ export async function getDailyPosSummary(organizationId: string, date = new Date
     chargesCount: chargeAgg._count,
     paymentsTotal: decimalToNumber(paymentAgg._sum.amount),
     paymentsCount: paymentAgg._count,
-    openBalanceTotal: decimalToNumber(openChargesAgg._sum.amount),
+    openBalanceTotal:
+      decimalToNumber(openChargesAgg._sum.amount) - decimalToNumber(openChargesAgg._sum.paidAmount),
     openChargesCount: openChargesAgg._count,
     paymentsByMethod: paymentsByMethod.map((row) => ({
       method: row.paymentMethod ?? 'UNKNOWN',

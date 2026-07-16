@@ -135,6 +135,20 @@ export default async function DashboardPage() {
         </section>
       ) : null}
 
+      {license.isOperational && kpis.overdueInstallmentCount > 0 ? (
+        <section className="card flex flex-col gap-3 border-rose-500/40 bg-rose-500/5 p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="font-semibold text-rose-100">
+              {t('alerts.overdueTitle', { count: kpis.overdueInstallmentCount })}
+            </p>
+            <p className="muted mt-1 text-sm">{t('alerts.overdueSubtitle')}</p>
+          </div>
+          <Link href="/dashboard/payment-plans" className="button shrink-0 px-4 py-2 text-sm whitespace-nowrap">
+            {t('alerts.overdueCta')} →
+          </Link>
+        </section>
+      ) : null}
+
       {role && RECEPTION_ROLES.has(role) && license.isOperational ? (
         <ReceptionDownloadPromo variant="card" />
       ) : null}
@@ -184,7 +198,7 @@ export default async function DashboardPage() {
         </section>
       ) : null}
 
-      <section className="grid gap-4 md:grid-cols-3">
+      <section className="grid gap-4 md:grid-cols-4">
         <article className="card p-5">
           <p className="muted text-sm">{t('kpis.checkInsToday')}</p>
           <p className="mt-2 text-3xl font-semibold tabular-nums">{kpis.checkInsToday}</p>
@@ -212,6 +226,15 @@ export default async function DashboardPage() {
           <p className="mt-2 text-3xl font-semibold tabular-nums">{kpis.membershipsExpiringSoonCount}</p>
           <Link href="/dashboard/members" className="muted mt-2 inline-block text-xs hover:text-white">
             {t('kpis.expiringSoonLink')} →
+          </Link>
+        </article>
+        <article
+          className={`card p-5 ${kpis.overdueInstallmentCount > 0 ? 'border-rose-500/40 bg-rose-500/5' : ''}`}
+        >
+          <p className="muted text-sm">{t('kpis.overdueInstallments')}</p>
+          <p className="mt-2 text-3xl font-semibold tabular-nums">{kpis.overdueInstallmentCount}</p>
+          <Link href="/dashboard/payment-plans" className="muted mt-2 inline-block text-xs hover:text-white">
+            {t('kpis.overdueInstallmentsLink')} →
           </Link>
         </article>
       </section>

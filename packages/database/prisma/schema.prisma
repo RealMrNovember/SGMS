@@ -136,6 +136,8 @@ enum AuditAction {
   ORGANIZATION_HIERARCHY_UNLINKED
   HIERARCHY_MEMBER_GRANTED
   HIERARCHY_MEMBER_REVOKED
+  PAYMENT_PLAN_CREATED
+  PAYMENT_PLAN_CANCELLED
 }
 
 enum HierarchyRole {
@@ -223,6 +225,12 @@ enum PaymentMethod {
   TRANSFER
 }
 
+enum PaymentPlanStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
 // ---------------------------------------------------------------------------
 // User — platform kullanıcıları (web panel girişi)
 // ---------------------------------------------------------------------------
@@ -256,6 +264,7 @@ model User {
   apiTokens          ApiToken[]
   expensesCreated    Expense[]            @relation("ExpenseCreatedBy")
   transactionsCreated Transaction[]       @relation("TransactionCreatedBy")
+  paymentPlansCreated PaymentPlan[]       @relation("PaymentPlanCreatedBy")
   staffCheckIns       CheckIn[]            @relation("StaffCheckIn")
   passwordResetTokens PasswordResetToken[]
   partnerProfile      Partner?
@@ -479,6 +488,7 @@ model Organization {
   expenseCategories  ExpenseCategory[]
   expenses           Expense[]
   transactions       Transaction[]
+  paymentPlans       PaymentPlan[]
   checkIns           CheckIn[]
   syncBatches        SyncBatch[]
   trainerProfiles    TrainerProfile[]
@@ -680,6 +690,7 @@ model GymMember {
   apiTokens          ApiToken[]
   expenses           Expense[]
   transactions       Transaction[]
+  paymentPlans       PaymentPlan[]
   checkIns           CheckIn[]
   ptSessions         PtSession[]
 
@@ -833,10 +844,13 @@ model Expense {
   organizationId String        @map("organization_id")
   gymMemberId    String        @map("gym_member_id")
   categoryId     String?       @map("category_id")
+  paymentPlanId  String?       @map("payment_plan_id")
   amount         Decimal       @db.Decimal(10, 2)
+  paidAmount     Decimal       @default(0) @map("paid_amount") @db.Decimal(10, 2)
   currency       String        @default("TRY")
   description    String?
   status         ExpenseStatus @default(OPEN)
+  dueDate        DateTime?     @map("due_date")
   createdById    String        @map("created_by_id")
   paidAt         DateTime?     @map("paid_at")
   voidedAt       DateTime?     @map("voided_at")
@@ -847,11 +861,13 @@ model Expense {
   organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   gymMember    GymMember        @relation(fields: [gymMemberId], references: [id], onDelete: Cascade)
   category     ExpenseCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  paymentPlan  PaymentPlan?     @relation(fields: [paymentPlanId], references: [id], onDelete: SetNull)
   createdBy    User             @relation("ExpenseCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
   transactions Transaction[]
 
   @@index([organizationId, gymMemberId, status, createdAt])
   @@index([gymMemberId, status])
+  @@index([organizationId, status, dueDate])
   @@map("expenses")
 }
 
@@ -882,6 +898,31 @@ model Transaction {
   @@index([organizationId, gymMemberId, createdAt])
   @@index([gymMemberId, type, createdAt])
   @@map("transactions")
+}
+
+// ---------------------------------------------------------------------------
+// PaymentPlan — bir üyeye ait birden çok taksit (Expense) kaydını gruplar
+// ---------------------------------------------------------------------------
+
+model PaymentPlan {
+  id               String            @id @default(cuid())
+  organizationId   String            @map("organization_id")
+  gymMemberId      String            @map("gym_member_id")
+  description      String?
+  installmentCount Int               @map("installment_count")
+  status           PaymentPlanStatus @default(ACTIVE)
+  createdById      String            @map("created_by_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  gymMember    GymMember    @relation(fields: [gymMemberId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation("PaymentPlanCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  expenses     Expense[]
+
+  @@index([organizationId, gymMemberId, status])
+  @@map("payment_plans")
 }
 
 // ---------------------------------------------------------------------------

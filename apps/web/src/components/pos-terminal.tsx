@@ -40,6 +40,7 @@ export function PosTerminal({
 
   const [selectedMemberId, setSelectedMemberId] = useState('');
   const [openBalance, setOpenBalance] = useState<number | null>(null);
+  const [hasOverdueInstallment, setHasOverdueInstallment] = useState(false);
   const [recentExpenses, setRecentExpenses] = useState<
     Array<{
       id: string;
@@ -64,6 +65,7 @@ export function PosTerminal({
   useEffect(() => {
     if (!selectedMemberId) {
       setOpenBalance(null);
+      setHasOverdueInstallment(false);
       setRecentExpenses([]);
       return;
     }
@@ -72,10 +74,12 @@ export function PosTerminal({
       const result = await getMemberPosSnapshot(selectedMemberId);
       if ('error' in result) {
         setOpenBalance(null);
+        setHasOverdueInstallment(false);
         setRecentExpenses([]);
         return;
       }
       setOpenBalance(result.openBalance);
+      setHasOverdueInstallment(result.hasOverdueInstallment);
       setRecentExpenses(result.recentExpenses);
     });
   }, [selectedMemberId, addState.success, payState.success, quickPending]);
@@ -111,7 +115,14 @@ export function PosTerminal({
 
         {memberSelected ? (
           <div className="rounded-xl border border-[var(--border)] bg-white/5 px-4 py-3">
-            <p className="muted text-xs">{tExpenses('openBalance')}</p>
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="muted text-xs">{tExpenses('openBalance')}</p>
+              {hasOverdueInstallment ? (
+                <span className="badge border-rose-500/40 text-[10px] text-rose-200">
+                  {t('overdueInstallmentBadge')}
+                </span>
+              ) : null}
+            </div>
             <p className="text-2xl font-semibold text-amber-200">
               {snapshotPending ? tCommon('ellipsis') : formatter.format(openBalance ?? 0)}
             </p>

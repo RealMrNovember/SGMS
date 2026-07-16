@@ -1,6 +1,7 @@
 import { auth } from '@/lib/auth';
 import { intlLocaleFor } from '@/lib/format-locale';
 import { decimalToNumber, getMemberAccountSummary } from '@/lib/member-balance';
+import { getMemberPaymentPlans } from '@/lib/payment-plans';
 import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -16,12 +17,13 @@ export default async function AthleteAccountPage() {
   const locale = await getLocale();
   const dateLocale = intlLocaleFor(locale);
 
-  const summary = await getMemberAccountSummary(
-    session.user.organizationId,
-    session.user.gymMemberId,
-  );
+  const [summary, paymentPlans] = await Promise.all([
+    getMemberAccountSummary(session.user.organizationId, session.user.gymMemberId),
+    getMemberPaymentPlans(session.user.organizationId, session.user.gymMemberId),
+  ]);
 
   const openBalance = decimalToNumber(summary.openBalance);
+  const activePlans = paymentPlans.filter((plan) => plan.status === 'ACTIVE');
   const formatter = new Intl.NumberFormat(intlLocaleFor(locale), {
     style: 'currency',
     currency: 'TRY',
@@ -60,6 +62,45 @@ export default async function AthleteAccountPage() {
           </a>
         </div>
       </section>
+
+      {activePlans.length > 0 ? (
+        <section className="card overflow-hidden">
+          <div className="border-b border-[var(--border)] px-5 py-4">
+            <h3 className="font-semibold">{t('paymentPlan.title')}</h3>
+          </div>
+          <div className="divide-y divide-[var(--border)]">
+            {activePlans.map((plan) => (
+              <div key={plan.id} className="px-5 py-4">
+                <p className="muted text-xs">
+                  {t('paymentPlan.installmentCountLabel', { count: plan.installmentCount })}
+                </p>
+                <div className="mt-2 space-y-2">
+                  {plan.installments.map((installment, index) => (
+                    <div key={installment.id} className="flex items-center justify-between text-sm">
+                      <span className="muted">
+                        {t('paymentPlan.installmentLabel', {
+                          index: index + 1,
+                          count: plan.installmentCount,
+                        })}{' '}
+                        ·{' '}
+                        {installment.dueDate
+                          ? installment.dueDate.toLocaleDateString(dateLocale)
+                          : '—'}
+                      </span>
+                      <span className="flex items-center gap-2">
+                        {formatter.format(installment.paidAmount)} / {formatter.format(installment.amount)}
+                        <span className="badge text-[10px]">
+                          {t(`paymentPlan.status.${installment.status}`)}
+                        </span>
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <section className="card overflow-hidden">
         <div className="border-b border-[var(--border)] px-5 py-4">

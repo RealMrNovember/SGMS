@@ -50,7 +50,8 @@
       "dailyOps": "Gündəlik Əməliyyatlar",
       "management": "İdarəetmə",
       "analytics": "Analitika"
-    }
+    },
+    "paymentPlans": "Ödəniş Planları"
   },
   "auth": {
     "login": "Daxil ol",
@@ -247,7 +248,9 @@
       "revenueThisMonth": "Revenue This Month",
       "revenueLink": "View cash summary",
       "expiringSoon": "Memberships Expiring in 7 Days",
-      "expiringSoonLink": "View members"
+      "expiringSoonLink": "View members",
+      "overdueInstallments": "Gecikmiş Taksitlər",
+      "overdueInstallmentsLink": "Ödəniş planlarına bax"
     },
     "cards": {
       "organization": "Təşkilat",
@@ -284,7 +287,10 @@
     "alerts": {
       "expiringTitle": "{count} üzvlüyün müddəti 7 gün ərzində bitir",
       "expiringSubtitle": "Yeniləmə xatırlatması göndərərək üzv itkisinin qarşısını alın.",
-      "expiringCta": "Üzvlərə bax"
+      "expiringCta": "Üzvlərə bax",
+      "overdueTitle": "{count} taksitin vaxtı keçib",
+      "overdueSubtitle": "Qalan balansı yığın və ya üzvlə əlaqə saxlayın.",
+      "overdueCta": "Ödəniş planlarına bax"
     },
     "comingSoonTeaser": {
       "title": "Yol xəritəsində növbəti nədir?",
@@ -530,6 +536,34 @@
       "cash": "Nağd",
       "card": "Kart",
       "transfer": "Köçürmə"
+    },
+    "paymentPlan": {
+      "title": "Ödəniş Planları",
+      "subtitle": "Sonra ödəyəcək üzvlər üçün taksit planı yaradın.",
+      "empty": "Hələ ödəniş planı yoxdur.",
+      "planStatus": {
+        "ACTIVE": "Aktiv",
+        "COMPLETED": "Tamamlandı",
+        "CANCELLED": "Ləğv edildi"
+      },
+      "installmentCountLabel": "{count} taksit",
+      "cancelPlan": "Planı ləğv et",
+      "installmentLabel": "Taksit {index}/{count}",
+      "status": {
+        "OPEN": "Açıq",
+        "PAID": "Ödənilib",
+        "VOID": "Ləğv edilib",
+        "OVERDUE": "Gecikmiş"
+      },
+      "pay": "Ödə",
+      "totalAmount": "Ümumi məbləğ",
+      "installmentCount": "Taksit sayı",
+      "cadenceWeekly": "Həftəlik",
+      "cadenceMonthly": "Aylıq",
+      "cadenceCustom": "Xüsusi (gün)",
+      "intervalDays": "Taksitlər arası gün (yalnız xüsusi)",
+      "description": "Açıqlama (opsional)",
+      "create": "Plan yarat"
     }
   },
   "pos": {
@@ -562,7 +596,8 @@
       "count": "{count} əməliyyat",
       "openCount": "{count} açıq kalem",
       "noPayments": "Bu gün ödəniş yoxdur"
-    }
+    },
+    "overdueInstallmentBadge": "Gecikmiş taksit"
   },
   "marketing": {
     "nav": {
@@ -1230,6 +1265,21 @@
       "colStaff": "Personal",
       "colRevenue": "Gəlir",
       "colCheckIns": "Ziyarət"
+    }
+  },
+  "paymentPlans": {
+    "backToOverview": "← Ümumi Baxış",
+    "title": "Ödəniş Planları",
+    "subtitle": "Bütün üzvlərinizin gözləyən taksitləri.",
+    "empty": "Gözləyən taksit yoxdur.",
+    "overdue": "Gecikmiş",
+    "upcoming": "Yaxınlaşan",
+    "columns": {
+      "member": "Üzv",
+      "dueDate": "Son Tarix",
+      "amount": "Məbləğ",
+      "status": "Status",
+      "action": "Əməliyyat"
     }
   }
 }

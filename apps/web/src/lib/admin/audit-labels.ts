@@ -38,7 +38,13 @@ export const AUDIT_CATEGORY_ACTIONS: Record<Exclude<AuditCategory, 'all'>, Audit
   team: ['MEMBER_INVITED', 'USER_CREATED', 'USER_UPDATED', 'MEMBER_UPDATED', 'MEMBER_REMOVED'],
   members: ['MEMBER_REGISTERED', 'MEASUREMENT_ADDED'],
   devices: ['DEVICE_REGISTERED', 'DEVICE_UPDATED', 'DEVICE_DISABLED'],
-  finance: ['EXPENSE_ADDED', 'EXPENSE_VOIDED', 'PAYMENT_RECORDED'],
+  finance: [
+    'EXPENSE_ADDED',
+    'EXPENSE_VOIDED',
+    'PAYMENT_RECORDED',
+    'PAYMENT_PLAN_CREATED',
+    'PAYMENT_PLAN_CANCELLED',
+  ],
   checkin: ['MEMBER_CHECK_IN'],
   auth: ['USER_LOGIN', 'USER_LOGOUT'],
   security: [
@@ -132,6 +138,8 @@ export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   ORGANIZATION_HIERARCHY_UNLINKED: 'Organizasyonun kurumsal hiyerarşi bağı kaldırıldı',
   HIERARCHY_MEMBER_GRANTED: 'Kurumsal hiyerarşi yetkisi verildi',
   HIERARCHY_MEMBER_REVOKED: 'Kurumsal hiyerarşi yetkisi kaldırıldı',
+  PAYMENT_PLAN_CREATED: 'Ödeme planı oluşturuldu',
+  PAYMENT_PLAN_CANCELLED: 'Ödeme planı iptal edildi',
 };
 
 export const ALL_AUDIT_ACTIONS = Object.keys(AUDIT_ACTION_LABELS) as AuditAction[];

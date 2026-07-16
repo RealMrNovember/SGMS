@@ -7,6 +7,11 @@ import {
   type ExpenseActionState,
 } from '@/actions/expenses';
 import { voidExpense } from '@/actions/expenses';
+import {
+  createPaymentPlan,
+  cancelPaymentPlan,
+  type PaymentPlanActionState,
+} from '@/actions/payment-plans';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useActionState, useTransition } from 'react';
@@ -17,7 +22,25 @@ type Category = {
   defaultAmount: string | null;
 };
 
+type PaymentPlanInstallment = {
+  id: string;
+  amount: number;
+  paidAmount: number;
+  status: string;
+  dueDate: string | null;
+  description: string | null;
+};
+
+type MemberPaymentPlan = {
+  id: string;
+  description: string | null;
+  installmentCount: number;
+  status: string;
+  installments: PaymentPlanInstallment[];
+};
+
 const initialState: ExpenseActionState = {};
+const initialPlanState: PaymentPlanActionState = {};
 
 export function MemberAccountPanel({
   gymMemberId,
@@ -28,6 +51,7 @@ export function MemberAccountPanel({
   currency,
   expenses,
   transactions,
+  paymentPlans,
 }: {
   gymMemberId: string;
   canManage: boolean;
@@ -50,14 +74,19 @@ export function MemberAccountPanel({
     paymentMethod: string | null;
     createdAt: string;
   }>;
+  paymentPlans: MemberPaymentPlan[];
 }) {
   const t = useTranslations('expenses');
   const tCommon = useTranslations('common');
   const router = useRouter();
   const [addState, addAction, addPending] = useActionState(addMemberExpense, initialState);
   const [payState, payAction, payPending] = useActionState(recordPayment, initialState);
+  const [planState, planAction, planPending] = useActionState(createPaymentPlan, initialPlanState);
   const [quickPending, startQuick] = useTransition();
   const [voidPending, startVoid] = useTransition();
+  const [cancelPlanPending, startCancelPlan] = useTransition();
+
+  const now = Date.now();
 
   const formatter = new Intl.NumberFormat(undefined, {
     style: 'currency',
@@ -184,6 +213,185 @@ export function MemberAccountPanel({
       ) : (
         <p className="muted text-sm">{t('noPermission')}</p>
       )}
+
+      <div className="space-y-4 border-t border-[var(--border)] pt-6">
+        <div>
+          <h4 className="font-medium">{t('paymentPlan.title')}</h4>
+          <p className="muted mt-1 text-sm">{t('paymentPlan.subtitle')}</p>
+        </div>
+
+        {paymentPlans.length === 0 ? (
+          <p className="muted text-sm">{t('paymentPlan.empty')}</p>
+        ) : (
+          <div className="space-y-4">
+            {paymentPlans.map((plan) => (
+              <div key={plan.id} className="data-card">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <p className="font-medium">
+                      {plan.description ?? t('paymentPlan.title')}{' '}
+                      <span className="badge text-[10px]">
+                        {t(`paymentPlan.planStatus.${plan.status}`)}
+                      </span>
+                    </p>
+                    <p className="muted text-xs">
+                      {t('paymentPlan.installmentCountLabel', { count: plan.installmentCount })}
+                    </p>
+                  </div>
+                  {canVoid && plan.status === 'ACTIVE' ? (
+                    <button
+                      type="button"
+                      disabled={cancelPlanPending}
+                      className="text-xs text-rose-300 hover:text-rose-200"
+                      onClick={() => {
+                        startCancelPlan(async () => {
+                          await cancelPaymentPlan(plan.id);
+                          router.refresh();
+                        });
+                      }}
+                    >
+                      {t('paymentPlan.cancelPlan')}
+                    </button>
+                  ) : null}
+                </div>
+
+                <div className="data-card-list mt-3">
+                  {plan.installments.map((installment, index) => {
+                    const outstanding = installment.amount - installment.paidAmount;
+                    const isOverdue =
+                      installment.status === 'OPEN' &&
+                      installment.dueDate != null &&
+                      new Date(installment.dueDate).getTime() < now;
+
+                    return (
+                      <div key={installment.id} className="data-card-row flex-col items-stretch gap-2">
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="data-card-label">
+                            {t('paymentPlan.installmentLabel', {
+                              index: index + 1,
+                              count: plan.installmentCount,
+                            })}
+                          </span>
+                          <span
+                            className={`badge text-[10px] ${isOverdue ? 'border-rose-500/40 text-rose-200' : ''}`}
+                          >
+                            {isOverdue
+                              ? t('paymentPlan.status.OVERDUE')
+                              : t(`paymentPlan.status.${installment.status}`)}
+                          </span>
+                        </div>
+                        <div className="data-card-value flex flex-wrap items-center justify-between gap-2 text-left">
+                          <span className="muted text-xs">
+                            {installment.dueDate
+                              ? new Date(installment.dueDate).toLocaleDateString()
+                              : '—'}
+                          </span>
+                          <span>
+                            {formatter.format(installment.paidAmount)} / {formatter.format(installment.amount)}
+                          </span>
+                        </div>
+                        {canManage && installment.status === 'OPEN' && outstanding > 0 ? (
+                          <form action={payAction} className="flex flex-wrap items-center gap-2">
+                            <input type="hidden" name="gymMemberId" value={gymMemberId} />
+                            <input type="hidden" name="expenseId" value={installment.id} />
+                            <input
+                              name="amount"
+                              type="number"
+                              step="0.01"
+                              min="0.01"
+                              max={outstanding}
+                              defaultValue={outstanding}
+                              required
+                              className="input w-28 text-sm"
+                            />
+                            <select name="paymentMethod" className="input w-auto text-sm" defaultValue="CASH">
+                              <option value="CASH">{t('methods.cash')}</option>
+                              <option value="CARD">{t('methods.card')}</option>
+                              <option value="TRANSFER">{t('methods.transfer')}</option>
+                            </select>
+                            <button
+                              type="submit"
+                              disabled={payPending}
+                              className="button px-3 py-1.5 text-xs"
+                            >
+                              {t('paymentPlan.pay')}
+                            </button>
+                          </form>
+                        ) : null}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {canManage ? (
+          <>
+            {planState.error ? (
+              <p className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+                {planState.error}
+              </p>
+            ) : null}
+            {planState.success ? (
+              <p className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+                {planState.success}
+              </p>
+            ) : null}
+
+            <form action={planAction} className="grid gap-3 md:grid-cols-3">
+              <input type="hidden" name="gymMemberId" value={gymMemberId} />
+              <input
+                name="totalAmount"
+                type="number"
+                step="0.01"
+                min="0.01"
+                required
+                placeholder={t('paymentPlan.totalAmount')}
+                className="input"
+              />
+              <input
+                name="installmentCount"
+                type="number"
+                step="1"
+                min="1"
+                max="24"
+                required
+                placeholder={t('paymentPlan.installmentCount')}
+                className="input"
+              />
+              <input name="firstDueDate" type="date" required className="input" />
+              <select name="cadence" className="input" defaultValue="MONTHLY">
+                <option value="WEEKLY">{t('paymentPlan.cadenceWeekly')}</option>
+                <option value="MONTHLY">{t('paymentPlan.cadenceMonthly')}</option>
+                <option value="CUSTOM_DAYS">{t('paymentPlan.cadenceCustom')}</option>
+              </select>
+              <input
+                name="intervalDays"
+                type="number"
+                step="1"
+                min="1"
+                max="90"
+                placeholder={t('paymentPlan.intervalDays')}
+                className="input"
+              />
+              <input
+                name="description"
+                placeholder={t('paymentPlan.description')}
+                className="input"
+              />
+              <button
+                type="submit"
+                disabled={planPending}
+                className="button px-4 py-2 text-sm md:col-span-3"
+              >
+                {planPending ? tCommon('ellipsis') : t('paymentPlan.create')}
+              </button>
+            </form>
+          </>
+        ) : null}
+      </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         <div>

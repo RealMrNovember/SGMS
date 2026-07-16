@@ -50,7 +50,8 @@
       "dailyOps": "Daily Operations",
       "management": "Management",
       "analytics": "Analytics"
-    }
+    },
+    "paymentPlans": "Payment Plans"
   },
   "auth": {
     "login": "Sign In",
@@ -247,7 +248,9 @@
       "revenueThisMonth": "Revenue This Month",
       "revenueLink": "View cash summary",
       "expiringSoon": "Memberships Expiring in 7 Days",
-      "expiringSoonLink": "View members"
+      "expiringSoonLink": "View members",
+      "overdueInstallments": "Overdue Installments",
+      "overdueInstallmentsLink": "View payment plans"
     },
     "cards": {
       "organization": "Organization",
@@ -284,7 +287,10 @@
     "alerts": {
       "expiringTitle": "{count} memberships expire within 7 days",
       "expiringSubtitle": "Send a renewal reminder to reduce member churn.",
-      "expiringCta": "View members"
+      "expiringCta": "View members",
+      "overdueTitle": "{count} installments are overdue",
+      "overdueSubtitle": "Collect the outstanding balance or contact the member.",
+      "overdueCta": "View payment plans"
     },
     "comingSoonTeaser": {
       "title": "What's next on the roadmap?",
@@ -530,6 +536,34 @@
       "cash": "Cash",
       "card": "Card",
       "transfer": "Transfer"
+    },
+    "paymentPlan": {
+      "title": "Payment Plans",
+      "subtitle": "Schedule installments for members who need to pay later.",
+      "empty": "No payment plans yet.",
+      "planStatus": {
+        "ACTIVE": "Active",
+        "COMPLETED": "Completed",
+        "CANCELLED": "Cancelled"
+      },
+      "installmentCountLabel": "{count} installments",
+      "cancelPlan": "Cancel plan",
+      "installmentLabel": "Installment {index}/{count}",
+      "status": {
+        "OPEN": "Open",
+        "PAID": "Paid",
+        "VOID": "Cancelled",
+        "OVERDUE": "Overdue"
+      },
+      "pay": "Pay",
+      "totalAmount": "Total amount",
+      "installmentCount": "Number of installments",
+      "cadenceWeekly": "Weekly",
+      "cadenceMonthly": "Monthly",
+      "cadenceCustom": "Custom (days)",
+      "intervalDays": "Days between installments (custom only)",
+      "description": "Description (optional)",
+      "create": "Create plan"
     }
   },
   "pos": {
@@ -562,7 +596,8 @@
       "count": "{count} transactions",
       "openCount": "{count} open items",
       "noPayments": "No payments today"
-    }
+    },
+    "overdueInstallmentBadge": "Overdue installment"
   },
   "marketing": {
     "nav": {
@@ -585,44 +620,113 @@
       "ctaLogin": "Sign in to console"
     },
     "stats": {
-      "members": { "value": "CRM+", "label": "Members & PT ops" },
-      "languages": { "value": "6 Lang", "label": "Global gym experience" },
-      "uptime": { "value": "Cloud", "label": "SaaS-ready infrastructure" },
-      "trial": { "value": "14 Days", "label": "No credit card" }
+      "members": {
+        "value": "CRM+",
+        "label": "Members & PT ops"
+      },
+      "languages": {
+        "value": "6 Lang",
+        "label": "Global gym experience"
+      },
+      "uptime": {
+        "value": "Cloud",
+        "label": "SaaS-ready infrastructure"
+      },
+      "trial": {
+        "value": "14 Days",
+        "label": "No credit card"
+      }
     },
     "features": {
       "kicker": "Platform capabilities",
       "title": "Physical gym + digital operations together",
       "subtitle": "From front desk to coach to athlete app — one shared data layer for your team.",
       "items": {
-        "crm": { "icon": "👥", "title": "Member CRM & Metrics", "description": "Profiles, avatars, health measurements and membership plans with a clear staff view." },
-        "programs": { "icon": "🏋", "title": "Workout & Nutrition", "description": "PT assignments, workout and nutrition programs with instant athlete portal access." },
-        "pt": { "icon": "🥇", "title": "PT Performance & Commission", "description": "Monthly session count, hours, revenue, and commission calculated automatically for every trainer — cancellation and no-show rate included." },
-        "pos": { "icon": "💳", "title": "POS & Member Accounts", "description": "Market, café and extra session charges. Collections, daily cash summary and balances." },
-        "reports": { "icon": "📊", "title": "Advanced Reporting & BI", "description": "Visitor trends, busiest hours, top-selling trainers/products, and membership metrics like MRR, LTV, and renewal rate." },
-        "enterprise": { "icon": "🏢", "title": "Enterprise Multi-Branch Hierarchy", "description": "Build a company/region/branch tree and view consolidated members, staff, revenue and visit data across every branch in one screen." },
-        "i18n": { "icon": "🌍", "title": "6 Languages", "description": "TR, EN, RU, FR, ES, AZ — ready for expat members and international chains." },
-        "mobile": { "icon": "📱", "title": "Mobile API & Athlete Portal", "description": "Bearer token API and self-service for measurements, programs and messages." },
-        "realtime": { "icon": "⚡", "title": "Real-time Messaging", "description": "Coach ↔ athlete messaging with WebSocket (Soketi) live updates; SSE fallback when not configured." }
+        "crm": {
+          "icon": "👥",
+          "title": "Member CRM & Metrics",
+          "description": "Profiles, avatars, health measurements and membership plans with a clear staff view."
+        },
+        "programs": {
+          "icon": "🏋",
+          "title": "Workout & Nutrition",
+          "description": "PT assignments, workout and nutrition programs with instant athlete portal access."
+        },
+        "pt": {
+          "icon": "🥇",
+          "title": "PT Performance & Commission",
+          "description": "Monthly session count, hours, revenue, and commission calculated automatically for every trainer — cancellation and no-show rate included."
+        },
+        "pos": {
+          "icon": "💳",
+          "title": "POS & Member Accounts",
+          "description": "Market, café and extra session charges. Collections, daily cash summary and balances."
+        },
+        "reports": {
+          "icon": "📊",
+          "title": "Advanced Reporting & BI",
+          "description": "Visitor trends, busiest hours, top-selling trainers/products, and membership metrics like MRR, LTV, and renewal rate."
+        },
+        "enterprise": {
+          "icon": "🏢",
+          "title": "Enterprise Multi-Branch Hierarchy",
+          "description": "Build a company/region/branch tree and view consolidated members, staff, revenue and visit data across every branch in one screen."
+        },
+        "i18n": {
+          "icon": "🌍",
+          "title": "6 Languages",
+          "description": "TR, EN, RU, FR, ES, AZ — ready for expat members and international chains."
+        },
+        "mobile": {
+          "icon": "📱",
+          "title": "Mobile API & Athlete Portal",
+          "description": "Bearer token API and self-service for measurements, programs and messages."
+        },
+        "realtime": {
+          "icon": "⚡",
+          "title": "Real-time Messaging",
+          "description": "Coach ↔ athlete messaging with WebSocket (Soketi) live updates; SSE fallback when not configured."
+        }
       }
     },
     "why": {
       "kicker": "Why you need it",
       "title": "Spreadsheets and WhatsApp don't scale a gym",
       "items": {
-        "fragmented": { "title": "Fragmented tools", "description": "Members in one place, debts elsewhere, programs lost in chat. SGMS unifies everything under one tenant." },
-        "international": { "title": "International members", "description": "Multilingual UI and locale-aware API. Your gym meets global expectations." },
-        "finance": { "title": "Invisible debt", "description": "Water, supplements, extra sessions — member accounts track it all. Balances update after payment." },
-        "athlete": { "title": "Athlete expectations", "description": "Members expect digital access to programs, metrics and balance. SGMS delivers via the athlete portal." }
+        "fragmented": {
+          "title": "Fragmented tools",
+          "description": "Members in one place, debts elsewhere, programs lost in chat. SGMS unifies everything under one tenant."
+        },
+        "international": {
+          "title": "International members",
+          "description": "Multilingual UI and locale-aware API. Your gym meets global expectations."
+        },
+        "finance": {
+          "title": "Invisible debt",
+          "description": "Water, supplements, extra sessions — member accounts track it all. Balances update after payment."
+        },
+        "athlete": {
+          "title": "Athlete expectations",
+          "description": "Members expect digital access to programs, metrics and balance. SGMS delivers via the athlete portal."
+        }
       }
     },
     "how": {
       "kicker": "Getting started",
       "title": "Go digital in 3 steps",
       "steps": {
-        "register": { "title": "Open your 14-day trial", "description": "Register with your gym name and owner account. No card required — instant OWNER console." },
-        "setup": { "title": "Add team and members", "description": "Staff roles, plans, POS categories. Explore quickly with demo data." },
-        "operate": { "title": "Run daily operations", "description": "Check-in, metrics, programs, payments and messaging — one platform, any device." }
+        "register": {
+          "title": "Open your 14-day trial",
+          "description": "Register with your gym name and owner account. No card required — instant OWNER console."
+        },
+        "setup": {
+          "title": "Add team and members",
+          "description": "Staff roles, plans, POS categories. Explore quickly with demo data."
+        },
+        "operate": {
+          "title": "Run daily operations",
+          "description": "Check-in, metrics, programs, payments and messaging — one platform, any device."
+        }
       }
     },
     "roadmap": {
@@ -1161,6 +1265,21 @@
       "colStaff": "Staff",
       "colRevenue": "Revenue",
       "colCheckIns": "Check-ins"
+    }
+  },
+  "paymentPlans": {
+    "backToOverview": "← Overview",
+    "title": "Payment Plans",
+    "subtitle": "All outstanding installments across your members.",
+    "empty": "No outstanding installments.",
+    "overdue": "Overdue",
+    "upcoming": "Upcoming",
+    "columns": {
+      "member": "Member",
+      "dueDate": "Due date",
+      "amount": "Amount",
+      "status": "Status",
+      "action": "Action"
     }
   }
 }

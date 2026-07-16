@@ -3,19 +3,19 @@
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { getTenantWriteBlockReason } from '@/lib/tenant-access';
+import { applyPaymentToExpenses } from '@/lib/billing/settle-payment';
+import { MANAGER_ROLES } from '@/lib/billing/roles';
 import type { OrganizationRole, PaymentMethod } from '@sgms/database';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { decimalToNumber } from '@/lib/member-balance';
-
-const MANAGER_ROLES = new Set<OrganizationRole>(['OWNER', 'ADMIN', 'STAFF']);
 
 export type ExpenseActionState = {
   error?: string;
   success?: string;
 };
 
-async function getExpenseContext() {
+export async function getExpenseContext() {
   const session = await auth();
   if (!session?.user || session.user.isSuperAdmin) {
     return { error: 'Bu işlem için tenant oturumu gerekir.' as const };
@@ -192,6 +192,7 @@ const paymentSchema = z.object({
   amount: z.coerce.number().positive().max(1_000_000),
   paymentMethod: z.enum(['CASH', 'CARD', 'TRANSFER']),
   notes: z.string().max(500).optional(),
+  expenseId: z.string().cuid().optional(),
 });
 
 export async function recordPayment(
@@ -213,6 +214,7 @@ export async function recordPayment(
     amount: formData.get('amount'),
     paymentMethod: formData.get('paymentMethod'),
     notes: formData.get('notes') || undefined,
+    expenseId: formData.get('expenseId') || undefined,
   });
 
   if (!parsed.success) {
@@ -227,22 +229,12 @@ export async function recordPayment(
     return { error: 'Üye bulunamadı.' };
   }
 
-  let remaining = parsed.data.amount;
-
-  const openExpenses = await prisma.expense.findMany({
-    where: {
-      organizationId: context.organizationId,
-      gymMemberId: parsed.data.gymMemberId,
-      status: 'OPEN',
-    },
-    orderBy: { createdAt: 'asc' },
-  });
-
   await prisma.$transaction(async (tx) => {
     const transaction = await tx.transaction.create({
       data: {
         organizationId: context.organizationId,
         gymMemberId: parsed.data.gymMemberId,
+        expenseId: parsed.data.expenseId ?? null,
         amount: parsed.data.amount,
         currency: 'TRY',
         type: 'PAYMENT',
@@ -252,19 +244,12 @@ export async function recordPayment(
       },
     });
 
-    for (const expense of openExpenses) {
-      if (remaining <= 0) {
-        break;
-      }
-      const expenseAmount = Number(expense.amount.toString());
-      if (remaining >= expenseAmount) {
-        await tx.expense.update({
-          where: { id: expense.id },
-          data: { status: 'PAID', paidAt: new Date() },
-        });
-        remaining -= expenseAmount;
-      }
-    }
+    await applyPaymentToExpenses(tx, {
+      organizationId: context.organizationId,
+      gymMemberId: parsed.data.gymMemberId,
+      amount: parsed.data.amount,
+      targetExpenseId: parsed.data.expenseId,
+    });
 
     await tx.auditLog.create({
       data: {
@@ -438,10 +423,10 @@ export async function getMemberPosSnapshot(gymMemberId: string) {
     return { error: 'Üye bulunamadı.' as const };
   }
 
-  const [openBalance, recentExpenses] = await Promise.all([
+  const [openAgg, recentExpenses, overdueInstallment] = await Promise.all([
     prisma.expense.aggregate({
       where: { organizationId, gymMemberId, status: 'OPEN' },
-      _sum: { amount: true },
+      _sum: { amount: true, paidAmount: true },
     }),
     prisma.expense.findMany({
       where: { organizationId, gymMemberId },
@@ -456,11 +441,25 @@ export async function getMemberPosSnapshot(gymMemberId: string) {
         category: { select: { name: true } },
       },
     }),
+    prisma.expense.findFirst({
+      where: {
+        organizationId,
+        gymMemberId,
+        status: 'OPEN',
+        paymentPlanId: { not: null },
+        dueDate: { lt: new Date() },
+      },
+      select: { id: true },
+    }),
   ]);
+
+  const openBalance =
+    decimalToNumber(openAgg._sum.amount) - decimalToNumber(openAgg._sum.paidAmount);
 
   return {
     member,
-    openBalance: decimalToNumber(openBalance._sum.amount),
+    openBalance,
+    hasOverdueInstallment: overdueInstallment != null,
     recentExpenses: recentExpenses.map((e) => ({
       ...e,
       amount: e.amount.toString(),

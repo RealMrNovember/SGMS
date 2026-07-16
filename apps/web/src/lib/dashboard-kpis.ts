@@ -19,6 +19,7 @@ export type DashboardKpis = {
   checkInsToday: number;
   revenueThisMonth: number;
   membershipsExpiringSoonCount: number;
+  overdueInstallmentCount: number;
 };
 
 /** Ana dashboard için operasyonel özet — "hesap ayarları" değil, günlük çalışan bir salon komuta merkezi. */
@@ -27,7 +28,7 @@ export async function getDashboardKpis(organizationId: string, now = new Date())
   const month = monthBounds(now);
   const soon = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
-  const [checkInsToday, revenueAgg, membershipsExpiringSoonCount] = await Promise.all([
+  const [checkInsToday, revenueAgg, membershipsExpiringSoonCount, overdueInstallmentCount] = await Promise.all([
     prisma.checkIn.count({
       where: {
         organizationId,
@@ -51,11 +52,20 @@ export async function getDashboardKpis(organizationId: string, now = new Date())
         membershipEndsAt: { gte: now, lte: soon },
       },
     }),
+    prisma.expense.count({
+      where: {
+        organizationId,
+        status: 'OPEN',
+        paymentPlanId: { not: null },
+        dueDate: { lt: now },
+      },
+    }),
   ]);
 
   return {
     checkInsToday,
     revenueThisMonth: decimalToNumber(revenueAgg._sum.amount),
     membershipsExpiringSoonCount,
+    overdueInstallmentCount,
   };
 }

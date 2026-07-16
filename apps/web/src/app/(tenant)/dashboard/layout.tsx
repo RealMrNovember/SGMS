@@ -12,6 +12,7 @@ import { prisma } from '@/lib/prisma';
 import {
   BarChart3,
   Building2,
+  CalendarClock,
   ClipboardList,
   CreditCard,
   Dumbbell,
@@ -96,6 +97,7 @@ export default async function TenantDashboardLayout({ children }: { children: Re
             { href: '/dashboard/check-in', label: t('checkIn'), icon: <ScanLine /> },
             { href: '/dashboard/members', label: t('members'), icon: <Users /> },
             { href: '/dashboard/pos', label: t('pos'), icon: <CreditCard /> },
+            { href: '/dashboard/payment-plans', label: t('paymentPlans'), icon: <CalendarClock /> },
             { href: '/dashboard/messages', label: t('messages'), icon: <MessageSquare />, badge: unreadMessages },
           ],
         },

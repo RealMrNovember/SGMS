@@ -50,7 +50,8 @@
       "dailyOps": "Operaciones diarias",
       "management": "Gestión",
       "analytics": "Análisis"
-    }
+    },
+    "paymentPlans": "Planes de pago"
   },
   "auth": {
     "login": "Iniciar sesión",
@@ -247,7 +248,9 @@
       "revenueThisMonth": "Revenue This Month",
       "revenueLink": "View cash summary",
       "expiringSoon": "Memberships Expiring in 7 Days",
-      "expiringSoonLink": "View members"
+      "expiringSoonLink": "View members",
+      "overdueInstallments": "Cuotas vencidas",
+      "overdueInstallmentsLink": "Ver planes de pago"
     },
     "cards": {
       "organization": "Organización",
@@ -284,7 +287,10 @@
     "alerts": {
       "expiringTitle": "{count} membresías vencen en 7 días",
       "expiringSubtitle": "Envíe un recordatorio de renovación para reducir la pérdida de socios.",
-      "expiringCta": "Ver miembros"
+      "expiringCta": "Ver miembros",
+      "overdueTitle": "{count} cuotas están vencidas",
+      "overdueSubtitle": "Cobre el saldo pendiente o contacte al socio.",
+      "overdueCta": "Ver planes de pago"
     },
     "comingSoonTeaser": {
       "title": "¿Qué sigue en la hoja de ruta?",
@@ -530,6 +536,34 @@
       "cash": "Efectivo",
       "card": "Tarjeta",
       "transfer": "Transferencia"
+    },
+    "paymentPlan": {
+      "title": "Planes de pago",
+      "subtitle": "Programe cuotas para socios que pagarán más adelante.",
+      "empty": "Aún no hay planes de pago.",
+      "planStatus": {
+        "ACTIVE": "Activo",
+        "COMPLETED": "Completado",
+        "CANCELLED": "Cancelado"
+      },
+      "installmentCountLabel": "{count} cuotas",
+      "cancelPlan": "Cancelar plan",
+      "installmentLabel": "Cuota {index}/{count}",
+      "status": {
+        "OPEN": "Abierta",
+        "PAID": "Pagada",
+        "VOID": "Cancelada",
+        "OVERDUE": "Vencida"
+      },
+      "pay": "Pagar",
+      "totalAmount": "Monto total",
+      "installmentCount": "Número de cuotas",
+      "cadenceWeekly": "Semanal",
+      "cadenceMonthly": "Mensual",
+      "cadenceCustom": "Personalizado (días)",
+      "intervalDays": "Días entre cuotas (solo personalizado)",
+      "description": "Descripción (opcional)",
+      "create": "Crear plan"
     }
   },
   "pos": {
@@ -562,7 +596,8 @@
       "count": "{count} operaciones",
       "openCount": "{count} abiertos",
       "noPayments": "Sin pagos hoy"
-    }
+    },
+    "overdueInstallmentBadge": "Cuota vencida"
   },
   "marketing": {
     "nav": {
@@ -1230,6 +1265,21 @@
       "colStaff": "Personal",
       "colRevenue": "Ingresos",
       "colCheckIns": "Visitas"
+    }
+  },
+  "paymentPlans": {
+    "backToOverview": "← Resumen",
+    "title": "Planes de pago",
+    "subtitle": "Todas las cuotas pendientes de sus socios.",
+    "empty": "No hay cuotas pendientes.",
+    "overdue": "Vencida",
+    "upcoming": "Próxima",
+    "columns": {
+      "member": "Socio",
+      "dueDate": "Fecha de vencimiento",
+      "amount": "Monto",
+      "status": "Estado",
+      "action": "Acción"
     }
   }
 }

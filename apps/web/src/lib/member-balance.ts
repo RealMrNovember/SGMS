@@ -7,10 +7,10 @@ export async function getMemberOpenBalance(organizationId: string, gymMemberId: 
       gymMemberId,
       status: 'OPEN',
     },
-    _sum: { amount: true },
+    _sum: { amount: true, paidAmount: true },
   });
 
-  return aggregate._sum.amount ?? 0;
+  return decimalToNumber(aggregate._sum.amount) - decimalToNumber(aggregate._sum.paidAmount);
 }
 
 export async function getMemberAccountSummary(organizationId: string, gymMemberId: string) {

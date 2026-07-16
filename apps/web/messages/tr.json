@@ -50,7 +50,8 @@
       "dailyOps": "Günlük İşlemler",
       "management": "Yönetim",
       "analytics": "Analiz"
-    }
+    },
+    "paymentPlans": "Ödeme Planları"
   },
   "auth": {
     "login": "Giriş Yap",
@@ -247,7 +248,9 @@
       "revenueThisMonth": "Bu Ayki Ciro",
       "revenueLink": "Kasa özetini gör",
       "expiringSoon": "7 Gün İçinde Bitecek Üyelik",
-      "expiringSoonLink": "Üyeleri gör"
+      "expiringSoonLink": "Üyeleri gör",
+      "overdueInstallments": "Vadesi Geçen Taksitler",
+      "overdueInstallmentsLink": "Ödeme planlarını gör"
     },
     "cards": {
       "organization": "Organizasyon",
@@ -284,7 +287,10 @@
     "alerts": {
       "expiringTitle": "{count} üyeliğin süresi 7 gün içinde doluyor",
       "expiringSubtitle": "Yenileme hatırlatması göndererek üye kaybını önleyin.",
-      "expiringCta": "Üyeleri gör"
+      "expiringCta": "Üyeleri gör",
+      "overdueTitle": "{count} taksitin vadesi geçti",
+      "overdueSubtitle": "Kalan bakiyeyi tahsil edin veya üyeyle iletişime geçin.",
+      "overdueCta": "Ödeme planlarını gör"
     },
     "comingSoonTeaser": {
       "title": "Yol haritasında sırada ne var?",
@@ -530,6 +536,34 @@
       "cash": "Nakit",
       "card": "Kart",
       "transfer": "Havale"
+    },
+    "paymentPlan": {
+      "title": "Ödeme Planları",
+      "subtitle": "Daha sonra ödeyecek üyeler için taksit planı oluşturun.",
+      "empty": "Henüz ödeme planı yok.",
+      "planStatus": {
+        "ACTIVE": "Aktif",
+        "COMPLETED": "Tamamlandı",
+        "CANCELLED": "İptal Edildi"
+      },
+      "installmentCountLabel": "{count} taksit",
+      "cancelPlan": "Planı iptal et",
+      "installmentLabel": "Taksit {index}/{count}",
+      "status": {
+        "OPEN": "Açık",
+        "PAID": "Ödendi",
+        "VOID": "İptal",
+        "OVERDUE": "Vadesi Geçti"
+      },
+      "pay": "Öde",
+      "totalAmount": "Toplam tutar",
+      "installmentCount": "Taksit sayısı",
+      "cadenceWeekly": "Haftalık",
+      "cadenceMonthly": "Aylık",
+      "cadenceCustom": "Özel (gün)",
+      "intervalDays": "Taksitler arası gün (yalnızca özel)",
+      "description": "Açıklama (opsiyonel)",
+      "create": "Plan oluştur"
     }
   },
   "pos": {
@@ -562,7 +596,8 @@
       "count": "{count} işlem",
       "openCount": "{count} açık kalem",
       "noPayments": "Bugün tahsilat yok"
-    }
+    },
+    "overdueInstallmentBadge": "Vadesi geçen taksit"
   },
   "marketing": {
     "nav": {
@@ -585,44 +620,113 @@
       "ctaLogin": "Panele Giriş"
     },
     "stats": {
-      "members": { "value": "CRM+", "label": "Üye & PT yönetimi" },
-      "languages": { "value": "6 Dil", "label": "Global salon deneyimi" },
-      "uptime": { "value": "Cloud", "label": "SaaS altyapı · VDS hazır" },
-      "trial": { "value": "14 Gün", "label": "Kredi kartı gerekmez" }
+      "members": {
+        "value": "CRM+",
+        "label": "Üye & PT yönetimi"
+      },
+      "languages": {
+        "value": "6 Dil",
+        "label": "Global salon deneyimi"
+      },
+      "uptime": {
+        "value": "Cloud",
+        "label": "SaaS altyapı · VDS hazır"
+      },
+      "trial": {
+        "value": "14 Gün",
+        "label": "Kredi kartı gerekmez"
+      }
     },
     "features": {
       "kicker": "Platform yetenekleri",
       "title": "Fiziksel salon + dijital operasyon bir arada",
       "subtitle": "Resepsiyondan antrenöre, kasadan sporcu uygulamasına — tüm ekip aynı veri üzerinde çalışır.",
       "items": {
-        "crm": { "icon": "👥", "title": "Üye CRM & Ölçüm", "description": "Profil, avatar, sağlık ölçümleri ve üyelik planları. Resepsiyon ve PT için net görünüm." },
-        "programs": { "icon": "🏋", "title": "Antrenman & Beslenme", "description": "PT atamaları, workout ve nutrition programları. Sporcu portalında anında erişim." },
-        "pt": { "icon": "🥇", "title": "PT Performans & Prim Yönetimi", "description": "Antrenörlerin aylık seans sayısı, saati, cirosu ve komisyonu otomatik hesaplanır — iptal ve no-show oranıyla birlikte." },
-        "pos": { "icon": "💳", "title": "POS & Cari Hesap", "description": "Market, kafe, ekstra ders borçları. Tahsilat, kasa özeti ve üye bakiyesi tek ekranda." },
-        "reports": { "icon": "📊", "title": "İleri Raporlama & İş Zekası", "description": "Ziyaretçi trendi, yoğunluk saatleri, en çok satan PT/ürün ve MRR/LTV/yenileme oranı gibi üyelik iş metrikleri." },
-        "enterprise": { "icon": "🏢", "title": "Kurumsal Hiyerarşi & Çoklu Şube", "description": "Şirket/bölge/şube ağacı kurun; tüm şubelerin üye, personel, gelir ve ziyaret verilerini tek konsolide ekranda görün." },
-        "i18n": { "icon": "🌍", "title": "6 Dil Desteği", "description": "TR, EN, RU, FR, ES, AZ — expat üyeler ve uluslararası zincirler için hazır." },
-        "mobile": { "icon": "📱", "title": "Mobil API & Sporcu Portalı", "description": "Bearer token API, ölçüm/program/mesaj self-service. Mobil uygulama için hazır altyapı." },
-        "realtime": { "icon": "⚡", "title": "Anlık Mesajlaşma", "description": "PT ↔ sporcu iletişimi. WebSocket (Soketi) ile anlık güncelleme; yapılandırılmazsa SSE yedek kanal." }
+        "crm": {
+          "icon": "👥",
+          "title": "Üye CRM & Ölçüm",
+          "description": "Profil, avatar, sağlık ölçümleri ve üyelik planları. Resepsiyon ve PT için net görünüm."
+        },
+        "programs": {
+          "icon": "🏋",
+          "title": "Antrenman & Beslenme",
+          "description": "PT atamaları, workout ve nutrition programları. Sporcu portalında anında erişim."
+        },
+        "pt": {
+          "icon": "🥇",
+          "title": "PT Performans & Prim Yönetimi",
+          "description": "Antrenörlerin aylık seans sayısı, saati, cirosu ve komisyonu otomatik hesaplanır — iptal ve no-show oranıyla birlikte."
+        },
+        "pos": {
+          "icon": "💳",
+          "title": "POS & Cari Hesap",
+          "description": "Market, kafe, ekstra ders borçları. Tahsilat, kasa özeti ve üye bakiyesi tek ekranda."
+        },
+        "reports": {
+          "icon": "📊",
+          "title": "İleri Raporlama & İş Zekası",
+          "description": "Ziyaretçi trendi, yoğunluk saatleri, en çok satan PT/ürün ve MRR/LTV/yenileme oranı gibi üyelik iş metrikleri."
+        },
+        "enterprise": {
+          "icon": "🏢",
+          "title": "Kurumsal Hiyerarşi & Çoklu Şube",
+          "description": "Şirket/bölge/şube ağacı kurun; tüm şubelerin üye, personel, gelir ve ziyaret verilerini tek konsolide ekranda görün."
+        },
+        "i18n": {
+          "icon": "🌍",
+          "title": "6 Dil Desteği",
+          "description": "TR, EN, RU, FR, ES, AZ — expat üyeler ve uluslararası zincirler için hazır."
+        },
+        "mobile": {
+          "icon": "📱",
+          "title": "Mobil API & Sporcu Portalı",
+          "description": "Bearer token API, ölçüm/program/mesaj self-service. Mobil uygulama için hazır altyapı."
+        },
+        "realtime": {
+          "icon": "⚡",
+          "title": "Anlık Mesajlaşma",
+          "description": "PT ↔ sporcu iletişimi. WebSocket (Soketi) ile anlık güncelleme; yapılandırılmazsa SSE yedek kanal."
+        }
       }
     },
     "why": {
       "kicker": "Neden ihtiyacınız var",
       "title": "Excel ve WhatsApp ile salon büyümez",
       "items": {
-        "fragmented": { "title": "Dağınık sistemler", "description": "Üye listesi bir yerde, borçlar başka yerde, PT programları mesajlaşmada kayboluyor. SGMS hepsini tek tenant altında birleştirir." },
-        "international": { "title": "Uluslararası üyeler", "description": "Farklı dillerde arayüz ve locale-aware API. Salonunuz global standartlara uyum sağlar." },
-        "finance": { "title": "Görünmeyen borçlar", "description": "Su, protein, ekstra ders — cari hesap otomatik takip eder. Tahsilat sonrası bakiye anında güncellenir." },
-        "athlete": { "title": "Sporcu beklentisi", "description": "Üyeleriniz program, ölçüm ve borç bilgisine dijital erişim ister. SGMS sporcu portalı ile bunu sunar." }
+        "fragmented": {
+          "title": "Dağınık sistemler",
+          "description": "Üye listesi bir yerde, borçlar başka yerde, PT programları mesajlaşmada kayboluyor. SGMS hepsini tek tenant altında birleştirir."
+        },
+        "international": {
+          "title": "Uluslararası üyeler",
+          "description": "Farklı dillerde arayüz ve locale-aware API. Salonunuz global standartlara uyum sağlar."
+        },
+        "finance": {
+          "title": "Görünmeyen borçlar",
+          "description": "Su, protein, ekstra ders — cari hesap otomatik takip eder. Tahsilat sonrası bakiye anında güncellenir."
+        },
+        "athlete": {
+          "title": "Sporcu beklentisi",
+          "description": "Üyeleriniz program, ölçüm ve borç bilgisine dijital erişim ister. SGMS sporcu portalı ile bunu sunar."
+        }
       }
     },
     "how": {
       "kicker": "Başlangıç",
       "title": "3 adımda dijital salona geçin",
       "steps": {
-        "register": { "title": "14 günlük deneme açın", "description": "Salon adınız ve yönetici hesabınızla kayıt olun. Kredi kartı gerekmez, anında OWNER paneli." },
-        "setup": { "title": "Ekibinizi ve üyelerinizi ekleyin", "description": "Personel rolleri, üyelik planları, POS kategorileri. Demo verilerle hızlı keşif mümkün." },
-        "operate": { "title": "Günlük operasyonu yönetin", "description": "Check-in, ölçüm, program, tahsilat ve mesajlaşma — tek platformdan, her cihazdan." }
+        "register": {
+          "title": "14 günlük deneme açın",
+          "description": "Salon adınız ve yönetici hesabınızla kayıt olun. Kredi kartı gerekmez, anında OWNER paneli."
+        },
+        "setup": {
+          "title": "Ekibinizi ve üyelerinizi ekleyin",
+          "description": "Personel rolleri, üyelik planları, POS kategorileri. Demo verilerle hızlı keşif mümkün."
+        },
+        "operate": {
+          "title": "Günlük operasyonu yönetin",
+          "description": "Check-in, ölçüm, program, tahsilat ve mesajlaşma — tek platformdan, her cihazdan."
+        }
       }
     },
     "roadmap": {
@@ -1164,6 +1268,21 @@
       "colStaff": "Personel",
       "colRevenue": "Ciro",
       "colCheckIns": "Ziyaret"
+    }
+  },
+  "paymentPlans": {
+    "backToOverview": "← Genel Bakış",
+    "title": "Ödeme Planları",
+    "subtitle": "Tüm üyelerinizin bekleyen taksitleri.",
+    "empty": "Bekleyen taksit yok.",
+    "overdue": "Vadesi Geçti",
+    "upcoming": "Yaklaşan",
+    "columns": {
+      "member": "Üye",
+      "dueDate": "Vade Tarihi",
+      "amount": "Tutar",
+      "status": "Durum",
+      "action": "İşlem"
     }
   }
 }

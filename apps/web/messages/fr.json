@@ -50,7 +50,8 @@
       "dailyOps": "Opérations quotidiennes",
       "management": "Gestion",
       "analytics": "Analyses"
-    }
+    },
+    "paymentPlans": "Plans de paiement"
   },
   "auth": {
     "login": "Connexion",
@@ -247,7 +248,9 @@
       "revenueThisMonth": "Revenue This Month",
       "revenueLink": "View cash summary",
       "expiringSoon": "Memberships Expiring in 7 Days",
-      "expiringSoonLink": "View members"
+      "expiringSoonLink": "View members",
+      "overdueInstallments": "Échéances en retard",
+      "overdueInstallmentsLink": "Voir les plans de paiement"
     },
     "cards": {
       "organization": "Organisation",
@@ -284,7 +287,10 @@
     "alerts": {
       "expiringTitle": "{count} abonnements expirent sous 7 jours",
       "expiringSubtitle": "Envoyez un rappel de renouvellement pour réduire le taux de résiliation.",
-      "expiringCta": "Voir les membres"
+      "expiringCta": "Voir les membres",
+      "overdueTitle": "{count} échéances sont en retard",
+      "overdueSubtitle": "Encaissez le solde restant ou contactez le membre.",
+      "overdueCta": "Voir les plans de paiement"
     },
     "comingSoonTeaser": {
       "title": "Que réserve la feuille de route ?",
@@ -530,6 +536,34 @@
       "cash": "Espèces",
       "card": "Carte",
       "transfer": "Virement"
+    },
+    "paymentPlan": {
+      "title": "Plans de paiement",
+      "subtitle": "Planifiez des échéances pour les membres qui paieront plus tard.",
+      "empty": "Aucun plan de paiement pour le moment.",
+      "planStatus": {
+        "ACTIVE": "Actif",
+        "COMPLETED": "Terminé",
+        "CANCELLED": "Annulé"
+      },
+      "installmentCountLabel": "{count} échéances",
+      "cancelPlan": "Annuler le plan",
+      "installmentLabel": "Échéance {index}/{count}",
+      "status": {
+        "OPEN": "Ouvert",
+        "PAID": "Payé",
+        "VOID": "Annulé",
+        "OVERDUE": "En retard"
+      },
+      "pay": "Payer",
+      "totalAmount": "Montant total",
+      "installmentCount": "Nombre d'échéances",
+      "cadenceWeekly": "Hebdomadaire",
+      "cadenceMonthly": "Mensuel",
+      "cadenceCustom": "Personnalisé (jours)",
+      "intervalDays": "Jours entre les échéances (personnalisé uniquement)",
+      "description": "Description (facultatif)",
+      "create": "Créer le plan"
     }
   },
   "pos": {
@@ -562,7 +596,8 @@
       "count": "{count} opérations",
       "openCount": "{count} ouverts",
       "noPayments": "Aucun encaissement aujourd'hui"
-    }
+    },
+    "overdueInstallmentBadge": "Échéance en retard"
   },
   "marketing": {
     "nav": {
@@ -1230,6 +1265,21 @@
       "colStaff": "Personnel",
       "colRevenue": "Chiffre d'Affaires",
       "colCheckIns": "Visites"
+    }
+  },
+  "paymentPlans": {
+    "backToOverview": "← Vue d'ensemble",
+    "title": "Plans de paiement",
+    "subtitle": "Toutes les échéances en attente de vos membres.",
+    "empty": "Aucune échéance en attente.",
+    "overdue": "En retard",
+    "upcoming": "À venir",
+    "columns": {
+      "member": "Membre",
+      "dueDate": "Échéance",
+      "amount": "Montant",
+      "status": "Statut",
+      "action": "Action"
     }
   }
 }
