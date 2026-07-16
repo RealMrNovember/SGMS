@@ -69,7 +69,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 31 | Entegrasyon Pazaryeri | 🔲 Planlandı | 0% |
 | 32 | Ticarileştirme: Paket & Ek Kapasite Satışı | 🔲 Planlandı | 0% |
 | 33 | Dinamik Rol Bazlı Kullanım Kılavuzu | 🔲 Planlandı | 0% |
-| 34 | Tam Responsive Tasarım Sistemi | 🔄 Devam ediyor | ~10% (dashboard nav düzeltmesi tamamlandı) |
+| 34 | Tam Responsive Tasarım Sistemi | 🔄 Devam ediyor | ~70% (sol menü + dark/light tema + ikon sistemi tüm yüzeylerde tamamlandı) |
 | 35 | Temsilci (Partner) Portalı | ✅ Tamamlandı | 100% |
 
 > Fazlar 6/9/10'un durum özeti önceki revizyonlarda detay bölümleriyle **çelişiyordu** (özet tablo güncellenmeden unutulmuştu). Bu revizyon koda göre (tüm alt maddeler `[x]`, gerçek commit geçmişi) düzeltilmiştir.
@@ -907,24 +907,37 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ---
 
-## 🔲 Faz 34 — Tam Responsive Tasarım Sistemi & Arayüz Yenileme (Öncelik: P0 — kullanıcı deneyimi)
+## 🔄 Faz 34 — Tam Responsive Tasarım Sistemi & Arayüz Yenileme (Öncelik: P0 — kullanıcı deneyimi) — ~70%
 
-> **Denetim bulgusu (2026-07-15):** Mevcut `/dashboard` üst navigasyonu (`layout.tsx`) 10 menü öğesini + dil seçici + çıkış butonunu tek bir `flex flex-wrap` satırına sığdırmaya çalışıyor — mobil ekranda (375px) bu, çok satırlı, dağınık bir menüye dönüşüyor. Yeni modüller (Faz 21-31) eklendikçe bu sorun katlanarak büyüyecekti. **Bu fazın ilk parçası bu oturumda doğrudan uygulandı** (aşağıya bakınız); geri kalanı sistematik bir tasarım sistemi turudur.
+> **Denetim bulgusu (2026-07-15):** Mevcut `/dashboard` üst navigasyonu (`layout.tsx`) 10 menü öğesini + dil seçici + çıkış butonunu tek bir `flex flex-wrap` satırına sığdırmaya çalışıyor — mobil ekranda (375px) bu, çok satırlı, dağınık bir menüye dönüşüyor. Yeni modüller (Faz 21-31) eklendikçe bu sorun katlanarak büyüyecekti.
+>
+> **Kullanıcı geri bildirimi (2026-07-16):** Mevcut tasarımdan memnuniyetsizlik — üst menü mobil bir siteymiş gibi hissettiriyor, dil seçici hantal ve yanındaki bir eleman tıklanınca sayfa scroll'u bozuluyor, dark/light tema seçimi hiç yok. Sistemin tamamında bütünlük kazanan, sol menü tabanlı, spor salonuna özgü ikon/animasyon içeren, teknik bilgisi olmayan kullanıcıların bile rahat kullanabileceği modern bir tasarım istendi.
 
-### 34.1 Bu oturumda tamamlanan acil düzeltmeler
-- [x] Tenant dashboard navigasyonu: mobilde açılır menü (hamburger + kayan panel), masaüstünde yatay menü — `apps/web/src/components/dashboard-nav.tsx`
-- [x] Yeni modüller için nav'a bindirme yapmadan **"Yakında" grubu** — ayrı, katlanabilir bir bölüm altında toplanır, ana menüyü kalabalıklaştırmaz
-- [x] "Çok Yakında" sayfası (`/dashboard/coming-soon/[feature]`) — her yeni modül (PT Yönetimi, Ders Programı, HR, Ekipman, Kasa/Vardiya, Bildirim Merkezi, İleri Raporlama, AI Öngörüler) için markaya uygun, bilgilendirici bir bekleme sayfası
+### 34.1 İlk acil düzeltme (2026-07-15)
+- [x] Tenant dashboard navigasyonu: mobilde açılır menü (hamburger + kayan panel), masaüstünde yatay menü
+- [x] "Çok Yakında" sayfası (`/dashboard/coming-soon/[feature]`) — her yeni modül için markaya uygun bekleme sayfası
 
-### 34.2 Sistematik tasarım sistemi turu (sonraki oturumlar)
-- [ ] Tüm veri tablolarının mobilde (768px altı) kart görünümüne dönüşmesi (yatay scroll yerine) — üye listesi, POS, audit log, ekipman listesi
+### 34.2 Sistem genelinde arayüz yenilemesi (2026-07-16'da tamamlandı)
+- [x] **Tema sistemi:** `globals.css`'te tek kaynaklı CSS değişken seti (`--surface`, `--gold`, `--sidebar-*`, semantik durum renkleri vb.) + `:root[data-theme='light']` override bloğu — `.admin-shell`/`.login-shell`/`.marketing-shell` artık aynı tokenlara işaret ediyor (tekrar yok). `apps/web/src/actions/theme.ts` (cookie tabanlı, `setLocale` ile aynı desen) + kök `layout.tsx`'te SSR'da `data-theme` ataması (flaş yok)
+- [x] `apps/web/src/components/theme-toggle.tsx` — güneş/ay ikonlu, anlık geçiş yapan tema butonu (tüm kimlik doğrulamalı yüzeylerde + marketing/login header'ında)
+- [x] `apps/web/src/components/locale-switcher.tsx` — native `<select>` yerine kompakt `Globe` ikonlu popover (click-outside + Escape ile kapanır) — eski scroll bozulma hatasının kök nedeni (düzgün olmayan `onBlur`/`setTimeout` menü kapatma) ortadan kalktı
+- [x] `apps/web/src/components/app-sidebar-nav.tsx` + `app-bottom-nav.tsx` — paylaşılan, gruplu, ikonlu (lucide-react) sol menü + mobilde alt sekme çubuğu ("Diğer" sheet'i ile tam menüye erişim); sidebar her zaman ikon+etiket, daraltılabilir (tercih localStorage'da saklanır)
+- [x] `apps/web/src/components/gym-loader.tsx` — spor salonu temalı (barbell kaldırma animasyonlu, `prefers-reduced-motion` destekli) route-level loading ekranı
+- [x] **Dashboard**: header+yatay menüden sol menüye geçirildi, gruplu nav ("Günlük İşlemler", "Yönetim", "Analiz")
+- [x] **Temsilci (Partner) paneli**: aynı shell'e geçirildi
+- [x] **Master Admin paneli**: eski `AdminSidebarNav` yerine paylaşılan `AppSidebarNav` + artık mobilde de çalışan alt menü (önceden mobilde hiç nav yoktu)
+- [x] **Sporcu portalı**: mobil-öncelikli alt sekme deseni korundu (zaten uygundu), ikon eklendi + tema/dil header'a eklendi
+- [x] Yeni çeviri anahtarları 6 dilin tamamına eklendi, derin anahtar-parity scripti ile 0 eksik doğrulandı
+- [x] RSC sınırı hatası (ikon bileşenleri sunucu bileşeninden istemciye fonksiyon referansı olarak geçiriliyordu) tespit edilip düzeltildi — production log izlemesiyle yakalandı
+
+### 34.3 Sıradaki tur (henüz yapılmadı)
+- [ ] Tüm veri tablolarının mobilde (768px altı) kart görünümüne dönüşmesi (yatay scroll yerine) — üye listesi, POS, audit log
 - [ ] Dokunmatik hedef boyutlarının (min. 44×44px) tüm buton/link'lerde denetimi
-- [ ] `/admin` (Super Admin) panelinin de aynı responsive nav desenine geçirilmesi
-- [ ] Form bileşenlerinin (özellikle çok alanlı formlar: üye ekleme, ekipman ekleme) mobilde tek sütuna düşen, adım adım (wizard) akışa dönüştürülmesi
-- [ ] Karanlık/aydınlık tema tutarlılığı denetimi (mevcut tasarım koyu tema odaklı — aydınlık mod talebi gelirse)
+- [ ] Form bileşenlerinin (çok alanlı formlar) mobilde adım adım (wizard) akışa dönüştürülmesi
+- [ ] Marketing/login sayfalarının görsel dilinin (hero, animasyonlar) yeni ikon sistemiyle daha da zenginleştirilmesi
 - [ ] Performans: mobil ağlarda ilk yükleme süresi hedefi (Core Web Vitals — LCP < 2.5s)
 
-**Kabul kriteri:** ✅ Dashboard navigasyonu artık 375px genişlikte bile kullanılabilir · 🔲 tüm tablolar mobilde kart görünümüne geçmiş olacak (sonraki tur)
+**Kabul kriteri:** ✅ Dashboard/Partner/Admin/Athlete artık ortak, ikonlu, dark/light temalı bir sol-menü + mobil alt-menü sistemine sahip · 🔲 veri tabloları mobilde kart görünümüne geçmiş olacak (sonraki tur)
 
 **Bağımlılık:** yok — bu faz diğer tüm fazların üzerine sürekli uygulanan bir kalite katmanıdır, tek seferlik "bitti" denecek bir faz değildir
 
@@ -986,11 +999,11 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | Bildirim Merkezi (Push/SMS/WhatsApp/Mail/Telegram) | P1 | 27 | 🔄 ~35% — tarayıcı Web Push tamamlandı, SMS/WhatsApp/Telegram + şablon sistemi kaldı |
 | İleri raporlama & BI (MRR/ARR/LTV/Churn) | P1 | 28 | ✅ tamamlandı — 2026-07-15 (ARR + churn-anketi v2'ye ertelendi) |
 | Yapay Zeka öngörüleri (churn, kampanya, fiyatlandırma) | P2 | 29 | 🔲 |
-| Kurumsal hiyerarşi (Organizasyon→Bölge→Şube) | P1 | 30 | 🔲 |
+| Kurumsal hiyerarşi (Organizasyon→Bölge→Şube) | P1 | 30 | ✅ tamamlandı — 2026-07-15 (v1) |
 | Entegrasyon Pazaryeri (Health/SMS/WhatsApp/E-Fatura) | P2 | 31 | 🔲 |
 | Paket + ek kapasite satışı (add-on) + PT/personel limit ayrımı | P0 | 32 | 🔲 gelir modeli — kullanıcı onayı gerektirir |
 | Rol bazlı dinamik kullanım kılavuzu (Help Center) | P1 | 33 | 🔲 |
-| Tam responsive tasarım sistemi | P0 | 34 | 🔄 dashboard nav düzeltmesi tamamlandı, sistematik tur sürüyor |
+| Tam responsive tasarım sistemi | P0 | 34 | 🔄 ~70% — sol menü + dark/light tema + ikon sistemi tüm yüzeylerde tamamlandı, tablo/form mobil turu kaldı |
 | Temsilci (Partner) Portalı | P1 | 35 | ✅ tamamlandı — 2026-07-15 |
 | Production `ExpenseStatus` enum case-drift düzeltmesi (`/dashboard/pos` hatası) | P0 | — | ✅ tamamlandı — 2026-07-15, kök neden: 2026-06-30'daki elle migration kurtarma |
 | 14 günlük deneme kaydı: `registerTrialOrganization`'da hiç try/catch yoktu — herhangi bir DB hatası kullanıcıya ham hata ekranı olarak yansıyor ve hesap oluşmuyordu | P0 | — | ✅ tamamlandı — 2026-07-15, transaction + cloud sync artık ayrı ayrı yakalanıyor, kullanıcıya her zaman dostane mesaj dönüyor |
@@ -1020,6 +1033,7 @@ Devam ediyor:
 
 Şimdi canlı (production'da):
   Faz 34.1   Responsive dashboard nav + "Çok Yakında" sayfası    ✅
+  Faz 34.2   Sol menü + dark/light tema + ikon sistemi (tüm yüzeyler) ✅ (~70%)
   Faz 35     Temsilci (Partner) Portalı                          ✅
   Faz 27.1   Tarayıcı Web Push bildirimleri                      ✅ (~35% — SMS/WhatsApp/şablon kaldı)
   Faz 21     PT performans/komisyon/prim yönetimi                ✅
@@ -1028,7 +1042,7 @@ Devam ediyor:
 
 Sıradaki (öncelik sırası — profesyonel değerlendirme, P0 en önce):
   Faz 32     Ticarileştirme: paket + ek kapasite satışı          ← P0, gelir modeli (kullanıcı onayı gerekli)
-  Faz 34     Tam responsive tasarım sistemi (sistematik tur)     ← P0, sürekli kalite katmanı
+  Faz 34.3   Responsive tasarım sistemi — tablo/form mobil turu  ← P0, sürekli kalite katmanı
   Faz 33     Rol bazlı dinamik kullanım kılavuzu                 ← P1
   Faz 17     Üyelik senaryoları & ders/sınıf yönetimi            ← P1
   Faz 22     Personel Yönetimi / HR                              ← P2
