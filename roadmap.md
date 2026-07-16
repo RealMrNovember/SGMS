@@ -69,7 +69,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 31 | Entegrasyon Pazaryeri | 🔲 Planlandı | 0% |
 | 32 | Ticarileştirme: Paket & Ek Kapasite Satışı | 🔲 Planlandı | 0% |
 | 33 | Dinamik Rol Bazlı Kullanım Kılavuzu | 🔲 Planlandı | 0% |
-| 34 | Tam Responsive Tasarım Sistemi | 🔄 Devam ediyor | ~85% (sol menü/tema/ikon + mobil tablo/kart + mesajlaşma modernizasyonu tamamlandı — sporcu profil özyönetimi + interaktif program görünümü kaldı) |
+| 34 | Tam Responsive Tasarım Sistemi | 🔄 Devam ediyor | ~90% (sol menü/tema/ikon + mobil tablo/kart + mesajlaşma modernizasyonu + sporcu profil özyönetimi tamamlandı — yalnızca interaktif program görünümü kaldı) |
 | 35 | Temsilci (Partner) Portalı | ✅ Tamamlandı | 100% |
 
 > Fazlar 6/9/10'un durum özeti önceki revizyonlarda detay bölümleriyle **çelişiyordu** (özet tablo güncellenmeden unutulmuştu). Bu revizyon koda göre (tüm alt maddeler `[x]`, gerçek commit geçmişi) düzeltilmiştir.
@@ -1052,11 +1052,14 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 **Kapsam dışı (v2'ye ertelendi):** tam optimistic-UI/WebSocket-driven mesaj ekleme (şu an her yeni mesajda `router.refresh()` tam sayfa yenilemesi var — yeterince hızlı, düşük riskli, korunuyor); gerçek push-delivery-ack tabanlı "teslim edildi" semantiği (bugün `deliveredAt` mesaj oluşturulduğu an set ediliyor, gerçek cihaz-teslim onayı değil).
 
-### 34.5 Sporcu Profil Özyönetimi — yeni, 2026-07-16 eklendi
+### 34.5 Sporcu Profil Özyönetimi — tamamlandı, 2026-07-16
 
-> **Senaryo:** Bir üye telefon numarasını değiştirdi veya profil fotoğrafını güncellemek istiyor — bugün bunun için resepsiyona gitmesi gerekiyor. Kendi kendine yönetebilmesi hem üyenin hem resepsiyonun işini azaltır.
-- [ ] `/athlete/account` genişletilir: parola değiştirme (mevcut `password-reset` altyapısıyla aynı güvenlik kurallarını paylaşır), kullanıcı adı/e-posta güncelleme (e-posta değişiminde mevcut e-posta doğrulama deseni), doğum tarihi düzenleme, avatar yükleme (Faz 6.2'deki mevcut `lib/storage.ts`/R2 altyapısı doğrudan yeniden kullanılır — yeni depolama işi gerekmez)
-- [ ] Hassas alan değişiklikleri (e-posta, parola) audit log'a düşer — kimlik hırsızlığı/şüpheli değişiklik durumunda iz bırakır
+> **Senaryo:** Bir üye telefon numarasını değiştirdi veya profil fotoğrafını güncellemek istiyor — bugün bunun için resepsiyona gitmesi gerekiyor. Kendi kendine yönetebilmesi hem üyenin hem resepsiyonun işini azaltır. **Araştırma sırasında düzeltilen varsayım:** roadmap "e-posta değişiminde mevcut e-posta doğrulama deseni" varsaymıştı, ama `User.emailVerifiedAt` alanı kod tabanında hiç kullanılmıyor — böyle bir doğrulama akışı gerçekte yoktu. Aynı şekilde "oturum açıkken parola değiştirme" deseni de yoktu (yalnızca forgot-password e-posta/token akışı vardı).
+- [x] `/athlete/account`'a profil fotoğrafı yükleme eklendi — mevcut `AvatarUpload`/`lib/storage.ts` altyapısı doğrudan yeniden kullanıldı. Bulunan bir yetkilendirme boşluğu düzeltildi: `/api/v1/upload/avatar` rotasının `gym_member` dalı yalnızca personel API bağlamı kabul ediyordu, bir sporcunun kendi oturumuyla erişimi her zaman 403 ile reddediliyordu — artık sporcu kendi `gymMemberId`'siyle eşleşince personel bağlamı atlanıp doğrudan izin veriliyor (personelin başka bir üyenin fotoğrafını yönetme akışı değişmedi)
+- [x] Görünen ad (`User.name`), iletişim telefonu/e-postası ve doğum tarihi (`GymMember` alanları) için özyönetim formları — `MEMBER_UPDATED` audit kaydı (`source: 'self'`) düşülüyor
+- [x] Oturum açıkken parola değiştirme (mevcut parola + yeni parola) — `password-reset.ts`'teki bcrypt/zod güvenlik parametreleriyle birebir aynı, `PASSWORD_RESET_COMPLETED` audit kaydı düşülüyor
+
+**Kapsam dışı (v2'ye ertelendi):** Giriş kimlik bilgisi olan `User.email`'in doğrulamalı değişimi — yeni bir token modeli/migration, yeni bir mail şablonu ve yeni bir onay sayfası gerektirir (doğrulanmamış e-posta değişimi hesap ele geçirme riski taşır); iletişim bilgisi olan `GymMember.email`/`phone` alanları bu turda güncellenebiliyor, yalnızca giriş e-postası dokunulmadı.
 
 ### 34.6 İnteraktif Antrenman Programı Görünümü — yeni, 2026-07-16 eklendi
 
@@ -1145,7 +1148,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | Ayarlar ekranı modernizasyonu (rol bazlı, kategorili) | P1 | 33 | 🔲 |
 | Tam responsive tasarım sistemi | P0 | 34 | 🔄 ~70% — sol menü + dark/light tema + ikon sistemi tüm yüzeylerde tamamlandı, tablo/form mobil turu kaldı |
 | Mesajlaşma arayüzü modernizasyonu (WhatsApp/Telegram tarzı) | P0 | 34 | ✅ tamamlandı — 2026-07-16 |
-| Sporcu profil özyönetimi (parola/avatar/doğum tarihi) | P1 | 34 | 🔲 |
+| Sporcu profil özyönetimi (parola/avatar/doğum tarihi) | P1 | 34 | ✅ tamamlandı — 2026-07-16 (giriş e-postası doğrulamalı değişimi v2'ye ertelendi) |
 | İnteraktif antrenman programı görünümü (video + set/tekrar) | P2 | 34 | 🔲 |
 | Temsilci (Partner) Portalı | P1 | 35 | ✅ tamamlandı — 2026-07-15 |
 | Production `ExpenseStatus` enum case-drift düzeltmesi (`/dashboard/pos` hatası) | P0 | — | ✅ tamamlandı — 2026-07-15, kök neden: 2026-06-30'daki elle migration kurtarma |
@@ -1181,6 +1184,7 @@ Devam ediyor:
   Faz 34.2   Sol menü + dark/light tema + ikon sistemi (tüm yüzeyler) ✅ (~70%)
   Faz 34.3   Responsive tablo/kart + wizard formlar (Tier 1)     ✅ (Tier 2 ertelendi)
   Faz 34.4   Mesajlaşma arayüzü modernizasyonu (tik/avatar/canlı okundu) ✅
+  Faz 34.5   Sporcu profil özyönetimi (avatar/iletişim/parola)    ✅
   Faz 35     Temsilci (Partner) Portalı                          ✅
   Faz 27.1   Tarayıcı Web Push bildirimleri                      ✅ (~35% — SMS/WhatsApp/şablon kaldı)
   Faz 21     PT performans/komisyon/prim yönetimi                ✅
@@ -1194,7 +1198,6 @@ Sıradaki (öncelik sırası — profesyonel değerlendirme, P0 en önce):
   Faz 8.7    Salon bazlı online ödeme sağlayıcısı (Iyzico/PayTR) ← P1, Faz 8.6'ya bağımlı, Faz 16.3 deseni yeniden kullanılır
   Faz 14.3   Demo PT girişi (login ekranı)                       ← P1, düşük efor / yüksek satış-öncesi değer
   Faz 12.4   Master Admin kalıcı silme (hard-delete)             ← P1, düşük efor, veri hijyeni
-  Faz 34.5   Sporcu profil özyönetimi                            ← P1, mevcut altyapıyı yeniden kullanır
   Faz 33     Rol bazlı dinamik kullanım kılavuzu + 33.1 ayarlar  ← P1
              ekranı modernizasyonu
   Faz 17.0   Lead/potansiyel müşteri takibi (follow-up)          ← P1, doğrudan gelir dönüşümü
