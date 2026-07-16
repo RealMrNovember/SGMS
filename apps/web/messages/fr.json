@@ -19,6 +19,8 @@
     "noEmail": "Pas d'e-mail",
     "ellipsis": "…",
     "membersLinked": "{count} membres sur ce forfait",
+    "back": "Retour",
+    "next": "Suivant",
     "theme": {
       "light": "Mode clair",
       "dark": "Mode sombre",
@@ -172,7 +174,10 @@
       "membershipStart": "Début abonnement",
       "notes": "Notes (optionnel)",
       "saving": "Enregistrement…",
-      "submit": "Enregistrer le membre"
+      "submit": "Enregistrer le membre",
+      "step1": "Informations personnelles",
+      "step2": "Abonnement",
+      "step3": "Notes & confirmation"
     }
   },
   "measurements": {
@@ -387,7 +392,9 @@
       "startDate": "Début",
       "endDate": "Fin (optionnel)",
       "saving": "Création…",
-      "submit": "Créer le programme"
+      "submit": "Créer le programme",
+      "step1": "Informations du programme",
+      "step2": "Contenu"
     },
     "builder": {
       "goal": "Objectif / notes",

@@ -60,7 +60,37 @@ export default async function TeamPage() {
           <p className="muted mt-1 text-sm">{t('listCount', { count: members.length })}</p>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="data-card-list p-4 md:hidden">
+          {members.map((member) => (
+            <div key={member.id} className="data-card">
+              <div className="flex items-center gap-3">
+                <UserAvatar name={member.user.name ?? member.user.email} avatarUrl={member.user.avatarUrl} size="sm" />
+                <div className="min-w-0">
+                  <p className="truncate font-medium">{member.user.name}</p>
+                  <p className="muted truncate text-xs">{member.user.email}</p>
+                </div>
+              </div>
+              <div className="mt-3">
+                <div className="data-card-row">
+                  <span className="data-card-label">{t('columns.role')}</span>
+                  <span className="badge">{member.role}</span>
+                </div>
+                <div className="data-card-row">
+                  <span className="data-card-label">{t('columns.joined')}</span>
+                  <span className="data-card-value">
+                    {(member.joinedAt ?? member.invitedAt ?? member.createdAt).toLocaleDateString(dateLocale)}
+                  </span>
+                </div>
+                <div className="data-card-row">
+                  <span className="data-card-label">{t('columns.rfid')}</span>
+                </div>
+                <StaffRfidField membershipId={member.id} currentRfid={member.rfidTag} canManage={canInvite} />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="hidden overflow-x-auto md:block">
           <table className="w-full min-w-[640px] text-left text-sm">
             <thead className="muted border-b border-[var(--border)] text-xs uppercase tracking-wide">
               <tr>

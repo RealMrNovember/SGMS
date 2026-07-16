@@ -152,8 +152,8 @@ input {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.35rem;
-  height: 2.35rem;
+  width: 2.75rem;
+  height: 2.75rem;
   border-radius: 0.6rem;
   border: 1px solid var(--border);
   background: var(--surface-hover);
@@ -164,6 +164,94 @@ input {
 .icon-btn:hover {
   border-color: var(--gold-muted);
   background: var(--gold-muted);
+}
+
+/* Mobil tablo → kart görünümü — .admin-audit-feed__item ile aynı görsel ağırlık.
+   Kullanım: tablo sarmalayıcısına `hidden md:block`, yanına `.data-card-list md:hidden` eklenir. */
+.data-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.data-card {
+  border-radius: 0.9rem;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  background: rgba(255, 255, 255, 0.02);
+  padding: 1rem;
+}
+
+.data-card-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.3rem 0;
+}
+
+.data-card-label {
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.data-card-value {
+  font-size: 0.875rem;
+  text-align: right;
+}
+
+.data-card-actions {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+/* Çok adımlı (wizard) form ilerleme göstergesi */
+.wizard-progress {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+}
+
+.wizard-progress-step {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  padding: 0.4rem 0.75rem 0.4rem 0.4rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.wizard-progress-step[data-active='true'] {
+  border-color: var(--gold-muted);
+  background: var(--gold-muted);
+  color: var(--foreground);
+}
+
+.wizard-progress-step[data-done='true'] {
+  color: var(--gold);
+}
+
+.wizard-progress-index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 999px;
+  background: var(--surface-hover);
+  font-size: 0.7rem;
 }
 
 /* ---------------------------------------------------------------------------
@@ -284,6 +372,7 @@ input {
   align-items: center;
   justify-content: center;
   width: 100%;
+  min-height: 2.75rem;
   gap: 0.5rem;
   border-radius: 0.75rem;
   padding: 0.55rem;

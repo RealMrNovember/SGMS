@@ -19,6 +19,8 @@
     "noEmail": "E-poçt yoxdur",
     "ellipsis": "…",
     "membersLinked": "Bu planda {count} üzv",
+    "back": "Geri",
+    "next": "İrəli",
     "theme": {
       "light": "İşıqlı rejim",
       "dark": "Qaranlıq rejim",
@@ -172,7 +174,10 @@
       "membershipStart": "Üzvlük başlanğıcı",
       "notes": "Qeydlər (istəyə bağlı)",
       "saving": "Saxlanılır…",
-      "submit": "Üzvü saxla"
+      "submit": "Üzvü saxla",
+      "step1": "Şəxsi Məlumatlar",
+      "step2": "Üzvlük",
+      "step3": "Qeydlər & Təsdiq"
     }
   },
   "measurements": {
@@ -387,7 +392,9 @@
       "startDate": "Başlanğıc",
       "endDate": "Bitiş (istəyə bağlı)",
       "saving": "Yaradılır…",
-      "submit": "Proqram yarat"
+      "submit": "Proqram yarat",
+      "step1": "Proqram Məlumatları",
+      "step2": "Məzmun"
     },
     "builder": {
       "goal": "Məqsəd / qeydlər",

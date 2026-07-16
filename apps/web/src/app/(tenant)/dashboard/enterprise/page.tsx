@@ -143,6 +143,43 @@ export default async function EnterprisePage({
         {report.branches.length === 0 ? (
           <p className="muted p-5 text-sm">{t('empty')}</p>
         ) : (
+          <>
+            <div className="data-card-list p-4 md:hidden">
+              {report.branches.map((b) => (
+                <div key={b.organizationId} className="data-card">
+                  <p className="font-medium">
+                    {scopes.some((s) => s.organization.id === b.organizationId) ? (
+                      <Link href={`/dashboard/enterprise?range=${preset}&node=${b.organizationId}`} className="hover:underline">
+                        {b.organizationName}
+                      </Link>
+                    ) : (
+                      b.organizationName
+                    )}
+                  </p>
+                  <p className="muted text-xs">{b.ownerName ?? '—'}</p>
+                  <div className="mt-3">
+                    <div className="data-card-row">
+                      <span className="data-card-label">{t('branchTable.colMembers')}</span>
+                      <span className="data-card-value tabular-nums">{b.activeMembers}</span>
+                    </div>
+                    <div className="data-card-row">
+                      <span className="data-card-label">{t('branchTable.colStaff')}</span>
+                      <span className="data-card-value tabular-nums">{b.staffCount}</span>
+                    </div>
+                    <div className="data-card-row">
+                      <span className="data-card-label">{t('branchTable.colRevenue')}</span>
+                      <span className="data-card-value tabular-nums text-[#c9a962]">{currency.format(b.revenue)}</span>
+                    </div>
+                    <div className="data-card-row">
+                      <span className="data-card-label">{t('branchTable.colCheckIns')}</span>
+                      <span className="data-card-value tabular-nums">{b.checkIns}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="hidden overflow-x-auto md:block">
           <table className="w-full min-w-[720px] text-left text-sm">
             <thead className="muted text-xs uppercase tracking-wide">
               <tr>
@@ -178,6 +215,8 @@ export default async function EnterprisePage({
               ))}
             </tbody>
           </table>
+            </div>
+          </>
         )}
       </section>
     </div>

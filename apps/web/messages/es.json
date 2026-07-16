@@ -19,6 +19,8 @@
     "noEmail": "Sin correo",
     "ellipsis": "…",
     "membersLinked": "{count} miembros en este plan",
+    "back": "Atrás",
+    "next": "Siguiente",
     "theme": {
       "light": "Modo claro",
       "dark": "Modo oscuro",
@@ -172,7 +174,10 @@
       "membershipStart": "Inicio membresía",
       "notes": "Notas (opcional)",
       "saving": "Guardando…",
-      "submit": "Guardar miembro"
+      "submit": "Guardar miembro",
+      "step1": "Información personal",
+      "step2": "Membresía",
+      "step3": "Notas y confirmación"
     }
   },
   "measurements": {
@@ -387,7 +392,9 @@
       "startDate": "Inicio",
       "endDate": "Fin (opcional)",
       "saving": "Creando…",
-      "submit": "Crear programa"
+      "submit": "Crear programa",
+      "step1": "Información del programa",
+      "step2": "Contenido"
     },
     "builder": {
       "goal": "Objetivo / notas",

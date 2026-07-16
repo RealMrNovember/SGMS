@@ -19,6 +19,8 @@
     "noEmail": "E-posta yok",
     "ellipsis": "…",
     "membersLinked": "{count} üye bu plana bağlı",
+    "back": "Geri",
+    "next": "İleri",
     "theme": {
       "light": "Açık Mod",
       "dark": "Koyu Mod",
@@ -172,7 +174,10 @@
       "membershipStart": "Üyelik Başlangıcı",
       "notes": "Notlar (opsiyonel)",
       "saving": "Kaydediliyor…",
-      "submit": "Üyeyi Kaydet"
+      "submit": "Üyeyi Kaydet",
+      "step1": "Kişisel Bilgiler",
+      "step2": "Üyelik",
+      "step3": "Notlar & Onay"
     }
   },
   "measurements": {
@@ -387,7 +392,9 @@
       "startDate": "Başlangıç",
       "endDate": "Bitiş (opsiyonel)",
       "saving": "Oluşturuluyor…",
-      "submit": "Program Oluştur"
+      "submit": "Program Oluştur",
+      "step1": "Program Bilgileri",
+      "step2": "İçerik"
     },
     "builder": {
       "goal": "Program hedefi / notlar",

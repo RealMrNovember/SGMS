@@ -103,7 +103,51 @@ export default async function ProgramsPage({
           </p>
         </div>
 
-        <div className="overflow-x-auto">
+        {programs.length === 0 ? (
+          <p className="muted px-6 py-8 text-center text-sm md:hidden">{t('empty')}</p>
+        ) : (
+          <div className="data-card-list p-4 md:hidden">
+            {programs.map((p) => (
+              <div key={p.id} className="data-card">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate font-medium">{p.title}</p>
+                    <Link href={`/dashboard/programs?member=${p.gymMemberId}`} className="muted text-xs hover:text-white">
+                      {p.gymMember.firstName} {p.gymMember.lastName}
+                    </Link>
+                  </div>
+                  <span className="badge shrink-0">{programTypeLabel(p.type)}</span>
+                </div>
+                <div className="mt-3">
+                  <div className="data-card-row">
+                    <span className="data-card-label">{t('columns.trainer')}</span>
+                    <span className="data-card-value">{p.trainer.name ?? '—'}</span>
+                  </div>
+                  <div className="data-card-row">
+                    <span className="data-card-label">{t('columns.period')}</span>
+                    <span className="data-card-value">
+                      {p.startDate.toLocaleDateString(dateLocale)}
+                      {p.endDate ? ` → ${p.endDate.toLocaleDateString(dateLocale)}` : ''}
+                    </span>
+                  </div>
+                  <div className="data-card-row">
+                    <span className="data-card-label">{t('columns.status')}</span>
+                    <span className={`badge ${p.isActive ? '' : 'opacity-50'}`}>
+                      {p.isActive ? tCommon('active') : tCommon('inactive')}
+                    </span>
+                  </div>
+                </div>
+                {canManage ? (
+                  <div className="data-card-actions">
+                    <ToggleProgramButton programId={p.id} isActive={p.isActive} />
+                  </div>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="hidden overflow-x-auto md:block">
           <table className="w-full min-w-[900px] text-left text-sm">
             <thead className="muted border-b border-[var(--border)] text-xs uppercase tracking-wide">
               <tr>

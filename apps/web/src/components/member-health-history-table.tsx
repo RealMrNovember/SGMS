@@ -33,7 +33,43 @@ export async function MemberHealthHistoryTable({
         </p>
       </div>
 
-      <div className="overflow-x-auto">
+      {measurements.length === 0 ? (
+        <p className="muted px-6 py-8 text-center text-sm md:hidden">{t('historyEmpty')}</p>
+      ) : (
+        <div className="data-card-list p-4 md:hidden">
+          {measurements.map((m) => (
+            <div key={m.id} className="data-card">
+              <p className="font-medium">{m.measuredAt.toLocaleString(dateLocale)}</p>
+              <div className="mt-3">
+                <div className="data-card-row">
+                  <span className="data-card-label">{t('columns.weight')}</span>
+                  <span className="data-card-value">{formatDecimal(m.weight)}</span>
+                </div>
+                <div className="data-card-row">
+                  <span className="data-card-label">{t('columns.bodyFat')}</span>
+                  <span className="data-card-value">{formatDecimal(m.bodyFatPercentage)}</span>
+                </div>
+                <div className="data-card-row">
+                  <span className="data-card-label">{t('columns.muscle')}</span>
+                  <span className="data-card-value">{formatDecimal(m.muscleMass)}</span>
+                </div>
+                <div className="data-card-row">
+                  <span className="data-card-label">{t('columns.height')}</span>
+                  <span className="data-card-value">{formatDecimal(m.height)}</span>
+                </div>
+                {m.notes ? (
+                  <div className="data-card-row">
+                    <span className="data-card-label">{t('columns.notes')}</span>
+                    <span className="data-card-value">{m.notes}</span>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="hidden overflow-x-auto md:block">
         <table className="w-full min-w-[800px] text-left text-sm">
           <thead className="muted border-b border-[var(--border)] text-xs uppercase tracking-wide">
             <tr>

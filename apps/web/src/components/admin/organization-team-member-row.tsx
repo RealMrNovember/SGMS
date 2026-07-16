@@ -64,7 +64,7 @@ export function OrganizationTeamMemberRow({
             <option value="TRAINER">TRAINER</option>
             <option value="VIEWER">VIEWER</option>
           </select>
-          <button type="submit" className="button px-2 py-1 text-xs">
+          <button type="submit" className="button px-3 py-2 text-xs min-h-[2.75rem]">
             Rol kaydet
           </button>
         </form>
@@ -79,7 +79,7 @@ export function OrganizationTeamMemberRow({
             placeholder="Kart UID"
             className="input text-xs"
           />
-          <button type="submit" className="button px-2 py-1 text-xs">
+          <button type="submit" className="button px-3 py-2 text-xs min-h-[2.75rem]">
             RFID kaydet
           </button>
         </form>
@@ -94,14 +94,14 @@ export function OrganizationTeamMemberRow({
             <input type="hidden" name="organizationId" value={organizationId} />
             <input type="hidden" name="membershipId" value={member.id} />
             <input type="hidden" name="isActive" value={member.isActive ? 'false' : 'true'} />
-            <button type="submit" className="button px-2 py-1 text-xs">
+            <button type="submit" className="button px-3 py-2 text-xs min-h-[2.75rem]">
               {member.isActive ? 'Devre dışı bırak' : 'Aktifleştir'}
             </button>
           </form>
           <form action={resetAction}>
             <input type="hidden" name="organizationId" value={organizationId} />
             <input type="hidden" name="membershipId" value={member.id} />
-            <button type="submit" className="button px-2 py-1 text-xs" disabled={resetPending}>
+            <button type="submit" className="button px-3 py-2 text-xs min-h-[2.75rem]" disabled={resetPending}>
               Parola sıfırla
             </button>
           </form>

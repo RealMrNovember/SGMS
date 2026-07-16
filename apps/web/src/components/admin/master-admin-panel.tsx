@@ -104,7 +104,7 @@ function MasterAdminRowActions({
             </select>
           </label>
           <div className="sm:col-span-2">
-            <button type="submit" className="button px-2 py-1 text-xs">
+            <button type="submit" className="button px-3 py-2 text-xs min-h-[2.75rem]">
               Profili kaydet
             </button>
           </div>
@@ -133,7 +133,7 @@ function MasterAdminRowActions({
             />
             <button
               type="submit"
-              className="button px-2 py-1 text-xs"
+              className="button px-3 py-2 text-xs min-h-[2.75rem]"
               disabled={isSelf && admin.status === 'ACTIVE'}
             >
               {admin.status === 'ACTIVE' ? 'Devre dışı bırak' : 'Aktifleştir'}
@@ -141,7 +141,7 @@ function MasterAdminRowActions({
           </form>
           <form action={resetAction}>
             <input type="hidden" name="userId" value={admin.id} />
-            <button type="submit" className="button px-2 py-1 text-xs" disabled={resetPending}>
+            <button type="submit" className="button px-3 py-2 text-xs min-h-[2.75rem]" disabled={resetPending}>
               Parola sıfırla
             </button>
           </form>
@@ -161,7 +161,7 @@ function MasterAdminRowActions({
               <input type="hidden" name="userId" value={admin.id} />
               <button
                 type="submit"
-                className="admin-audit-delete-btn px-2 py-1 text-xs"
+                className="admin-audit-delete-btn px-3 py-2 text-xs min-h-[2.75rem]"
                 disabled={demotePending}
               >
                 Yetkiyi kaldır

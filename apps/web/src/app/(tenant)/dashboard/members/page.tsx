@@ -138,7 +138,60 @@ export default async function MembersPage({
           </form>
         </div>
 
-        <div className="overflow-x-auto">
+        {members.length === 0 ? (
+          <p className="muted px-6 py-8 text-center text-sm md:hidden">
+            {query || statusFilter ? t('noResults') : t('empty')}
+          </p>
+        ) : (
+          <div className="data-card-list p-4 md:hidden">
+            {members.map((member) => {
+              const fullName = `${member.firstName} ${member.lastName}`;
+              return (
+                <div key={member.id} className="data-card">
+                  <div className="flex items-center gap-3">
+                    <UserAvatar name={fullName} avatarUrl={member.avatarUrl} size="sm" />
+                    <div className="min-w-0">
+                      <Link href={`/dashboard/members/${member.id}`} className="font-medium hover:text-white">
+                        {fullName}
+                      </Link>
+                      <p className="muted truncate text-xs">{member.email ?? '—'}</p>
+                    </div>
+                  </div>
+                  <div className="mt-3">
+                    <div className="data-card-row">
+                      <span className="data-card-label">{t('columns.identity')}</span>
+                      <span className="data-card-value">
+                        {member.isForeignMember ? (member.passportNumber ?? '—') : (member.nationalId ?? '—')}
+                        {member.phone ? ` · ${member.phone}` : ''}
+                      </span>
+                    </div>
+                    <div className="data-card-row">
+                      <span className="data-card-label">{t('columns.plan')}</span>
+                      <span className="data-card-value">{member.plan?.name ?? '—'}</span>
+                    </div>
+                    <div className="data-card-row">
+                      <span className="data-card-label">{t('columns.status')}</span>
+                      <span className="badge">{member.status}</span>
+                    </div>
+                    <div className="data-card-row">
+                      <span className="data-card-label">{t('columns.membershipEnd')}</span>
+                      <span className="data-card-value">
+                        {member.membershipEndsAt ? member.membershipEndsAt.toLocaleDateString(dateLocale) : '—'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="data-card-actions">
+                    <Link href={`/dashboard/members/${member.id}/measurements`} className="muted text-sm hover:text-white">
+                      {t('viewMeasurements')}
+                    </Link>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        <div className="hidden overflow-x-auto md:block">
           <table className="w-full min-w-[900px] text-left text-sm">
             <thead className="muted border-b border-[var(--border)] text-xs uppercase tracking-wide">
               <tr>

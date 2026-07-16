@@ -137,7 +137,47 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
         {sessions.length === 0 ? (
           <p className="muted p-6 text-sm">{t('sessions.empty')}</p>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+            <div className="data-card-list p-4 md:hidden">
+              {sessions.map((s) => (
+                <div key={s.id} className="data-card">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-medium">
+                        {s.gymMember.firstName} {s.gymMember.lastName}
+                      </p>
+                      <p className="muted text-xs">{s.scheduledAt.toLocaleString(dateLocale)}</p>
+                    </div>
+                    <span className="badge shrink-0 text-[10px]">{t(`sessions.status.${s.status}`)}</span>
+                  </div>
+                  <div className="mt-3">
+                    <div className="data-card-row">
+                      <span className="data-card-label">{t('sessions.colDuration')}</span>
+                      <span className="data-card-value">{s.durationMinutes} dk</span>
+                    </div>
+                    <div className="data-card-row">
+                      <span className="data-card-label">{t('sessions.colRevenue')}</span>
+                      <span className="data-card-value tabular-nums">
+                        {s.revenueAmount ? `${Number(s.revenueAmount).toLocaleString(dateLocale)} ₺` : '—'}
+                      </span>
+                    </div>
+                    <div className="data-card-row">
+                      <span className="data-card-label">{t('sessions.colCommission')}</span>
+                      <span className="data-card-value tabular-nums text-[#c9a962]">
+                        {s.commissionAmount ? `${Number(s.commissionAmount).toLocaleString(dateLocale)} ₺` : '—'}
+                      </span>
+                    </div>
+                  </div>
+                  {s.status === 'SCHEDULED' ? (
+                    <div className="data-card-actions">
+                      <PtSessionActions sessionId={s.id} />
+                    </div>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+
+            <div className="hidden overflow-x-auto md:block">
             <table className="w-full min-w-[760px] text-left text-sm">
               <thead className="muted border-b border-[var(--border)] text-xs uppercase tracking-wide">
                 <tr>
@@ -174,7 +214,8 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
                 ))}
               </tbody>
             </table>
-          </div>
+            </div>
+          </>
         )}
       </section>
     </div>
