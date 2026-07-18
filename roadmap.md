@@ -11,7 +11,7 @@
 | **Legacy (kullanımdan kalktı)** | `license.cicibyte.com` — SGMS artık bu servisi kullanmıyor (bkz. Faz 13). Sunucu diğer istemciler (GarageLedger vb.) için ayakta kalmaya devam ediyor, SGMS'in ona bağımlılığı yok. |
 | **Kaynak doküman** | `sgms.cicibyte.com - readme.md` (teknik günlük/arşiv), `CiCiByte_SGMS_Ultimate_Enterprise_Blueprint.docx` |
 
-**Son güncelleme:** 2026-07-16 · **Bu dosya artık tek doğru kaynaktır** (`readme.md` sadece hızlı başlangıç talimatlarını barındırır, faz/durum takibi burada yapılır).
+**Son güncelleme:** 2026-07-19 · **Bu dosya artık tek doğru kaynaktır** (`readme.md` sadece hızlı başlangıç talimatlarını barındırır, faz/durum takibi burada yapılır).
 
 ---
 
@@ -48,12 +48,12 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 10 | IoT, Kapı, Turnike & SGMS Resepsiyon | ✅ Tamamlandı | 100% |
 | 11 | Marketing & Showcase Sitesi | ✅ Tamamlandı | 100% |
 | 12 | Master Admin, Billing & Audit Platformu | 🔄 Devam ediyor | ~95% (kalıcı silme/hard-delete sırada) |
-| 13 | CiciByte Cloud Migrasyonu & Platform Sertleştirme | 🔄 Devam ediyor | ~90% (yalnızca Playwright E2E kaldı) |
+| 13 | CiciByte Cloud Migrasyonu & Platform Sertleştirme | ✅ Tamamlandı | ~95% (Playwright E2E temel akışlarla kuruldu — 2026-07-19) |
 | 14 | Demo Hesap Güvenliği & Master Admin Geçişi | 🔄 Devam ediyor | ~90% (Demo PT girişi sırada) |
 | 15 | Kimlik, Onboarding & Uyum Sertleştirme | ✅ Tamamlandı | ~95% (proaktif hatırlatma + 6 dil çevirisi kaldı) |
-| 16 | CiciByte Cloud Ticari Entegrasyonu (Ödeme, Referans/Komisyon, Release) | 🔄 Devam ediyor | ~80% (gerçek iyzico anahtarı + sandbox kapatma bekliyor) |
+| 16 | CiciByte Cloud Ticari Entegrasyonu (Ödeme, Referans/Komisyon, Release) | 🔄 Devam ediyor | ~90% (Platform Ödeme Ayarları paneli — iyzico/PayTR/EFT — 2026-07-19'da eklendi; gerçek anahtarlar bekleniyor) |
 | 17 | Üyelik Senaryoları & Ders/Sınıf Yönetimi | 🔲 Planlandı | 0% |
-| 18 | Uyumluluk & Sağlamlaştırma (2FA, GDPR, E2E, Invoice) | 🔲 Planlandı | 0% |
+| 18 | Uyumluluk & Sağlamlaştırma (2FA, GDPR, E2E, Invoice) | 🔄 Devam ediyor | ~40% (2FA + Playwright E2E tamamlandı — 2026-07-19; GDPR self-servis, vardiya, sağlık formu, Invoice uygulama kodu sırada) |
 | 19 | SGMS Masaüstü — Genişletme | 🔲 Gelecek Vizyon | 0% |
 | 20 | SGMS Mobil Uygulama | 🔲 Gelecek Vizyon | 0% |
 | 21 | PT Performans, Komisyon & Prim Yönetimi | ✅ Tamamlandı | 100% (CSV export ve POS entegrasyonu v2'ye ertelendi) |
@@ -71,6 +71,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 33 | Dinamik Rol Bazlı Kullanım Kılavuzu | 🔲 Planlandı | 0% |
 | 34 | Tam Responsive Tasarım Sistemi | ✅ Tamamlandı | ~97% (sol menü/tema/ikon + mobil tablo/kart + mesajlaşma + profil özyönetimi + interaktif program görünümü tamamlandı — yalnızca video desteği/ilerleme geçmişi Tier 2'ye ertelendi) |
 | 35 | Temsilci (Partner) Portalı | ✅ Tamamlandı | 100% |
+| 36 | Kritik İş Mantığı Denetimi & Sağlamlaştırma (2026-07-19 canlıya alma denetimi) | 🔄 Devam ediyor | 0% (10 kritik + 7 ikincil bulgu — bkz. detay bölümü, kullanıcı onayıyla önceliklendirildi) |
 
 > Fazlar 6/9/10'un durum özeti önceki revizyonlarda detay bölümleriyle **çelişiyordu** (özet tablo güncellenmeden unutulmuştu). Bu revizyon koda göre (tüm alt maddeler `[x]`, gerçek commit geçmişi) düzeltilmiştir.
 
@@ -1095,6 +1096,106 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ---
 
+## 🔄 Faz 36 — Kritik İş Mantığı Denetimi & Sağlamlaştırma (Öncelik: P0 — 2026-07-19 canlıya alma denetimi)
+
+> **Arka plan:** Canlıya alma öncesi 4 paralel ajanla gerçek işletme senaryoları üzerinden tam bir mantık denetimi yapıldı (üyelik/para akışı, check-in/turnike, personel/roller/mesajlaşma, raporlama/hiyerarşi/SGMS'in kendi ödeme sistemi). 10 kritik + 7 ikincil öncelikli bulgu tespit edildi. Bu faz, kullanıcı onayıyla önceliklendirilmiş **tüm bulguların** kalıcı çözümünü kapsar — hiçbiri "not düşüldü" olarak bırakılmadı, hepsi somut kabul kriterine bağlandı.
+
+### 36.1 Üyelik Yenileme / Paket & Süre Uzatma Aksiyonu
+
+> **Senaryo:** Bir üyenin 1 aylık paketi bugün bitiyor. Resepsiyonist ya üyeye yeni bir paket sattığında (POS'tan tahsilat alarak) ya da bir temsilci/admin salon adına "süre uzatma" talebiyle bunu düzeltebilmeli — bugün ikisi de mümkün değil, `membershipEndsAt` hiçbir UI'dan güncellenemiyor.
+- [ ] `renewMembership` server action — yeni `GymMembershipPlan` seçilir, `membershipStartsAt`/`membershipEndsAt` otomatik hesaplanır (`durationDays` ile, mevcut bitiş tarihinden mi yoksa bugünden mi başlayacağı — süre dolmamışsa üstüne ekleme, dolmuşsa bugünden başlatma mantığı)
+- [ ] Yenileme, POS/Expense akışına bağlanır — paket satışı otomatik bir `Expense` (tutar = plan fiyatı) oluşturur, ödeme alındığında `Transaction` ile kapanır (mevcut `lib/billing/settle-payment.ts` akışı yeniden kullanılır)
+- [ ] `/dashboard/members/[id]` sayfasına "Paketi Yenile / Süre Uzat" butonu (OWNER/ADMIN/STAFF — rol bazlı, STAFF yalnızca satış yapabilir, admin onayı gerekmeyen serbest uzatma STAFF'a kapalı olabilir — ayarlanabilir)
+- [ ] Temsilci/Master Admin tarafında da salon adına manuel süre uzatma talebi (mevcut Partner'ın "deneme süresi uzatma" desenine benzer, ama bu kez **gym member** seviyesinde) — audit log'a yazılır
+- [ ] Kabul kriteri: bir üyenin süresi dolduğunda resepsiyon "paket sat" diyerek hem tahsilat alıp hem süreyi uzatabiliyor; bir admin/temsilci de talep üzerine ücretsiz/manuel uzatma yapabiliyor; her iki yol da audit log'da görünüyor
+
+### 36.2 Çoklu Para Birimi Doğrulama & Bakiye Motoru
+
+> **Senaryo:** Yabancı bir üyenin USD paket borcu ile yerli bir üyenin TRY POS borcu asla aynı bakiyede toplanmamalı; bir tahsilat yanlış para birimindeki borca uygulanmamalı.
+- [ ] `GymMember`'a birincil para birimi alanı eklenir (ya da her zaman org'un para birimiyle sınırlanır) — yeni `Expense` eklerken üyenin mevcut açık borçlarından **farklı** bir para birimi seçilmeye çalışılırsa net bir uyarı/engelleme
+- [ ] `getMemberOpenBalance` (`lib/member-balance.ts`) para birimine göre gruplanmış bakiye döndürür (`{ TRY: 500, USD: 200 }` gibi) — tek bir yanıltıcı sayı yerine
+- [ ] `applyPaymentToExpenses` (`lib/billing/settle-payment.ts`) FIFO uygularken yalnızca **aynı para birimindeki** açık borçları dikkate alır
+- [ ] `recordPayment` (`actions/expenses.ts`) tahsilat para birimini sabit `'TRY'` yerine ilgili `Expense.currency`'den alır
+- [ ] Üye detay sayfasında bakiye, her para birimi için ayrı satır olarak gösterilir
+- [ ] Kabul kriteri: USD ve TRY borcu olan bir üyede her tahsilat yalnızca kendi para birimindeki borca düşüyor; ekranda "500 ₺ + 200 $" gibi ayrıştırılmış gösteriliyor, asla tek bir yanlış toplam yok
+
+### 36.3 2FA Kurtarma — E-posta + Master Admin
+
+> **Senaryo:** Salon sahibi telefonunu kaybeder, yedek kodları da elinde yoktur. Bugün bu kişi kendi hesabına **kalıcı olarak kilitleniyor** — bu, bu gece eklenen zorunlu 2FA'nın getirdiği bir risktir ve acilen kapatılmalı.
+- [ ] E-posta ile kurtarma: `requestTwoFactorRecovery(email)` — kimliği doğrulanmış bir kurtarma linki (mevcut `password-reset`/`staff-invite` token deseniyle aynı: rastgele token, hash'lenmiş saklama, kısa TTL) e-postayla gönderilir; link tıklandığında 2FA sıfırlanır (`totpSecret`/`twoFactorEnabledAt` temizlenir, backup code'lar silinir) ve kullanıcı bir sonraki girişte 2FA'yı yeniden kurmaya zorlanır
+- [ ] Kurtarma linkinin kötüye kullanımını önlemek için: rate limit (mevcut `consumePasswordResetRateLimit` deseni), ve işlem audit log'a (`TWO_FACTOR_DISABLED`, metadata: `recovery: true`) yazılır + hesap sahibine ayrıca "2FA'nız e-posta yoluyla sıfırlandı" bilgilendirme maili gider (kimse habersiz sıfırlanamasın)
+- [ ] Master Admin tarafı: `/admin/organizations/[id]` üzerinden Master Admin bir organizasyonun OWNER/ADMIN'inin 2FA'sını sıfırlayabilir (kimlik doğrulama sonrası destek talebiyle) — bu da audit log'a yazılır
+- [ ] Kabul kriteri: telefonunu ve yedek kodlarını kaybeden bir OWNER, e-postasına gelen linkle 2FA'sını sıfırlayıp yeniden kurabiliyor; alternatif olarak destekle iletişime geçip Master Admin üzerinden de sıfırlatabiliyor; her iki yol da audit log'da iz bırakıyor
+
+### 36.4 Personel Çıkarma & Oturum İptali
+
+> **Senaryo:** Bir resepsiyonist işten çıkarılır. Salon sahibinin panelde bunu yapacak bir butonu yok; üstelik biri onu devre dışı bıraksa bile, çıkarılan kişi haftalarca (JWT süresi dolana kadar) sisteme girmeye devam edebiliyor.
+- [ ] `/dashboard/team`'e "Çıkar / Devre Dışı Bırak" aksiyonu (OWNER/ADMIN) — `OrganizationMember.isActive = false`, RFID kartı otomatik boşa çıkarılır, bekleyen `StaffInviteToken`'ları iptal edilir
+- [ ] Aynı aksiyon Master Admin (`/admin/organizations/[id]`) ve temsilci panelinden de yapılabilir (kendi atadığı salonlar için, mevcut `requirePartnerOwnsOrganization` deseniyle)
+- [ ] **Oturum iptali gerçek zamanlı olmalı:** JWT'ye kısa bir `sessionVersion`/`tokenVersion` damgası eklenir (`User` veya `OrganizationMember`'da); her `auth()` çağrısında (ya da middleware'de belirli bir cache TTL'iyle, örn. 60 saniye) bu versiyon DB'dekiyle karşılaştırılır — uyuşmuyorsa oturum geçersiz sayılır ve kullanıcı çıkışa zorlanır. (Not: her istekte DB'ye gitmek performans maliyeti yaratır — Redis'te `organizationId:userId → isActive` cache'i tutup deactivate anında invalidate etmek, mevcut `tokenRevokeRedisCache` özelliğinin genişletilmiş hali olarak en uygunu)
+- [ ] Kabul kriteri: bir personel çıkarıldığında en geç ~1 dakika içinde (gerçek zamanlıya en yakın, DB'ye her istekte gitmeden) mevcut oturumu geçersiz oluyor ve tekrar giriş yapamıyor; RFID kartı otomatik boşalıyor
+
+### 36.5 Rol Bazlı API Erişim Sıkılaştırması — TRAINER Finansal Veri Erişimi
+
+> **Senaryo:** Bir PT/antrenör, hiçbir üyenin ödeme geçmişini görmemeli — bu resepsiyonistin ve salon sahibinin işi.
+- [ ] `GET /api/v1/transactions` (ve varsa benzer finansal endpoint'ler) rol kontrolü eklenir: yalnızca `OWNER`/`ADMIN`/`STAFF` (resepsiyon) erişebilir, `TRAINER` **kesin olarak** engellenir (403)
+- [ ] Aynı prensip diğer finansal API uçları için de (expenses, payment-plans) tek tek gözden geçirilip STAFF_ROLES tanımından TRAINER hariç tutulur (yalnızca finansal olanlarda — check-in/programlar gibi TRAINER'ın gerçekten ihtiyacı olan uçlar dokunulmaz)
+- [ ] Kabul kriteri: bir TRAINER bearer token'ıyla `/api/v1/transactions`'a istek attığında 403 alıyor; UI'da zaten gizli olan veri artık API'den de çekilemiyor
+
+### 36.6 Çoklu Şube Personel Desteği & Organizasyon Switcher
+
+> **Senaryo:** Aynı kişi (örneğin bir bölge müdürü ya da birden fazla şubede çalışan bir PT) hem Gym A'da hem Gym B'de personel olabilmeli ve panelde şubeler arasında geçiş yapıp her birinin kendi müşterileriyle ayrı ayrı ilgilenebilmeli.
+- [ ] Aynı e-posta birden fazla organizasyonda personel olarak davet edilebilir hale getirilir — `inviteTeamMember`'daki "zaten kayıtlı" kontrolü yalnızca hedef organizasyon için mi bakıyor doğrulanır ve sessiz no-op yerine ya gerçekten davet gönderilir ya da net bir hata döner
+- [ ] Session/JWT tek bir `organizationId`'ye kilitlenmek yerine, kullanıcının aktif üyeliklerinin listesini taşır; **profesyonel bir organizasyon switcher** (dashboard header'da, mevcut şubeler arasında tek tıkla geçiş — sayfa yenilemeden, benzer SaaS ürünlerindeki "workspace switcher" deseni) eklenir
+- [ ] Aktif organizasyon seçimi JWT'de güncellenir (`update()` session callback ile) ve tüm sorgular her zaman o an aktif olan `organizationId`'ye göre scoped kalır — bir şubenin verisi asla diğerinde sızmaz
+- [ ] Kabul kriteri: aynı e-posta Gym A ve Gym B'de ayrı ayrı personel olabiliyor; kullanıcı panelde tek tıkla şube değiştirebiliyor; her şubede yalnızca o şubenin üyeleri/verileri görünüyor
+
+### 36.7 Ödeme İşlemi Idempotency — Çifte Aktivasyon Önleme
+
+> **En kritik madde.** Aynı anda iki ödeme talebi (kart + manuel, ya da çift tıklama) abonelik süresini iki kez uzatmamalı, iki proforma göndermemeli.
+- [ ] `Organization.settings` JSON'daki `billingRequests` yerine (ya da onunla birlikte) **veritabanı seviyesinde** bir kısıtlama: bir organizasyonun aynı anda yalnızca bir `pending` durumda `billingRequest`/`GatewayCheckoutSession` olabileceğini garanti eden bir mekanizma (örn. `Organization` başına tekil bir "aktif ödeme talebi kilidi" satırı + `@@unique` kısıtı, ya da `$transaction` içinde `SELECT ... FOR UPDATE` ile satır kilidi)
+- [ ] `activateSubscriptionFromRequest` (`lib/billing/activate.ts`) tüm okuma+yazma akışı tek bir serializable transaction içine alınır — iki eşzamanlı çağrı asla ikisi de "pending" durumu görüp ikisi de aktivasyon yapamaz
+- [ ] iyzico/PayTR webhook route'larındaki find-then-update deseni atomik hale getirilir (`UPDATE ... WHERE status = 'pending' RETURNING *` gibi tek sorguluk koşullu güncelleme)
+- [ ] Kabul kriteri: aynı organizasyon için eşzamanlı iki ödeme tamamlansa bile abonelik yalnızca **bir kez** uzuyor, yalnızca **bir** proforma gönderiliyor; ikinci deneme net bir "zaten aktif" yanıtı alıyor
+
+### 36.8 Abonelik Kilidi ↔ Cihaz/Turnike Check-in Tutarlılığı
+
+> **Senaryo:** Deneme süresi/ödeme bitip panel kilitlendiğinde, salonun turnikesi de bilinçli bir kurala göre davranmalı — bugün panel kilitli olsa da turnike süresiz çalışmaya devam ediyor, bu da salonun hiç ödemeden sonsuza kadar işletilebileceği anlamına geliyor.
+- [ ] Ürün kararı olarak: `mode: 'billing_only'` durumunda cihaz/turnike check-in'i de **kısa bir ek süre sonra** (örn. 3-7 gün "nezaket" penceresi — panel kilitlenir kilitlenmez turnikeyi de anında kapatmak gerçek bir salonun ortasında kalmasına neden olabilir) kapatılır; pencere süresi boyunca resepsiyon panelinde büyük bir uyarı gösterilir
+- [ ] `api/v1/check-in/route.ts`'deki cihaz-anahtarlı yol da `resolveSubscriptionAccess` kontrolünden geçirilir (bugün yalnızca staff-session yolu kontrol ediyor)
+- [ ] Kabul kriteri: ödemesi gerçekten bitmiş bir salonun turnikesi, tanımlı nezaket süresi sonunda gerçekten kapanıyor; süreç boyunca hem panelde hem (varsa) e-posta ile net uyarılar gidiyor — sürpriz bir kesinti yaşanmıyor
+
+### 36.9 İade (Refund) Akışı
+
+> **Senaryo:** Bir üye yanlış tahsilat için iade talep eder, ya da salon bir hizmeti iptal edip parasını geri öder — bugün bunun hiçbir kaydı/aksiyonu yok.
+- [ ] `recordRefund` server action — bir `Transaction` (type: `PAYMENT`) seçilip kısmi/tam iade tutarı girilir, karşılığında `type: REFUND` yeni bir `Transaction` oluşturulur (orijinal işlemle ilişkilendirilir — `Transaction`'a opsiyonel `refundOfTransactionId` self-relation eklenir)
+- [ ] İade, ilgili `Expense.paidAmount`'ı düşürür (borç yeniden "kısmen ödenmiş"/"açık" durumuna dönebilir)
+- [ ] POS/üye detay ekranında iade butonu (OWNER/ADMIN/STAFF, tutara göre onay eşiği düşünülebilir) + audit log
+- [ ] Kabul kriteri: bir tahsilat kısmen/tamamen iade edilebiliyor, ilgili borç kaydı doğru şekilde güncelleniyor, işlem audit log'da ve üye ekstresinde görünüyor
+
+### 36.10 Birleşik Ciro/Rapor Motoru
+
+> **Senaryo:** Salon sahibi `/dashboard/reports` ve kurumsal `/dashboard/enterprise` ekranlarında aynı ay için **farklı ciro rakamları** görüyor — biri fatura edilen tutarı, diğeri tahsil edileni, hiçbiri iadeyi düşmüyor.
+- [ ] Tek bir merkezi `getRevenueForPeriod(organizationId, range)` fonksiyonu yazılır (muhtemelen `lib/reports/revenue.ts`) — **tahsil edilen** (`Transaction` type `PAYMENT` eksi `REFUND`) baz alınır, hem tenant raporları hem enterprise konsolide görünüm bu tek fonksiyonu kullanır
+- [ ] "Faturalanan" (billed/`Expense.amount`) ve "Tahsil edilen" (collected/`Transaction`) ayrı ayrı ama tutarlı şekilde etiketlenerek gösterilir — ikisi karıştırılmaz
+- [ ] Kabul kriteri: aynı dönem için tenant raporu ve kurumsal konsolide görünüm birbiriyle tutarlı rakam gösteriyor; iadeler ciroyu doğru şekilde düşürüyor
+
+### 36.11 İkincil Öncelikli Sağlamlaştırma Kalemleri
+
+- [ ] **QR check-in tek kullanımlık hale getirme** — `verifyCheckInQrToken`'a jti/nonce bazlı "kullanıldı" işaretlemesi (Redis'te kısa TTL'li tek-kullanım kilidi), ekran görüntüsüyle ikinci kişinin girmesi engellenir
+- [ ] **Offline turnike senkronunda `direction` alanının işlenmesi** — `sync/push/route.ts` request body'den `direction`'ı da haritalar, auto-toggle'a güvenmek yerine cihazın gönderdiği gerçek yönü kullanır
+- [ ] **Cihaz devre dışı bırakılırken bekleyen offline veri koruması** — bir cihaz `DISABLED` yapılmadan önce bekleyen senkron verisi var mı kontrol edilir; varsa net bir uyarı ("bu cihazda senkronize edilmemiş X kayıt var") ve/veya devre dışı bırakma yerine geçici "re-key" (yeni anahtar) akışı sunulur
+- [ ] **Check-in idempotency/kilit** — hızlı ardışık (aynı üye, saniyeler içinde) check-in'lere karşı kısa süreli bir uygulama seviyesi kilit (Redis, birkaç saniyelik TTL) eklenir; race'den doğan çift ENTRY kaydı önlenir
+- [ ] **Bekleyen personel davetleri için görünürlük + yeniden gönderme** — `/dashboard/team` listesinde `user.status === 'INVITED'` net bir "Davet Bekliyor" etiketiyle gösterilir, "Daveti Yeniden Gönder" aksiyonu eklenir, uzun süre yanıtsız davetler koltuk limitinden düşülebilir/iptal edilebilir hale gelir
+- [ ] **Üye limiti kontrolünün API reaktivasyon yoluna da uygulanması** — `assertWithinMemberLimit`, `PATCH /api/v1/members/[id]` üzerinden `INACTIVE → ACTIVE` geçişinde de çağrılır
+- [ ] **Proforma e-postası için yeniden deneme/kayıt** — `sendProformaInvoiceEmail` başarısız olursa sessizce yutulmak yerine bir durum kaydı tutulur (örn. `ProformaToken`'a `emailStatus` alanı) ve Master Admin panelinden "yeniden gönder" aksiyonu sunulur; PDF font indirmesi (`raw.githubusercontent.com`) için timeout + yerel fallback eklenir (dış servise bağımlılığı azaltmak için)
+
+**Kabul kriteri (faz geneli):** Yukarıdaki 10 kritik maddenin tamamı üretim ortamında doğrulanmış, gerçek senaryolarla test edilmiş ve audit log'a bağlanmış olmalı; 7 ikincil madde takip listesinde kalabilir ama roadmap'ten düşürülmez.
+
+**Bağımlılık:** Faz 8 (POS/Cari) · Faz 12 (Master Admin) · Faz 16 (Ödeme sağlayıcı — bu gece eklendi) · Faz 30 (Kurumsal hiyerarşi — 36.6 için)
+
+---
+
 ## Teknik Borç & Paralel İyileştirmeler
 
 | Öğe | Öncelik | Faz | Durum |
@@ -1193,7 +1294,31 @@ Devam ediyor:
   Faz 28     İleri raporlama & Business Intelligence             ✅ (~80% — ARR/churn-anketi v2)
   Faz 30     Kurumsal hiyerarşi & çoklu şube/bölge               ✅ (v1 — bkz. ertelenenler)
 
-Sıradaki (öncelik sırası — profesyonel değerlendirme, P0 en önce):
+Şimdi en öncelikli (2026-07-19 canlıya alma denetimi — Faz 36, kullanıcı onaylı sıra):
+  Faz 36 · Sprint 1 — Güvenlik & Erişim (hızlı, izole, yüksek değer)
+    36.5     TRAINER'ın finansal API erişiminin kapatılması        ← tek satırlık rol kontrolü, en düşük risk
+    36.4     Personel çıkarma + gerçek zamanlı oturum iptali        ← güvenlik açığı, orta efor
+    36.3     2FA kurtarma (e-posta + Master Admin)                  ← bu gece eklenen riski kapatır, acil
+
+  Faz 36 · Sprint 2 — Para/Defter Bütünlüğü (birbirine bağlı, birlikte yürütülür)
+    36.2     Çoklu para birimi doğrulama & bakiye motoru
+    36.9     İade (refund) akışı
+    36.10    Birleşik ciro/rapor motoru
+    36.1     Üyelik yenileme / paket & süre uzatma (POS'a bağlı)
+
+  Faz 36 · Sprint 3 — Ödeme Güvenliği & Abonelik Politikası
+    36.7     Ödeme idempotency — çifte aktivasyon önleme            ← en kritik, para güvenliği
+    36.8     Abonelik kilidi ↔ cihaz/turnike check-in tutarlılığı
+
+  Faz 36 · Sprint 4 — Çoklu Şube
+    36.6     Çoklu şube personel desteği & organizasyon switcher     ← en büyük kapsam, session/JWT yeniden tasarımı
+
+  Faz 36 · Sprint 5 — İkincil sağlamlaştırma (36.11, tek tek düşük efor)
+    QR tek kullanımlık · offline sync direction · cihaz devre dışı veri koruması ·
+    check-in idempotency kilidi · davet "pending" görünürlüğü/yeniden gönderme ·
+    üye limiti reaktivasyon kontrolü · proforma e-posta retry
+
+Sıradaki (Faz 36 sonrası — profesyonel değerlendirme, P0 en önce):
   Faz 32     Ticarileştirme: paket + ek kapasite satışı          ← P0, gelir modeli (kullanıcı onayı gerekli)
   [Repo]     Git contributors düzenlemesi (cursoragent kaldırma) ← P0, ⚠️ onay gerekli (destructive, force-push)
 
