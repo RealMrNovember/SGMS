@@ -1,6 +1,5 @@
 import {
   canManageMembers,
-  requireMemberScopedApiContext,
   requireTenantApiContext,
   requireTenantWriteAccess,
   resolveGymMemberFilter,
@@ -14,8 +13,10 @@ import type { PaymentMethod, TransactionType } from '@sgms/database';
 
 const PAYMENT_METHODS = new Set<PaymentMethod>(['CASH', 'CARD', 'TRANSFER']);
 
+// Finansal veri — yalnızca resepsiyon/yönetim (OWNER/ADMIN/STAFF). TRAINER'ın hiçbir
+// üyenin ödeme geçmişini görmemesi gerekir (bkz. roadmap.md Faz 36.5).
 export async function GET(request: Request) {
-  const authResult = await requireMemberScopedApiContext(request);
+  const authResult = await requireTenantApiContext(request, { roles: ['OWNER', 'ADMIN', 'STAFF'] });
   if ('response' in authResult) {
     return authResult.response;
   }

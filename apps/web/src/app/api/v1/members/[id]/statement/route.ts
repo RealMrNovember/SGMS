@@ -20,6 +20,11 @@ export async function GET(request: Request, { params }: RouteParams) {
     return apiErrorI18n('ownRecordsOnly', 403, request);
   }
 
+  // Cari ekstre finansal veridir — TRAINER hiçbir üyenin ekstresini göremez (bkz. roadmap.md Faz 36.5).
+  if (!isAthleteContext(context) && context.role === 'TRAINER') {
+    return apiErrorI18n('roleForbidden', 403, request);
+  }
+
   const format = new URL(request.url).searchParams.get('format')?.toLowerCase();
 
   if (format === 'pdf') {

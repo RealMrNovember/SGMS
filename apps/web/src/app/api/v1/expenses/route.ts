@@ -1,6 +1,5 @@
 import {
   canManageMembers,
-  requireMemberScopedApiContext,
   requireTenantApiContext,
   requireTenantWriteAccess,
   resolveGymMemberFilter,
@@ -11,8 +10,9 @@ import { apiOk } from '@/lib/api/response';
 import { decimalToNumber } from '@/lib/member-balance';
 import { prisma } from '@/lib/prisma';
 
+// Finansal veri — yalnızca resepsiyon/yönetim (OWNER/ADMIN/STAFF). TRAINER göremez (bkz. roadmap.md Faz 36.5).
 export async function GET(request: Request) {
-  const authResult = await requireMemberScopedApiContext(request);
+  const authResult = await requireTenantApiContext(request, { roles: ['OWNER', 'ADMIN', 'STAFF'] });
   if ('response' in authResult) {
     return authResult.response;
   }

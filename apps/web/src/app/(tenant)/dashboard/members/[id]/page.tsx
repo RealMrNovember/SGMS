@@ -194,40 +194,44 @@ export default async function MemberDetailPage({
         </section>
       ) : null}
 
-      <MemberAccountPanel
-        gymMemberId={member.id}
-        canManage={canManageAccount}
-        canVoid={canVoidExpenses}
-        currency="TRY"
-        openBalance={decimalToNumber(accountSummary.openBalance)}
-        categories={expenseCategories.map((c) => ({
-          id: c.id,
-          name: c.name,
-          defaultAmount: c.defaultAmount?.toString() ?? null,
-        }))}
-        expenses={accountSummary.recentExpenses.map((e) => ({
-          id: e.id,
-          description: e.description,
-          amount: e.amount.toString(),
-          status: e.status,
-          createdAt: e.createdAt.toISOString(),
-          category: e.category,
-        }))}
-        transactions={accountSummary.recentTransactions.map((tx) => ({
-          id: tx.id,
-          amount: tx.amount.toString(),
-          type: tx.type,
-          paymentMethod: tx.paymentMethod,
-          createdAt: tx.createdAt.toISOString(),
-        }))}
-        paymentPlans={paymentPlans.map((plan) => ({
-          ...plan,
-          installments: plan.installments.map((installment) => ({
-            ...installment,
-            dueDate: installment.dueDate ? installment.dueDate.toISOString() : null,
-          })),
-        }))}
-      />
+      {/* Finansal veri (bakiye, harcama, tahsilat) — yalnızca OWNER/ADMIN/STAFF görebilir.
+          TRAINER hiçbir üyenin ödeme/cari bilgisine erişemez (bkz. roadmap.md Faz 36.5). */}
+      {canManageAccount ? (
+        <MemberAccountPanel
+          gymMemberId={member.id}
+          canManage={canManageAccount}
+          canVoid={canVoidExpenses}
+          currency="TRY"
+          openBalance={decimalToNumber(accountSummary.openBalance)}
+          categories={expenseCategories.map((c) => ({
+            id: c.id,
+            name: c.name,
+            defaultAmount: c.defaultAmount?.toString() ?? null,
+          }))}
+          expenses={accountSummary.recentExpenses.map((e) => ({
+            id: e.id,
+            description: e.description,
+            amount: e.amount.toString(),
+            status: e.status,
+            createdAt: e.createdAt.toISOString(),
+            category: e.category,
+          }))}
+          transactions={accountSummary.recentTransactions.map((tx) => ({
+            id: tx.id,
+            amount: tx.amount.toString(),
+            type: tx.type,
+            paymentMethod: tx.paymentMethod,
+            createdAt: tx.createdAt.toISOString(),
+          }))}
+          paymentPlans={paymentPlans.map((plan) => ({
+            ...plan,
+            installments: plan.installments.map((installment) => ({
+              ...installment,
+              dueDate: installment.dueDate ? installment.dueDate.toISOString() : null,
+            })),
+          }))}
+        />
+      ) : null}
 
       <AddMeasurementForm gymMemberId={member.id} canManage={canManageMeasurements} />
 
