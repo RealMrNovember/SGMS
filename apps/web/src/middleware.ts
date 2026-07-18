@@ -47,6 +47,8 @@ export default auth((request) => {
   const isSuperAdmin = request.auth?.user?.isSuperAdmin === true;
   const isPartner = request.auth?.user?.isPartner === true;
   const isAthlete = isAthleteSession(request.auth);
+  const needsTwoFactorSetup = request.auth?.user?.needsTwoFactorSetup === true;
+  const securityPath = isSuperAdmin ? '/admin/account/security' : '/dashboard/account/security';
   const { pathname } = request.nextUrl;
 
   const isPublic =
@@ -54,6 +56,7 @@ export default auth((request) => {
     pathname.startsWith('/trial') ||
     pathname.startsWith('/forgot-password') ||
     pathname.startsWith('/reset-password') ||
+    pathname.startsWith('/staff-invite') ||
     pathname.startsWith('/privacy') ||
     pathname.startsWith('/terms') ||
     pathname.startsWith('/api/auth') ||
@@ -76,9 +79,18 @@ export default auth((request) => {
     return withLocaleCookie(
       request,
       NextResponse.redirect(
-        new URL(defaultDestination(isSuperAdmin, isPartner, isAthlete), request.nextUrl.origin),
+        new URL(
+          needsTwoFactorSetup
+            ? securityPath
+            : defaultDestination(isSuperAdmin, isPartner, isAthlete),
+          request.nextUrl.origin,
+        ),
       ),
     );
+  }
+
+  if (isLoggedIn && needsTwoFactorSetup && !isApi && pathname !== securityPath) {
+    return withLocaleCookie(request, NextResponse.redirect(new URL(securityPath, request.nextUrl.origin)));
   }
 
   if (isLoggedIn && pathname.startsWith('/dashboard') && isAthlete) {

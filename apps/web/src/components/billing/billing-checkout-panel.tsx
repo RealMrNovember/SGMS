@@ -42,16 +42,25 @@ function buildWhatsAppUrl(orgName: string, planName: string, cycle: string, amou
   return `https://wa.me/${siteConfig.contact.whatsapp}?text=${encodeURIComponent(text)}`;
 }
 
+type BankTransferInfo = {
+  ibanHolderName: string | null;
+  ibanNumber: string | null;
+  ibanBankName: string | null;
+  bankTransferNote: string | null;
+} | null;
+
 export function BillingCheckoutPanel({
   organizationName,
   plans,
   hasPendingRequest,
   locked,
+  bankTransfer,
 }: {
   organizationName: string;
   plans: PlanOption[];
   hasPendingRequest: boolean;
   locked: boolean;
+  bankTransfer: BankTransferInfo;
 }) {
   const t = useTranslations('billing');
   const [state, formAction, pending] = useActionState(submitBillingRequest, initial);
@@ -156,12 +165,45 @@ export function BillingCheckoutPanel({
             <p className="muted text-xs">{t('payWithCardHint')}</p>
           </form>
 
-          <p className="muted text-sm">{t('bankSoon')}</p>
+          {!bankTransfer ? <p className="muted text-sm">{t('bankSoon')}</p> : null}
         </div>
 
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">{t('requestTitle')}</h3>
           <p className="muted text-sm leading-7">{t('requestHint')}</p>
+
+          {bankTransfer ? (
+            <div className="rounded-lg border border-white/10 bg-black/20 p-4 text-sm">
+              <p className="font-semibold">Banka Havalesi / EFT bilgileri</p>
+              <dl className="mt-2 space-y-1">
+                {bankTransfer.ibanHolderName ? (
+                  <div className="flex justify-between gap-4">
+                    <dt className="muted">Hesap sahibi</dt>
+                    <dd>{bankTransfer.ibanHolderName}</dd>
+                  </div>
+                ) : null}
+                {bankTransfer.ibanNumber ? (
+                  <div className="flex justify-between gap-4">
+                    <dt className="muted">IBAN</dt>
+                    <dd className="font-mono">{bankTransfer.ibanNumber}</dd>
+                  </div>
+                ) : null}
+                {bankTransfer.ibanBankName ? (
+                  <div className="flex justify-between gap-4">
+                    <dt className="muted">Banka</dt>
+                    <dd>{bankTransfer.ibanBankName}</dd>
+                  </div>
+                ) : null}
+              </dl>
+              {bankTransfer.bankTransferNote ? (
+                <p className="muted mt-2 text-xs">{bankTransfer.bankTransferNote}</p>
+              ) : null}
+              <p className="muted mt-2 text-xs">
+                Transferi yaptıktan sonra aşağıdaki formla bize bildirin — onay sonrası paneliniz
+                otomatik açılır ve proforma faturanız e-posta ile gönderilir.
+              </p>
+            </div>
+          ) : null}
           <form action={formAction} className="space-y-3">
             <input type="hidden" name="planId" value={selectedPlanId} />
             <input type="hidden" name="billingCycle" value={cycle} />

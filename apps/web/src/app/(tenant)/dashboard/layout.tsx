@@ -23,6 +23,7 @@ import {
   MessageSquare,
   ScanLine,
   Settings,
+  ShieldCheck,
   Sparkles,
   Users,
   Wallet,
@@ -109,6 +110,7 @@ export default async function TenantDashboardLayout({ children }: { children: Re
             { href: '/dashboard/team', label: t('team'), icon: <IdCard /> },
             { href: '/dashboard/plans', label: t('plans'), icon: <Layers /> },
             { href: '/dashboard/settings', label: t('settings'), icon: <Settings /> },
+            { href: '/dashboard/account/security', label: t('twoFactor'), icon: <ShieldCheck /> },
           ],
         },
         ...(canViewReports || canViewEnterprise

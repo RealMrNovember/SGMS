@@ -1,29 +1,38 @@
 'use server';
 
 import { auth } from '@/lib/auth';
+import { getRequestAuditContext } from '@/lib/audit/logger';
+import { getCloudClient } from '@/lib/cloud-sync';
+import { createStaffInviteToken } from '@/lib/staff-invite';
 import { prisma } from '@/lib/prisma';
+import { siteConfig } from '@/lib/site-config';
 import { assertWithinStaffLimit, getTenantWriteBlockReason } from '@/lib/tenant-access';
 import type { OrganizationRole } from '@sgms/database';
 import { hash } from 'bcryptjs';
+import { randomBytes } from 'crypto';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 
 const INVITABLE_ROLES = ['STAFF', 'TRAINER', 'VIEWER'] as const satisfies readonly OrganizationRole[];
 const MANAGER_ROLES = new Set<OrganizationRole>(['OWNER', 'ADMIN']);
 
-const DEFAULT_STAFF_PASSWORD = 'Staff123!';
-
-const inviteTeamMemberSchema = z.object({
-  name: z.string().min(2).max(120),
-  email: z.string().email(),
-  role: z.enum(INVITABLE_ROLES),
-});
+const inviteTeamMemberSchema = z
+  .object({
+    name: z.string().min(2).max(120),
+    email: z.string().email(),
+    role: z.enum(INVITABLE_ROLES),
+    passwordMode: z.enum(['owner_set', 'email_invite']),
+    password: z.string().optional(),
+  })
+  .refine((data) => data.passwordMode !== 'owner_set' || (data.password && data.password.length >= 8), {
+    message: 'Parola en az 8 karakter olmalı.',
+    path: ['password'],
+  });
 
 export type InviteTeamMemberState = {
   error?: string;
   success?: string;
-  temporaryPassword?: string;
-  fieldErrors?: Partial<Record<keyof z.infer<typeof inviteTeamMemberSchema>, string>>;
+  fieldErrors?: Partial<Record<'name' | 'email' | 'role' | 'password', string>>;
 };
 
 async function getTenantContext() {
@@ -64,6 +73,8 @@ export async function inviteTeamMember(
     name: formData.get('name'),
     email: formData.get('email'),
     role: formData.get('role'),
+    passwordMode: formData.get('passwordMode') ?? 'email_invite',
+    password: formData.get('password') || undefined,
   });
 
   if (!parsed.success) {
@@ -98,9 +109,16 @@ export async function inviteTeamMember(
     return { error: staffLimitError };
   }
 
-  const passwordHash = await hash(DEFAULT_STAFF_PASSWORD, 12);
+  // Yeni hesap: sahibi bir parola atadıysa doğrudan onu, aksi halde kimsenin
+  // bilmediği rastgele bir hash kullanılır — kullanıcı e-postadaki linkle kendi
+  // parolasını belirleyene kadar bu hesaba parolayla giriş yapılamaz.
+  const passwordHash = await hash(
+    data.passwordMode === 'owner_set' ? data.password! : randomBytes(32).toString('hex'),
+    12,
+  );
+  const initialStatus = data.passwordMode === 'owner_set' ? 'ACTIVE' : 'INVITED';
 
-  await prisma.$transaction(async (tx) => {
+  const newUserId = await prisma.$transaction(async (tx) => {
     const user =
       existingUser ??
       (await tx.user.create({
@@ -108,7 +126,7 @@ export async function inviteTeamMember(
           email,
           name: data.name,
           passwordHash,
-          status: 'ACTIVE',
+          status: initialStatus,
           locale: 'tr',
         },
       }));
@@ -141,17 +159,59 @@ export async function inviteTeamMember(
         metadata: {
           email,
           role: data.role,
+          passwordMode: data.passwordMode,
         },
       },
     });
+
+    return existingUser ? null : user.id;
   });
 
   revalidatePath('/dashboard/team');
 
-  return {
-    success: `${data.name} personel olarak eklendi.`,
-    temporaryPassword: existingUser ? undefined : DEFAULT_STAFF_PASSWORD,
-  };
+  if (newUserId && data.passwordMode === 'email_invite') {
+    const { token } = await createStaffInviteToken(newUserId, context.organizationId);
+    const inviteUrl = `${siteConfig.url}/staff-invite?token=${token}`;
+
+    const html = `
+      <p>Merhaba ${data.name},</p>
+      <p>SGMS üzerinde size bir personel hesabı oluşturuldu. Aşağıdaki bağlantıya tıklayarak
+      kendi parolanızı belirleyebilir ve giriş yapabilirsiniz:</p>
+      <p><a href="${inviteUrl}">${inviteUrl}</a></p>
+      <p>Bu bağlantı 7 gün içinde geçerliliğini yitirecektir.</p>
+    `.trim();
+
+    const mailResult = await getCloudClient().sendMail({
+      to: email,
+      subject: 'SGMS — hesabınız oluşturuldu, parolanızı belirleyin',
+      html,
+      category: 'transactional',
+    });
+
+    const ctx = await getRequestAuditContext();
+    await prisma.auditLog.create({
+      data: {
+        actorId: context.actorId,
+        organizationId: context.organizationId,
+        action: 'STAFF_INVITE_SENT',
+        entityType: 'user',
+        entityId: newUserId,
+        metadata: { email, emailSent: mailResult.ok },
+        ipAddress: ctx.ipAddress,
+        userAgent: ctx.userAgent,
+      },
+    });
+
+    if (!mailResult.ok) {
+      return {
+        error: `${data.name} eklendi ama davet e-postası gönderilemedi. Lütfen kendisine ${inviteUrl} bağlantısını manuel iletin.`,
+      };
+    }
+
+    return { success: `${data.name} eklendi. Parolasını belirlemesi için davet e-postası gönderildi.` };
+  }
+
+  return { success: `${data.name} personel olarak eklendi.` };
 }
 
 export type UpdateStaffRfidState = { error?: string; success?: string };

@@ -36,7 +36,7 @@ export const AUDIT_CATEGORY_ACTIONS: Record<Exclude<AuditCategory, 'all'>, Audit
     'CLOUD_SYNC_FAILED',
   ],
   team: ['MEMBER_INVITED', 'USER_CREATED', 'USER_UPDATED', 'MEMBER_UPDATED', 'MEMBER_REMOVED'],
-  members: ['MEMBER_REGISTERED', 'MEASUREMENT_ADDED'],
+  members: ['MEMBER_REGISTERED', 'MEASUREMENT_ADDED', 'MEMBERSHIP_REMINDER_SENT'],
   devices: ['DEVICE_REGISTERED', 'DEVICE_UPDATED', 'DEVICE_DISABLED'],
   finance: [
     'EXPENSE_ADDED',
@@ -44,6 +44,7 @@ export const AUDIT_CATEGORY_ACTIONS: Record<Exclude<AuditCategory, 'all'>, Audit
     'PAYMENT_RECORDED',
     'PAYMENT_PLAN_CREATED',
     'PAYMENT_PLAN_CANCELLED',
+    'PROFORMA_SENT',
   ],
   checkin: ['MEMBER_CHECK_IN'],
   auth: ['USER_LOGIN', 'USER_LOGOUT'],
@@ -55,8 +56,13 @@ export const AUDIT_CATEGORY_ACTIONS: Record<Exclude<AuditCategory, 'all'>, Audit
     'MESSAGE_REPORTED',
     'PASSWORD_RESET_REQUESTED',
     'PASSWORD_RESET_COMPLETED',
+    'TWO_FACTOR_ENABLED',
+    'TWO_FACTOR_DISABLED',
+    'TWO_FACTOR_BACKUP_CODES_REGENERATED',
+    'STAFF_INVITE_SENT',
+    'STAFF_INVITE_ACCEPTED',
   ],
-  settings: ['SETTINGS_CHANGED'],
+  settings: ['SETTINGS_CHANGED', 'PLATFORM_PAYMENT_SETTINGS_CHANGED'],
   partner: [
     'PARTNER_CREATED',
     'PARTNER_UPDATED',
@@ -140,6 +146,14 @@ export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   HIERARCHY_MEMBER_REVOKED: 'Kurumsal hiyerarşi yetkisi kaldırıldı',
   PAYMENT_PLAN_CREATED: 'Ödeme planı oluşturuldu',
   PAYMENT_PLAN_CANCELLED: 'Ödeme planı iptal edildi',
+  PLATFORM_PAYMENT_SETTINGS_CHANGED: 'Platform ödeme ayarları değiştirildi',
+  TWO_FACTOR_ENABLED: '2FA etkinleştirildi',
+  TWO_FACTOR_DISABLED: '2FA devre dışı bırakıldı',
+  TWO_FACTOR_BACKUP_CODES_REGENERATED: '2FA yedek kodları yenilendi',
+  STAFF_INVITE_SENT: 'Personel daveti gönderildi',
+  STAFF_INVITE_ACCEPTED: 'Personel daveti kabul edildi',
+  PROFORMA_SENT: 'Proforma fatura gönderildi',
+  MEMBERSHIP_REMINDER_SENT: 'Üyelik hatırlatması gönderildi',
 };
 
 export const ALL_AUDIT_ACTIONS = Object.keys(AUDIT_ACTION_LABELS) as AuditAction[];

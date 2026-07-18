@@ -1,6 +1,7 @@
 'use server';
 
 import { auth } from '@/lib/auth';
+import { getRequestAuditContext } from '@/lib/audit/logger';
 import {
   appendBillingRequest,
   getPendingBillingRequest,
@@ -8,6 +9,7 @@ import {
 } from '@/lib/billing/settings';
 import { resolveSubscriptionAccess } from '@/lib/billing/subscription-gate';
 import { getCloudClient } from '@/lib/cloud-sync';
+import { getPlatformPaymentSettings, initiateIyzicoCheckout, initiatePaytrCheckout } from '@/lib/payments/gateway';
 import { prisma } from '@/lib/prisma';
 import { siteConfig } from '@/lib/site-config';
 import type { Prisma } from '@sgms/database';
@@ -139,7 +141,11 @@ export type CardCheckoutState = {
   error?: string;
 };
 
-/** "Kartla öde" — cloud.cicibyte.com üzerinden gerçek ödeme ağ geçidine (iyzico) yönlendirir. */
+/**
+ * "Kartla öde" — Platform Ödeme Ayarları'nda (Master Admin → Ayarlar → Ödeme)
+ * bir sağlayıcı (iyzico/PayTR) tanımlıysa doğrudan o sağlayıcının ödeme sayfasına
+ * yönlendirir. Hiçbir sağlayıcı seçilmediyse eski cloud.cicibyte.com akışına düşer.
+ */
 export async function startCardCheckout(
   _prev: CardCheckoutState,
   formData: FormData,
@@ -159,9 +165,10 @@ export async function startCardCheckout(
     const session = await requireOwnerContext();
     const orgId = session.user.organizationId!;
 
-    const [org, plan] = await Promise.all([
+    const [org, plan, gatewaySettings] = await Promise.all([
       prisma.organization.findUnique({ where: { id: orgId }, select: { name: true, slug: true, email: true } }),
       prisma.plan.findFirst({ where: { id: parsed.data.planId, isActive: true } }),
+      getPlatformPaymentSettings(),
     ]);
 
     if (!org || !plan) {
@@ -171,22 +178,99 @@ export async function startCardCheckout(
     const amount =
       parsed.data.billingCycle === 'YEARLY' ? Number(plan.priceYearly) : Number(plan.priceMonthly);
 
-    const result = await getCloudClient().startCheckout({
-      tenantSlug: org.slug,
-      tenantName: org.name,
-      email: org.email,
-      planCode: plan.code,
-      billingInterval: parsed.data.billingCycle === 'YEARLY' ? 'yearly' : 'monthly',
-      amount,
-      currency: plan.currency,
-      returnUrl: `${siteConfig.url}/dashboard/billing`,
-    });
+    if (gatewaySettings.activeGateway !== 'NONE') {
+      const orgSettingsRow = await prisma.organization.findUnique({
+        where: { id: orgId },
+        select: { settings: true },
+      });
+      const billingSettings = parseBillingSettings(orgSettingsRow?.settings);
+      if (getPendingBillingRequest(billingSettings)) {
+        return { error: 'Bekleyen bir ödeme talebiniz var. Onay sonrası panel otomatik açılacaktır.' };
+      }
 
-    if (!result.ok || !result.payload?.checkout_url) {
-      return { error: result.message || 'Ödeme sayfası oluşturulamadı. Lütfen daha sonra tekrar deneyin.' };
+      const nextSettings = appendBillingRequest(billingSettings, {
+        planId: plan.id,
+        planCode: plan.code,
+        planName: plan.name,
+        billingCycle: parsed.data.billingCycle,
+        amount,
+        currency: plan.currency,
+      });
+      const billingRequestId = nextSettings.billingRequests![0].id;
+
+      await prisma.$transaction([
+        prisma.organization.update({
+          where: { id: orgId },
+          data: { settings: nextSettings as Prisma.InputJsonValue },
+        }),
+        prisma.gatewayCheckoutSession.create({
+          data: {
+            id: billingRequestId,
+            organizationId: orgId,
+            billingRequestId,
+            gateway: gatewaySettings.activeGateway,
+          },
+        }),
+      ]);
+
+      const ctx = await getRequestAuditContext();
+      const buyer = {
+        id: session.user.id,
+        name: session.user.name || org.name,
+        email: org.email || session.user.email,
+        ip: ctx.ipAddress || '85.34.78.112',
+      };
+
+      if (gatewaySettings.activeGateway === 'IYZICO') {
+        const result = await initiateIyzicoCheckout(gatewaySettings, {
+          orderId: billingRequestId,
+          amount,
+          currency: plan.currency,
+          description: `${plan.name} — ${parsed.data.billingCycle === 'YEARLY' ? 'Yıllık' : 'Aylık'}`,
+          buyer,
+          callbackUrl: `${siteConfig.url}/api/v1/webhooks/iyzico`,
+        });
+        if (!result.ok) {
+          return { error: result.error };
+        }
+        checkoutUrl = result.paymentPageUrl;
+      } else {
+        const result = await initiatePaytrCheckout(
+          gatewaySettings,
+          {
+            orderId: billingRequestId,
+            amount,
+            currency: plan.currency,
+            description: `${plan.name} — ${parsed.data.billingCycle === 'YEARLY' ? 'Yıllık' : 'Aylık'}`,
+            buyer,
+            callbackUrl: `${siteConfig.url}/api/v1/webhooks/paytr`,
+          },
+          `${siteConfig.url}/dashboard/billing?paytr=ok`,
+          `${siteConfig.url}/dashboard/billing?paytr=fail`,
+        );
+        if (!result.ok) {
+          return { error: result.error };
+        }
+        checkoutUrl = result.iframeUrl;
+      }
+    } else {
+      const result = await getCloudClient().startCheckout({
+        tenantSlug: org.slug,
+        tenantName: org.name,
+        email: org.email,
+        planCode: plan.code,
+        billingInterval: parsed.data.billingCycle === 'YEARLY' ? 'yearly' : 'monthly',
+        amount,
+        currency: plan.currency,
+        returnUrl: `${siteConfig.url}/dashboard/billing`,
+      });
+
+      if (!result.ok || !result.payload?.checkout_url) {
+        return { error: result.message || 'Ödeme sayfası oluşturulamadı. Lütfen daha sonra tekrar deneyin.' };
+      }
+
+      checkoutUrl = result.payload.checkout_url;
     }
-
-    checkoutUrl = result.payload.checkout_url;
   } catch (error) {
     return { error: error instanceof Error ? error.message : 'Ödeme başlatılamadı.' };
   }

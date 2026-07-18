@@ -7,6 +7,7 @@ import { auth } from '@/lib/auth';
 import { getMasterAdminStats } from '@/lib/admin/master-admin-queries';
 import {
   Building2,
+  CreditCard,
   Flag,
   Handshake,
   Layers,
@@ -16,6 +17,7 @@ import {
   PlusCircle,
   ScrollText,
   ShieldAlert,
+  ShieldCheck,
   UserCog,
 } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
@@ -53,12 +55,14 @@ export default async function SuperAdminLayout({ children }: { children: React.R
         { href: '/admin/audit', label: tAdmin('auditNav'), icon: <ScrollText /> },
         { href: '/admin/audit?category=security', label: tAdmin('auditSecurityNav'), icon: <ShieldAlert /> },
         { href: '/admin/moderation', label: tAdmin('moderationNav'), icon: <Flag /> },
+        { href: '/admin/account/security', label: tAdmin('twoFactorNav'), icon: <ShieldCheck /> },
       ],
     },
     {
       title: tAdmin('navGroupSystem'),
       items: [
         { href: '/admin/admins', label: tAdmin('adminsNav'), icon: <UserCog /> },
+        { href: '/admin/payments', label: tAdmin('paymentsNav'), icon: <CreditCard /> },
         { href: '/admin/communications', label: tAdmin('communicationsNav'), icon: <Mail /> },
         { href: '/admin/organizations/new', label: t('newCustomer'), icon: <PlusCircle /> },
       ],

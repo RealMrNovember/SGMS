@@ -58,6 +58,7 @@ export async function writeLoginFailedAudit(input: {
     | 'user_not_found'
     | 'user_inactive'
     | 'invalid_password'
+    | 'invalid_totp'
     | 'no_api_scope'
     | 'org_mismatch'
     | 'super_admin_blocked'

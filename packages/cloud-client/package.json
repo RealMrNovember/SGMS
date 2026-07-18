@@ -15,7 +15,8 @@
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "heartbeat": "node dist/heartbeat-cli.js"
+    "heartbeat": "node dist/heartbeat-cli.js",
+    "reminders": "node dist/reminders-cli.js"
   },
   "dependencies": {
     "@sgms/database": "workspace:*"

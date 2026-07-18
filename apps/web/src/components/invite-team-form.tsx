@@ -2,13 +2,14 @@
 
 import { inviteTeamMember, type InviteTeamMemberState } from '@/actions/team';
 import { useTranslations } from 'next-intl';
-import { useActionState } from 'react';
+import { useActionState, useState } from 'react';
 
 const initialState: InviteTeamMemberState = {};
 
 export function InviteTeamForm({ canInvite }: { canInvite: boolean }) {
   const t = useTranslations('team.invite');
   const [state, formAction, pending] = useActionState(inviteTeamMember, initialState);
+  const [passwordMode, setPasswordMode] = useState<'email_invite' | 'owner_set'>('email_invite');
 
   const roleOptions = [
     { value: 'STAFF', label: t('roleStaff') },
@@ -40,11 +41,6 @@ export function InviteTeamForm({ canInvite }: { canInvite: boolean }) {
       {state.success ? (
         <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
           <p>{state.success}</p>
-          {state.temporaryPassword ? (
-            <p className="mt-2">
-              {t('tempPassword', { password: state.temporaryPassword })}
-            </p>
-          ) : null}
         </div>
       ) : null}
 
@@ -84,6 +80,51 @@ export function InviteTeamForm({ canInvite }: { canInvite: boolean }) {
             <p className="text-xs text-rose-400">{state.fieldErrors.role}</p>
           ) : null}
         </div>
+
+        <div className="space-y-2 md:col-span-2">
+          <span className="muted text-sm">{t('passwordModeLabel')}</span>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="radio"
+                name="passwordMode"
+                value="email_invite"
+                checked={passwordMode === 'email_invite'}
+                onChange={() => setPasswordMode('email_invite')}
+              />
+              {t('passwordModeEmailInvite')}
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="radio"
+                name="passwordMode"
+                value="owner_set"
+                checked={passwordMode === 'owner_set'}
+                onChange={() => setPasswordMode('owner_set')}
+              />
+              {t('passwordModeOwnerSet')}
+            </label>
+          </div>
+        </div>
+
+        {passwordMode === 'owner_set' ? (
+          <div className="space-y-2 md:col-span-2">
+            <label htmlFor="password" className="muted text-sm">
+              {t('password')}
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              className="input"
+              minLength={8}
+              required={passwordMode === 'owner_set'}
+            />
+            {state.fieldErrors?.password ? (
+              <p className="text-xs text-rose-400">{state.fieldErrors.password}</p>
+            ) : null}
+          </div>
+        ) : null}
 
         <div className="md:col-span-2">
           <button type="submit" className="button px-6 py-3 text-sm" disabled={pending}>

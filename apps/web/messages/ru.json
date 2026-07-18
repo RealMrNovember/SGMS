@@ -51,7 +51,8 @@
       "management": "Управление",
       "analytics": "Аналитика"
     },
-    "paymentPlans": "Планы платежей"
+    "paymentPlans": "Планы платежей",
+    "twoFactor": "Безопасность аккаунта (2FA)"
   },
   "auth": {
     "login": "Войти",
@@ -81,7 +82,11 @@
     "demoOwner": "Владелец зала",
     "demoStaff": "Ресепшн",
     "demoAthlete": "Клиент (спортсмен)",
-    "backToSite": "На главную"
+    "backToSite": "На главную",
+    "totpLabel": "Код подтверждения (приложение Authenticator)",
+    "verifyTotp": "Подтвердить код",
+    "backToCredentials": "Назад",
+    "invalidTotp": "Неверный код подтверждения."
   },
   "avatar": {
     "uploadPhoto": "Загрузить фото",
@@ -235,7 +240,10 @@
       "roleViewer": "Наблюдатель (VIEWER)",
       "saving": "Добавление…",
       "submit": "Добавить сотрудника",
-      "tempPassword": "Временный пароль: {password}"
+      "passwordModeLabel": "Как установить пароль?",
+      "passwordModeEmailInvite": "Сотрудник сам установит пароль по ссылке из письма",
+      "passwordModeOwnerSet": "Я установлю пароль сам",
+      "password": "Пароль"
     }
   },
   "dashboard": {
@@ -863,6 +871,8 @@
     "communicationsSubtitle": "Ready email copy for customer outreach. Customer detail pages use personalized versions.",
     "auditSecurityNav": "События безопасности",
     "adminsNav": "Мастер-администраторы",
+    "paymentsNav": "Настройки платежей",
+    "twoFactorNav": "Безопасность 2FA",
     "adminsTitle": "Управление мастер-администраторами",
     "adminsSubtitle": "Добавляйте, повышайте, сбрасывайте пароли или отзывайте супер-администраторов платформы. Каждое действие фиксируется в журнале.",
     "adminsCardHint": "Добавляйте мастер-администраторов и управляйте существующими операторами платформы.",

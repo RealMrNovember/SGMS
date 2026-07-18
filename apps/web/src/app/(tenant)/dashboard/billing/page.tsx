@@ -3,6 +3,7 @@ import { BillingStatusPoller } from '@/components/billing/billing-status-poller'
 import { auth } from '@/lib/auth';
 import { getPendingBillingRequest, parseBillingSettings } from '@/lib/billing/settings';
 import { resolveSubscriptionAccess } from '@/lib/billing/subscription-gate';
+import { getPublicBankTransferInfo } from '@/lib/payments/gateway';
 import { prisma } from '@/lib/prisma';
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
@@ -23,7 +24,7 @@ export default async function BillingPage({
   const orgId = session.user.organizationId;
   const t = await getTranslations('billing');
 
-  const [access, org, plans] = await Promise.all([
+  const [access, org, plans, bankTransfer] = await Promise.all([
     resolveSubscriptionAccess(orgId),
     prisma.organization.findUnique({
       where: { id: orgId },
@@ -33,6 +34,7 @@ export default async function BillingPage({
       where: { isActive: true, currency: 'TRY' },
       orderBy: { sortOrder: 'asc' },
     }),
+    getPublicBankTransferInfo(),
   ]);
 
   if (!org) {
@@ -116,6 +118,7 @@ export default async function BillingPage({
         plans={planOptions}
         hasPendingRequest={Boolean(pending)}
         locked={locked}
+        bankTransfer={bankTransfer}
       />
     </div>
   );

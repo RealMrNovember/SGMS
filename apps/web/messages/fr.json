@@ -51,7 +51,8 @@
       "management": "Gestion",
       "analytics": "Analyses"
     },
-    "paymentPlans": "Plans de paiement"
+    "paymentPlans": "Plans de paiement",
+    "twoFactor": "Sécurité du compte (2FA)"
   },
   "auth": {
     "login": "Connexion",
@@ -81,7 +82,11 @@
     "demoOwner": "Propriétaire",
     "demoStaff": "Accueil",
     "demoAthlete": "Client (Athlète)",
-    "backToSite": "Retour au site"
+    "backToSite": "Retour au site",
+    "totpLabel": "Code de vérification (appli Authenticator)",
+    "verifyTotp": "Vérifier le code",
+    "backToCredentials": "Retour",
+    "invalidTotp": "Code de vérification incorrect."
   },
   "avatar": {
     "uploadPhoto": "Télécharger une photo",
@@ -235,7 +240,10 @@
       "roleViewer": "Lecteur (VIEWER)",
       "saving": "Ajout…",
       "submit": "Ajouter le personnel",
-      "tempPassword": "Mot de passe temporaire : {password}"
+      "passwordModeLabel": "Comment définir le mot de passe ?",
+      "passwordModeEmailInvite": "Le membre le définit lui-même par e-mail",
+      "passwordModeOwnerSet": "Je le définis moi-même",
+      "password": "Mot de passe"
     }
   },
   "dashboard": {
@@ -863,6 +871,8 @@
     "communicationsSubtitle": "Ready email copy for customer outreach. Customer detail pages use personalized versions.",
     "auditSecurityNav": "Événements de sécurité",
     "adminsNav": "Master Admins",
+    "paymentsNav": "Paramètres de paiement",
+    "twoFactorNav": "Sécurité 2FA",
     "adminsTitle": "Gestion des administrateurs principaux",
     "adminsSubtitle": "Ajoutez, promouvez, réinitialisez les mots de passe ou révoquez des super-administrateurs de la plateforme. Chaque action est auditée.",
     "adminsCardHint": "Ajoutez des administrateurs principaux et gérez les opérateurs existants de la plateforme.",

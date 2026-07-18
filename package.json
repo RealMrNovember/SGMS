@@ -20,6 +20,7 @@
     "db:migrate:deploy": "pnpm --filter @sgms/database exec prisma migrate deploy",
     "deploy:verify": "bash docs/deployment/verify-production.sh",
     "cloud:heartbeat": "pnpm --filter @sgms/cloud-client heartbeat",
+    "reminders:run": "pnpm --filter @sgms/cloud-client reminders",
     "build:packages": "pnpm --filter @sgms/database build && pnpm --filter @sgms/cloud-client build",
     "test": "pnpm --filter @sgms/cloud-client test && pnpm --filter @sgms/web test",
     "typecheck": "pnpm --filter @sgms/cloud-client typecheck && pnpm --filter @sgms/web typecheck",

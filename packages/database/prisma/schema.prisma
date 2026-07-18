@@ -138,6 +138,14 @@ enum AuditAction {
   HIERARCHY_MEMBER_REVOKED
   PAYMENT_PLAN_CREATED
   PAYMENT_PLAN_CANCELLED
+  PLATFORM_PAYMENT_SETTINGS_CHANGED
+  TWO_FACTOR_ENABLED
+  TWO_FACTOR_DISABLED
+  TWO_FACTOR_BACKUP_CODES_REGENERATED
+  STAFF_INVITE_SENT
+  STAFF_INVITE_ACCEPTED
+  PROFORMA_SENT
+  MEMBERSHIP_REMINDER_SENT
 }
 
 enum HierarchyRole {
@@ -231,47 +239,57 @@ enum PaymentPlanStatus {
   CANCELLED
 }
 
+enum PaymentGateway {
+  NONE
+  IYZICO
+  PAYTR
+}
+
 // ---------------------------------------------------------------------------
 // User — platform kullanıcıları (web panel girişi)
 // ---------------------------------------------------------------------------
 
 model User {
-  id              String     @id @default(cuid())
-  email           String     @unique
-  passwordHash    String     @map("password_hash")
-  name            String
-  isSuperAdmin    Boolean    @default(false) @map("is_super_admin")
-  isDemo          Boolean    @default(false) @map("is_demo")
-  isPartner       Boolean    @default(false) @map("is_partner")
-  status          UserStatus @default(ACTIVE)
-  emailVerifiedAt DateTime?  @map("email_verified_at")
-  lastLoginAt     DateTime?  @map("last_login_at")
-  locale          String     @default("tr")
-  avatarUrl       String?    @map("avatar_url")
+  id                 String     @id @default(cuid())
+  email              String     @unique
+  passwordHash       String     @map("password_hash")
+  name               String
+  isSuperAdmin       Boolean    @default(false) @map("is_super_admin")
+  isDemo             Boolean    @default(false) @map("is_demo")
+  isPartner          Boolean    @default(false) @map("is_partner")
+  status             UserStatus @default(ACTIVE)
+  emailVerifiedAt    DateTime?  @map("email_verified_at")
+  lastLoginAt        DateTime?  @map("last_login_at")
+  locale             String     @default("tr")
+  avatarUrl          String?    @map("avatar_url")
+  totpSecret         String?    @map("totp_secret")
+  twoFactorEnabledAt DateTime?  @map("two_factor_enabled_at")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  memberships        OrganizationMember[]
-  auditLogs          AuditLog[]           @relation("AuditLogActor")
-  gymMemberProfile   GymMember?           @relation("GymMemberAccount")
-  assignedAthletes   GymMember[]          @relation("GymMemberTrainer")
-  trainingPrograms   TrainingProgram[]    @relation("TrainingProgramTrainer")
-  sentMessages       DirectMessage[]      @relation("DirectMessageSender")
-  receivedMessages   DirectMessage[]      @relation("DirectMessageReceiver")
-  messageReports     MessageReport[]      @relation("MessageReportReporter")
-  reviewedReports    MessageReport[]      @relation("MessageReportReviewer")
-  apiTokens          ApiToken[]
-  expensesCreated    Expense[]            @relation("ExpenseCreatedBy")
-  transactionsCreated Transaction[]       @relation("TransactionCreatedBy")
-  paymentPlansCreated PaymentPlan[]       @relation("PaymentPlanCreatedBy")
-  staffCheckIns       CheckIn[]            @relation("StaffCheckIn")
-  passwordResetTokens PasswordResetToken[]
-  partnerProfile      Partner?
-  pushSubscriptions   PushSubscription[]
-  trainerProfiles     TrainerProfile[]
-  ptSessionsAsTrainer PtSession[]          @relation("PtSessionTrainer")
-  ptSessionsCreated   PtSession[]          @relation("PtSessionCreatedBy")
+  twoFactorBackupCodes TwoFactorBackupCode[]
+  staffInviteTokens    StaffInviteToken[]
+  memberships          OrganizationMember[]
+  auditLogs            AuditLog[]            @relation("AuditLogActor")
+  gymMemberProfile     GymMember?            @relation("GymMemberAccount")
+  assignedAthletes     GymMember[]           @relation("GymMemberTrainer")
+  trainingPrograms     TrainingProgram[]     @relation("TrainingProgramTrainer")
+  sentMessages         DirectMessage[]       @relation("DirectMessageSender")
+  receivedMessages     DirectMessage[]       @relation("DirectMessageReceiver")
+  messageReports       MessageReport[]       @relation("MessageReportReporter")
+  reviewedReports      MessageReport[]       @relation("MessageReportReviewer")
+  apiTokens            ApiToken[]
+  expensesCreated      Expense[]             @relation("ExpenseCreatedBy")
+  transactionsCreated  Transaction[]         @relation("TransactionCreatedBy")
+  paymentPlansCreated  PaymentPlan[]         @relation("PaymentPlanCreatedBy")
+  staffCheckIns        CheckIn[]             @relation("StaffCheckIn")
+  passwordResetTokens  PasswordResetToken[]
+  partnerProfile       Partner?
+  pushSubscriptions    PushSubscription[]
+  trainerProfiles      TrainerProfile[]
+  ptSessionsAsTrainer  PtSession[]           @relation("PtSessionTrainer")
+  ptSessionsCreated    PtSession[]           @relation("PtSessionCreatedBy")
   hierarchyMemberships HierarchyMember[]
 
   @@index([status])
@@ -291,7 +309,7 @@ model Partner {
   userId         String  @unique @map("user_id")
   name           String
   code           String  @unique
-  commissionRate Decimal @default(0) @db.Decimal(5, 2) @map("commission_rate")
+  commissionRate Decimal @default(0) @map("commission_rate") @db.Decimal(5, 2)
   isActive       Boolean @default(true) @map("is_active")
   notes          String?
 
@@ -335,9 +353,11 @@ model TrainerProfile {
   organizationId     String            @map("organization_id")
   userId             String            @map("user_id")
   commissionModel    PtCommissionModel @default(FIXED_PER_SESSION) @map("commission_model")
-  /** FIXED_PER_SESSION için TRY tutar, PERCENTAGE_OF_REVENUE/TIERED için yüzde (0-100). */
-  baseCommissionRate Decimal           @default(0) @db.Decimal(7, 2) @map("base_commission_rate")
-  hourlyRate         Decimal?          @db.Decimal(10, 2) @map("hourly_rate")
+  /**
+   * FIXED_PER_SESSION için TRY tutar, PERCENTAGE_OF_REVENUE/TIERED için yüzde (0-100).
+   */
+  baseCommissionRate Decimal           @default(0) @map("base_commission_rate") @db.Decimal(7, 2)
+  hourlyRate         Decimal?          @map("hourly_rate") @db.Decimal(10, 2)
   isActive           Boolean           @default(true) @map("is_active")
 
   createdAt DateTime @default(now()) @map("created_at")
@@ -352,18 +372,18 @@ model TrainerProfile {
 }
 
 model PtSession {
-  id              String          @id @default(cuid())
-  organizationId  String          @map("organization_id")
-  trainerUserId   String          @map("trainer_user_id")
-  gymMemberId     String          @map("gym_member_id")
-  scheduledAt     DateTime        @map("scheduled_at")
-  durationMinutes Int             @default(60) @map("duration_minutes")
-  status          PtSessionStatus @default(SCHEDULED)
-  revenueAmount   Decimal?        @db.Decimal(10, 2) @map("revenue_amount")
-  commissionAmount Decimal?       @db.Decimal(10, 2) @map("commission_amount")
-  notes           String?
-  completedAt     DateTime?       @map("completed_at")
-  createdById     String          @map("created_by_id")
+  id               String          @id @default(cuid())
+  organizationId   String          @map("organization_id")
+  trainerUserId    String          @map("trainer_user_id")
+  gymMemberId      String          @map("gym_member_id")
+  scheduledAt      DateTime        @map("scheduled_at")
+  durationMinutes  Int             @default(60) @map("duration_minutes")
+  status           PtSessionStatus @default(SCHEDULED)
+  revenueAmount    Decimal?        @map("revenue_amount") @db.Decimal(10, 2)
+  commissionAmount Decimal?        @map("commission_amount") @db.Decimal(10, 2)
+  notes            String?
+  completedAt      DateTime?       @map("completed_at")
+  createdById      String          @map("created_by_id")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -427,21 +447,116 @@ model PasswordResetToken {
 }
 
 // ---------------------------------------------------------------------------
+// TwoFactorBackupCode — 2FA kurtarma kodları (kullanıcı 2FA'yı etkinleştirdiğinde
+// tek seferlik 10 adet kod üretilir, her biri bcrypt hash olarak saklanır).
+// ---------------------------------------------------------------------------
+
+model TwoFactorBackupCode {
+  id       String    @id @default(cuid())
+  userId   String    @map("user_id")
+  codeHash String    @map("code_hash")
+  usedAt   DateTime? @map("used_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("two_factor_backup_codes")
+}
+
+// ---------------------------------------------------------------------------
+// StaffInviteToken — personel daveti: imzalı, süreli token ile personel kendi
+// parolasını belirler (PasswordResetToken ile aynı desen).
+// ---------------------------------------------------------------------------
+
+model StaffInviteToken {
+  id             String    @id @default(cuid())
+  userId         String    @map("user_id")
+  organizationId String    @map("organization_id")
+  tokenHash      String    @unique @map("token_hash")
+  expiresAt      DateTime  @map("expires_at")
+  usedAt         DateTime? @map("used_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("staff_invite_tokens")
+}
+
+// ---------------------------------------------------------------------------
+// PlatformPaymentSettings — SGMS'in kendi abonelik gelirini tahsil ettiği ödeme
+// sağlayıcısı yapılandırması (tekil satır, Master Admin tarafından yönetilir).
+// Tenant'ların kendi üyelerinden POS/cari tahsilatı bu modelden bağımsızdır.
+// ---------------------------------------------------------------------------
+
+model PlatformPaymentSettings {
+  id            String         @id @default("singleton")
+  activeGateway PaymentGateway @default(NONE) @map("active_gateway")
+
+  iyzicoApiKey    String? @map("iyzico_api_key")
+  iyzicoSecretKey String? @map("iyzico_secret_key")
+  iyzicoBaseUrl   String  @default("https://sandbox-api.iyzipay.com") @map("iyzico_base_url")
+  iyzicoSandbox   Boolean @default(true) @map("iyzico_sandbox")
+
+  paytrMerchantId   String? @map("paytr_merchant_id")
+  paytrMerchantKey  String? @map("paytr_merchant_key")
+  paytrMerchantSalt String? @map("paytr_merchant_salt")
+  paytrSandbox      Boolean @default(true) @map("paytr_sandbox")
+
+  bankTransferEnabled Boolean @default(false) @map("bank_transfer_enabled")
+  ibanHolderName      String? @map("iban_holder_name")
+  ibanNumber          String? @map("iban_number")
+  ibanBankName        String? @map("iban_bank_name")
+  bankTransferNote    String? @map("bank_transfer_note") @db.Text
+
+  updatedById String?  @map("updated_by_id")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("platform_payment_settings")
+}
+
+// ---------------------------------------------------------------------------
+// GatewayCheckoutSession — iyzico/PayTR'a gönderilen sipariş kimliği (merchant_oid /
+// conversationId) ↔ organizasyon/billingRequest eşlemesi. Webhook geldiğinde
+// hangi organizasyonun aboneliğinin aktifleştirileceğini bulmak için kullanılır.
+// ---------------------------------------------------------------------------
+
+model GatewayCheckoutSession {
+  id               String         @id
+  organizationId   String         @map("organization_id")
+  billingRequestId String         @map("billing_request_id")
+  gateway          PaymentGateway
+  status           String         @default("pending")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@map("gateway_checkout_sessions")
+}
+
+// ---------------------------------------------------------------------------
 // Organization — spor salonu / tenant
 // ---------------------------------------------------------------------------
 
 model Organization {
-  id        String             @id @default(cuid())
-  name      String
-  slug      String             @unique
-  email     String?
-  phone     String?
-  address   String?
-  city      String?
-  country   String             @default("TR")
-  timezone  String             @default("Europe/Istanbul")
-  status    OrganizationStatus @default(PENDING)
-  settings  Json               @default("{}")
+  id       String             @id @default(cuid())
+  name     String
+  slug     String             @unique
+  email    String?
+  phone    String?
+  address  String?
+  city     String?
+  country  String             @default("TR")
+  timezone String             @default("Europe/Istanbul")
+  status   OrganizationStatus @default(PENDING)
+  settings Json               @default("{}")
 
   // Org düzeyinde merkezi platform kimliği (cloud.cicibyte.com — CiciByte Cloud tenant sync)
   installationId       String               @unique @map("installation_id")
@@ -454,7 +569,7 @@ model Organization {
 
   // Partner (temsilci) ataması — bu organizasyonu getiren temsilci, atandıysa
   // üyelik süresi / özel indirim / ek kapasite konularında sınırlı yönetim yetkisine sahiptir.
-  partnerId String?  @map("partner_id")
+  partnerId String? @map("partner_id")
 
   // Plan'ın taban limitlerinin üzerine eklenen, organizasyona özel ek kapasite
   // (temsilci veya Master Admin tarafından tanımlanır — bkz. lib/tenant-access.ts).
@@ -470,30 +585,32 @@ model Organization {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  partner            Partner?             @relation(fields: [partnerId], references: [id], onDelete: SetNull)
-  parentOrganization Organization?        @relation("OrganizationHierarchy", fields: [parentOrganizationId], references: [id], onDelete: SetNull)
-  childOrganizations Organization[]       @relation("OrganizationHierarchy")
-  hierarchyMembers   HierarchyMember[]
-  members            OrganizationMember[]
-  subscriptions      Subscription[]
-  devices            Device[]
-  auditLogs          AuditLog[]
-  gymMembershipPlans GymMembershipPlan[]
-  gymMembers         GymMember[]
-  healthMeasurements HealthMeasurement[]
-  trainingPrograms   TrainingProgram[]
-  exerciseSetLogs    ExerciseSetLog[]
-  directMessages     DirectMessage[]
-  messageReports     MessageReport[]
-  apiTokens          ApiToken[]
-  expenseCategories  ExpenseCategory[]
-  expenses           Expense[]
-  transactions       Transaction[]
-  paymentPlans       PaymentPlan[]
-  checkIns           CheckIn[]
-  syncBatches        SyncBatch[]
-  trainerProfiles    TrainerProfile[]
-  ptSessions         PtSession[]
+  partner                 Partner?                 @relation(fields: [partnerId], references: [id], onDelete: SetNull)
+  parentOrganization      Organization?            @relation("OrganizationHierarchy", fields: [parentOrganizationId], references: [id], onDelete: SetNull)
+  childOrganizations      Organization[]           @relation("OrganizationHierarchy")
+  hierarchyMembers        HierarchyMember[]
+  members                 OrganizationMember[]
+  subscriptions           Subscription[]
+  devices                 Device[]
+  auditLogs               AuditLog[]
+  gymMembershipPlans      GymMembershipPlan[]
+  gymMembers              GymMember[]
+  healthMeasurements      HealthMeasurement[]
+  trainingPrograms        TrainingProgram[]
+  exerciseSetLogs         ExerciseSetLog[]
+  directMessages          DirectMessage[]
+  messageReports          MessageReport[]
+  apiTokens               ApiToken[]
+  expenseCategories       ExpenseCategory[]
+  expenses                Expense[]
+  transactions            Transaction[]
+  paymentPlans            PaymentPlan[]
+  checkIns                CheckIn[]
+  syncBatches             SyncBatch[]
+  trainerProfiles         TrainerProfile[]
+  ptSessions              PtSession[]
+  proformaTokens          ProformaToken[]
+  gatewayCheckoutSessions GatewayCheckoutSession[]
 
   @@index([status])
   @@index([centralLicenseStatus])
@@ -656,28 +773,29 @@ model GymMembershipPlan {
 // ---------------------------------------------------------------------------
 
 model GymMember {
-  id             String          @id @default(cuid())
-  organizationId String          @map("organization_id")
-  planId         String?         @map("plan_id")
-  userId         String?         @unique @map("user_id")
-  trainerId      String?         @map("trainer_id")
-  firstName      String          @map("first_name")
-  lastName       String          @map("last_name")
-  nationalId     String?         @map("national_id")
-  isForeignMember Boolean        @default(false) @map("is_foreign_member")
-  nationality    String?
-  passportNumber String?         @map("passport_number")
-  phone          String?
-  email          String?
-  birthDate      DateTime?       @map("birth_date") @db.Date
-  gender         Gender          @default(UNSPECIFIED)
-  status         GymMemberStatus @default(ACTIVE)
-  membershipStartsAt DateTime?   @map("membership_starts_at")
-  membershipEndsAt   DateTime?   @map("membership_ends_at")
-  notes          String?         @db.Text
-  locale         String          @default("tr")
-  avatarUrl      String?         @map("avatar_url")
-  rfidTag        String?         @map("rfid_tag")
+  id                 String          @id @default(cuid())
+  organizationId     String          @map("organization_id")
+  planId             String?         @map("plan_id")
+  userId             String?         @unique @map("user_id")
+  trainerId          String?         @map("trainer_id")
+  firstName          String          @map("first_name")
+  lastName           String          @map("last_name")
+  nationalId         String?         @map("national_id")
+  isForeignMember    Boolean         @default(false) @map("is_foreign_member")
+  nationality        String?
+  passportNumber     String?         @map("passport_number")
+  phone              String?
+  email              String?
+  birthDate          DateTime?       @map("birth_date") @db.Date
+  gender             Gender          @default(UNSPECIFIED)
+  status             GymMemberStatus @default(ACTIVE)
+  membershipStartsAt DateTime?       @map("membership_starts_at")
+  membershipEndsAt   DateTime?       @map("membership_ends_at")
+  lastReminderSentAt DateTime?       @map("last_reminder_sent_at")
+  notes              String?         @db.Text
+  locale             String          @default("tr")
+  avatarUrl          String?         @map("avatar_url")
+  rfidTag            String?         @map("rfid_tag")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -714,15 +832,15 @@ model GymMember {
 // ---------------------------------------------------------------------------
 
 model HealthMeasurement {
-  id                 String   @id @default(cuid())
-  organizationId     String   @map("organization_id")
-  gymMemberId        String   @map("gym_member_id")
-  weight             Decimal? @db.Decimal(5, 2)
-  bodyFatPercentage  Decimal? @map("body_fat_percentage") @db.Decimal(5, 2)
-  muscleMass         Decimal? @map("muscle_mass") @db.Decimal(5, 2)
-  height             Decimal? @db.Decimal(5, 2)
-  notes              String?  @db.Text
-  measuredAt         DateTime @map("measured_at")
+  id                String   @id @default(cuid())
+  organizationId    String   @map("organization_id")
+  gymMemberId       String   @map("gym_member_id")
+  weight            Decimal? @db.Decimal(5, 2)
+  bodyFatPercentage Decimal? @map("body_fat_percentage") @db.Decimal(5, 2)
+  muscleMass        Decimal? @map("muscle_mass") @db.Decimal(5, 2)
+  height            Decimal? @db.Decimal(5, 2)
+  notes             String?  @db.Text
+  measuredAt        DateTime @map("measured_at")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -754,9 +872,9 @@ model TrainingProgram {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  gymMember    GymMember    @relation(fields: [gymMemberId], references: [id], onDelete: Cascade)
-  trainer      User         @relation("TrainingProgramTrainer", fields: [trainerId], references: [id], onDelete: Restrict)
+  organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  gymMember       GymMember        @relation(fields: [gymMemberId], references: [id], onDelete: Cascade)
+  trainer         User             @relation("TrainingProgramTrainer", fields: [trainerId], references: [id], onDelete: Restrict)
   exerciseSetLogs ExerciseSetLog[]
 
   @@index([organizationId, gymMemberId, isActive])
@@ -799,19 +917,19 @@ model ExerciseSetLog {
 // ---------------------------------------------------------------------------
 
 model DirectMessage {
-  id             String   @id @default(cuid())
-  organizationId String   @map("organization_id")
-  senderId       String   @map("sender_id")
-  receiverId     String   @map("receiver_id")
-  content        String   @db.Text
-  isRead         Boolean  @default(false) @map("is_read")
+  id             String    @id @default(cuid())
+  organizationId String    @map("organization_id")
+  senderId       String    @map("sender_id")
+  receiverId     String    @map("receiver_id")
+  content        String    @db.Text
+  isRead         Boolean   @default(false) @map("is_read")
   deliveredAt    DateTime? @map("delivered_at")
   readAt         DateTime? @map("read_at")
-  createdAt      DateTime @default(now()) @map("created_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
 
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  sender       User         @relation("DirectMessageSender", fields: [senderId], references: [id], onDelete: Cascade)
-  receiver     User         @relation("DirectMessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  sender       User            @relation("DirectMessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver     User            @relation("DirectMessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
   reports      MessageReport[]
 
   @@index([organizationId, receiverId, isRead, createdAt])
@@ -932,6 +1050,28 @@ model Transaction {
 }
 
 // ---------------------------------------------------------------------------
+// ProformaToken — proforma fatura PDF'ine imzalı, süreli, kimliksiz erişim linki
+// (salon sahibi platform girişi olmadan e-postadaki linkten indirebilir). Faturayı
+// tetikleyen abonelik ödemesi (billingRequest) Organization.settings JSON'ında tutulur.
+// ---------------------------------------------------------------------------
+
+model ProformaToken {
+  id               String   @id @default(cuid())
+  organizationId   String   @map("organization_id")
+  billingRequestId String   @map("billing_request_id")
+  tokenHash        String   @unique @map("token_hash")
+  expiresAt        DateTime @map("expires_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([expiresAt])
+  @@map("proforma_tokens")
+}
+
+// ---------------------------------------------------------------------------
 // PaymentPlan — bir üyeye ait birden çok taksit (Expense) kaydını gruplar
 // ---------------------------------------------------------------------------
 
@@ -988,18 +1128,18 @@ model AuditLog {
 // ---------------------------------------------------------------------------
 
 model ApiToken {
-  id             String           @id @default(cuid())
-  userId         String           @map("user_id")
-  organizationId String           @map("organization_id")
-  gymMemberId    String?          @map("gym_member_id")
+  id             String            @id @default(cuid())
+  userId         String            @map("user_id")
+  organizationId String            @map("organization_id")
+  gymMemberId    String?           @map("gym_member_id")
   role           OrganizationRole?
-  tokenHash      String           @unique @map("token_hash")
+  tokenHash      String            @unique @map("token_hash")
   scope          ApiTokenScope
   label          String?
-  expiresAt      DateTime         @map("expires_at")
-  revokedAt      DateTime?        @map("revoked_at")
-  lastUsedAt     DateTime?        @map("last_used_at")
-  createdAt      DateTime         @default(now()) @map("created_at")
+  expiresAt      DateTime          @map("expires_at")
+  revokedAt      DateTime?         @map("revoked_at")
+  lastUsedAt     DateTime?         @map("last_used_at")
+  createdAt      DateTime          @default(now()) @map("created_at")
 
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -1016,29 +1156,29 @@ model ApiToken {
 // ---------------------------------------------------------------------------
 
 model CheckIn {
-  id             String             @id @default(cuid())
-  organizationId String             @map("organization_id")
-  subjectType    AccessSubjectType  @default(GYM_MEMBER) @map("subject_type")
-  direction      AccessDirection    @default(ENTRY)
-  gymMemberId    String?            @map("gym_member_id")
-  staffUserId    String?            @map("staff_user_id")
-  deviceId       String?            @map("device_id")
-  clientEventId  String?            @map("client_event_id")
+  id             String            @id @default(cuid())
+  organizationId String            @map("organization_id")
+  subjectType    AccessSubjectType @default(GYM_MEMBER) @map("subject_type")
+  direction      AccessDirection   @default(ENTRY)
+  gymMemberId    String?           @map("gym_member_id")
+  staffUserId    String?           @map("staff_user_id")
+  deviceId       String?           @map("device_id")
+  clientEventId  String?           @map("client_event_id")
   method         CheckInMethod
-  checkedInAt    DateTime           @default(now()) @map("checked_in_at")
-  metadata       Json               @default("{}")
+  checkedInAt    DateTime          @default(now()) @map("checked_in_at")
+  metadata       Json              @default("{}")
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   gymMember    GymMember?   @relation(fields: [gymMemberId], references: [id], onDelete: Cascade)
   staffUser    User?        @relation("StaffCheckIn", fields: [staffUserId], references: [id], onDelete: SetNull)
   device       Device?      @relation(fields: [deviceId], references: [id], onDelete: SetNull)
 
+  @@unique([deviceId, clientEventId])
   @@index([organizationId, checkedInAt])
   @@index([organizationId, direction, checkedInAt])
   @@index([gymMemberId, checkedInAt])
   @@index([staffUserId, checkedInAt])
   @@index([deviceId, checkedInAt])
-  @@unique([deviceId, clientEventId])
   @@map("check_ins")
 }
 

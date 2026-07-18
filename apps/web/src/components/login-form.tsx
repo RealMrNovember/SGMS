@@ -1,5 +1,6 @@
 'use client';
 
+import { checkTwoFactorRequired } from '@/actions/two-factor';
 import { DEMO_ACCOUNTS, type DemoAccountKey } from '@/lib/demo-accounts';
 import { signIn } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
@@ -23,6 +24,8 @@ export function LoginForm() {
 
   const [email, setEmail] = useState(prefilledEmail);
   const [password, setPassword] = useState('');
+  const [totp, setTotp] = useState('');
+  const [needsTotp, setNeedsTotp] = useState(false);
   const [activeDemo, setActiveDemo] = useState<DemoAccountKey | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -44,9 +47,24 @@ export function LoginForm() {
     setLoading(true);
     setError(null);
 
+    if (!needsTotp) {
+      const check = await checkTwoFactorRequired(email, password);
+      if (!check.ok) {
+        setLoading(false);
+        setError(t('invalidCredentials'));
+        return;
+      }
+      if (check.requiresTotp) {
+        setLoading(false);
+        setNeedsTotp(true);
+        return;
+      }
+    }
+
     const result = await signIn('credentials', {
       email,
       password,
+      totp: needsTotp ? totp : undefined,
       redirect: false,
       callbackUrl,
     });
@@ -54,7 +72,7 @@ export function LoginForm() {
     setLoading(false);
 
     if (result?.error) {
-      setError(t('invalidCredentials'));
+      setError(needsTotp ? tLogin('invalidTotp') : t('invalidCredentials'));
       return;
     }
 
@@ -92,6 +110,7 @@ export function LoginForm() {
             type="email"
             autoComplete="email"
             required
+            disabled={needsTotp}
             className="input"
             value={email}
             onChange={(event) => {
@@ -116,6 +135,7 @@ export function LoginForm() {
             type="password"
             autoComplete="current-password"
             required
+            disabled={needsTotp}
             className="input"
             value={password}
             onChange={(event) => {
@@ -125,10 +145,42 @@ export function LoginForm() {
           />
         </div>
 
+        {needsTotp ? (
+          <div className="space-y-2">
+            <label htmlFor="totp" className="muted text-sm">
+              {tLogin('totpLabel')}
+            </label>
+            <input
+              id="totp"
+              name="totp"
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              autoFocus
+              required
+              className="input"
+              placeholder="123456"
+              value={totp}
+              onChange={(event) => setTotp(event.target.value)}
+            />
+            <button
+              type="button"
+              className="muted text-xs hover:text-white"
+              onClick={() => {
+                setNeedsTotp(false);
+                setTotp('');
+                setError(null);
+              }}
+            >
+              {tLogin('backToCredentials')}
+            </button>
+          </div>
+        ) : null}
+
         {error ? <p className="text-sm text-rose-400">{error}</p> : null}
 
         <button type="submit" className="button button-gold w-full" disabled={loading}>
-          {loading ? t('loggingIn') : t('login')}
+          {loading ? t('loggingIn') : needsTotp ? tLogin('verifyTotp') : t('login')}
         </button>
       </form>
     </div>

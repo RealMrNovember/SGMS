@@ -51,7 +51,8 @@
       "management": "Management",
       "analytics": "Analytics"
     },
-    "paymentPlans": "Payment Plans"
+    "paymentPlans": "Payment Plans",
+    "twoFactor": "Account Security (2FA)"
   },
   "auth": {
     "login": "Sign In",
@@ -81,7 +82,11 @@
     "demoOwner": "Gym Owner",
     "demoStaff": "Front Desk",
     "demoAthlete": "Customer (Athlete)",
-    "backToSite": "Back to website"
+    "backToSite": "Back to website",
+    "totpLabel": "Verification code (Authenticator app)",
+    "verifyTotp": "Verify Code",
+    "backToCredentials": "Go back",
+    "invalidTotp": "Invalid verification code."
   },
   "avatar": {
     "uploadPhoto": "Upload Photo",
@@ -235,7 +240,10 @@
       "roleViewer": "Viewer (VIEWER)",
       "saving": "Adding…",
       "submit": "Add Staff",
-      "tempPassword": "Temporary password: {password}"
+      "passwordModeLabel": "How should the password be set?",
+      "passwordModeEmailInvite": "Staff sets their own password via email",
+      "passwordModeOwnerSet": "I'll set the password myself",
+      "password": "Password"
     }
   },
   "dashboard": {
@@ -817,6 +825,8 @@
     "auditNav": "Audit Log",
     "auditSecurityNav": "Security events",
     "adminsNav": "Master Admins",
+    "paymentsNav": "Payment Settings",
+    "twoFactorNav": "2FA Security",
     "adminsTitle": "Master admin management",
     "adminsSubtitle": "Add, promote, reset passwords, or revoke platform super administrators. Every action is audited.",
     "adminsCardHint": "Add master admins and manage existing platform operators.",

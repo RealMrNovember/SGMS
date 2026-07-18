@@ -11,10 +11,12 @@ import {
 import { syncOrganizationToCloud } from '@/lib/cloud-sync';
 import { prisma } from '@/lib/prisma';
 import { consumeLoginRateLimit } from '@/lib/rate-limit';
+import { matchBackupCode, verifyTotpToken } from '@/lib/two-factor';
 
 const credentialsSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
+  totp: z.string().optional(),
 });
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -157,6 +159,41 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null;
         }
 
+        if (user.twoFactorEnabledAt) {
+          const totp = parsed.data.totp?.trim();
+          let totpValid = false;
+
+          if (totp && user.totpSecret && verifyTotpToken(totp, user.totpSecret)) {
+            totpValid = true;
+          } else if (totp) {
+            const backupCodes = await prisma.twoFactorBackupCode.findMany({
+              where: { userId: user.id, usedAt: null },
+              select: { id: true, codeHash: true },
+            });
+            const matchedId = await matchBackupCode(totp, backupCodes);
+            if (matchedId) {
+              await prisma.twoFactorBackupCode.update({
+                where: { id: matchedId },
+                data: { usedAt: new Date() },
+              });
+              totpValid = true;
+            }
+          }
+
+          if (!totpValid) {
+            void writeLoginFailedAudit({
+              email: parsed.data.email.toLowerCase(),
+              reason: 'invalid_totp',
+              actorId: user.id,
+              organizationId: user.memberships[0]?.organizationId ?? null,
+              source: 'web',
+              ipAddress: ctx.ipAddress,
+              userAgent: ctx.userAgent,
+            });
+            return null;
+          }
+        }
+
         const membership = user.memberships[0] ?? null;
         const gymMember =
           user.gymMemberProfile?.status === 'ACTIVE' ? user.gymMemberProfile : null;
@@ -208,6 +245,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           role: membership?.role ?? null,
           locale: user.locale,
           gymMemberId: gymMember?.id ?? null,
+          twoFactorEnabled: Boolean(user.twoFactorEnabledAt),
         };
       },
     }),

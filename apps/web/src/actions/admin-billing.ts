@@ -2,11 +2,8 @@
 
 import { requireSuperAdmin } from '@/lib/admin/guards';
 import { writeAdminAuditLog } from '@/lib/admin/audit-write';
-import {
-  parseBillingSettings,
-  updateBillingRequestStatus,
-} from '@/lib/billing/settings';
-import { syncOrganizationToCloud } from '@/lib/cloud-sync';
+import { activateSubscriptionFromRequest } from '@/lib/billing/activate';
+import { parseBillingSettings, updateBillingRequestStatus } from '@/lib/billing/settings';
 import { prisma } from '@/lib/prisma';
 import type { Prisma } from '@sgms/database';
 import { revalidatePath } from 'next/cache';
@@ -23,82 +20,16 @@ export async function approveBillingRequest(
   try {
     const session = await requireSuperAdmin();
 
-    const org = await prisma.organization.findUnique({
-      where: { id: organizationId },
-      select: { settings: true },
-    });
-
-    if (!org) {
-      return { error: 'Organizasyon bulunamadı.' };
-    }
-
-    const settings = parseBillingSettings(org.settings);
-    const request = (settings.billingRequests ?? []).find((r) => r.id === requestId);
-
-    if (!request || request.status !== 'pending') {
-      return { error: 'Bekleyen talep bulunamadı.' };
-    }
-
-    const subscription = await prisma.subscription.findFirst({
-      where: { organizationId },
-      orderBy: { createdAt: 'desc' },
-    });
-
-    if (!subscription) {
-      return { error: 'Abonelik kaydı yok.' };
-    }
-
-    const periodEnd = new Date(
-      Date.now() +
-        (request.billingCycle === 'YEARLY' ? 365 : 30) * 24 * 60 * 60 * 1000,
-    );
-
-    const nextSettings = updateBillingRequestStatus(
-      settings,
+    const result = await activateSubscriptionFromRequest(
+      organizationId,
       requestId,
-      'approved',
       session.user.email ?? 'master-admin',
+      session.user.id,
     );
 
-    await prisma.$transaction([
-      prisma.subscription.update({
-        where: { id: subscription.id },
-        data: {
-          planId: request.planId,
-          status: 'ACTIVE',
-          billingCycle: request.billingCycle,
-          trialEndsAt: null,
-          currentPeriodStart: new Date(),
-          currentPeriodEnd: periodEnd,
-        },
-      }),
-      prisma.organization.update({
-        where: { id: organizationId },
-        data: {
-          status: 'ACTIVE',
-          centralLicenseStatus: 'ACTIVE',
-          licenseExpiresAt: periodEnd,
-          settings: nextSettings as Prisma.InputJsonValue,
-        },
-      }),
-      prisma.auditLog.create({
-        data: {
-          actorId: session.user.id,
-          organizationId,
-          action: 'SUBSCRIPTION_STARTED',
-          entityType: 'subscription',
-          entityId: subscription.id,
-          metadata: {
-            billingRequestId: requestId,
-            planCode: request.planCode,
-            amount: request.amount,
-            approvedBy: 'master_admin',
-          },
-        },
-      }),
-    ]);
-
-    await syncOrganizationToCloud(organizationId);
+    if (!result.ok) {
+      return { error: result.error };
+    }
 
     revalidatePath(`/admin/organizations/${organizationId}`);
     revalidatePath('/admin/plans');

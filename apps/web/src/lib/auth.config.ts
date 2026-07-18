@@ -17,6 +17,8 @@ declare module 'next-auth' {
       role: OrganizationRole | null;
       locale: string;
       gymMemberId: string | null;
+      twoFactorEnabled: boolean;
+      needsTwoFactorSetup: boolean;
     };
   }
 
@@ -31,6 +33,7 @@ declare module 'next-auth' {
     role?: OrganizationRole | null;
     locale?: string;
     gymMemberId?: string | null;
+    twoFactorEnabled?: boolean;
   }
 }
 
@@ -55,6 +58,7 @@ export const authConfig = {
         token.role = user.role ?? null;
         token.locale = user.locale ?? 'tr';
         token.gymMemberId = user.gymMemberId ?? null;
+        token.twoFactorEnabled = user.twoFactorEnabled ?? false;
       }
 
       return token;
@@ -72,6 +76,14 @@ export const authConfig = {
         session.user.role = (token.role as OrganizationRole | null | undefined) ?? null;
         session.user.locale = (token.locale as string | undefined) ?? 'tr';
         session.user.gymMemberId = (token.gymMemberId as string | null | undefined) ?? null;
+        session.user.twoFactorEnabled = Boolean(token.twoFactorEnabled);
+
+        const privilegedRole =
+          session.user.isSuperAdmin || session.user.role === 'OWNER' || session.user.role === 'ADMIN';
+        // Demo hesaplar (login sayfasındaki tek tıkla giriş) zaten hiçbir mutasyon yapamaz —
+        // 2FA zorunluluğu prospektif müşterinin paneli incelemesini engellememeli.
+        session.user.needsTwoFactorSetup =
+          privilegedRole && !session.user.twoFactorEnabled && !session.user.isDemo;
       }
 
       return session;

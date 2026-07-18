@@ -51,7 +51,8 @@
       "management": "Yönetim",
       "analytics": "Analiz"
     },
-    "paymentPlans": "Ödeme Planları"
+    "paymentPlans": "Ödeme Planları",
+    "twoFactor": "Hesap Güvenliği (2FA)"
   },
   "auth": {
     "login": "Giriş Yap",
@@ -81,7 +82,11 @@
     "demoOwner": "Salon Sahibi",
     "demoStaff": "Resepsiyon",
     "demoAthlete": "Müşteri (Sporcu)",
-    "backToSite": "Web sitesine dön"
+    "backToSite": "Web sitesine dön",
+    "totpLabel": "Doğrulama kodu (Authenticator uygulaması)",
+    "verifyTotp": "Kodu Doğrula",
+    "backToCredentials": "Geri dön",
+    "invalidTotp": "Doğrulama kodu hatalı."
   },
   "avatar": {
     "uploadPhoto": "Fotoğraf Yükle",
@@ -235,7 +240,10 @@
       "roleViewer": "Görüntüleyici (VIEWER)",
       "saving": "Ekleniyor…",
       "submit": "Personel Ekle",
-      "tempPassword": "Geçici parola: {password}"
+      "passwordModeLabel": "Parola nasıl belirlensin?",
+      "passwordModeEmailInvite": "Personel e-posta ile kendi parolasını belirlesin",
+      "passwordModeOwnerSet": "Parolayı ben belirleyeceğim",
+      "password": "Parola"
     }
   },
   "dashboard": {
@@ -817,6 +825,8 @@
     "auditNav": "Denetim Kayıtları",
     "auditSecurityNav": "Güvenlik olayları",
     "adminsNav": "Master Adminler",
+    "paymentsNav": "Ödeme Ayarları",
+    "twoFactorNav": "2FA Güvenlik",
     "adminsTitle": "Master Admin yönetimi",
     "adminsSubtitle": "Platform süper yöneticilerini ekleyin, yükseltin, parola sıfırlayın veya yetkisini kaldırın. Tüm işlemler denetim kaydına yazılır.",
     "adminsCardHint": "Yeni master admin ekleyin, mevcut hesapları yönetin veya yetki kaldırın.",

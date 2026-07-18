@@ -1,0 +1,557 @@
+<title>SGMS Ürün Denetimi</title>
+<style>
+  :root {
+    --bg: #f6f4ef;
+    --bg-elev: #ffffff;
+    --bg-sunken: #ece9e1;
+    --ink: #1c1b19;
+    --ink-dim: #6b6860;
+    --ink-faint: #a29e93;
+    --border: #ddd8cc;
+    --accent: #5b4fd6;
+    --accent-ink: #ffffff;
+    --accent-wash: #efedfb;
+    --critical: #c23a3a;
+    --critical-wash: #fbeceb;
+    --warning: #a3690f;
+    --warning-wash: #fbf1de;
+    --good: #2f7a5c;
+    --good-wash: #e9f5ef;
+    --mono: ui-monospace, "Cascadia Code", "SF Mono", "Consolas", monospace;
+    --serif: Iowan Old Style, "Palatino Linotype", Palatino, Georgia, serif;
+    --sans: "Segoe UI", ui-sans-serif, -apple-system, system-ui, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #17161c;
+      --bg-elev: #1f1e26;
+      --bg-sunken: #131218;
+      --ink: #ece9f2;
+      --ink-dim: #a7a3b5;
+      --ink-faint: #716d80;
+      --border: #34313f;
+      --accent: #9d8fff;
+      --accent-ink: #17161c;
+      --accent-wash: #262238;
+      --critical: #f0837f;
+      --critical-wash: #2e1c1e;
+      --warning: #e0ab5c;
+      --warning-wash: #2c2417;
+      --good: #6fcba3;
+      --good-wash: #172a22;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #17161c; --bg-elev: #1f1e26; --bg-sunken: #131218;
+    --ink: #ece9f2; --ink-dim: #a7a3b5; --ink-faint: #716d80; --border: #34313f;
+    --accent: #9d8fff; --accent-ink: #17161c; --accent-wash: #262238;
+    --critical: #f0837f; --critical-wash: #2e1c1e;
+    --warning: #e0ab5c; --warning-wash: #2c2417;
+    --good: #6fcba3; --good-wash: #172a22;
+  }
+  :root[data-theme="light"] {
+    --bg: #f6f4ef; --bg-elev: #ffffff; --bg-sunken: #ece9e1;
+    --ink: #1c1b19; --ink-dim: #6b6860; --ink-faint: #a29e93; --border: #ddd8cc;
+    --accent: #5b4fd6; --accent-ink: #ffffff; --accent-wash: #efedfb;
+    --critical: #c23a3a; --critical-wash: #fbeceb;
+    --warning: #a3690f; --warning-wash: #fbf1de;
+    --good: #2f7a5c; --good-wash: #e9f5ef;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15.5px;
+    line-height: 1.6;
+    margin: 0;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 24px 96px; }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+
+  header.masthead {
+    padding: 56px 0 32px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 40px;
+  }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 7px; height: 7px;
+    background: var(--accent);
+    display: inline-block;
+    border-radius: 1px;
+  }
+  h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 40px;
+    line-height: 1.12;
+    margin: 14px 0 12px;
+    text-wrap: balance;
+    letter-spacing: -0.01em;
+  }
+  .lede {
+    color: var(--ink-dim);
+    font-size: 16.5px;
+    max-width: 62ch;
+    margin: 0;
+  }
+  .lede strong { color: var(--ink); font-weight: 600; }
+
+  .scorecard {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 28px;
+  }
+  .stat {
+    background: var(--bg-elev);
+    padding: 16px 18px;
+  }
+  .stat .n {
+    font-family: var(--serif);
+    font-size: 30px;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .stat .l {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .stat.crit .n { color: var(--critical); }
+  .stat.warn .n { color: var(--warning); }
+  .stat.good .n { color: var(--good); }
+
+  nav.toc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 28px 0 0;
+  }
+  nav.toc a {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-dim);
+    text-decoration: none;
+    padding: 6px 11px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--bg-elev);
+    transition: color 0.15s, border-color 0.15s;
+  }
+  nav.toc a:hover, nav.toc a:focus-visible {
+    color: var(--accent);
+    border-color: var(--accent);
+    outline: none;
+  }
+
+  section.block { margin: 56px 0; }
+  .sechead {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 6px;
+  }
+  h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 25px;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  .sechead .count {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--ink-faint);
+  }
+  .secnote {
+    color: var(--ink-dim);
+    font-size: 14px;
+    max-width: 68ch;
+    margin: 4px 0 24px;
+  }
+
+  .grid-done {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 10px;
+  }
+  .done-chip {
+    background: var(--good-wash);
+    border: 1px solid var(--good);
+    border-radius: 8px;
+    padding: 10px 13px;
+    font-size: 13px;
+  }
+  .done-chip .t { font-weight: 600; }
+  .done-chip .d { color: var(--ink-dim); font-size: 12px; margin-top: 2px; }
+
+  .finding {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--critical);
+    border-radius: 8px;
+    padding: 18px 20px;
+    margin-bottom: 12px;
+  }
+  .finding.warning { border-left-color: var(--warning); }
+  .finding.good { border-left-color: var(--good); }
+
+  .finding-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .finding-head h3 {
+    font-family: var(--sans);
+    font-weight: 650;
+    font-size: 15.5px;
+    margin: 0;
+  }
+  .pill {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .pill.crit { background: var(--critical-wash); color: var(--critical); }
+  .pill.warn { background: var(--warning-wash); color: var(--warning); }
+
+  .scenario {
+    margin: 10px 0 0;
+    font-size: 14px;
+    color: var(--ink);
+    padding-left: 14px;
+    border-left: 2px solid var(--border);
+  }
+  .scenario b { color: var(--ink-dim); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+
+  .evidence {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .evidence code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--bg-sunken);
+    color: var(--ink-dim);
+    padding: 3px 8px;
+    border-radius: 5px;
+  }
+
+  .phase {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: 4px 20px;
+    margin-bottom: 28px;
+  }
+  .phase-num {
+    font-family: var(--serif);
+    font-size: 32px;
+    color: var(--accent);
+    line-height: 1;
+    grid-row: span 2;
+  }
+  .phase h3 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 650;
+  }
+  .phase .why {
+    color: var(--ink-dim);
+    font-size: 13.5px;
+    margin: 4px 0 10px;
+  }
+  .phase ul {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 14px;
+  }
+  .phase li { margin-bottom: 4px; }
+  .phase-divider {
+    grid-column: 1 / -1;
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 4px 0 24px;
+  }
+
+  .verdict {
+    background: var(--accent-wash);
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+    padding: 24px 26px;
+    margin-top: 12px;
+  }
+  .verdict h2 { margin-top: 0; }
+  .verdict p { font-size: 14.5px; }
+  .verdict p:last-child { margin-bottom: 0; }
+
+  footer {
+    margin-top: 64px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    color: var(--ink-faint);
+    font-size: 12px;
+    font-family: var(--mono);
+  }
+
+  @media (max-width: 640px) {
+    h1 { font-size: 30px; }
+    .scorecard { grid-template-columns: repeat(2, 1fr); }
+    .wrap { padding: 0 16px 64px; }
+  }
+</style>
+
+<div class="wrap">
+  <h2 class="sr-only">SGMS ürün denetim raporu: eksik özellikler, tamamlanan modüller ve önceliklendirilmiş yol haritası</h2>
+
+  <header class="masthead">
+    <p class="eyebrow">CiCiByte SGMS · Ürün Denetimi</p>
+    <h1>Kod ne diyor, ürün ne olması gerekiyor</h1>
+    <p class="lede">
+      Lisans göçü tamamlandıktan sonra, SGMS'in kendi iş mantığını — kaynak kod, şema ve
+      100'den fazla dosya üzerinden — satır satır denetledim. Aşağıdaki her bulgu bir dosya
+      ve satıra dayanıyor; varsayım yok. <strong>Kapsam: yalnızca web uygulaması</strong>
+      (mobil/masaüstü henüz yok, talebiniz üzerine bu turda dışarıda bırakıldı).
+    </p>
+
+    <div class="scorecard">
+      <div class="stat crit"><div class="n">6</div><div class="l">Kritik — kırılır</div></div>
+      <div class="stat warn"><div class="n">9</div><div class="l">Önemli — risk</div></div>
+      <div class="stat"><div class="n">5</div><div class="l">İyi olur</div></div>
+      <div class="stat good"><div class="n">10+</div><div class="l">Sağlam temel</div></div>
+    </div>
+
+    <nav class="toc">
+      <a href="#saglam">Sağlam temeller</a>
+      <a href="#kritik">Kritik eksikler</a>
+      <a href="#onemli">Önemli eksikler</a>
+      <a href="#iyi-olur">İyi olur</a>
+      <a href="#oneri">Yol haritası önerisi</a>
+    </nav>
+  </header>
+
+  <section class="block" id="saglam">
+    <div class="sechead"><h2>Sağlam temeller</h2><span class="count">zaten tamam, üzerine inşa edilebilir</span></div>
+    <p class="secnote">Bunlar iddia değil — her biri çalışan kodda doğrulandı: tenant izolasyonu, RBAC guard'ları, gerçek zamanlı yayın, üyelik süresi kontrolü giriş anında gerçekten engelliyor.</p>
+    <div class="grid-done">
+      <div class="done-chip"><div class="t">Multi-tenant + RBAC</div><div class="d">org izolasyonu her sorguda</div></div>
+      <div class="done-chip"><div class="t">CRM çekirdeği</div><div class="d">ölçüm, program, profil</div></div>
+      <div class="done-chip"><div class="t">Gerçek zamanlı mesajlaşma</div><div class="d">Soketi + SSE fallback</div></div>
+      <div class="done-chip"><div class="t">Check-in + süre kontrolü</div><div class="d">süresi dolan üye kapıda engelleniyor</div></div>
+      <div class="done-chip"><div class="t">POS / cari hesap temeli</div><div class="d">borç, tahsilat, FIFO kapama</div></div>
+      <div class="done-chip"><div class="t">i18n</div><div class="d">6 dil, tam kapsam</div></div>
+      <div class="done-chip"><div class="t">Master Admin + Audit</div><div class="d">kategori bazlı, export'lu</div></div>
+      <div class="done-chip"><div class="t">Cloud senkronu</div><div class="d">bugün tamamlandı</div></div>
+      <div class="done-chip"><div class="t">Test + CI/CD</div><div class="d">bugün kuruldu</div></div>
+      <div class="done-chip"><div class="t">SGMS Resepsiyon</div><div class="d">masaüstü, v0.5.0</div></div>
+    </div>
+  </section>
+
+  <section class="block" id="kritik">
+    <div class="sechead"><h2>Kritik eksikler</h2><span class="count">6 bulgu — gerçek kullanımda kırılır</span></div>
+    <p class="secnote">Bunlar "olsa iyi olur" değil: bir gerçek salon bunlarla günlük operasyonda tıkanır.</p>
+
+    <div class="finding">
+      <div class="finding-head"><h3>Üye listesi 50 kayıtta donuyor — arama/filtre yok</h3><span class="pill crit">Kırılır</span></div>
+      <div class="scenario"><b>Senaryo</b><br>200 üyeli bir salonda resepsiyonist "Ahmet" adlı üyeyi bulmak istiyor. Liste sabit <code>take: 50</code> ile geliyor, soyadına göre sıralı — arama kutusu, filtre veya sayfalama hiç yok. 51. üyeden itibaren kimse görünmüyor.</div>
+      <div class="evidence"><code>apps/web/src/app/(tenant)/dashboard/members/page.tsx:43</code></div>
+    </div>
+
+    <div class="finding">
+      <div class="finding-head"><h3>"Şifremi unuttum" akışı yok</h3><span class="pill crit">Kırılır</span></div>
+      <div class="scenario"><b>Senaryo</b><br>Bir salon sahibi parolasını unutuyor. Login ekranında sıfırlama linki yok — tek çare Master Admin'e ulaşıp elle parola değiştirmesini istemek. Bu, self-servis bir SaaS için sürdürülemez bir destek yükü yaratır.</div>
+      <div class="evidence"><code>apps/web/src/components/login-form.tsx</code> — reset linki yok</div>
+    </div>
+
+    <div class="finding">
+      <div class="finding-head"><h3>E-posta gerçekten gönderilmiyor — sadece mailto: linki</h3><span class="pill crit">Kırılır</span></div>
+      <div class="scenario"><b>Senaryo</b><br>"Deneme süresi bitiyor" e-postası aslında hiç gitmiyor. Sistem sadece bir <code>mailto:</code> URL'i üretiyor; Master Admin'in kendi e-posta istemcisinden manuel gönderip göndermediğine bağlı. Otomatik hatırlatma, karşılama e-postası, hiçbiri gerçekte teslim edilmiyor.</div>
+      <div class="evidence"><code>lib/admin/email-templates.ts:112</code> — <code>buildMailtoUrl()</code>, SMTP dispatch yok</div>
+    </div>
+
+    <div class="finding">
+      <div class="finding-head"><h3>Gerçek ödeme ağ geçidi yok — tamamen manuel onay</h3><span class="pill crit">Kırılır</span></div>
+      <div class="scenario"><b>Senaryo</b><br>Salon sahibi "ödedim" diyerek bir talep gönderiyor; Master Admin bunu elle onaylıyor. Kart/banka entegrasyonu (iyzico, PayTR, Stripe) yok — sistem sahibinin sözüne güveniyor. Ölçeklendiğinde (yüzlerce müşteri) bu, gelir güvenilirliğini ve iş gücünü tüketir.</div>
+      <div class="evidence"><code>actions/billing.ts</code>, <code>actions/admin-billing.ts</code> — talep/onay akışı, ödeme sağlayıcısı çağrısı yok</div>
+    </div>
+
+    <div class="finding">
+      <div class="finding-head"><h3>Ana dashboard operasyonel değil — sadece hesap durumu</h3><span class="pill crit">Kırılır</span></div>
+      <div class="scenario"><b>Senaryo</b><br>Sahip her sabah paneli açtığında SaaS planını, lisans durumunu, kurulum ID'sini görüyor — ama bugün kaç kişi giriş yaptı, bu ay ciro ne kadar, hangi üyeliklerin süresi bu hafta doluyor gibi hiçbir operasyonel bilgi yok. İlk açılan ekran bir "hesap ayarları" sayfası, bir "salon komuta merkezi" değil.</div>
+      <div class="evidence"><code>apps/web/src/app/(tenant)/dashboard/page.tsx</code></div>
+    </div>
+
+    <div class="finding">
+      <div class="finding-head"><h3>Login/API'de brute-force koruması yok</h3><span class="pill crit">Kırılır</span></div>
+      <div class="scenario"><b>Senaryo</b><br>Rate limiting yalnızca mesajlaşma taşkınına karşı var. <code>/login</code> ve <code>/api/v1/auth/login</code> sınırsız denemeye açık — bir saldırgan otomatik script ile parola tahmini yapabilir.</div>
+      <div class="evidence"><code>lib/rate-limit.ts</code> — yalnızca <code>actions/messages.ts</code> içinde kullanılıyor</div>
+    </div>
+  </section>
+
+  <section class="block" id="onemli">
+    <div class="sechead"><h2>Önemli eksikler</h2><span class="count">9 bulgu — büyüme, hukuki ve gelir riski</span></div>
+    <p class="secnote">Bugün kırmıyor ama büyüdükçe (daha fazla salon, daha fazla ülke, daha fazla denetim) risk haline gelir.</p>
+
+    <div class="finding warning">
+      <div class="finding-head"><h3>Üyelik dondurma / pause yok</h3><span class="pill warn">Önemli</span></div>
+      <div class="scenario"><b>Senaryo</b><br>Bir üye 1 aylığına şehir dışına çıkıyor. "Dondur" seçeneği yok — ya üyelik sayaç işlemeye devam ediyor ya da personel elle bitiş tarihini kaydırıyor (iz bırakmadan, tutarsız). <code>GymMemberStatus</code> sadece ACTIVE/INACTIVE/SUSPENDED.</div>
+    </div>
+
+    <div class="finding warning">
+      <div class="finding-head"><h3>Sınıf / ders rezervasyon sistemi yok</h3><span class="pill warn">Önemli</span></div>
+      <div class="scenario"><b>Senaryo</b><br>Pilates dersine kimlerin katılacağı, kaç kişilik kontenjan olduğu, kimin bekleme listesinde olduğu — hiçbiri modellenmemiş. <code>TrainingProgram</code> yalnızca bireysel antrenman/beslenme programı, bir takvim/rezervasyon kavramı yok.</div>
+    </div>
+
+    <div class="finding warning">
+      <div class="finding-head"><h3>KVKK / Gizlilik / Kullanım Şartları sayfaları yok</h3><span class="pill warn">Önemli</span></div>
+      <div class="scenario"><b>Senaryo</b><br>Sistem üyelerin sağlık ölçümlerini, kimlik/pasaport numaralarını, RFID etiketlerini saklıyor — ama gizlilik politikası, aydınlatma metni veya kullanım şartları sayfası hiçbir yerde yok. Türkiye'de KVKK, AB müşterileri için GDPR açısından gerçek hukuki risk.</div>
+    </div>
+
+    <div class="finding warning">
+      <div class="finding-head"><h3>İki faktörlü kimlik doğrulama (2FA) yok</h3><span class="pill warn">Önemli</span></div>
+      <div class="scenario"><b>Senaryo</b><br>Master Admin ve salon sahibi hesapları — finansal veriye ve tüm müşteri tabanına erişimi olan hesaplar — yalnızca parola ile korunuyor.</div>
+    </div>
+
+    <div class="finding warning">
+      <div class="finding-head"><h3>Çoklu şube (franchise) veri modeli yok</h3><span class="pill warn">Önemli</span></div>
+      <div class="scenario"><b>Senaryo</b><br>Franchise paketi satılıyor (roadmap, plan seed'leri) ama <code>Organization</code> modeli tek lokasyon varsayıyor. 3 şubesi olan bir zincir, SGMS'te 3 ayrı ayrı hesap açmak zorunda — ortak raporlama, personel paylaşımı imkansız.</div>
+    </div>
+
+    <div class="finding warning">
+      <div class="finding-head"><h3>POS'ta stok/envanter takibi yok</h3><span class="pill warn">Önemli</span></div>
+      <div class="scenario"><b>Senaryo</b><br>"Su 15₺" bir kategori + sabit fiyat; kaç şişe kaldığını sistem bilmiyor. Kafe/market işleten bir salon için gerçek envanter olmadan kayıp/çalıntı ürün fark edilemez.</div>
+    </div>
+
+    <div class="finding warning">
+      <div class="finding-head"><h3>İndirim / kupon / referans sistemi yok</h3><span class="pill warn">Önemli</span></div>
+      <div class="scenario"><b>Senaryo</b><br>"3 arkadaşını getir, 1 ay bedava" veya sezonluk kampanya kodu gibi standart büyüme taktikleri hiçbir yerde desteklenmiyor.</div>
+    </div>
+
+    <div class="finding warning">
+      <div class="finding-head"><h3>Proaktif hatırlatma yok — yalnızca reaktif engelleme var</h3><span class="pill warn">Önemli</span></div>
+      <div class="scenario"><b>Senaryo</b><br>İyi haber: süresi dolan bir üyelik turnikede gerçekten engelleniyor (<code>check-in/process.ts:304</code>). Kötü haber: üyeye süresinin dolacağını önceden haber veren otomatik bir e-posta/SMS/panel uyarısı yok — üye kapıda sürpriz yaşıyor.</div>
+    </div>
+
+    <div class="finding warning">
+      <div class="finding-head"><h3><code>Invoice</code> modeli yok</h3><span class="pill warn">Önemli</span></div>
+      <div class="scenario"><b>Senaryo</b><br>Faz 8'den kalan, roadmap'te zaten bilinen tek eksik — resmi fatura/e-fatura kaydı yok, yalnızca <code>Expense</code>/<code>Transaction</code> var.</div>
+    </div>
+  </section>
+
+  <section class="block" id="iyi-olur">
+    <div class="sechead"><h2>İyi olur</h2><span class="count">5 bulgu — olgunluk katmanı</span></div>
+    <p class="secnote">Bugün eksikliği hissedilmez ama bir "mükemmel sistem" hedefinde yeri var.</p>
+    <div class="grid-done">
+      <div class="done-chip"><div class="t">Personel vardiya planlama</div><div class="d">shift/takvim yok</div></div>
+      <div class="done-chip"><div class="t">Sağlık formu / rıza metni</div><div class="d">waiver, imza kaydı yok</div></div>
+      <div class="done-chip"><div class="t">Kendi kendine veri indirme/silme</div><div class="d">GDPR self-servis yok</div></div>
+      <div class="done-chip"><div class="t">Playwright E2E</div><div class="d">roadmap'te zaten not edildi</div></div>
+      <div class="done-chip"><div class="t">Mesaj dışı bildirim merkezi</div><div class="d">in-app notification yok</div></div>
+    </div>
+  </section>
+
+  <section class="block" id="oneri">
+    <div class="sechead"><h2>Yol haritası önerisi</h2></div>
+    <p class="secnote">Gerçek risk sırasına göre 4 aşama. Her aşama bir öncekinin üzerine biner — sırayı değiştirmeyi önermem.</p>
+
+    <div class="phase">
+      <div class="phase-num">A</div>
+      <div>
+        <h3>Yayına hazırlık — bugün kırık olanlar</h3>
+        <p class="why">Bunlar olmadan mevcut 4 müşteri bile günlük sürtünme yaşıyor.</p>
+        <ul>
+          <li>Üye listesine arama + filtre + gerçek sayfalama</li>
+          <li>Şifremi unuttum akışı (e-posta ile sıfırlama linki)</li>
+          <li>Gerçek SMTP entegrasyonu (en azından işlemsel e-postalar: karşılama, deneme bitişi, ödeme hatırlatma)</li>
+          <li>Login + API auth uçlarına rate limiting</li>
+        </ul>
+      </div>
+      <hr class="phase-divider">
+    </div>
+
+    <div class="phase">
+      <div class="phase-num">B</div>
+      <div>
+        <h3>Gelir güvenliği</h3>
+        <p class="why">Şu an gelir, sahibinin sözüne dayanıyor. Bu, ölçeklenemez ve denetlenemez.</p>
+        <ul>
+          <li>Gerçek ödeme ağ geçidi (iyzico — Türkiye pazarı için öncelik)</li>
+          <li>Proaktif üyelik/ödeme hatırlatmaları (otomatik e-posta, panelde rozet)</li>
+          <li>Operasyonel KPI dashboard'u (bugünkü check-in, aylık ciro, süresi dolan üyelikler)</li>
+        </ul>
+      </div>
+      <hr class="phase-divider">
+    </div>
+
+    <div class="phase">
+      <div class="phase-num">C</div>
+      <div>
+        <h3>Büyüme özellikleri</h3>
+        <p class="why">Satılan planların (Franchise) ve rekabetin gerektirdiği özellikler.</p>
+        <ul>
+          <li>Üyelik dondurma/pause</li>
+          <li>Sınıf/ders rezervasyon + bekleme listesi</li>
+          <li>Çoklu şube veri modeli (Franchise planını gerçek kılmak için)</li>
+          <li>İndirim/kupon/referans sistemi</li>
+          <li>POS stok/envanter takibi</li>
+        </ul>
+      </div>
+      <hr class="phase-divider">
+    </div>
+
+    <div class="phase">
+      <div class="phase-num">D</div>
+      <div>
+        <h3>Olgunluk ve uyumluluk</h3>
+        <p class="why">Hukuki risk ve kurumsal güvenlik beklentisi.</p>
+        <ul>
+          <li>KVKK/GDPR uyumlu Gizlilik, Kullanım Şartları, açık rıza metinleri</li>
+          <li>2FA (en azından Master Admin ve OWNER rolü için)</li>
+          <li>Kendi kendine veri indirme/hesap silme</li>
+          <li>Personel vardiya planlama, sağlık/rıza formu</li>
+          <li>Playwright E2E, <code>Invoice</code> modeli</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="verdict">
+      <h2>Görüşüm</h2>
+      <p>SGMS'in <strong>mimarisi zaten profesyonel seviyede</strong> — tenant izolasyonu, audit log'ları, gerçek zamanlı altyapı, check-in'in üyelik süresini gerçekten denetlemesi gibi detaylar, çoğu MVP'nin atladığı yerler. Bugün eksik olan şey mimari değil, <strong>"birinin gerçekten kullanacağı" varsayımıyla yazılmamış birkaç ekran ve entegrasyon</strong>: 50 kayıtla sınırlı bir üye listesi, gönderilmeyen bir e-posta, ödeme sözüne güvenen bir faturalama.</p>
+      <p>Önerim: <strong>A ve B aşamalarını tek bir çalışma bloğu olarak ele alalım</strong> — ikisi de mevcut 4 canlı müşteriyi doğrudan etkiliyor ve ikisi de (arama/filtre, e-posta, rate limit, ödeme, hatırlatma, KPI) birbirini besliyor. C ve D'yi ayrı fazlar olarak roadmap'e (Faz 14/15) ekleyip, hangisiyle başlamak istediğinize siz karar verin.</p>
+    </div>
+  </section>
+
+  <footer>SGMS ürün denetimi · 2026-07-14 · kaynak: packages/database/prisma/schema.prisma, apps/web/src/** · CiciByte</footer>
+</div>

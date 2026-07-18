@@ -60,6 +60,9 @@ git-log.txt
 .tools/node/
 .pm2/
 
+# Local tool config
+.claude/
+
 # User-uploaded media (local storage)
 apps/web/public/uploads/avatars/**
 !apps/web/public/uploads/avatars/.gitkeep

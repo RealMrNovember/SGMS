@@ -51,7 +51,8 @@
       "management": "İdarəetmə",
       "analytics": "Analitika"
     },
-    "paymentPlans": "Ödəniş Planları"
+    "paymentPlans": "Ödəniş Planları",
+    "twoFactor": "Hesab Təhlükəsizliyi (2FA)"
   },
   "auth": {
     "login": "Daxil ol",
@@ -81,7 +82,11 @@
     "demoOwner": "Salon sahibi",
     "demoStaff": "Resepsiya",
     "demoAthlete": "Müştəri (İdmançı)",
-    "backToSite": "Sayta qayıt"
+    "backToSite": "Sayta qayıt",
+    "totpLabel": "Təsdiq kodu (Authenticator tətbiqi)",
+    "verifyTotp": "Kodu təsdiqlə",
+    "backToCredentials": "Geri qayıt",
+    "invalidTotp": "Təsdiq kodu yanlışdır."
   },
   "avatar": {
     "uploadPhoto": "Şəkil yüklə",
@@ -235,7 +240,10 @@
       "roleViewer": "Baxıcı (VIEWER)",
       "saving": "Əlavə edilir…",
       "submit": "Personal əlavə et",
-      "tempPassword": "Müvəqqəti şifrə: {password}"
+      "passwordModeLabel": "Şifrə necə təyin edilsin?",
+      "passwordModeEmailInvite": "Personel e-poçt vasitəsilə özü təyin etsin",
+      "passwordModeOwnerSet": "Şifrəni mən təyin edəcəyəm",
+      "password": "Şifrə"
     }
   },
   "dashboard": {
@@ -863,6 +871,8 @@
     "communicationsSubtitle": "Ready email copy for customer outreach. Customer detail pages use personalized versions.",
     "auditSecurityNav": "Təhlükəsizlik hadisələri",
     "adminsNav": "Master Adminlər",
+    "paymentsNav": "Ödəniş Ayarları",
+    "twoFactorNav": "2FA Təhlükəsizlik",
     "adminsTitle": "Master admin idarəetməsi",
     "adminsSubtitle": "Platforma super adminlərini əlavə edin, yüksəldin, şifrələrini sıfırlayın və ya ləğv edin. Hər əməliyyat qeydə alınır.",
     "adminsCardHint": "Master adminlər əlavə edin və mövcud platforma operatorlarını idarə edin.",

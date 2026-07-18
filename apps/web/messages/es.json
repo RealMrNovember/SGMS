@@ -51,7 +51,8 @@
       "management": "Gestión",
       "analytics": "Análisis"
     },
-    "paymentPlans": "Planes de pago"
+    "paymentPlans": "Planes de pago",
+    "twoFactor": "Seguridad de la cuenta (2FA)"
   },
   "auth": {
     "login": "Iniciar sesión",
@@ -81,7 +82,11 @@
     "demoOwner": "Dueño del gym",
     "demoStaff": "Recepción",
     "demoAthlete": "Cliente (Atleta)",
-    "backToSite": "Volver al sitio"
+    "backToSite": "Volver al sitio",
+    "totpLabel": "Código de verificación (app Authenticator)",
+    "verifyTotp": "Verificar código",
+    "backToCredentials": "Volver",
+    "invalidTotp": "Código de verificación incorrecto."
   },
   "avatar": {
     "uploadPhoto": "Subir foto",
@@ -235,7 +240,10 @@
       "roleViewer": "Observador (VIEWER)",
       "saving": "Agregando…",
       "submit": "Agregar personal",
-      "tempPassword": "Contraseña temporal: {password}"
+      "passwordModeLabel": "¿Cómo se establecerá la contraseña?",
+      "passwordModeEmailInvite": "El personal la establece por correo electrónico",
+      "passwordModeOwnerSet": "La estableceré yo mismo",
+      "password": "Contraseña"
     }
   },
   "dashboard": {
@@ -863,6 +871,8 @@
     "communicationsSubtitle": "Ready email copy for customer outreach. Customer detail pages use personalized versions.",
     "auditSecurityNav": "Eventos de seguridad",
     "adminsNav": "Master Admins",
+    "paymentsNav": "Configuración de Pagos",
+    "twoFactorNav": "Seguridad 2FA",
     "adminsTitle": "Gestión de administradores maestros",
     "adminsSubtitle": "Agregue, ascienda, restablezca contraseñas o revoque superadministradores de la plataforma. Cada acción queda auditada.",
     "adminsCardHint": "Agregue administradores maestros y gestione los operadores existentes de la plataforma.",
