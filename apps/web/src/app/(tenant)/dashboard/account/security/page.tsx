@@ -8,7 +8,7 @@ export default async function DashboardAccountSecurityPage() {
     redirect('/login');
   }
 
-  const mandatory = session.user.role === 'OWNER' || session.user.role === 'ADMIN';
+  const mandatory = (session.user.role === 'OWNER' || session.user.role === 'ADMIN') && !session.user.isDemo;
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
