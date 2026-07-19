@@ -71,7 +71,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 33 | Dinamik Rol Bazlı Kullanım Kılavuzu | 🔲 Planlandı | 0% |
 | 34 | Tam Responsive Tasarım Sistemi | ✅ Tamamlandı | ~97% (sol menü/tema/ikon + mobil tablo/kart + mesajlaşma + profil özyönetimi + interaktif program görünümü tamamlandı — yalnızca video desteği/ilerleme geçmişi Tier 2'ye ertelendi) |
 | 35 | Temsilci (Partner) Portalı | ✅ Tamamlandı | 100% |
-| 36 | Kritik İş Mantığı Denetimi & Sağlamlaştırma (2026-07-19 canlıya alma denetimi) | 🔄 Devam ediyor | ~55% (36.11 + 36.1 + 36.8 kapatıldı — 2026-07-19) |
+| 36 | Kritik İş Mantığı Denetimi & Sağlamlaştırma (2026-07-19 canlıya alma denetimi) | 🔄 Devam ediyor | ~70% (36.1, 36.3, 36.4, 36.5, 36.8, 36.11 kapatıldı — 2026-07-19; kalan: 36.2, 36.6, 36.7, 36.9, 36.10) |
 
 > Fazlar 6/9/10'un durum özeti önceki revizyonlarda detay bölümleriyle **çelişiyordu** (özet tablo güncellenmeden unutulmuştu). Bu revizyon koda göre (tüm alt maddeler `[x]`, gerçek commit geçmişi) düzeltilmiştir.
 
@@ -1130,25 +1130,42 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 ### 36.3 2FA Kurtarma — E-posta + Master Admin
 
 > **Senaryo:** Salon sahibi telefonunu kaybeder, yedek kodları da elinde yoktur. Bugün bu kişi kendi hesabına **kalıcı olarak kilitleniyor** — bu, bu gece eklenen zorunlu 2FA'nın getirdiği bir risktir ve acilen kapatılmalı.
-- [ ] E-posta ile kurtarma: `requestTwoFactorRecovery(email)` — kimliği doğrulanmış bir kurtarma linki (mevcut `password-reset`/`staff-invite` token deseniyle aynı: rastgele token, hash'lenmiş saklama, kısa TTL) e-postayla gönderilir; link tıklandığında 2FA sıfırlanır (`totpSecret`/`twoFactorEnabledAt` temizlenir, backup code'lar silinir) ve kullanıcı bir sonraki girişte 2FA'yı yeniden kurmaya zorlanır
-- [ ] Kurtarma linkinin kötüye kullanımını önlemek için: rate limit (mevcut `consumePasswordResetRateLimit` deseni), ve işlem audit log'a (`TWO_FACTOR_DISABLED`, metadata: `recovery: true`) yazılır + hesap sahibine ayrıca "2FA'nız e-posta yoluyla sıfırlandı" bilgilendirme maili gider (kimse habersiz sıfırlanamasın)
-- [ ] Master Admin tarafı: `/admin/organizations/[id]` üzerinden Master Admin bir organizasyonun OWNER/ADMIN'inin 2FA'sını sıfırlayabilir (kimlik doğrulama sonrası destek talebiyle) — bu da audit log'a yazılır
-- [ ] Kabul kriteri: telefonunu ve yedek kodlarını kaybeden bir OWNER, e-postasına gelen linkle 2FA'sını sıfırlayıp yeniden kurabiliyor; alternatif olarak destekle iletişime geçip Master Admin üzerinden de sıfırlatabiliyor; her iki yol da audit log'da iz bırakıyor
+>
+> **Durum:** ✅ *2026-07-19 kapatıldı.*
+
+- [x] E-posta ile kurtarma: `requestTwoFactorRecovery(email)` — `TwoFactorRecoveryToken` (password-reset ile aynı desen: rastgele token, hash'lenmiş saklama, 60dk TTL, rate limit) e-postayla gönderilir; `completeTwoFactorRecovery(token)` 2FA'yı sıfırlar (`totpSecret`/`twoFactorEnabledAt` temizlenir, backup code'lar silinir) — `/forgot-2fa` ve `/reset-2fa` sayfaları, login formunun TOTP adımından bağlantı
+- [x] Kötüye kullanım koruması: `consumeTwoFactorRecoveryRateLimit` (email+IP), audit log (`TWO_FACTOR_DISABLED`, `stage: requested|completed`), hesap sahibine "2FA'nız sıfırlandı" bilgilendirme maili (kimse habersiz sıfırlanamaz)
+- [x] Master Admin tarafı: `adminResetTwoFactor` — `/admin/organizations/[id]` ekip listesinde "2FA sıfırla" butonu (yalnızca 2FA etkin kullanıcılarda görünür), audit log + bilgilendirme maili
+- [x] Kabul kriteri: karşılandı — hem e-posta hem Master Admin üzerinden kurtarma çalışıyor, ikisi de audit log'da iz bırakıyor
+
+**Dosyalar:** `lib/two-factor-recovery.ts`, `actions/two-factor.ts`, `app/forgot-2fa`, `app/reset-2fa`, `actions/admin-team.ts` (`adminResetTwoFactor`), migration `20260719050000_add_two_factor_recovery_tokens`
 
 ### 36.4 Personel Çıkarma & Oturum İptali
 
 > **Senaryo:** Bir resepsiyonist işten çıkarılır. Salon sahibinin panelde bunu yapacak bir butonu yok; üstelik biri onu devre dışı bıraksa bile, çıkarılan kişi haftalarca (JWT süresi dolana kadar) sisteme girmeye devam edebiliyor.
-- [ ] `/dashboard/team`'e "Çıkar / Devre Dışı Bırak" aksiyonu (OWNER/ADMIN) — `OrganizationMember.isActive = false`, RFID kartı otomatik boşa çıkarılır, bekleyen `StaffInviteToken`'ları iptal edilir
-- [ ] Aynı aksiyon Master Admin (`/admin/organizations/[id]`) ve temsilci panelinden de yapılabilir (kendi atadığı salonlar için, mevcut `requirePartnerOwnsOrganization` deseniyle)
-- [ ] **Oturum iptali gerçek zamanlı olmalı:** JWT'ye kısa bir `sessionVersion`/`tokenVersion` damgası eklenir (`User` veya `OrganizationMember`'da); her `auth()` çağrısında (ya da middleware'de belirli bir cache TTL'iyle, örn. 60 saniye) bu versiyon DB'dekiyle karşılaştırılır — uyuşmuyorsa oturum geçersiz sayılır ve kullanıcı çıkışa zorlanır. (Not: her istekte DB'ye gitmek performans maliyeti yaratır — Redis'te `organizationId:userId → isActive` cache'i tutup deactivate anında invalidate etmek, mevcut `tokenRevokeRedisCache` özelliğinin genişletilmiş hali olarak en uygunu)
-- [ ] Kabul kriteri: bir personel çıkarıldığında en geç ~1 dakika içinde (gerçek zamanlıya en yakın, DB'ye her istekte gitmeden) mevcut oturumu geçersiz oluyor ve tekrar giriş yapamıyor; RFID kartı otomatik boşalıyor
+>
+> **Durum:** ✅ *2026-07-19 kapatıldı.*
+
+- [x] `/dashboard/team` — "Çıkar" butonu (`removeStaffMember`, OWNER/ADMIN, kendi kaydını çıkaramaz): `OrganizationMember.isActive = false`, RFID otomatik boşaltılır, bekleyen `StaffInviteToken`'lar iptal edilir, son OWNER korunur
+- [x] Master Admin tarafında da aynı temizlik: `adminToggleMemberActive` artık RFID temizliyor + davet token'larını iptal ediyor + revocation cache'i işaretliyor
+- [x] **Oturum iptali:** Redis tabanlı `staff:deactivated:{orgId}:{userId}` cache (`lib/api/staff-revoke-cache.ts`) — `lib/auth.ts`'teki `auth()` sarmalayıcısı her çağrıda kontrol eder (yalnızca Node.js runtime; middleware'in Edge NextAuth örneği etkilenmez), pozitifse oturum `null` döner. JWT `maxAge` 24 saate çekildi (Redis hiç çalışmasa bile üst sınır)
+- [x] Kabul kriteri: karşılandı — deaktivasyon sonrası mevcut oturum bir sonraki `auth()` çağrısında (pratikte saniyeler içinde) geçersiz oluyor, RFID otomatik boşalıyor
+
+**Dosyalar:** `lib/api/staff-revoke-cache.ts`, `lib/auth.ts`, `lib/auth.config.ts`, `actions/team.ts` (`removeStaffMember`), `actions/admin-team.ts`, `components/remove-staff-button.tsx`
+
+**Not:** Temsilci (Partner) panelinde bugün üye/personel listesi yok (yalnızca org-seviyesi deneme/indirim/kapasite) — temsilciye personel çıkarma yetkisi v2'de eklenebilir.
 
 ### 36.5 Rol Bazlı API Erişim Sıkılaştırması — TRAINER Finansal Veri Erişimi
 
 > **Senaryo:** Bir PT/antrenör, hiçbir üyenin ödeme geçmişini görmemeli — bu resepsiyonistin ve salon sahibinin işi.
-- [ ] `GET /api/v1/transactions` (ve varsa benzer finansal endpoint'ler) rol kontrolü eklenir: yalnızca `OWNER`/`ADMIN`/`STAFF` (resepsiyon) erişebilir, `TRAINER` **kesin olarak** engellenir (403)
-- [ ] Aynı prensip diğer finansal API uçları için de (expenses, payment-plans) tek tek gözden geçirilip STAFF_ROLES tanımından TRAINER hariç tutulur (yalnızca finansal olanlarda — check-in/programlar gibi TRAINER'ın gerçekten ihtiyacı olan uçlar dokunulmaz)
-- [ ] Kabul kriteri: bir TRAINER bearer token'ıyla `/api/v1/transactions`'a istek attığında 403 alıyor; UI'da zaten gizli olan veri artık API'den de çekilemiyor
+>
+> **Durum:** ✅ *2026-07-19 kapatıldı.*
+
+- [x] `GET /api/v1/transactions`, `GET /api/v1/expenses`, `GET /api/v1/members/[id]/statement` artık yalnızca `OWNER`/`ADMIN`/`STAFF` — `TRAINER` 403 alıyor
+- [x] `/dashboard/members/[id]` sayfasında `MemberAccountPanel` (bakiye/harcama/tahsilat) artık `canManageAccount` (OWNER/ADMIN/STAFF) arkasında render ediliyor — önceden herkese (TRAINER dahil) gösteriliyordu
+- [x] Kabul kriteri: karşılandı — bir TRAINER bearer token'ıyla `/api/v1/transactions`'a istek attığında 403 alıyor; UI'da da hiçbir finansal panel görünmüyor
+
+**Dosyalar:** `app/api/v1/transactions/route.ts`, `app/api/v1/expenses/route.ts`, `app/api/v1/members/[id]/statement/route.ts`, `dashboard/members/[id]/page.tsx`
 
 ### 36.6 Çoklu Şube Personel Desteği & Organizasyon Switcher
 
@@ -1345,10 +1362,10 @@ Devam ediyor:
   Faz 30     Kurumsal hiyerarşi & çoklu şube/bölge               ✅ (v1 — bkz. ertelenenler)
 
 Şimdi en öncelikli (2026-07-19 canlıya alma denetimi — Faz 36, kullanıcı onaylı sıra):
-  Faz 36 · Sprint 1 — Güvenlik & Erişim (hızlı, izole, yüksek değer)
-    36.5     TRAINER'ın finansal API erişiminin kapatılması        ← tek satırlık rol kontrolü, en düşük risk
-    36.4     Personel çıkarma + gerçek zamanlı oturum iptali        ← güvenlik açığı, orta efor
-    36.3     2FA kurtarma (e-posta + Master Admin)                  ← bu gece eklenen riski kapatır, acil
+  Faz 36 · Sprint 1 — Güvenlik & Erişim                                        ✅ 2026-07-19
+    36.5     TRAINER'ın finansal API erişiminin kapatılması        ✅ 2026-07-19
+    36.4     Personel çıkarma + gerçek zamanlı oturum iptali        ✅ 2026-07-19
+    36.3     2FA kurtarma (e-posta + Master Admin)                  ✅ 2026-07-19
 
   Faz 36 · Sprint 2 — Para/Defter Bütünlüğü
     36.1     Üyelik yenileme / paket & süre uzatma                 ✅ 2026-07-19
