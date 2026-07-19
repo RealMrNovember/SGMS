@@ -634,7 +634,13 @@
       "intervalDays": "Days between installments (custom only)",
       "description": "Description (optional)",
       "create": "Create plan"
-    }
+    },
+    "refund": "Refund",
+    "refundAmount": "Refund amount",
+    "refundReason": "Refund reason",
+    "confirmRefund": "Record refund",
+    "refundCancel": "Cancel",
+    "refundedBadge": "Refunded: {amount}"
   },
   "pos": {
     "title": "Mini POS / Cash Desk",
@@ -1315,6 +1321,16 @@
       "title": "Top-Selling Categories",
       "colName": "Category",
       "colRevenue": "Revenue"
+    },
+    "revenue": {
+      "title": "Revenue (Collected vs Billed)",
+      "subtitle": "Collected = payments − refunds. Billed = charges created in the period. They are never mixed.",
+      "collected": "Collected (net)",
+      "billed": "Billed",
+      "billedHint": "Charges created in the period (excluding VOID)",
+      "paymentsMinusRefunds": "Payments {payments} − Refunds {refunds}",
+      "byCurrency": "By currency",
+      "rowSummary": "Collected {collected} · Billed {billed}"
     }
   },
   "enterprise": {

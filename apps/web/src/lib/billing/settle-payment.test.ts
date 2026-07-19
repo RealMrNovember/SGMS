@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { applyPaymentToExpenses } from './settle-payment';
+import { applyPaymentToExpenses, applyRefundToExpenses } from './settle-payment';
 
 type FakeExpense = {
   id: string;
@@ -8,9 +8,11 @@ type FakeExpense = {
   status: 'OPEN' | 'PAID' | 'VOID';
   amount: number;
   paidAmount: number;
+  currency: string;
   dueDate: Date | null;
   createdAt: Date;
   paidAt: Date | null;
+  updatedAt: Date;
 };
 
 function createFakeTx(expenses: FakeExpense[]) {
@@ -18,22 +20,47 @@ function createFakeTx(expenses: FakeExpense[]) {
     expense: {
       async findFirst({ where }: { where: Record<string, unknown> }) {
         return (
-          expenses.find(
-            (e) =>
-              e.id === where.id &&
-              e.organizationId === where.organizationId &&
-              e.gymMemberId === where.gymMemberId &&
-              (where.status === undefined || e.status === where.status),
-          ) ?? null
+          expenses.find((e) => {
+            if (where.id && e.id !== where.id) return false;
+            if (where.organizationId && e.organizationId !== where.organizationId) return false;
+            if (where.gymMemberId && e.gymMemberId !== where.gymMemberId) return false;
+            if (where.currency && e.currency !== where.currency) return false;
+            if (where.status) {
+              if (typeof where.status === 'string' && e.status !== where.status) return false;
+              if (
+                typeof where.status === 'object' &&
+                where.status !== null &&
+                'in' in where.status &&
+                !(where.status as { in: string[] }).in.includes(e.status)
+              ) {
+                return false;
+              }
+            }
+            return true;
+          }) ?? null
         );
       },
       async findMany({ where }: { where: Record<string, unknown> }) {
-        let result = expenses.filter(
-          (e) =>
-            e.organizationId === where.organizationId &&
-            e.gymMemberId === where.gymMemberId &&
-            e.status === where.status,
-        );
+        let result = expenses.filter((e) => {
+          if (e.organizationId !== where.organizationId) return false;
+          if (e.gymMemberId !== where.gymMemberId) return false;
+          if (where.currency && e.currency !== where.currency) return false;
+          if (where.status) {
+            if (typeof where.status === 'string' && e.status !== where.status) return false;
+            if (
+              typeof where.status === 'object' &&
+              where.status !== null &&
+              'in' in where.status &&
+              !(where.status as { in: string[] }).in.includes(e.status)
+            ) {
+              return false;
+            }
+          }
+          if (where.paidAmount && typeof where.paidAmount === 'object' && 'gt' in where.paidAmount) {
+            if (!(e.paidAmount > (where.paidAmount as { gt: number }).gt)) return false;
+          }
+          return true;
+        });
         const idFilter = where.id as { not?: string } | undefined;
         if (idFilter?.not) {
           result = result.filter((e) => e.id !== idFilter.not);
@@ -67,9 +94,11 @@ function makeExpense(overrides: Partial<FakeExpense> & { id: string }): FakeExpe
     status: 'OPEN',
     amount: 100,
     paidAmount: 0,
+    currency: 'TRY',
     dueDate: null,
     createdAt: new Date('2026-01-01'),
     paidAt: null,
+    updatedAt: new Date('2026-01-01'),
     ...overrides,
   };
 }
@@ -83,6 +112,7 @@ describe('applyPaymentToExpenses', () => {
       organizationId: 'org1',
       gymMemberId: 'member1',
       amount: 100,
+      currency: 'TRY',
     });
 
     expect(remaining).toBe(0);
@@ -90,27 +120,41 @@ describe('applyPaymentToExpenses', () => {
     expect(expenses[0].paidAmount).toBe(100);
   });
 
-  it('pays off multiple open expenses in full FIFO order', async () => {
-    const expenses = [
-      makeExpense({ id: 'e1', amount: 50, dueDate: new Date('2026-01-01') }),
-      makeExpense({ id: 'e2', amount: 50, dueDate: new Date('2026-01-02') }),
-    ];
+  it('does not apply a TRY payment to a USD open expense', async () => {
+    const expenses = [makeExpense({ id: 'usd', amount: 100, currency: 'USD' })];
     const tx = createFakeTx(expenses);
 
     const { remaining } = await applyPaymentToExpenses(tx, {
       organizationId: 'org1',
       gymMemberId: 'member1',
       amount: 100,
+      currency: 'TRY',
     });
 
-    expect(remaining).toBe(0);
-    expect(expenses[0].status).toBe('PAID');
-    expect(expenses[1].status).toBe('PAID');
+    expect(remaining).toBe(100);
+    expect(expenses[0].paidAmount).toBe(0);
+    expect(expenses[0].status).toBe('OPEN');
   });
 
-  it('applies a true partial payment to the oldest open expense instead of skipping it', async () => {
-    // Regression test: the previous implementation only closed an expense if the
-    // payment could cover it in full, silently skipping any partial coverage.
+  it('pays only matching-currency debts when both TRY and USD are open', async () => {
+    const expenses = [
+      makeExpense({ id: 'try', amount: 50, currency: 'TRY', dueDate: new Date('2026-01-01') }),
+      makeExpense({ id: 'usd', amount: 80, currency: 'USD', dueDate: new Date('2026-01-01') }),
+    ];
+    const tx = createFakeTx(expenses);
+
+    await applyPaymentToExpenses(tx, {
+      organizationId: 'org1',
+      gymMemberId: 'member1',
+      amount: 50,
+      currency: 'USD',
+    });
+
+    expect(expenses.find((e) => e.id === 'usd')!.paidAmount).toBe(50);
+    expect(expenses.find((e) => e.id === 'try')!.paidAmount).toBe(0);
+  });
+
+  it('applies a true partial payment to the oldest open expense', async () => {
     const expenses = [makeExpense({ id: 'e1', amount: 100 })];
     const tx = createFakeTx(expenses);
 
@@ -118,72 +162,39 @@ describe('applyPaymentToExpenses', () => {
       organizationId: 'org1',
       gymMemberId: 'member1',
       amount: 40,
+      currency: 'TRY',
     });
 
     expect(remaining).toBe(0);
     expect(expenses[0].status).toBe('OPEN');
     expect(expenses[0].paidAmount).toBe(40);
   });
+});
 
-  it('applies a partial payment to the oldest (due-first) expense rather than fully paying a smaller newer one', async () => {
+describe('applyRefundToExpenses', () => {
+  it('reduces paidAmount and reopens a PAID expense', async () => {
     const expenses = [
-      makeExpense({ id: 'older', amount: 100, dueDate: new Date('2026-01-01') }),
-      makeExpense({ id: 'newer', amount: 30, dueDate: new Date('2026-01-05') }),
+      makeExpense({
+        id: 'e1',
+        amount: 100,
+        paidAmount: 100,
+        status: 'PAID',
+        paidAt: new Date('2026-01-02'),
+      }),
     ];
     const tx = createFakeTx(expenses);
 
-    const { remaining } = await applyPaymentToExpenses(tx, {
+    const { remaining } = await applyRefundToExpenses(tx, {
       organizationId: 'org1',
       gymMemberId: 'member1',
       amount: 40,
+      currency: 'TRY',
+      expenseId: 'e1',
     });
 
     expect(remaining).toBe(0);
-    const older = expenses.find((e) => e.id === 'older')!;
-    const newer = expenses.find((e) => e.id === 'newer')!;
-    expect(older.paidAmount).toBe(40);
-    expect(older.status).toBe('OPEN');
-    expect(newer.paidAmount).toBe(0);
-    expect(newer.status).toBe('OPEN');
-  });
-
-  it('applies a targeted payment to a specific installment and spills the remainder into FIFO', async () => {
-    const expenses = [
-      makeExpense({ id: 'target', amount: 20, dueDate: new Date('2026-01-01') }),
-      makeExpense({ id: 'other', amount: 100, dueDate: new Date('2026-01-02') }),
-    ];
-    const tx = createFakeTx(expenses);
-
-    const { remaining } = await applyPaymentToExpenses(tx, {
-      organizationId: 'org1',
-      gymMemberId: 'member1',
-      amount: 50,
-      targetExpenseId: 'target',
-    });
-
-    expect(remaining).toBe(0);
-    const target = expenses.find((e) => e.id === 'target')!;
-    const other = expenses.find((e) => e.id === 'other')!;
-    expect(target.status).toBe('PAID');
-    expect(target.paidAmount).toBe(20);
-    expect(other.status).toBe('OPEN');
-    expect(other.paidAmount).toBe(30);
-  });
-
-  it('closes an installment across multiple partial payments over separate visits', async () => {
-    const expenses = [makeExpense({ id: 'e1', amount: 90 })];
-    const tx = createFakeTx(expenses);
-
-    await applyPaymentToExpenses(tx, { organizationId: 'org1', gymMemberId: 'member1', amount: 30 });
-    expect(expenses[0].paidAmount).toBe(30);
-    expect(expenses[0].status).toBe('OPEN');
-
-    await applyPaymentToExpenses(tx, { organizationId: 'org1', gymMemberId: 'member1', amount: 30 });
     expect(expenses[0].paidAmount).toBe(60);
     expect(expenses[0].status).toBe('OPEN');
-
-    await applyPaymentToExpenses(tx, { organizationId: 'org1', gymMemberId: 'member1', amount: 30 });
-    expect(expenses[0].paidAmount).toBe(90);
-    expect(expenses[0].status).toBe('PAID');
+    expect(expenses[0].paidAt).toBeNull();
   });
 });

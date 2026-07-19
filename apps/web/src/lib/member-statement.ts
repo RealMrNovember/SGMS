@@ -1,4 +1,8 @@
-import { decimalToNumber, getMemberOpenBalance } from '@/lib/member-balance';
+import {
+  decimalToNumber,
+  getMemberOpenBalance,
+  getMemberOpenBalancesByCurrency,
+} from '@/lib/member-balance';
 import { prisma } from '@/lib/prisma';
 
 export type MemberStatementRow = {
@@ -6,6 +10,7 @@ export type MemberStatementRow = {
   date: Date;
   description: string;
   amount: number;
+  currency?: string;
   status?: string;
   paymentMethod?: string;
 };
@@ -16,6 +21,7 @@ export type MemberStatementData = {
   memberId: string;
   currency: string;
   openBalance: number;
+  balancesByCurrency: Record<string, number>;
   generatedAt: Date;
   charges: MemberStatementRow[];
   payments: MemberStatementRow[];
@@ -37,7 +43,7 @@ export async function loadMemberStatementData(
     return null;
   }
 
-  const [expenses, transactions, openBalance] = await Promise.all([
+  const [expenses, transactions, openBalance, balancesByCurrency] = await Promise.all([
     prisma.expense.findMany({
       where: { organizationId, gymMemberId },
       orderBy: { createdAt: 'asc' },
@@ -48,6 +54,7 @@ export async function loadMemberStatementData(
       orderBy: { createdAt: 'asc' },
     }),
     getMemberOpenBalance(organizationId, gymMemberId),
+    getMemberOpenBalancesByCurrency(organizationId, gymMemberId),
   ]);
 
   const currency = member.plan?.currency ?? 'TRY';
@@ -59,12 +66,14 @@ export async function loadMemberStatementData(
     memberId: member.id,
     currency,
     openBalance: decimalToNumber(openBalance),
+    balancesByCurrency,
     generatedAt: new Date(),
     charges: expenses.map((expense) => ({
       type: 'CHARGE',
       date: expense.createdAt,
       description: expense.description ?? expense.category?.name ?? '',
       amount: decimalToNumber(expense.amount),
+      currency: expense.currency,
       status: expense.status,
     })),
     payments: transactions.map((tx) => ({
@@ -72,6 +81,7 @@ export async function loadMemberStatementData(
       date: tx.createdAt,
       description: tx.notes ?? tx.reference ?? '',
       amount: decimalToNumber(tx.amount),
+      currency: tx.currency,
       paymentMethod: tx.paymentMethod ?? undefined,
     })),
   };
@@ -111,9 +121,12 @@ export async function buildMemberStatementCsv(organizationId: string, gymMemberI
   csv += csvRow(['Member ID', data.memberId]);
   csv += csvRow(['Currency', data.currency]);
   csv += csvRow(['Open Balance', data.openBalance]);
+  for (const [code, amount] of Object.entries(data.balancesByCurrency)) {
+    csv += csvRow([`Open Balance (${code})`, amount]);
+  }
   csv += csvRow(['Generated At', data.generatedAt.toISOString()]);
   csv += '\n';
-  csv += csvRow(['Type', 'Date', 'Description', 'Amount', 'Status', 'Payment Method']);
+  csv += csvRow(['Type', 'Date', 'Description', 'Amount', 'Currency', 'Status', 'Payment Method']);
   csv += csvRow(['--- CHARGES ---']);
 
   for (const row of data.charges) {
@@ -122,12 +135,13 @@ export async function buildMemberStatementCsv(organizationId: string, gymMemberI
       row.date.toISOString(),
       row.description,
       row.amount,
+      row.currency ?? data.currency,
       row.status ?? '',
       '',
     ]);
   }
 
-  csv += csvRow(['--- PAYMENTS ---']);
+  csv += csvRow(['--- PAYMENTS / REFUNDS ---']);
 
   for (const row of data.payments) {
     csv += csvRow([
@@ -135,6 +149,7 @@ export async function buildMemberStatementCsv(organizationId: string, gymMemberI
       row.date.toISOString(),
       row.description,
       row.amount,
+      row.currency ?? data.currency,
       '',
       row.paymentMethod ?? '',
     ]);

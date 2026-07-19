@@ -71,7 +71,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 33 | Dinamik Rol Bazlı Kullanım Kılavuzu | 🔲 Planlandı | 0% |
 | 34 | Tam Responsive Tasarım Sistemi | ✅ Tamamlandı | ~97% (sol menü/tema/ikon + mobil tablo/kart + mesajlaşma + profil özyönetimi + interaktif program görünümü tamamlandı — yalnızca video desteği/ilerleme geçmişi Tier 2'ye ertelendi) |
 | 35 | Temsilci (Partner) Portalı | ✅ Tamamlandı | 100% |
-| 36 | Kritik İş Mantığı Denetimi & Sağlamlaştırma (2026-07-19 canlıya alma denetimi) | 🔄 Devam ediyor | ~80% (36.1, 36.3, 36.4, 36.5, 36.6, 36.7, 36.8, 36.11 kapatıldı — 2026-07-19; kalan: 36.2, 36.9, 36.10) |
+| 36 | Kritik İş Mantığı Denetimi & Sağlamlaştırma (2026-07-19 canlıya alma denetimi) | ✅ Tamamlandı | 100% (36.1–36.11 tamamı kapatıldı — 2026-07-19) |
 
 > Fazlar 6/9/10'un durum özeti önceki revizyonlarda detay bölümleriyle **çelişiyordu** (özet tablo güncellenmeden unutulmuştu). Bu revizyon koda göre (tüm alt maddeler `[x]`, gerçek commit geçmişi) düzeltilmiştir.
 
@@ -1119,13 +1119,20 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ### 36.2 Çoklu Para Birimi Doğrulama & Bakiye Motoru
 
-> **Senaryo:** Yabancı bir üyenin USD paket borcu ile yerli bir üyenin TRY POS borcu asla aynı bakiyede toplanmamalı; bir tahsilat yanlış para birimindeki borca uygulanmamalı.
-- [ ] `GymMember`'a birincil para birimi alanı eklenir (ya da her zaman org'un para birimiyle sınırlanır) — yeni `Expense` eklerken üyenin mevcut açık borçlarından **farklı** bir para birimi seçilmeye çalışılırsa net bir uyarı/engelleme
-- [ ] `getMemberOpenBalance` (`lib/member-balance.ts`) para birimine göre gruplanmış bakiye döndürür (`{ TRY: 500, USD: 200 }` gibi) — tek bir yanıltıcı sayı yerine
-- [ ] `applyPaymentToExpenses` (`lib/billing/settle-payment.ts`) FIFO uygularken yalnızca **aynı para birimindeki** açık borçları dikkate alır
-- [ ] `recordPayment` (`actions/expenses.ts`) tahsilat para birimini sabit `'TRY'` yerine ilgili `Expense.currency`'den alır
-- [ ] Üye detay sayfasında bakiye, her para birimi için ayrı satır olarak gösterilir
-- [ ] Kabul kriteri: USD ve TRY borcu olan bir üyede her tahsilat yalnızca kendi para birimindeki borca düşüyor; ekranda "500 ₺ + 200 $" gibi ayrıştırılmış gösteriliyor, asla tek bir yanlış toplam yok
+> **Senaryo:** Expat üye John'un aylık paketi **200 USD**, aynı gün resepsiyonda protein bar için **150 TRY** POS borcu açılıyor. Resepsiyonist nakit 150 ₺ alınca sistem eskiden tek “açık bakiye” sayısına topluyordu (350 gibi anlamsız bir rakam) veya ödemeyi yanlışlıkla USD borcuna uygulayabiliyordu. Gerçek hayatta iki defter ayrı tutulmalı: tahsilat yalnızca kendi para birimindeki borca düşmeli; ekranda **150 ₺ + 200 $** gibi ayrıştırılmış görünmeli.
+>
+> **Durum:** ✅ *2026-07-19 kapatıldı.*
+
+- [x] Yeni `Expense` eklerken üyenin mevcut açık borçlarından **farklı** para birimi engellenir (`addMemberExpense` / `quickAddCategoryExpense` + net hata mesajı) — üye birincil currency alanı yerine “açık borç para birimi tutarlılığı” kuralı
+- [x] `getMemberOpenBalancesByCurrency` — para birimine göre gruplanmış bakiye (`{ TRY: 150, USD: 200 }`); `getMemberAccountSummary` / POS snapshot bunu taşır
+- [x] `applyPaymentToExpenses` FIFO uygularken yalnızca **aynı currency** OPEN borçları dikkate alır (`currency` zorunlu parametre)
+- [x] `recordPayment` tahsilat para birimini form / hedef Expense / tek açık currency’den alır; çoklu currency’de seçim zorunlu
+- [x] Üye detay + POS + sporcu hesabı: bakiye her para birimi için ayrı satır; tahsilat formunda currency seçici
+- [x] Ekstre CSV/PDF: para birimine göre açık bakiye satırları + satır bazlı currency
+- [x] Birim test: `lib/billing/settle-payment.test.ts` (aynı currency settle, farklı currency’ye dokunmama)
+- [x] Kabul kriteri: karşılandı — USD ve TRY borcu karışmıyor; ekranda ayrıştırılmış bakiye; tahsilat yalnızca kendi currency borcuna düşüyor
+
+**Dosyalar:** `lib/member-balance.ts`, `lib/billing/settle-payment.ts`, `actions/expenses.ts`, `actions/membership.ts`, `api/v1/transactions`, `components/member-account-panel.tsx`, `components/pos-terminal.tsx`, `lib/member-statement.ts` / `-pdf.ts`, athlete account, messages (6 dil)
 
 ### 36.3 2FA Kurtarma — E-posta + Master Admin
 
@@ -1218,18 +1225,33 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ### 36.9 İade (Refund) Akışı
 
-> **Senaryo:** Bir üye yanlış tahsilat için iade talep eder, ya da salon bir hizmeti iptal edip parasını geri öder — bugün bunun hiçbir kaydı/aksiyonu yok.
-- [ ] `recordRefund` server action — bir `Transaction` (type: `PAYMENT`) seçilip kısmi/tam iade tutarı girilir, karşılığında `type: REFUND` yeni bir `Transaction` oluşturulur (orijinal işlemle ilişkilendirilir — `Transaction`'a opsiyonel `refundOfTransactionId` self-relation eklenir)
-- [ ] İade, ilgili `Expense.paidAmount`'ı düşürür (borç yeniden "kısmen ödenmiş"/"açık" durumuna dönebilir)
-- [ ] POS/üye detay ekranında iade butonu (OWNER/ADMIN/STAFF, tutara göre onay eşiği düşünülebilir) + audit log
-- [ ] Kabul kriteri: bir tahsilat kısmen/tamamen iade edilebiliyor, ilgili borç kaydı doğru şekilde güncelleniyor, işlem audit log'da ve üye ekstresinde görünüyor
+> **Senaryo:** Resepsiyonist Ahmet’e yanlışlıkla **1.200 ₺** kart tahsilatı kaydeder; üye 10 dk sonra fark eder. Eskiden iptal/iade kaydı yoktu — ya borcu “VOID” edip defteri bozuyorlardı ya da Excel’de eksi satır tutuyorlardı. Gerçek hayatta kısmi/tam iade orijinal tahsilata bağlanmalı, borç `paidAmount` düşmeli (gerekirse OPEN’a dönmeli) ve audit’te iz bırakmalı.
+>
+> **Durum:** ✅ *2026-07-19 kapatıldı.*
+
+- [x] `recordRefund` server action — `PAYMENT` seçilip kısmi/tam iade; `type: REFUND` Transaction + `refundOfTransactionId` self-relation
+- [x] `applyRefundToExpenses` — LIFO/hedefli `paidAmount` düşürme; PAID → OPEN geri dönüş mümkün
+- [x] Üye cari panelinde iade formu (OWNER/ADMIN/STAFF via `canManage`) + gerekçe (≥3 karakter) + kalan iade edilebilir tutar kontrolü
+- [x] Audit `REFUND_RECORDED` + Master Admin etiketleri; raporlarda REFUND cirosu düşürür (36.10)
+- [x] Migration: `20260719060000_currency_balance_refund_revenue` (`refund_of_transaction_id`, `REFUND_RECORDED`)
+- [x] Birim test: `applyRefundToExpenses` settle-payment testlerinde
+- [x] Kabul kriteri: karşılandı — kısmi/tam iade, borç güncellemesi, audit + ekstrede REFUND satırı
+
+**Dosyalar:** `schema.prisma` (Transaction refund relation), `lib/billing/settle-payment.ts`, `actions/expenses.ts` (`recordRefund`), `components/member-account-panel.tsx`, `lib/admin/audit-labels.ts`, messages (6 dil)
 
 ### 36.10 Birleşik Ciro/Rapor Motoru
 
-> **Senaryo:** Salon sahibi `/dashboard/reports` ve kurumsal `/dashboard/enterprise` ekranlarında aynı ay için **farklı ciro rakamları** görüyor — biri fatura edilen tutarı, diğeri tahsil edileni, hiçbiri iadeyi düşmüyor.
-- [ ] Tek bir merkezi `getRevenueForPeriod(organizationId, range)` fonksiyonu yazılır (muhtemelen `lib/reports/revenue.ts`) — **tahsil edilen** (`Transaction` type `PAYMENT` eksi `REFUND`) baz alınır, hem tenant raporları hem enterprise konsolide görünüm bu tek fonksiyonu kullanır
-- [ ] "Faturalanan" (billed/`Expense.amount`) ve "Tahsil edilen" (collected/`Transaction`) ayrı ayrı ama tutarlı şekilde etiketlenerek gösterilir — ikisi karıştırılmaz
-- [ ] Kabul kriteri: aynı dönem için tenant raporu ve kurumsal konsolide görünüm birbiriyle tutarlı rakam gösteriyor; iadeler ciroyu doğru şekilde düşürüyor
+> **Senaryo:** Zincir sahibi `/dashboard/reports`’ta “bu ay ciro 80.000” görür; kurumsal `/dashboard/enterprise` aynı ay için “95.000” gösterir — biri Expense (faturalanan), diğeri Transaction (ödeme) toplamıydı; iadeler hiç düşülmüyordu. Gerçek hayatta yönetim toplantısında tek rakam konuşulur: **tahsil edilen net** (ödeme − iade); faturalanan ayrı satırda etiketlenir.
+>
+> **Durum:** ✅ *2026-07-19 kapatıldı.*
+
+- [x] Merkezi `getRevenueForPeriod(organizationId|ids, range)` — `lib/reports/revenue.ts`: collected = PAYMENT − REFUND; billed = Expense (VOID hariç); `byCurrency` ayrımı
+- [x] `getCollectedRevenueByOrganization` — enterprise konsolidasyon aynı motoru kullanır
+- [x] Dashboard KPI `revenueThisMonth` = net tahsilat; `billedThisMonth` ayrı alan
+- [x] `/dashboard/reports` — “Tahsil edilen” vs “Faturalanan” kartları + para birimi satırları
+- [x] Kabul kriteri: karşılandı — tenant rapor ile enterprise aynı tanımı kullanır; iadeler net cirosu düşürür; billed ≠ collected karışmaz
+
+**Dosyalar:** `lib/reports/revenue.ts`, `lib/dashboard-kpis.ts`, `lib/enterprise/queries.ts`, `dashboard/reports/page.tsx`, messages (6 dil)
 
 ### 36.11 İkincil Öncelikli Sağlamlaştırma Kalemleri
 
@@ -1374,7 +1396,7 @@ Devam ediyor:
   Faz 28     İleri raporlama & Business Intelligence             ✅ (~80% — ARR/churn-anketi v2)
   Faz 30     Kurumsal hiyerarşi & çoklu şube/bölge               ✅ (v1 — bkz. ertelenenler)
 
-Şimdi en öncelikli (2026-07-19 canlıya alma denetimi — Faz 36, kullanıcı onaylı sıra):
+Faz 36 tamamlandı (2026-07-19 canlıya alma denetimi — kullanıcı onaylı sıra, 11/11 madde kapatıldı):
   Faz 36 · Sprint 1 — Güvenlik & Erişim                                        ✅ 2026-07-19
     36.5     TRAINER'ın finansal API erişiminin kapatılması        ✅ 2026-07-19
     36.4     Personel çıkarma + gerçek zamanlı oturum iptali        ✅ 2026-07-19
@@ -1382,9 +1404,9 @@ Devam ediyor:
 
   Faz 36 · Sprint 2 — Para/Defter Bütünlüğü
     36.1     Üyelik yenileme / paket & süre uzatma                 ✅ 2026-07-19
-    36.2     Çoklu para birimi doğrulama & bakiye motoru
-    36.9     İade (refund) akışı
-    36.10    Birleşik ciro/rapor motoru
+    36.2     Çoklu para birimi doğrulama & bakiye motoru           ✅ 2026-07-19
+    36.9     İade (refund) akışı                                  ✅ 2026-07-19
+    36.10    Birleşik ciro/rapor motoru                           ✅ 2026-07-19
 
   Faz 36 · Sprint 3 — Ödeme Güvenliği & Abonelik Politikası
     36.7     Ödeme idempotency — çifte aktivasyon önleme            ✅ 2026-07-19

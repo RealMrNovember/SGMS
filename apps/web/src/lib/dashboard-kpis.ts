@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { decimalToNumber } from '@/lib/member-balance';
+import { getRevenueForPeriod } from '@/lib/reports/revenue';
 
 function dayBounds(date: Date) {
   const start = new Date(date);
@@ -17,7 +17,9 @@ function monthBounds(date: Date) {
 
 export type DashboardKpis = {
   checkInsToday: number;
+  /** Net tahsilat (PAYMENT − REFUND) — birleşik ciro motoru (36.10). */
   revenueThisMonth: number;
+  billedThisMonth: number;
   membershipsExpiringSoonCount: number;
   overdueInstallmentCount: number;
 };
@@ -28,43 +30,45 @@ export async function getDashboardKpis(organizationId: string, now = new Date())
   const month = monthBounds(now);
   const soon = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
-  const [checkInsToday, revenueAgg, membershipsExpiringSoonCount, overdueInstallmentCount] = await Promise.all([
-    prisma.checkIn.count({
-      where: {
-        organizationId,
-        subjectType: 'GYM_MEMBER',
-        direction: 'ENTRY',
-        checkedInAt: { gte: today.start, lt: today.end },
-      },
-    }),
-    prisma.transaction.aggregate({
-      where: {
-        organizationId,
-        type: 'PAYMENT',
-        createdAt: { gte: month.start, lt: month.end },
-      },
-      _sum: { amount: true },
-    }),
-    prisma.gymMember.count({
-      where: {
-        organizationId,
-        status: 'ACTIVE',
-        membershipEndsAt: { gte: now, lte: soon },
-      },
-    }),
-    prisma.expense.count({
-      where: {
-        organizationId,
-        status: 'OPEN',
-        paymentPlanId: { not: null },
-        dueDate: { lt: now },
-      },
-    }),
-  ]);
+  const [checkInsToday, revenue, membershipsExpiringSoonCount, overdueInstallmentCount] =
+    await Promise.all([
+      prisma.checkIn.count({
+        where: {
+          organizationId,
+          subjectType: 'GYM_MEMBER',
+          direction: 'ENTRY',
+          checkedInAt: { gte: today.start, lt: today.end },
+        },
+      }),
+      getRevenueForPeriod(organizationId, {
+        start: month.start,
+        end: new Date(month.end.getTime() - 1),
+      }),
+      prisma.gymMember.count({
+        where: {
+          organizationId,
+          status: 'ACTIVE',
+          membershipEndsAt: { gte: now, lte: soon },
+        },
+      }),
+      prisma.expense.count({
+        where: {
+          organizationId,
+          status: 'OPEN',
+          paymentPlanId: { not: null },
+          dueDate: { lt: now },
+        },
+      }),
+    ]);
+
+  // Tüm para birimlerinin net tahsilat toplamı (dashboard tek rakam gösteriyor; TRY ağırlıklı)
+  const collectedAll = revenue.byCurrency.reduce((sum, c) => sum + c.collected, 0);
+  const billedAll = revenue.byCurrency.reduce((sum, c) => sum + c.billed, 0);
 
   return {
     checkInsToday,
-    revenueThisMonth: decimalToNumber(revenueAgg._sum.amount),
+    revenueThisMonth: collectedAll,
+    billedThisMonth: billedAll,
     membershipsExpiringSoonCount,
     overdueInstallmentCount,
   };

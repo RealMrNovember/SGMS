@@ -3,12 +3,16 @@
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { getTenantWriteBlockReason } from '@/lib/tenant-access';
-import { applyPaymentToExpenses } from '@/lib/billing/settle-payment';
+import { applyPaymentToExpenses, applyRefundToExpenses } from '@/lib/billing/settle-payment';
 import { MANAGER_ROLES } from '@/lib/billing/roles';
 import type { OrganizationRole, PaymentMethod } from '@sgms/database';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { decimalToNumber } from '@/lib/member-balance';
+import {
+  decimalToNumber,
+  getMemberOpenBalancesByCurrency,
+  getMemberOpenCurrencyCodes,
+} from '@/lib/member-balance';
 
 export type ExpenseActionState = {
   error?: string;
@@ -89,11 +93,21 @@ export async function addMemberExpense(
     categoryName = category.name;
   }
 
-  const currency = parsed.data.currency ?? 'TRY';
+  const currency = (parsed.data.currency ?? 'TRY').toUpperCase();
   const description =
     parsed.data.description?.trim() ||
     categoryName ||
     'Salon harcaması';
+
+  const openCurrencies = await getMemberOpenCurrencyCodes(
+    context.organizationId,
+    parsed.data.gymMemberId,
+  );
+  if (openCurrencies.length > 0 && !openCurrencies.includes(currency)) {
+    return {
+      error: `Üyenin açık borçları ${openCurrencies.join(', ')} cinsinden. Farklı para birimi (${currency}) ekleyemezsiniz; önce mevcut borcu kapatın veya aynı para birimini kullanın.`,
+    };
+  }
 
   const expense = await prisma.expense.create({
     data: {
@@ -156,13 +170,21 @@ export async function quickAddCategoryExpense(
     return { error: 'Kategori veya varsayılan tutar bulunamadı.' };
   }
 
+  const currency = 'TRY';
+  const openCurrencies = await getMemberOpenCurrencyCodes(context.organizationId, gymMemberId);
+  if (openCurrencies.length > 0 && !openCurrencies.includes(currency)) {
+    return {
+      error: `Üyenin açık borçları ${openCurrencies.join(', ')} cinsinden. Farklı para birimi (${currency}) ekleyemezsiniz; önce mevcut borcu kapatın veya aynı para birimini kullanın.`,
+    };
+  }
+
   const expense = await prisma.expense.create({
     data: {
       organizationId: context.organizationId,
       gymMemberId,
       categoryId: category.id,
       amount: category.defaultAmount,
-      currency: 'TRY',
+      currency,
       description: category.name,
       status: 'OPEN',
       createdById: context.userId,
@@ -193,6 +215,7 @@ const paymentSchema = z.object({
   paymentMethod: z.enum(['CASH', 'CARD', 'TRANSFER']),
   notes: z.string().max(500).optional(),
   expenseId: z.string().cuid().optional(),
+  currency: z.string().length(3).optional(),
 });
 
 export async function recordPayment(
@@ -215,6 +238,7 @@ export async function recordPayment(
     paymentMethod: formData.get('paymentMethod'),
     notes: formData.get('notes') || undefined,
     expenseId: formData.get('expenseId') || undefined,
+    currency: formData.get('currency') || undefined,
   });
 
   if (!parsed.success) {
@@ -229,6 +253,39 @@ export async function recordPayment(
     return { error: 'Üye bulunamadı.' };
   }
 
+  let currency = parsed.data.currency?.toUpperCase();
+
+  if (parsed.data.expenseId) {
+    const targetExpense = await prisma.expense.findFirst({
+      where: {
+        id: parsed.data.expenseId,
+        organizationId: context.organizationId,
+        gymMemberId: parsed.data.gymMemberId,
+      },
+      select: { currency: true },
+    });
+    if (!targetExpense) {
+      return { error: 'Hedef borç kaydı bulunamadı.' };
+    }
+    currency = targetExpense.currency.toUpperCase();
+  }
+
+  if (!currency) {
+    const openCodes = await getMemberOpenCurrencyCodes(
+      context.organizationId,
+      parsed.data.gymMemberId,
+    );
+    if (openCodes.length === 1) {
+      currency = openCodes[0];
+    } else if (openCodes.length === 0) {
+      currency = 'TRY';
+    } else {
+      return {
+        error: `Birden fazla para biriminde açık borç var (${openCodes.join(', ')}). Lütfen para birimi seçin veya belirli bir borcu hedefleyin.`,
+      };
+    }
+  }
+
   await prisma.$transaction(async (tx) => {
     const transaction = await tx.transaction.create({
       data: {
@@ -236,7 +293,7 @@ export async function recordPayment(
         gymMemberId: parsed.data.gymMemberId,
         expenseId: parsed.data.expenseId ?? null,
         amount: parsed.data.amount,
-        currency: 'TRY',
+        currency,
         type: 'PAYMENT',
         paymentMethod: parsed.data.paymentMethod as PaymentMethod,
         notes: parsed.data.notes ?? null,
@@ -248,6 +305,7 @@ export async function recordPayment(
       organizationId: context.organizationId,
       gymMemberId: parsed.data.gymMemberId,
       amount: parsed.data.amount,
+      currency,
       targetExpenseId: parsed.data.expenseId,
     });
 
@@ -261,6 +319,7 @@ export async function recordPayment(
         metadata: {
           gymMemberId: parsed.data.gymMemberId,
           amount: parsed.data.amount,
+          currency,
         },
       },
     });
@@ -270,7 +329,122 @@ export async function recordPayment(
   revalidatePath('/athlete/account');
   revalidatePath('/dashboard/pos');
 
-  return { success: 'Tahsilat kaydedildi.' };
+  return { success: `Tahsilat kaydedildi (${currency}).` };
+}
+
+const refundSchema = z.object({
+  transactionId: z.string().cuid(),
+  amount: z.coerce.number().positive().max(1_000_000),
+  reason: z.string().min(3).max(500),
+  paymentMethod: z.enum(['CASH', 'CARD', 'TRANSFER']).optional(),
+});
+
+/**
+ * Tahsilat iadesi (36.9) — kısmi/tam; Expense.paidAmount geri alınır.
+ */
+export async function recordRefund(
+  _prev: ExpenseActionState,
+  formData: FormData,
+): Promise<ExpenseActionState> {
+  const context = await getExpenseContext();
+  if ('error' in context) {
+    return { error: context.error };
+  }
+
+  const writeBlock = await getTenantWriteBlockReason(context.organizationId);
+  if (writeBlock) {
+    return { error: writeBlock };
+  }
+
+  const parsed = refundSchema.safeParse({
+    transactionId: formData.get('transactionId'),
+    amount: formData.get('amount'),
+    reason: formData.get('reason'),
+    paymentMethod: formData.get('paymentMethod') || undefined,
+  });
+
+  if (!parsed.success) {
+    return { error: 'İade tutarı ve gerekçe (en az 3 karakter) zorunludur.' };
+  }
+
+  const original = await prisma.transaction.findFirst({
+    where: {
+      id: parsed.data.transactionId,
+      organizationId: context.organizationId,
+      type: 'PAYMENT',
+    },
+    include: {
+      refunds: { select: { amount: true } },
+    },
+  });
+
+  if (!original) {
+    return { error: 'İade edilecek tahsilat bulunamadı.' };
+  }
+
+  const alreadyRefunded = original.refunds.reduce(
+    (sum, r) => sum + decimalToNumber(r.amount),
+    0,
+  );
+  const maxRefundable = decimalToNumber(original.amount) - alreadyRefunded;
+  if (parsed.data.amount > maxRefundable + 0.001) {
+    return {
+      error: `İade tutarı kalan iade edilebilir tutarı aşıyor (maks. ${maxRefundable.toFixed(2)} ${original.currency}).`,
+    };
+  }
+
+  const currency = original.currency.toUpperCase();
+
+  await prisma.$transaction(async (tx) => {
+    const refund = await tx.transaction.create({
+      data: {
+        organizationId: context.organizationId,
+        gymMemberId: original.gymMemberId,
+        expenseId: original.expenseId,
+        amount: parsed.data.amount,
+        currency,
+        type: 'REFUND',
+        paymentMethod: (parsed.data.paymentMethod ?? original.paymentMethod) as PaymentMethod,
+        notes: parsed.data.reason.trim(),
+        refundOfTransactionId: original.id,
+        createdById: context.userId,
+      },
+    });
+
+    await applyRefundToExpenses(tx, {
+      organizationId: context.organizationId,
+      gymMemberId: original.gymMemberId,
+      amount: parsed.data.amount,
+      currency,
+      expenseId: original.expenseId,
+    });
+
+    await tx.auditLog.create({
+      data: {
+        actorId: context.userId,
+        organizationId: context.organizationId,
+        action: 'REFUND_RECORDED',
+        entityType: 'transaction',
+        entityId: refund.id,
+        metadata: {
+          gymMemberId: original.gymMemberId,
+          amount: parsed.data.amount,
+          currency,
+          refundOfTransactionId: original.id,
+          reason: parsed.data.reason.trim(),
+        },
+      },
+    });
+  });
+
+  revalidatePath(`/dashboard/members/${original.gymMemberId}`);
+  revalidatePath('/athlete/account');
+  revalidatePath('/dashboard/pos');
+  revalidatePath('/dashboard/reports');
+
+  return {
+    success: `${parsed.data.amount.toFixed(2)} ${currency} iade edildi.`,
+  };
 }
 
 export async function voidExpense(expenseId: string): Promise<ExpenseActionState> {
@@ -423,11 +597,8 @@ export async function getMemberPosSnapshot(gymMemberId: string) {
     return { error: 'Üye bulunamadı.' as const };
   }
 
-  const [openAgg, recentExpenses, overdueInstallment] = await Promise.all([
-    prisma.expense.aggregate({
-      where: { organizationId, gymMemberId, status: 'OPEN' },
-      _sum: { amount: true, paidAmount: true },
-    }),
+  const [openBalances, recentExpenses, overdueInstallment] = await Promise.all([
+    getMemberOpenBalancesByCurrency(organizationId, gymMemberId),
     prisma.expense.findMany({
       where: { organizationId, gymMemberId },
       orderBy: { createdAt: 'desc' },
@@ -436,6 +607,7 @@ export async function getMemberPosSnapshot(gymMemberId: string) {
         id: true,
         description: true,
         amount: true,
+        currency: true,
         status: true,
         createdAt: true,
         category: { select: { name: true } },
@@ -453,12 +625,16 @@ export async function getMemberPosSnapshot(gymMemberId: string) {
     }),
   ]);
 
+  const balanceKeys = Object.keys(openBalances);
   const openBalance =
-    decimalToNumber(openAgg._sum.amount) - decimalToNumber(openAgg._sum.paidAmount);
+    balanceKeys.length === 1
+      ? openBalances[balanceKeys[0]!]!
+      : openBalances.TRY ?? balanceKeys.reduce((s, k) => s + (openBalances[k] ?? 0), 0);
 
   return {
     member,
     openBalance,
+    balancesByCurrency: openBalances,
     hasOverdueInstallment: overdueInstallment != null,
     recentExpenses: recentExpenses.map((e) => ({
       ...e,

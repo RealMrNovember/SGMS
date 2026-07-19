@@ -4,6 +4,7 @@ import {
   addMemberExpense,
   quickAddCategoryExpense,
   recordPayment,
+  recordRefund,
   type ExpenseActionState,
 } from '@/actions/expenses';
 import { voidExpense } from '@/actions/expenses';
@@ -14,7 +15,7 @@ import {
 } from '@/actions/payment-plans';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useActionState, useTransition } from 'react';
+import { useActionState, useState, useTransition } from 'react';
 
 type Category = {
   id: string;
@@ -42,12 +43,25 @@ type MemberPaymentPlan = {
 const initialState: ExpenseActionState = {};
 const initialPlanState: PaymentPlanActionState = {};
 
+function money(amount: number, currency: string) {
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency,
+      minimumFractionDigits: 2,
+    }).format(amount);
+  } catch {
+    return `${amount.toFixed(2)} ${currency}`;
+  }
+}
+
 export function MemberAccountPanel({
   gymMemberId,
   canManage,
   canVoid,
   categories,
   openBalance,
+  balancesByCurrency,
   currency,
   expenses,
   transactions,
@@ -58,11 +72,13 @@ export function MemberAccountPanel({
   canVoid: boolean;
   categories: Category[];
   openBalance: number;
+  balancesByCurrency?: Record<string, number>;
   currency: string;
   expenses: Array<{
     id: string;
     description: string | null;
     amount: string;
+    currency?: string;
     status: string;
     createdAt: string;
     category: { name: string } | null;
@@ -70,9 +86,11 @@ export function MemberAccountPanel({
   transactions: Array<{
     id: string;
     amount: string;
+    currency?: string;
     type: string;
     paymentMethod: string | null;
     createdAt: string;
+    refundedTotal?: number;
   }>;
   paymentPlans: MemberPaymentPlan[];
 }) {
@@ -81,12 +99,17 @@ export function MemberAccountPanel({
   const router = useRouter();
   const [addState, addAction, addPending] = useActionState(addMemberExpense, initialState);
   const [payState, payAction, payPending] = useActionState(recordPayment, initialState);
+  const [refundState, refundAction, refundPending] = useActionState(recordRefund, initialState);
   const [planState, planAction, planPending] = useActionState(createPaymentPlan, initialPlanState);
   const [quickPending, startQuick] = useTransition();
   const [voidPending, startVoid] = useTransition();
   const [cancelPlanPending, startCancelPlan] = useTransition();
+  const [refundTarget, setRefundTarget] = useState<string | null>(null);
 
   const now = Date.now();
+  const balanceEntries = Object.entries(balancesByCurrency ?? {}).filter(([, v]) => v > 0);
+  const currencyOptions =
+    balanceEntries.length > 0 ? balanceEntries.map(([c]) => c) : [currency];
 
   const formatter = new Intl.NumberFormat(undefined, {
     style: 'currency',
@@ -103,7 +126,21 @@ export function MemberAccountPanel({
         </div>
         <div className="text-right">
           <p className="muted text-xs">{t('openBalance')}</p>
-          <p className="text-2xl font-semibold text-amber-200">{formatter.format(openBalance)}</p>
+          {balanceEntries.length > 1 ? (
+            <ul className="mt-1 space-y-1">
+              {balanceEntries.map(([code, amount]) => (
+                <li key={code} className="text-xl font-semibold text-amber-200">
+                  {money(amount, code)}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-2xl font-semibold text-amber-200">
+              {balanceEntries.length === 1
+                ? money(balanceEntries[0]![1], balanceEntries[0]![0])
+                : formatter.format(openBalance)}
+            </p>
+          )}
           <div className="muted mt-2 flex flex-wrap justify-end gap-3 text-xs">
             <a
               href={`/api/v1/members/${gymMemberId}/statement?format=pdf`}
@@ -199,12 +236,30 @@ export function MemberAccountPanel({
               placeholder={t('paymentAmount')}
               className="input"
             />
+            {currencyOptions.length > 1 ? (
+              <select name="currency" className="input" defaultValue={currencyOptions[0]} required>
+                {currencyOptions.map((code) => (
+                  <option key={code} value={code}>
+                    {code}
+                    {balancesByCurrency?.[code] != null
+                      ? ` (${money(balancesByCurrency[code]!, code)})`
+                      : ''}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input type="hidden" name="currency" value={currencyOptions[0] ?? currency} />
+            )}
             <select name="paymentMethod" className="input" defaultValue="CASH">
               <option value="CASH">{t('methods.cash')}</option>
               <option value="CARD">{t('methods.card')}</option>
               <option value="TRANSFER">{t('methods.transfer')}</option>
             </select>
-            <input name="notes" placeholder={t('paymentNotes')} className="input md:col-span-2" />
+            <input
+              name="notes"
+              placeholder={t('paymentNotes')}
+              className={`input ${currencyOptions.length > 1 ? 'md:col-span-1' : 'md:col-span-2'}`}
+            />
             <button type="submit" disabled={payPending} className="button px-4 py-2 text-sm">
               {payPending ? tCommon('ellipsis') : t('recordPayment')}
             </button>
@@ -400,57 +455,145 @@ export function MemberAccountPanel({
             {expenses.length === 0 ? (
               <li>{t('emptyExpenses')}</li>
             ) : (
-              expenses.map((expense) => (
-                <li
-                  key={expense.id}
-                  className="flex items-center justify-between gap-3 border-b border-[var(--border)] pb-2"
-                >
-                  <span>
-                    {expense.description ?? expense.category?.name ?? '—'}{' '}
-                    <span className="badge text-[10px]">{expense.status}</span>
-                  </span>
-                  <span className="flex items-center gap-2 text-white">
-                    {formatter.format(Number(expense.amount))}
-                    {canVoid && expense.status === 'OPEN' ? (
-                      <button
-                        type="button"
-                        disabled={voidPending}
-                        className="text-xs text-rose-300 hover:text-rose-200"
-                        onClick={() => {
-                          startVoid(async () => {
-                            await voidExpense(expense.id);
-                            router.refresh();
-                          });
-                        }}
-                      >
-                        {t('void')}
-                      </button>
-                    ) : null}
-                  </span>
-                </li>
-              ))
+              expenses.map((expense) => {
+                const code = (expense.currency ?? currency).toUpperCase();
+                return (
+                  <li
+                    key={expense.id}
+                    className="flex items-center justify-between gap-3 border-b border-[var(--border)] pb-2"
+                  >
+                    <span>
+                      {expense.description ?? expense.category?.name ?? '—'}{' '}
+                      <span className="badge text-[10px]">{expense.status}</span>
+                    </span>
+                    <span className="flex items-center gap-2 text-white">
+                      {money(Number(expense.amount), code)}
+                      {canVoid && expense.status === 'OPEN' ? (
+                        <button
+                          type="button"
+                          disabled={voidPending}
+                          className="text-xs text-rose-300 hover:text-rose-200"
+                          onClick={() => {
+                            startVoid(async () => {
+                              await voidExpense(expense.id);
+                              router.refresh();
+                            });
+                          }}
+                        >
+                          {t('void')}
+                        </button>
+                      ) : null}
+                    </span>
+                  </li>
+                );
+              })
             )}
           </ul>
         </div>
         <div>
           <h4 className="font-medium">{t('recentPayments')}</h4>
-          <ul className="muted mt-3 space-y-2 text-sm">
+          {refundState.error ? (
+            <p className="mt-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-200">
+              {refundState.error}
+            </p>
+          ) : null}
+          {refundState.success ? (
+            <p className="mt-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-200">
+              {refundState.success}
+            </p>
+          ) : null}
+          <ul className="muted mt-3 space-y-3 text-sm">
             {transactions.length === 0 ? (
               <li>{t('emptyPayments')}</li>
             ) : (
-              transactions.map((tx) => (
-                <li
-                  key={tx.id}
-                  className="flex items-center justify-between gap-3 border-b border-[var(--border)] pb-2"
-                >
-                  <span>
-                    {tx.type} · {tx.paymentMethod ?? '—'}
-                  </span>
-                  <span className="text-emerald-200">
-                    {formatter.format(Number(tx.amount))}
-                  </span>
-                </li>
-              ))
+              transactions.map((tx) => {
+                const code = (tx.currency ?? currency).toUpperCase();
+                const amount = Number(tx.amount);
+                const refunded = tx.refundedTotal ?? 0;
+                const refundable = Math.max(0, Math.round((amount - refunded) * 100) / 100);
+                const isPayment = tx.type === 'PAYMENT';
+                const amountClass =
+                  tx.type === 'REFUND'
+                    ? 'text-rose-200'
+                    : 'text-emerald-200';
+
+                return (
+                  <li
+                    key={tx.id}
+                    className="space-y-2 border-b border-[var(--border)] pb-3"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <span>
+                        {tx.type} · {tx.paymentMethod ?? '—'}
+                        {refunded > 0 ? (
+                          <span className="badge ml-2 text-[10px]">
+                            {t('refundedBadge', { amount: money(refunded, code) })}
+                          </span>
+                        ) : null}
+                      </span>
+                      <span className={`flex items-center gap-2 ${amountClass}`}>
+                        {tx.type === 'REFUND' ? '−' : ''}
+                        {money(amount, code)}
+                        {canManage && isPayment && refundable > 0 ? (
+                          <button
+                            type="button"
+                            className="text-xs text-amber-200 hover:text-amber-100"
+                            onClick={() =>
+                              setRefundTarget((prev) => (prev === tx.id ? null : tx.id))
+                            }
+                          >
+                            {t('refund')}
+                          </button>
+                        ) : null}
+                      </span>
+                    </div>
+                    {refundTarget === tx.id && canManage ? (
+                      <form action={refundAction} className="grid gap-2 rounded-lg border border-[var(--border)] bg-white/5 p-3">
+                        <input type="hidden" name="transactionId" value={tx.id} />
+                        <input
+                          name="amount"
+                          type="number"
+                          step="0.01"
+                          min="0.01"
+                          max={refundable}
+                          defaultValue={refundable}
+                          required
+                          placeholder={t('refundAmount')}
+                          className="input text-sm"
+                        />
+                        <input
+                          name="reason"
+                          required
+                          minLength={3}
+                          placeholder={t('refundReason')}
+                          className="input text-sm"
+                        />
+                        <select name="paymentMethod" className="input text-sm" defaultValue={tx.paymentMethod ?? 'CASH'}>
+                          <option value="CASH">{t('methods.cash')}</option>
+                          <option value="CARD">{t('methods.card')}</option>
+                          <option value="TRANSFER">{t('methods.transfer')}</option>
+                        </select>
+                        <div className="flex gap-2">
+                          <button
+                            type="submit"
+                            disabled={refundPending}
+                            className="button px-3 py-1.5 text-xs"
+                          >
+                            {refundPending ? tCommon('ellipsis') : t('confirmRefund')}
+                          </button>
+                          <button
+                            type="button"
+                            className="button px-3 py-1.5 text-xs opacity-70"
+                            onClick={() => setRefundTarget(null)}
+                          >
+                            {t('refundCancel')}
+                          </button>
+                        </div>
+                      </form>
+                    ) : null}
+                  </li>
+                );
+              })
             )}
           </ul>
         </div>

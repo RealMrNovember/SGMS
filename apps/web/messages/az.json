@@ -634,7 +634,13 @@
       "intervalDays": "Taksitlər arası gün (yalnız xüsusi)",
       "description": "Açıqlama (opsional)",
       "create": "Plan yarat"
-    }
+    },
+    "refund": "Geri ödəniş",
+    "refundAmount": "Geri ödəniş məbləği",
+    "refundReason": "Geri ödəniş səbəbi",
+    "confirmRefund": "Geri ödənişi yaz",
+    "refundCancel": "Ləğv et",
+    "refundedBadge": "Geri ödənilib: {amount}"
   },
   "pos": {
     "title": "Mini POS / Kassa",
@@ -1315,6 +1321,16 @@
       "title": "Ən Çox Satılan Kateqoriyalar",
       "colName": "Kateqoriya",
       "colRevenue": "Gəlir"
+    },
+    "revenue": {
+      "title": "Gəlir (Yığılmış vs Faturalanmış)",
+      "subtitle": "Yığılmış = ödənişlər − geri ödənişlər. Faturalanmış = dövr ərzində yaradılan borclar. Qarışdırılmır.",
+      "collected": "Yığılmış (xalis)",
+      "billed": "Faturalanmış",
+      "billedHint": "Dövr ərzində yaradılan borclar (VOID istisna)",
+      "paymentsMinusRefunds": "Ödəniş {payments} − Geri ödəniş {refunds}",
+      "byCurrency": "Valyutaya görə",
+      "rowSummary": "Yığılmış {collected} · Faturalanmış {billed}"
     }
   },
   "enterprise": {

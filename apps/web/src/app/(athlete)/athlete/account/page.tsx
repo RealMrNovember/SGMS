@@ -37,7 +37,21 @@ export default async function AthleteAccountPage() {
   ]);
 
   const openBalance = decimalToNumber(summary.openBalance);
+  const balanceEntries = Object.entries(summary.balancesByCurrency).filter(([, v]) => v > 0);
   const activePlans = paymentPlans.filter((plan) => plan.status === 'ACTIVE');
+
+  function money(amount: number, code: string) {
+    try {
+      return new Intl.NumberFormat(intlLocaleFor(locale), {
+        style: 'currency',
+        currency: code,
+        minimumFractionDigits: 2,
+      }).format(amount);
+    } catch {
+      return `${amount.toFixed(2)} ${code}`;
+    }
+  }
+
   const formatter = new Intl.NumberFormat(intlLocaleFor(locale), {
     style: 'currency',
     currency: 'TRY',
@@ -78,8 +92,22 @@ export default async function AthleteAccountPage() {
 
       <section className="card p-5 text-center">
         <p className="muted text-sm">{t('openBalance')}</p>
-        <p className="mt-2 text-3xl font-semibold text-amber-200">{formatter.format(openBalance)}</p>
-        {openBalance === 0 ? (
+        {balanceEntries.length > 1 ? (
+          <ul className="mt-2 space-y-1">
+            {balanceEntries.map(([code, amount]) => (
+              <li key={code} className="text-2xl font-semibold text-amber-200">
+                {money(amount, code)}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-2 text-3xl font-semibold text-amber-200">
+            {balanceEntries.length === 1
+              ? money(balanceEntries[0]![1], balanceEntries[0]![0])
+              : formatter.format(openBalance)}
+          </p>
+        )}
+        {balanceEntries.length === 0 ? (
           <p className="muted mt-3 text-sm">{t('noDebt')}</p>
         ) : (
           <p className="muted mt-3 text-sm">{t('payAtDesk')}</p>

@@ -229,6 +229,7 @@ export default async function MemberDetailPage({
           canVoid={canVoidExpenses}
           currency="TRY"
           openBalance={decimalToNumber(accountSummary.openBalance)}
+          balancesByCurrency={accountSummary.balancesByCurrency}
           categories={expenseCategories.map((c) => ({
             id: c.id,
             name: c.name,
@@ -238,6 +239,7 @@ export default async function MemberDetailPage({
             id: e.id,
             description: e.description,
             amount: e.amount.toString(),
+            currency: e.currency,
             status: e.status,
             createdAt: e.createdAt.toISOString(),
             category: e.category,
@@ -245,9 +247,11 @@ export default async function MemberDetailPage({
           transactions={accountSummary.recentTransactions.map((tx) => ({
             id: tx.id,
             amount: tx.amount.toString(),
+            currency: tx.currency,
             type: tx.type,
             paymentMethod: tx.paymentMethod,
             createdAt: tx.createdAt.toISOString(),
+            refundedTotal: tx.refunds.reduce((sum, r) => sum + Number(r.amount.toString()), 0),
           }))}
           paymentPlans={paymentPlans.map((plan) => ({
             ...plan,

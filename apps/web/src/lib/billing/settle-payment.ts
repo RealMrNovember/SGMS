@@ -4,23 +4,31 @@ type SettlePaymentParams = {
   organizationId: string;
   gymMemberId: string;
   amount: number;
+  /** Yalnızca bu para birimindeki açık borçlara uygulanır (36.2). */
+  currency: string;
   targetExpenseId?: string;
 };
 
 /**
- * Bir tahsilatı açık borçlara uygular. Önceki sürüm bir borcu yalnızca tam
- * karşılanabiliyorsa kapatıyordu (kısmi ödeme sessizce atlanıyordu) — burada
- * her borç için gerçek kısmi ödeme (paidAmount birikimli) destekleniyor.
+ * Bir tahsilatı açık borçlara uygular — yalnızca aynı `currency` içindeki
+ * OPEN borçlar (USD ödemesi TRY borcuna düşmez).
  */
 export async function applyPaymentToExpenses(
   tx: Prisma.TransactionClient,
-  { organizationId, gymMemberId, amount, targetExpenseId }: SettlePaymentParams,
+  { organizationId, gymMemberId, amount, currency, targetExpenseId }: SettlePaymentParams,
 ): Promise<{ remaining: number }> {
+  const normalizedCurrency = currency.toUpperCase();
   let remaining = amount;
 
   if (targetExpenseId && remaining > 0) {
     const target = await tx.expense.findFirst({
-      where: { id: targetExpenseId, organizationId, gymMemberId, status: 'OPEN' },
+      where: {
+        id: targetExpenseId,
+        organizationId,
+        gymMemberId,
+        status: 'OPEN',
+        currency: normalizedCurrency,
+      },
     });
 
     if (target) {
@@ -52,6 +60,7 @@ export async function applyPaymentToExpenses(
       organizationId,
       gymMemberId,
       status: 'OPEN',
+      currency: normalizedCurrency,
       ...(targetExpenseId ? { id: { not: targetExpenseId } } : {}),
     },
     orderBy: [{ dueDate: { sort: 'asc', nulls: 'last' } }, { createdAt: 'asc' }],
@@ -81,6 +90,92 @@ export async function applyPaymentToExpenses(
     });
 
     remaining -= pay;
+  }
+
+  return { remaining };
+}
+
+type RefundExpenseParams = {
+  organizationId: string;
+  gymMemberId: string;
+  amount: number;
+  currency: string;
+  expenseId?: string | null;
+};
+
+/**
+ * İade tutarını borçlara geri yazar: paidAmount düşer, PAID ise yeniden OPEN olur.
+ */
+export async function applyRefundToExpenses(
+  tx: Prisma.TransactionClient,
+  { organizationId, gymMemberId, amount, currency, expenseId }: RefundExpenseParams,
+): Promise<{ remaining: number }> {
+  const normalizedCurrency = currency.toUpperCase();
+  let remaining = amount;
+
+  if (expenseId && remaining > 0) {
+    const target = await tx.expense.findFirst({
+      where: {
+        id: expenseId,
+        organizationId,
+        gymMemberId,
+        currency: normalizedCurrency,
+        status: { in: ['OPEN', 'PAID'] },
+      },
+    });
+
+    if (target) {
+      const paid = Number(target.paidAmount.toString());
+      const take = Math.min(remaining, paid);
+      if (take > 0) {
+        const newPaid = paid - take;
+        await tx.expense.update({
+          where: { id: target.id },
+          data: {
+            paidAmount: newPaid,
+            status: 'OPEN',
+            paidAt: null,
+            voidedAt: null,
+          },
+        });
+        remaining -= take;
+      }
+    }
+  }
+
+  if (remaining <= 0) {
+    return { remaining };
+  }
+
+  // Orijinal expense yoksa veya yetersizse: aynı para biriminde en son ödenenlerden geri al
+  const candidates = await tx.expense.findMany({
+    where: {
+      organizationId,
+      gymMemberId,
+      currency: normalizedCurrency,
+      status: { in: ['OPEN', 'PAID'] },
+      paidAmount: { gt: 0 },
+      ...(expenseId ? { id: { not: expenseId } } : {}),
+    },
+    orderBy: [{ paidAt: { sort: 'desc', nulls: 'last' } }, { updatedAt: 'desc' }],
+  });
+
+  for (const expense of candidates) {
+    if (remaining <= 0) break;
+    const paid = Number(expense.paidAmount.toString());
+    const take = Math.min(remaining, paid);
+    if (take <= 0) continue;
+
+    const newPaid = paid - take;
+    await tx.expense.update({
+      where: { id: expense.id },
+      data: {
+        paidAmount: newPaid,
+        status: 'OPEN',
+        paidAt: null,
+      },
+    });
+    remaining -= take;
   }
 
   return { remaining };

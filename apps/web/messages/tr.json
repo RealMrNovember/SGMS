@@ -291,7 +291,7 @@
     "kpis": {
       "checkInsToday": "Bugünkü Girişler",
       "checkInsLink": "Canlı akışı gör",
-      "revenueThisMonth": "Bu Ayki Ciro",
+      "revenueThisMonth": "Bu Ayki Net Tahsilat",
       "revenueLink": "Kasa özetini gör",
       "expiringSoon": "7 Gün İçinde Bitecek Üyelik",
       "expiringSoonLink": "Üyeleri gör",
@@ -602,6 +602,12 @@
     "void": "İptal",
     "exportCsv": "CSV ekstre indir",
     "exportPdf": "PDF ekstre indir",
+    "refund": "İade",
+    "refundAmount": "İade tutarı",
+    "refundReason": "İade gerekçesi",
+    "confirmRefund": "İadeyi kaydet",
+    "refundCancel": "Vazgeç",
+    "refundedBadge": "İade: {amount}",
     "methods": {
       "cash": "Nakit",
       "card": "Kart",
@@ -1287,6 +1293,16 @@
       "months": "{count} ay",
       "ltv": "Tahmini Yaşam Boyu Değer (LTV)",
       "totalVisits": "Toplam Ziyaret"
+    },
+    "revenue": {
+      "title": "Ciro (Tahsilat vs Faturalama)",
+      "subtitle": "Tahsil edilen = ödemeler − iadeler. Faturalanan = dönemde oluşturulan borçlar. İkisi karıştırılmaz.",
+      "collected": "Tahsil edilen (net)",
+      "billed": "Faturalanan",
+      "billedHint": "Dönemde kesilen borç tutarı (VOID hariç)",
+      "paymentsMinusRefunds": "Ödeme {payments} − İade {refunds}",
+      "byCurrency": "Para birimine göre",
+      "rowSummary": "Tahsil {collected} · Fatura {billed}"
     },
     "dailyVisitors": {
       "title": "Günlük Ziyaretçi Trendi",
