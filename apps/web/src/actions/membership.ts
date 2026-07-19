@@ -176,6 +176,7 @@ export async function renewMembership(
         organizationId: context.organizationId,
         gymMemberId: member.id,
         amount: planPrice,
+        currency,
         targetExpenseId: expense.id,
       });
 

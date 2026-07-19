@@ -40,12 +40,14 @@ export function PosTerminal({
 
   const [selectedMemberId, setSelectedMemberId] = useState('');
   const [openBalance, setOpenBalance] = useState<number | null>(null);
+  const [balancesByCurrency, setBalancesByCurrency] = useState<Record<string, number>>({});
   const [hasOverdueInstallment, setHasOverdueInstallment] = useState(false);
   const [recentExpenses, setRecentExpenses] = useState<
     Array<{
       id: string;
       description: string | null;
       amount: string;
+      currency?: string;
       status: string;
       category: { name: string } | null;
     }>
@@ -65,6 +67,7 @@ export function PosTerminal({
   useEffect(() => {
     if (!selectedMemberId) {
       setOpenBalance(null);
+      setBalancesByCurrency({});
       setHasOverdueInstallment(false);
       setRecentExpenses([]);
       return;
@@ -74,17 +77,34 @@ export function PosTerminal({
       const result = await getMemberPosSnapshot(selectedMemberId);
       if ('error' in result) {
         setOpenBalance(null);
+        setBalancesByCurrency({});
         setHasOverdueInstallment(false);
         setRecentExpenses([]);
         return;
       }
       setOpenBalance(result.openBalance);
+      setBalancesByCurrency(result.balancesByCurrency ?? {});
       setHasOverdueInstallment(result.hasOverdueInstallment);
       setRecentExpenses(result.recentExpenses);
     });
   }, [selectedMemberId, addState.success, payState.success, quickPending]);
 
   const memberSelected = Boolean(selectedMemberId);
+  const balanceEntries = Object.entries(balancesByCurrency).filter(([, v]) => v > 0);
+  const payCurrencyOptions =
+    balanceEntries.length > 0 ? balanceEntries.map(([c]) => c) : [currency];
+
+  function money(amount: number, code: string) {
+    try {
+      return new Intl.NumberFormat(undefined, {
+        style: 'currency',
+        currency: code,
+        minimumFractionDigits: 2,
+      }).format(amount);
+    } catch {
+      return `${amount.toFixed(2)} ${code}`;
+    }
+  }
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
@@ -123,9 +143,23 @@ export function PosTerminal({
                 </span>
               ) : null}
             </div>
-            <p className="text-2xl font-semibold text-amber-200">
-              {snapshotPending ? tCommon('ellipsis') : formatter.format(openBalance ?? 0)}
-            </p>
+            {snapshotPending ? (
+              <p className="text-2xl font-semibold text-amber-200">{tCommon('ellipsis')}</p>
+            ) : balanceEntries.length > 1 ? (
+              <ul className="mt-1 space-y-1">
+                {balanceEntries.map(([code, amount]) => (
+                  <li key={code} className="text-xl font-semibold text-amber-200">
+                    {money(amount, code)}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-2xl font-semibold text-amber-200">
+                {balanceEntries.length === 1
+                  ? money(balanceEntries[0]![1], balanceEntries[0]![0])
+                  : formatter.format(openBalance ?? 0)}
+              </p>
+            )}
           </div>
         ) : (
           <p className="muted text-sm">{t('selectMemberHint')}</p>
@@ -214,6 +248,26 @@ export function PosTerminal({
             className="input"
             disabled={!memberSelected}
           />
+          {payCurrencyOptions.length > 1 ? (
+            <select
+              name="currency"
+              className="input"
+              defaultValue={payCurrencyOptions[0]}
+              disabled={!memberSelected}
+              required
+            >
+              {payCurrencyOptions.map((code) => (
+                <option key={code} value={code}>
+                  {code}
+                  {balancesByCurrency[code] != null
+                    ? ` (${money(balancesByCurrency[code]!, code)})`
+                    : ''}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input type="hidden" name="currency" value={payCurrencyOptions[0] ?? currency} />
+          )}
           <select name="paymentMethod" className="input" defaultValue="CASH" disabled={!memberSelected}>
             <option value="CASH">{tExpenses('methods.cash')}</option>
             <option value="CARD">{tExpenses('methods.card')}</option>
@@ -222,7 +276,7 @@ export function PosTerminal({
           <input
             name="notes"
             placeholder={tExpenses('paymentNotes')}
-            className="input sm:col-span-2"
+            className={`input ${payCurrencyOptions.length > 1 ? '' : 'sm:col-span-2'}`}
             disabled={!memberSelected}
           />
           <button

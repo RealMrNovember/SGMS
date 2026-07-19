@@ -94,6 +94,21 @@ export async function POST(request: Request) {
   }
 
   const expenseId = typeof body.expenseId === 'string' ? body.expenseId : undefined;
+  let currency =
+    typeof body.currency === 'string' && body.currency.length === 3
+      ? body.currency.toUpperCase()
+      : 'TRY';
+
+  if (expenseId) {
+    const target = await prisma.expense.findFirst({
+      where: { id: expenseId, organizationId, gymMemberId },
+      select: { currency: true },
+    });
+    if (target) {
+      currency = target.currency.toUpperCase();
+    }
+  }
+
   const transaction = await prisma.$transaction(async (tx) => {
     const created = await tx.transaction.create({
       data: {
@@ -101,7 +116,7 @@ export async function POST(request: Request) {
         gymMemberId,
         expenseId: expenseId ?? null,
         amount,
-        currency: typeof body.currency === 'string' ? body.currency : 'TRY',
+        currency,
         type: type as TransactionType,
         paymentMethod: paymentMethod as PaymentMethod,
         reference: typeof body.reference === 'string' ? body.reference : null,
@@ -115,6 +130,7 @@ export async function POST(request: Request) {
         organizationId,
         gymMemberId,
         amount,
+        currency,
         targetExpenseId: expenseId,
       });
     }
@@ -126,7 +142,7 @@ export async function POST(request: Request) {
         action: 'PAYMENT_RECORDED',
         entityType: 'transaction',
         entityId: created.id,
-        metadata: { gymMemberId, amount, source: 'api_v1' },
+        metadata: { gymMemberId, amount, currency, source: 'api_v1' },
       },
     });
 

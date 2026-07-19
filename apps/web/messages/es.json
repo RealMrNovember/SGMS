@@ -634,7 +634,13 @@
       "intervalDays": "Días entre cuotas (solo personalizado)",
       "description": "Descripción (opcional)",
       "create": "Crear plan"
-    }
+    },
+    "refund": "Reembolso",
+    "refundAmount": "Importe del reembolso",
+    "refundReason": "Motivo del reembolso",
+    "confirmRefund": "Registrar reembolso",
+    "refundCancel": "Cancelar",
+    "refundedBadge": "Reembolsado: {amount}"
   },
   "pos": {
     "title": "Mini POS / Caja",
@@ -1315,6 +1321,16 @@
       "title": "Categorías Más Vendidas",
       "colName": "Categoría",
       "colRevenue": "Ingresos"
+    },
+    "revenue": {
+      "title": "Ingresos (Cobrado vs Facturado)",
+      "subtitle": "Cobrado = pagos − reembolsos. Facturado = cargos del periodo. No se mezclan.",
+      "collected": "Cobrado (neto)",
+      "billed": "Facturado",
+      "billedHint": "Cargos creados en el periodo (sin VOID)",
+      "paymentsMinusRefunds": "Pagos {payments} − Reembolsos {refunds}",
+      "byCurrency": "Por moneda",
+      "rowSummary": "Cobrado {collected} · Facturado {billed}"
     }
   },
   "enterprise": {

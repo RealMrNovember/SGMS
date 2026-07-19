@@ -634,7 +634,13 @@
       "intervalDays": "Jours entre les échéances (personnalisé uniquement)",
       "description": "Description (facultatif)",
       "create": "Créer le plan"
-    }
+    },
+    "refund": "Remboursement",
+    "refundAmount": "Montant du remboursement",
+    "refundReason": "Motif du remboursement",
+    "confirmRefund": "Enregistrer le remboursement",
+    "refundCancel": "Annuler",
+    "refundedBadge": "Remboursé : {amount}"
   },
   "pos": {
     "title": "Mini POS / Caisse",
@@ -1315,6 +1321,16 @@
       "title": "Catégories les Plus Vendues",
       "colName": "Catégorie",
       "colRevenue": "Chiffre d'affaires"
+    },
+    "revenue": {
+      "title": "Chiffre d'affaires (Encaissé vs Facturé)",
+      "subtitle": "Encaissé = paiements − remboursements. Facturé = dettes créées sur la période. Jamais mélangés.",
+      "collected": "Encaissé (net)",
+      "billed": "Facturé",
+      "billedHint": "Dettes créées sur la période (hors VOID)",
+      "paymentsMinusRefunds": "Paiements {payments} − Remboursements {refunds}",
+      "byCurrency": "Par devise",
+      "rowSummary": "Encaissé {collected} · Facturé {billed}"
     }
   },
   "enterprise": {

@@ -165,11 +165,25 @@ export async function buildMemberStatementPdf(
   draw(`${labels.currency}: ${data.currency}`, 10, rgb(0.45, 0.45, 0.5));
   draw(`${labels.generatedAt}: ${formatDate(data.generatedAt, locale)}`, 10, rgb(0.45, 0.45, 0.5));
   y -= 6;
-  draw(
-    `${labels.openBalance}: ${formatMoney(data.openBalance, data.currency, locale)}`,
-    14,
-    rgb(0.92, 0.75, 0.35),
-  );
+  const balanceEntries = Object.entries(data.balancesByCurrency).filter(([, v]) => v > 0);
+  if (balanceEntries.length > 1) {
+    draw(`${labels.openBalance}:`, 14, rgb(0.92, 0.75, 0.35));
+    for (const [code, amount] of balanceEntries) {
+      draw(`  ${formatMoney(amount, code, locale)}`, 12, rgb(0.92, 0.75, 0.35));
+    }
+  } else if (balanceEntries.length === 1) {
+    draw(
+      `${labels.openBalance}: ${formatMoney(balanceEntries[0]![1], balanceEntries[0]![0], locale)}`,
+      14,
+      rgb(0.92, 0.75, 0.35),
+    );
+  } else {
+    draw(
+      `${labels.openBalance}: ${formatMoney(data.openBalance, data.currency, locale)}`,
+      14,
+      rgb(0.92, 0.75, 0.35),
+    );
+  }
   y -= 10;
 
   const colWidths = [95, 230, 80, 70];

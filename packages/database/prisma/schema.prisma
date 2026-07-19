@@ -119,6 +119,7 @@ enum AuditAction {
   EXPENSE_ADDED
   EXPENSE_VOIDED
   PAYMENT_RECORDED
+  REFUND_RECORDED
   SETTINGS_CHANGED
   AUDIT_LOG_DELETED
   MESSAGE_REPORTED
@@ -1125,6 +1126,8 @@ model Transaction {
   invoiceId            String?         @map("invoice_id")
   gatewayId            String?         @map("gateway_id")
   gatewayTransactionId String?         @map("gateway_transaction_id")
+  /// Kısmi/tam iade: bu kayıt hangi PAYMENT işleminin iadesi?
+  refundOfTransactionId String?        @map("refund_of_transaction_id")
   amount               Decimal         @db.Decimal(10, 2)
   currency             String          @default("TRY")
   type                 TransactionType
@@ -1141,11 +1144,14 @@ model Transaction {
   invoice      Invoice?              @relation(fields: [invoiceId], references: [id])
   gateway      TenantPaymentGateway? @relation(fields: [gatewayId], references: [id])
   createdBy    User                  @relation("TransactionCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  refundOf     Transaction?          @relation("TransactionRefunds", fields: [refundOfTransactionId], references: [id], onDelete: SetNull)
+  refunds      Transaction[]         @relation("TransactionRefunds")
 
   @@index([organizationId, gymMemberId, createdAt])
   @@index([gymMemberId, type, createdAt])
   @@index([invoiceId])
   @@index([gatewayId])
+  @@index([refundOfTransactionId])
   @@map("transactions")
 }
 

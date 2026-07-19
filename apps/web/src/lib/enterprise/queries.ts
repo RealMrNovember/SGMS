@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { decimalToNumber } from '@/lib/member-balance';
+import { getCollectedRevenueByOrganization } from '@/lib/reports/revenue';
 import { resolveDescendantOrganizationIds } from '@/lib/enterprise/hierarchy';
 import type { DateRange } from '@/lib/reports/queries';
 
@@ -9,6 +9,7 @@ export type BranchRow = {
   ownerName: string | null;
   activeMembers: number;
   staffCount: number;
+  /** Net tahsilat (PAYMENT − REFUND) — 36.10 birleşik motor. */
   revenue: number;
   checkIns: number;
 };
@@ -24,8 +25,7 @@ export type ConsolidatedReport = {
 
 /**
  * Bir kurumsal düğümün (şirket/bölge) altındaki TÜM şubeler için konsolide,
- * salt-okunur özet rapor. Faz 28'in tenant-bazlı rapor sorgularıyla aynı mantığı
- * (PAYMENT tipi işlemler = gelir) alt ağaç genelinde toplar.
+ * salt-okunur özet rapor. Ciro = `getCollectedRevenueByOrganization` (PAYMENT − REFUND).
  */
 export async function getConsolidatedReport(
   rootOrganizationId: string,
@@ -33,50 +33,42 @@ export async function getConsolidatedReport(
 ): Promise<ConsolidatedReport> {
   const organizationIds = await resolveDescendantOrganizationIds(rootOrganizationId);
 
-  const [organizations, activeMemberCounts, staffCounts, payments, checkInCounts, owners] = await Promise.all([
-    prisma.organization.findMany({
-      where: { id: { in: organizationIds } },
-      select: { id: true, name: true },
-      orderBy: { name: 'asc' },
-    }),
-    prisma.gymMember.groupBy({
-      by: ['organizationId'],
-      where: { organizationId: { in: organizationIds }, status: 'ACTIVE' },
-      _count: { _all: true },
-    }),
-    prisma.organizationMember.groupBy({
-      by: ['organizationId'],
-      where: { organizationId: { in: organizationIds }, isActive: true },
-      _count: { _all: true },
-    }),
-    prisma.transaction.groupBy({
-      by: ['organizationId'],
-      where: {
-        organizationId: { in: organizationIds },
-        type: 'PAYMENT',
-        createdAt: { gte: range.start, lte: range.end },
-      },
-      _sum: { amount: true },
-    }),
-    prisma.checkIn.groupBy({
-      by: ['organizationId'],
-      where: {
-        organizationId: { in: organizationIds },
-        subjectType: 'GYM_MEMBER',
-        direction: 'ENTRY',
-        checkedInAt: { gte: range.start, lte: range.end },
-      },
-      _count: { _all: true },
-    }),
-    prisma.organizationMember.findMany({
-      where: { organizationId: { in: organizationIds }, role: 'OWNER', isActive: true },
-      select: { organizationId: true, user: { select: { name: true } } },
-    }),
-  ]);
+  const [organizations, activeMemberCounts, staffCounts, revenueByOrg, checkInCounts, owners] =
+    await Promise.all([
+      prisma.organization.findMany({
+        where: { id: { in: organizationIds } },
+        select: { id: true, name: true },
+        orderBy: { name: 'asc' },
+      }),
+      prisma.gymMember.groupBy({
+        by: ['organizationId'],
+        where: { organizationId: { in: organizationIds }, status: 'ACTIVE' },
+        _count: { _all: true },
+      }),
+      prisma.organizationMember.groupBy({
+        by: ['organizationId'],
+        where: { organizationId: { in: organizationIds }, isActive: true },
+        _count: { _all: true },
+      }),
+      getCollectedRevenueByOrganization(organizationIds, range),
+      prisma.checkIn.groupBy({
+        by: ['organizationId'],
+        where: {
+          organizationId: { in: organizationIds },
+          subjectType: 'GYM_MEMBER',
+          direction: 'ENTRY',
+          checkedInAt: { gte: range.start, lte: range.end },
+        },
+        _count: { _all: true },
+      }),
+      prisma.organizationMember.findMany({
+        where: { organizationId: { in: organizationIds }, role: 'OWNER', isActive: true },
+        select: { organizationId: true, user: { select: { name: true } } },
+      }),
+    ]);
 
   const activeMembersByOrg = new Map(activeMemberCounts.map((r) => [r.organizationId, r._count._all]));
   const staffByOrg = new Map(staffCounts.map((r) => [r.organizationId, r._count._all]));
-  const revenueByOrg = new Map(payments.map((r) => [r.organizationId, decimalToNumber(r._sum.amount ?? 0)]));
   const checkInsByOrg = new Map(checkInCounts.map((r) => [r.organizationId, r._count._all]));
   const ownerByOrg = new Map(owners.map((o) => [o.organizationId, o.user.name]));
 

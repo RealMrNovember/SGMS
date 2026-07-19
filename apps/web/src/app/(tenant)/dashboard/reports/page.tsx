@@ -7,6 +7,7 @@ import {
   resolveDateRange,
   type DateRange,
 } from '@/lib/reports/queries';
+import { getRevenueForPeriod } from '@/lib/reports/revenue';
 import type { OrganizationRole } from '@sgms/database';
 import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
@@ -46,9 +47,10 @@ export default async function ReportsPage({
   const dateLocale = intlLocaleFor(locale);
   const organizationId = session.user.organizationId;
 
-  const [operational, membership] = await Promise.all([
+  const [operational, membership, revenue] = await Promise.all([
     getOperationalReport(organizationId, range),
     getMembershipMetrics(organizationId, range),
+    getRevenueForPeriod(organizationId, range),
   ]);
 
   const maxDailyVisitor = Math.max(1, ...operational.dailyVisitors.map((d) => d.count));
@@ -56,9 +58,21 @@ export default async function ReportsPage({
   const topHours = [...operational.busiestHours].sort((a, b) => a.hour - b.hour);
   const topDays = [...operational.busiestDays].sort((a, b) => b.count - a.count).slice(0, 3);
 
+  function money(amount: number, code: string) {
+    try {
+      return new Intl.NumberFormat(dateLocale, {
+        style: 'currency',
+        currency: code,
+        maximumFractionDigits: 0,
+      }).format(amount);
+    } catch {
+      return `${amount.toFixed(0)} ${code}`;
+    }
+  }
+
   const currency = new Intl.NumberFormat(dateLocale, {
     style: 'currency',
-    currency: 'TRY',
+    currency: revenue.primaryCurrency || 'TRY',
     maximumFractionDigits: 0,
   });
 
@@ -79,6 +93,57 @@ export default async function ReportsPage({
               {t(`range.${p}`)}
             </Link>
           ))}
+        </div>
+      </section>
+
+      <section className="card space-y-4 p-6">
+        <div>
+          <h3 className="text-lg font-semibold">{t('revenue.title')}</h3>
+          <p className="muted mt-1 text-sm">{t('revenue.subtitle')}</p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <article className="rounded-xl border border-[var(--border)] bg-white/5 p-4">
+            <p className="muted text-sm">{t('revenue.collected')}</p>
+            <p className="mt-2 text-2xl font-semibold tabular-nums text-[#c9a962]">
+              {money(revenue.collected, revenue.primaryCurrency)}
+            </p>
+            <p className="muted mt-1 text-xs">
+              {t('revenue.paymentsMinusRefunds', {
+                payments: money(revenue.payments, revenue.primaryCurrency),
+                refunds: money(revenue.refunds, revenue.primaryCurrency),
+              })}
+            </p>
+          </article>
+          <article className="rounded-xl border border-[var(--border)] bg-white/5 p-4">
+            <p className="muted text-sm">{t('revenue.billed')}</p>
+            <p className="mt-2 text-2xl font-semibold tabular-nums">
+              {money(revenue.billed, revenue.primaryCurrency)}
+            </p>
+            <p className="muted mt-1 text-xs">{t('revenue.billedHint')}</p>
+          </article>
+          <article className="rounded-xl border border-[var(--border)] bg-white/5 p-4 sm:col-span-2">
+            <p className="muted text-sm">{t('revenue.byCurrency')}</p>
+            {revenue.byCurrency.length === 0 ? (
+              <p className="muted mt-2 text-sm">{t('empty')}</p>
+            ) : (
+              <ul className="mt-3 space-y-2 text-sm">
+                {revenue.byCurrency.map((row) => (
+                  <li
+                    key={row.currency}
+                    className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border)] pb-2 last:border-0"
+                  >
+                    <span className="font-medium">{row.currency}</span>
+                    <span className="tabular-nums">
+                      {t('revenue.rowSummary', {
+                        collected: money(row.collected, row.currency),
+                        billed: money(row.billed, row.currency),
+                      })}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </article>
         </div>
       </section>
 

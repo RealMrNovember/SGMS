@@ -634,7 +634,13 @@
       "intervalDays": "Дней между платежами (только для произвольного)",
       "description": "Описание (необязательно)",
       "create": "Создать план"
-    }
+    },
+    "refund": "Возврат",
+    "refundAmount": "Сумма возврата",
+    "refundReason": "Причина возврата",
+    "confirmRefund": "Записать возврат",
+    "refundCancel": "Отмена",
+    "refundedBadge": "Возвращено: {amount}"
   },
   "pos": {
     "title": "Мини-POS / Касса",
@@ -1315,6 +1321,16 @@
       "title": "Самые продаваемые категории",
       "colName": "Категория",
       "colRevenue": "Выручка"
+    },
+    "revenue": {
+      "title": "Выручка (Получено vs Начислено)",
+      "subtitle": "Получено = платежи − возвраты. Начислено = долги за период. Не смешиваются.",
+      "collected": "Получено (нетто)",
+      "billed": "Начислено",
+      "billedHint": "Долги, созданные за период (без VOID)",
+      "paymentsMinusRefunds": "Платежи {payments} − Возвраты {refunds}",
+      "byCurrency": "По валютам",
+      "rowSummary": "Получено {collected} · Начислено {billed}"
     }
   },
   "enterprise": {
