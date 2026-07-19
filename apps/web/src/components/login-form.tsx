@@ -8,9 +8,10 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FormEvent, useState } from 'react';
 
-const DEMO_LABEL_KEYS: Record<DemoAccountKey, 'demoOwner' | 'demoStaff' | 'demoAthlete'> = {
+const DEMO_LABEL_KEYS: Record<DemoAccountKey, 'demoOwner' | 'demoStaff' | 'demoTrainer' | 'demoAthlete'> = {
   owner: 'demoOwner',
   staff: 'demoStaff',
+  trainer: 'demoTrainer',
   athlete: 'demoAthlete',
 };
 
@@ -61,12 +62,15 @@ export function LoginForm() {
       }
     }
 
+    const effectiveCallbackUrl =
+      (activeDemo && DEMO_ACCOUNTS.find((item) => item.key === activeDemo)?.callbackUrl) || callbackUrl;
+
     const result = await signIn('credentials', {
       email,
       password,
       totp: needsTotp ? totp : undefined,
       redirect: false,
-      callbackUrl,
+      callbackUrl: effectiveCallbackUrl,
     });
 
     setLoading(false);
@@ -76,7 +80,7 @@ export function LoginForm() {
       return;
     }
 
-    router.push(result?.url ?? callbackUrl);
+    router.push(result?.url ?? effectiveCallbackUrl);
     router.refresh();
   }
 

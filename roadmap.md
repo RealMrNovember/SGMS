@@ -47,9 +47,9 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 9 | Gerçek Zamanlı İletişim (Real-time Chat) | ✅ Tamamlandı | 100% |
 | 10 | IoT, Kapı, Turnike & SGMS Resepsiyon | ✅ Tamamlandı | 100% |
 | 11 | Marketing & Showcase Sitesi | ✅ Tamamlandı | 100% |
-| 12 | Master Admin, Billing & Audit Platformu | 🔄 Devam ediyor | ~95% (kalıcı silme/hard-delete sırada) |
+| 12 | Master Admin, Billing & Audit Platformu | ✅ Tamamlandı | 100% (kalıcı silme/hard-delete — 2026-07-19 kapatıldı) |
 | 13 | CiciByte Cloud Migrasyonu & Platform Sertleştirme | ✅ Tamamlandı | ~95% (Playwright E2E temel akışlarla kuruldu — 2026-07-19) |
-| 14 | Demo Hesap Güvenliği & Master Admin Geçişi | 🔄 Devam ediyor | ~90% (Demo PT girişi sırada) |
+| 14 | Demo Hesap Güvenliği & Master Admin Geçişi | ✅ Tamamlandı | 100% (Demo PT girişi — 2026-07-19 kapatıldı) |
 | 15 | Kimlik, Onboarding & Uyum Sertleştirme | ✅ Tamamlandı | ~95% (proaktif hatırlatma + 6 dil çevirisi kaldı) |
 | 16 | CiciByte Cloud Ticari Entegrasyonu (Ödeme, Referans/Komisyon, Release) | 🔄 Devam ediyor | ~90% (Platform Ödeme Ayarları paneli — iyzico/PayTR/EFT — 2026-07-19'da eklendi; gerçek anahtarlar bekleniyor) |
 | 17 | Üyelik Senaryoları & Ders/Sınıf Yönetimi | 🔄 Devam ediyor | ~12% (17.0 Lead takibi kapatıldı — 2026-07-19; 17.1–17.7 Cursor'da devam ediyor) |
@@ -453,11 +453,16 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 ### 12.4 Kalıcı Silme (Hard Delete) — yeni, 2026-07-16 eklendi
 
 > **Senaryo:** Deneme süresi boyunca hiç giriş yapılmamış, sahte/test amaçlı oluşturulmuş bir organizasyon veritabanında süresiz kalıyor — Master Admin bunu yalnızca `SUSPENDED`/`ARCHIVED` durumuna çekebiliyor, tamamen silemiyor. Test/demo kirliliğinin temizlenmesi ve KVKK/GDPR'nin "verinin tamamen silinmesi" hakkı için gerçek bir hard-delete gerekiyor.
-- [ ] `admin/organizations/[id]` sayfasına, çok adımlı onay gerektiren (org adını yazarak doğrulama — yanlışlıkla tıklamayı engeller) bir **"Kalıcı Olarak Sil"** butonu
-- [ ] Silme işlemi, tüm bağlı kayıtları (üyeler, ölçümler, mesajlar, işlemler — cascade) transaction içinde temizler; işlem öncesi son bir `AuditLog` kaydı (organizasyon dışı, platform-seviyesinde saklanan) düşülür ki silme eylemi kimin tarafından ne zaman yapıldığı hâlâ izlenebilsin
-- [ ] Yalnızca Master Admin yetkisi — demo hesaplar (mevcut `isDemo` engeli) bu butona hiçbir şekilde erişemez
+>
+> **Durum:** ✅ *2026-07-19 kapatıldı.*
 
-**Kabul kriteri:** ✅ Master Admin tek panelden tüm organizasyonları, abonelikleri, planları ve audit geçmişini yönetebilir · 🔲 sahte/test organizasyonlar onaylı bir akışla kalıcı olarak silinebiliyor
+- [x] `admin/organizations/[id]` sayfasına "Tehlikeli Bölge" bölümünde, çok adımlı onay gerektiren (org adını harfi harfine yazarak doğrulama — buton yalnızca tam eşleşmede aktifleşir) bir **"Kalıcı Olarak Sil"** butonu
+- [x] Silme işlemi tek bir `prisma.organization.delete()` çağrısıyla yapılıyor — tüm bağlı tablolardaki (üyeler, personel, ölçümler, mesajlar, işlemler, cihazlar vb. — 30+ ilişki) `organizationId` alanları veritabanı seviyesinde `ON DELETE CASCADE` ile tanımlı olduğundan işlem tek bir atomik SQL ifadesiyle tutarlı şekilde tamamlanıyor (kısmi silinme riski yok); işlem öncesi platform-seviyeli (`organizationId: null`) bir `AuditLog` kaydı (yeni `ORGANIZATION_DELETED` action'ı, metadata'da org adı/slug snapshot'ı) düşülüyor ki silme eylemi kimin/ne zaman yaptığı organizasyon satırı silindikten sonra da izlenebilsin
+- [x] Yalnızca Master Admin yetkisi (`requireSuperAdmin`) — demo hesaplar (mevcut `isDemo` engeli) bu butona hiçbir şekilde erişemez
+
+**Kabul kriteri:** karşılandı — Master Admin tek panelden tüm organizasyonları, abonelikleri, planları ve audit geçmişini yönetebiliyor · sahte/test organizasyonlar isim-doğrulamalı onaylı bir akışla kalıcı olarak silinebiliyor
+
+**Dosyalar:** `packages/database/prisma/schema.prisma` (`ORGANIZATION_DELETED`), migration `20260719080000_add_organization_deleted_audit_action`, `actions/admin-organizations.ts`, `components/admin/organization-hard-delete-button.tsx`, `app/(super-admin)/admin/organizations/[id]/page.tsx`, `lib/admin/audit-labels.ts`
 
 ---
 
@@ -534,13 +539,18 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 ### 14.3 Demo PT Girişi — yeni, 2026-07-16 eklendi
 
 > **Senaryo:** Sistemi değerlendiren bir potansiyel müşteri (ör. büyük bir zincirin PT departmanı) bugün yalnızca Salon Sahibi/Resepsiyon/Sporcu demo hesaplarını deneyebiliyor — bir PT'nin kendi karnesini, seans planlamasını ve müşterisine program yazma akışını (Faz 21) görmesinin tek yolu gerçek bir hesap açmak. Bu, satış öncesi değerlendirmeyi zorlaştırıyor.
-- [ ] `demo-accounts.ts`'e `'trainer'` anahtarı eklenir (mevcut `owner`/`staff`/`athlete` demo hesaplarıyla aynı salt-okunur `isDemo: true` deseninde)
-- [ ] `/login` sayfasındaki demo giriş butonlarına **"PT (Personal Trainer)"** eklenir — tıklanınca doğrudan Faz 21'deki `/dashboard/trainers/[id]` karnesine yönlendirir
-- [ ] Diğer demo hesaplarla aynı yazma kısıtlaması (`isDemo` guard) otomatik uygulanır — ek kod gerekmez
+>
+> **Durum:** ✅ *2026-07-19 kapatıldı.*
 
-**Kabul kriteri:** ✅ Demo giriş butonlarından hiçbiri artık herhangi bir kayıt oluşturamıyor/güncelleyemiyor/silemiyor · `mozkarci1991@gmail.com` production'da Master Admin olarak giriş yapabiliyor · 🔲 giriş ekranında bir "PT" demo butonu da bulunuyor
+- [x] `demo-accounts.ts`'e `'trainer'` anahtarı eklendi (mevcut `owner`/`staff`/`athlete` demo hesaplarıyla aynı salt-okunur `isDemo: true` deseninde; `seed.ts`'deki mevcut `trainer@demo-gym.local` hesabı — zaten en az bir sporcuya atanmış — yeniden kullanıldı, yeni seed verisi gerekmedi)
+- [x] `/login` sayfasındaki demo giriş butonlarına **"PT (Antrenör)"** eklendi — tıklanınca `callbackUrl=/dashboard/trainers`'a yönlendirir; bu sayfa TRAINER rolü için zaten otomatik olarak kendi `/dashboard/trainers/[id]` karnesine (Faz 21) yönlendiriyor
+- [x] Diğer demo hesaplarla aynı yazma kısıtlaması (`isDemo` guard, `getTenantWriteBlockReason`) otomatik uygulanıyor — ek kod gerekmedi
+
+**Kabul kriteri:** karşılandı — demo giriş butonlarından hiçbiri herhangi bir kayıt oluşturamıyor/güncelleyemiyor/silemiyor · `mozkarci1991@gmail.com` production'da Master Admin olarak giriş yapabiliyor · giriş ekranında bir "PT" demo butonu bulunuyor ve doğrudan PT karnesine yönlendiriyor
 
 **Bağımlılık:** yok — bağımsız, acil güvenlik düzeltmesi
+
+**Dosyalar:** `lib/demo-accounts.ts`, `components/login-form.tsx`, messages (6 dil)
 
 ---
 
@@ -1439,10 +1449,10 @@ Tamamlanan paralel çalışma (2026-07-19, çakışmayı önlemek için dosya ba
   Faz 17.0    Potansiyel müşteri (Lead) takibi           ✅ 2026-07-19 (Claude) — Lead/LeadFollowUp modeli, /dashboard/leads
   Faz 33/33.1 Kullanım kılavuzu + ayarlar modernizasyonu ✅ 2026-07-19 (Cursor) — HelpArticle modeli, /help, /dashboard/settings
 
-Şu anda paralel çalışılıyor (2026-07-19, çakışmayı önlemek için dosya bazında ayrıldı — bu sefer Cursor'a geniş/uzun kapsamlı bir iş yükü verildi):
-  Faz 17.1–17.7  Kalan üyelik senaryoları & ders/sınıf yönetimi ← Cursor — dondurma/devir, kurumsal/aile/çocuk üyelik,
+Paralel çalışma (2026-07-19, çakışmayı önlemek için dosya bazında ayrıldı — bu sefer Cursor'a geniş/uzun kapsamlı bir iş yükü verildi):
+  Faz 17.1–17.7  Kalan üyelik senaryoları & ders/sınıf yönetimi ← Cursor'da devam ediyor — dondurma/devir, kurumsal/aile/çocuk üyelik,
                  ders/sınıf rezervasyon sistemi (GymClass/ClassSession/ClassBooking), indirim kodu, POS stok, misafir izni
-  Faz 12.4 + 14.3 Master Admin kalıcı silme + Demo PT girişi     ← bu oturum (Claude) — düşük efor, dosya bazında sıfır çakışma
+  Faz 12.4 + 14.3 Master Admin kalıcı silme + Demo PT girişi     ✅ 2026-07-19 (Claude) — düşük efor, dosya bazında sıfır çakışma
 
 Sıradaki (Faz 36 sonrası — profesyonel değerlendirme, P0 en önce):
   Faz 32     Ticarileştirme: paket + ek kapasite satışı          ← P0, gelir modeli (kullanıcı onayı gerekli)

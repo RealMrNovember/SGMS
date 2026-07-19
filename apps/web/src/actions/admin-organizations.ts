@@ -619,3 +619,70 @@ export async function cancelOrganizationSubscription(
     return { error: error instanceof Error ? error.message : 'Abonelik iptal edilemedi.' };
   }
 }
+
+const hardDeleteOrganizationSchema = z.object({
+  organizationId: z.string().cuid(),
+  confirmName: z.string().min(1),
+});
+
+/**
+ * Bir organizasyonu ve tüm bağlı verilerini (üyeler, personel, işlemler, mesajlar vb.)
+ * kalıcı olarak siler — geri alınamaz. Faz 12.4: test/demo kirliliğinin temizlenmesi ve
+ * KVKK/GDPR "verinin tamamen silinmesi" hakkı için. Yanlışlıkla tetiklenmeyi engellemek
+ * için organizasyon adının tam olarak yazılması zorunludur.
+ *
+ * Silme öncesi platform-seviyeli (organizationId: null) bir AuditLog kaydı düşülür —
+ * organizasyon satırı silindiğinde ilgili audit kayıtları (onDelete: SetNull) zaten
+ * kalıcı olarak korunur, ancak bu kayıt işlemi kimin/ne zaman yaptığını organizasyon
+ * adı/slug'ı metadata'da taşıyarak açıkça belgeler.
+ */
+export async function hardDeleteOrganization(
+  _prev: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  const parsed = hardDeleteOrganizationSchema.safeParse({
+    organizationId: formData.get('organizationId'),
+    confirmName: formData.get('confirmName'),
+  });
+
+  if (!parsed.success) {
+    return { error: 'Geçersiz istek.' };
+  }
+
+  try {
+    const session = await requireSuperAdmin();
+    const { organizationId, confirmName } = parsed.data;
+
+    const org = await prisma.organization.findUnique({
+      where: { id: organizationId },
+      select: { id: true, name: true, slug: true },
+    });
+
+    if (!org) {
+      return { error: 'Organizasyon bulunamadı.' };
+    }
+
+    if (confirmName.trim() !== org.name) {
+      return { error: 'Girilen ad organizasyon adıyla eşleşmiyor. Silme işlemi iptal edildi.' };
+    }
+
+    await writeAdminAuditLog({
+      actorId: session.user.id!,
+      organizationId: null,
+      action: 'ORGANIZATION_DELETED',
+      entityType: 'organization',
+      entityId: org.id,
+      metadata: { name: org.name, slug: org.slug, deletedBy: 'master_admin' },
+    });
+
+    await prisma.organization.delete({ where: { id: organizationId } });
+
+    revalidatePath('/admin');
+    revalidatePath('/admin/organizations');
+    revalidatePath('/admin/audit');
+
+    return { success: `${org.name} kalıcı olarak silindi.` };
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : 'Silme işlemi başarısız.' };
+  }
+}

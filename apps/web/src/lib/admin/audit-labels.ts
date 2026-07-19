@@ -20,7 +20,7 @@ export type AuditCategory =
   | 'leads';
 
 export const AUDIT_CATEGORY_ACTIONS: Record<Exclude<AuditCategory, 'all'>, AuditAction[]> = {
-  organization: ['ORGANIZATION_CREATED', 'ORGANIZATION_UPDATED'],
+  organization: ['ORGANIZATION_CREATED', 'ORGANIZATION_UPDATED', 'ORGANIZATION_DELETED'],
   subscription: [
     'SUBSCRIPTION_STARTED',
     'SUBSCRIPTION_CHANGED',
@@ -102,6 +102,7 @@ export const AUDIT_CATEGORY_ACTIONS: Record<Exclude<AuditCategory, 'all'>, Audit
 export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   ORGANIZATION_CREATED: 'Salon oluşturuldu',
   ORGANIZATION_UPDATED: 'Salon güncellendi',
+  ORGANIZATION_DELETED: 'Salon kalıcı olarak silindi',
   SUBSCRIPTION_STARTED: 'Abonelik başlatıldı',
   SUBSCRIPTION_CHANGED: 'Abonelik değiştirildi',
   SUBSCRIPTION_CANCELED: 'Abonelik iptal edildi',

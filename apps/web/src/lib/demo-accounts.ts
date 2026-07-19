@@ -1,9 +1,11 @@
-export type DemoAccountKey = 'owner' | 'staff' | 'athlete';
+export type DemoAccountKey = 'owner' | 'staff' | 'trainer' | 'athlete';
 
 export type DemoAccount = {
   key: DemoAccountKey;
   email: string;
   password: string;
+  /** Giriş sonrası varsayılan /dashboard yerine gidilecek yol (bkz. Faz 14.3). */
+  callbackUrl?: string;
 };
 
 /**
@@ -15,5 +17,7 @@ export type DemoAccount = {
 export const DEMO_ACCOUNTS: DemoAccount[] = [
   { key: 'owner', email: 'owner@demo-gym.local', password: 'Owner123!' },
   { key: 'staff', email: 'staff@demo-gym.local', password: 'Staff123!' },
+  // /dashboard/trainers, TRAINER rolü için otomatik olarak kendi karnesine (/dashboard/trainers/[id]) yönlendirir.
+  { key: 'trainer', email: 'trainer@demo-gym.local', password: 'Trainer123!', callbackUrl: '/dashboard/trainers' },
   { key: 'athlete', email: 'athlete@demo-gym.local', password: 'Athlete123!' },
 ];

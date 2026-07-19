@@ -1,6 +1,7 @@
 import { AdminBadge } from '@/components/admin/admin-badge';
 import { BillingRequestActions } from '@/components/admin/billing-request-actions';
 import { CopyEmailBlock } from '@/components/admin/copy-email-block';
+import { OrganizationHardDeleteButton } from '@/components/admin/organization-hard-delete-button';
 import { OrganizationHierarchyPanel } from '@/components/admin/organization-hierarchy-panel';
 import { OrganizationPartnerPanel } from '@/components/admin/organization-partner-panel';
 import { OrganizationProfileForm } from '@/components/admin/organization-profile-form';
@@ -302,6 +303,15 @@ export default async function AdminOrganizationDetailPage({
             {tAdmin('auditOpenFull')} →
           </Link>
         </div>
+      </section>
+
+      <section className="space-y-3">
+        <h3 className="text-lg font-semibold text-rose-300">Tehlikeli Bölge</h3>
+        <p className="muted text-sm">
+          Bu organizasyonu ve tüm bağlı verilerini kalıcı olarak sil. Test/demo amaçlı oluşturulmuş,
+          hiç giriş yapılmamış organizasyonlar için kullanın — geri alınamaz.
+        </p>
+        <OrganizationHardDeleteButton organizationId={org.id} organizationName={org.name} />
       </section>
     </div>
   );
