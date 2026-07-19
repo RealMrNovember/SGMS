@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "SGMS Sporcu",
+    "slug": "sgms-athlete",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "scheme": "sgms-athlete",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.cicibyte.sgms.athlete"
+    },
+    "android": {
+      "package": "com.cicibyte.sgms.athlete",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "backgroundColor": "#0b1220",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-secure-store"
+    ]
+  }
+}

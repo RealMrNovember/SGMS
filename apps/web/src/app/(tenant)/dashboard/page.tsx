@@ -6,6 +6,7 @@ import { refreshDashboardLicense } from '@/lib/license-dashboard';
 import { intlLocaleFor } from '@/lib/format-locale';
 import { prisma } from '@/lib/prisma';
 import { ReceptionDownloadPromo } from '@/components/reception/reception-download-promo';
+import { MobileDownloadPromo } from '@/components/reception/mobile-download-promo';
 import type { OrganizationRole } from '@sgms/database';
 import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
@@ -151,6 +152,10 @@ export default async function DashboardPage() {
 
       {role && RECEPTION_ROLES.has(role) && license.isOperational ? (
         <ReceptionDownloadPromo variant="card" />
+      ) : null}
+
+      {role && RECEPTION_ROLES.has(role) && license.isOperational ? (
+        <MobileDownloadPromo variant="card" />
       ) : null}
 
       {license.isOperational ? (

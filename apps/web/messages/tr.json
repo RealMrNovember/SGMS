@@ -731,7 +731,8 @@
       "trial": "14 Gün Deneyin",
       "loginShort": "Giriş",
       "trialShort": "14 Gün",
-      "receptionDesktop": "Resepsiyon Uygulaması"
+      "receptionDesktop": "Resepsiyon Uygulaması",
+      "mobileAthlete": "Sporcu Uygulaması"
     },
     "hero": {
       "kicker": "Dijital Spor Salonu İşletim Sistemi",
@@ -1140,6 +1141,23 @@
     "loginHintText": "Turnike olaylarını kaçırmamak için Windows uygulamasını indirin. Giriş sonrası personel hesabınızla bağlanın.",
     "checkInHint": "Resepsiyon PC’sine kurun; turnike olayları tarayıcı açık olmasa bile Windows bildirimi olarak gelir.",
     "footerLink": "SGMS Resepsiyon (Windows)"
+  },
+  "mobileAthlete": {
+    "badge": "Android Mobil Uygulama",
+    "title": "SGMS Sporcu",
+    "subtitle": "Sporcularınız telefonlarındaki QR kodla turnikeden saniyeler içinde giriş yapsın; giriş bilgileri panelinizde anında görünür.",
+    "download": "Android İndir (v{version})",
+    "size": "{size} · {platform}",
+    "features": {
+      "qr": "Otomatik yenilenen QR check-in kodu",
+      "fast": "Parolasız hızlı yeniden giriş",
+      "light": "Hafif, düşük veri kullanımlı uygulama"
+    },
+    "loginHint": "Sporcu mobil uygulaması",
+    "loginHintText": "Sporcularınızın QR ile giriş yapabilmesi için Android uygulamasını indirin ve sporcu hesabıyla giriş yapın.",
+    "checkInHint": "Sporcularınız telefonlarındaki QR kodu turnikeye okutarak saniyeler içinde giriş yapar.",
+    "footerLink": "SGMS Sporcu (Android)",
+    "unsignedNotice": "Uygulama henüz Play Store'da değil; kurulum sırasında \"bilinmeyen kaynaklara izin ver\" onayı gerekir."
   },
   "checkIn": {
     "title": "Salon Girişi",

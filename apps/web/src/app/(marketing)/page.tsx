@@ -1,6 +1,7 @@
 import { auth } from '@/lib/auth';
 import { siteConfig } from '@/lib/site-config';
 import { ReceptionDownloadPromo } from '@/components/reception/reception-download-promo';
+import { MobileDownloadPromo } from '@/components/reception/mobile-download-promo';
 import {
   MarketingHeroScene,
   MarketingReveal,
@@ -109,6 +110,8 @@ export default async function ShowcaseHomePage() {
       </section>
 
       <ReceptionDownloadPromo variant="marketing" />
+
+      <MobileDownloadPromo variant="marketing" />
 
       <section id="why-sgms" className="mx-auto max-w-6xl px-4 py-6 sm:px-5 sm:py-8 lg:px-8">
         <MarketingReveal variant="scale-in">

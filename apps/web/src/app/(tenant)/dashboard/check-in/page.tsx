@@ -3,6 +3,7 @@ import { DeviceManagementPanel } from '@/components/device-management-panel';
 import { ContextualHelpButton } from '@/components/help/contextual-help-button';
 import { ManualCheckInForm } from '@/components/manual-check-in-form';
 import { ReceptionDownloadPromo } from '@/components/reception/reception-download-promo';
+import { MobileDownloadPromo } from '@/components/reception/mobile-download-promo';
 import { UserAvatar } from '@/components/user-avatar';
 import { auth } from '@/lib/auth';
 import { intlLocaleFor } from '@/lib/format-locale';
@@ -84,6 +85,8 @@ export default async function CheckInDashboardPage() {
       </div>
 
       <ReceptionDownloadPromo variant="card" />
+
+      <MobileDownloadPromo variant="card" />
 
       <section className="grid gap-4 sm:grid-cols-3">
         <div className="card p-5">

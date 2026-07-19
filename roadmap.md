@@ -715,7 +715,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ---
 
-## 🟡 Faz 19 — SGMS Masaüstü Yeniden Yapılandırma (Öncelik: P1) — 19.1/19.3 ✅, 19.2/19.4 kısmi tamamlandı 2026-07-19
+## 🟡 Faz 19 — SGMS Masaüstü Yeniden Yapılandırma (Öncelik: P1) — 19.1/19.3 ✅ (v0.6.0 yayınlandı), 19.2/19.4 kısmi — 2026-07-19
 
 > **Kullanıcı talebi (2026-07-19):** *"Masaüstü uygulamayı da baştan yazmalıyız çünkü hem çok eski kaldı hem de hiç modern değil. Logo hala başlat çubuğunda ve masaüstünde farklı görünüyor, uygulama logosu görünmüyor. Hem de tamamen otomatik güncelleme alabilecek şekilde yapılandırmalıyız. Online ve offline çalışmak durumunda."*
 >
@@ -738,13 +738,14 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 **Kabul kriteri:** ✅ tema geçişi çalışıyor ve kalıcı · ✅ bağlantı/kuyruk rozeti görünür · ⚠️ tam görsel yeniden tasarım kapsam dışı bırakıldı (yukarıya bkz.)
 
-### 19.3 Otomatik güncelleme — ✅ 2026-07-19 kapatıldı (kod tamam, build doğrulandı; uçtan uca gerçek release testi henüz yapılmadı)
+### 19.3 Otomatik güncelleme — ✅ 2026-07-19 kapatıldı (v0.6.0 gerçek GitHub Release olarak yayınlandı)
 - [x] `electron-updater` entegrasyonu — `provider: github` (`owner: RealMrNovember, repo: SGMS`), `src/main/auto-updater.ts`: 10sn gecikme + 4 saatte bir kontrol
 - [x] `package.json`: `perMachine: false` (sessiz/silent güncelleme için elevasyon istemeyen per-user kurulum ön koşulu), `allowElevation` kaldırıldı, yeni `release` script'i (`electron-builder --win --publish always`)
 - [x] Sessiz arka plan indirme + `TitleBar`'da "Güncelleme hazır · yeniden başlat" rozeti (kullanıcı tıklayınca `installUpdateNow` IPC'si tetikleniyor); tıklanmazsa bir sonraki normal kapanışta devreye giriyor
-- [ ] Web sitesindeki "Windows İndir" linkinin GitHub Releases `latest` uç noktasına bağlanması — **henüz yapılmadı**, ayrı bir web görevi (muhtemelen Faz 20.3'teki mobil indirme sayfasıyla birlikte ele alınmalı)
+- [x] Web sitesindeki indirme linki artık GitHub Releases'e işaret ediyor (`lib/reception-desktop.ts` → `releases/download/v{version}/{fileName}`); versiyon her release'te elle güncellenir (GitHub'ın `/releases/latest/download/` deseni sabit dosya adı gerektirdiği için, artifact adı versiyonlu olduğundan kullanılamadı)
+- [x] **v0.6.0 gerçekten build edilip GitHub Releases'e yayınlandı** (`gh release view v0.6.0` → `isDraft: false`, `SGMS-Resepsiyon-0.6.0-Setup.exe` + `latest.yml` + blockmap yüklü) — büyük dosya yüklemesi `electron-builder --publish`'in kendi yükleyicisinde iki kez `ECONNRESET` ile koptu, `gh release upload` ile tamamlandı
 
-**Kabul kriteri:** ⚠️ Gerçek bir GitHub Release yayınlanıp çalışan bir kopyanın otomatik güncellendiği uçtan uca henüz test edilmedi — bunun için ilk `pnpm release` çalıştırılıp gerçek bir sürüm etiketiyle doğrulanmalı.
+**Kabul kriteri:** ✅ v0.6.0 GitHub Releases'te yayında ve `latest.yml` electron-updater'ın okuyacağı formatta mevcut. ⚠️ Otomatik güncellemenin **çalışan bir v0.5.0 kopyasından** gerçekten v0.6.0'a geçtiği uçtan uca henüz gözlemlenmedi (bir sonraki sürümde doğrulanabilir).
 
 ### 19.4 Offline-first mimari — 🟡 kısmi (yalnızca check-in kapsamında, bilinçli olarak dar tutuldu)
 - [x] Yerel kalıcı kuyruk — `electron-store` tabanlı `src/main/offline-queue.ts`: `enqueueCheckIn`, `flushQueue`, `getQueueStatus`, `onQueueStatusChange`, `MAX_ATTEMPTS=20`
@@ -762,37 +763,38 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ---
 
-## 🔄 Faz 20 — SGMS Mobil Uygulama (React Native) (Öncelik: P1) — yeni, 2026-07-19 eklendi
+## 🟡 Faz 20 — SGMS Mobil Uygulama (React Native) (Öncelik: P1) — MVP yayınlandı (v0.1.0), 2026-07-19
 
-> **Kullanıcı talebi (2026-07-19):** *"Mobil uygulama hiç yazmadık ama şu süreçte imzasız apk dosyası yazabiliriz ve sitemiz içerisinden direk indirme linki koyabiliriz."*
+> **Kullanıcı talebi (2026-07-19, ilk plan):** *"Mobil uygulama hiç yazmadık ama şu süreçte imzasız apk dosyası yazabiliriz ve sitemiz içerisinden direk indirme linki koyabiliriz."*
+> **Kullanıcı talebi (2026-07-19, uygulama günü):** *"Panelde desktop app'in olduğu yere android app de eklememiz lazım... showroom sayfasına da eklememiz lazım... Desktop app ve mobil app'in güncel ve çalışır olduklarına emin ol ve yayınla."* — kapsam netleştirildi: **şimdi minimal MVP** (giriş + QR check-in), diğer özellikler bir sonraki sürüme.
 >
-> **Karar (kullanıcı onaylı):** React Native ile sıfırdan native bir uygulama — Capacitor/WebView sarmalama yerine gerçek native bileşenler (kamera QR tarayıcı, push bildirim, gelecekte widget) için. İlk sürüm **yalnızca Android**, **imzasız APK** olarak `sgms.cicibyte.com` üzerinden doğrudan indirme linkiyle dağıtılır — henüz Play Store süreci yok. Backend zaten hazır: API v1, Bearer token + OpenAPI 3.1 ile (Faz 7) — mobil için hiçbir yeni sunucu ucu gerekmiyor.
+> **Karar (kullanıcı onaylı):** React Native (Expo) ile sıfırdan native bir uygulama. İlk sürüm **yalnızca Android**, **imzasız APK** olarak GitHub Releases üzerinden doğrudan indirme linkiyle dağıtılır. Backend zaten hazır: API v1, Bearer token (Faz 7) — mobil için hiçbir yeni sunucu ucu gerekmedi.
 >
-> **Senaryo:** Bir sporcu, salon sahibinin WhatsApp'tan gönderdiği indirme linkine tıklar, "bilinmeyen kaynaklardan yükleme"yi onaylar, APK'yı kurar. E-posta/parolasıyla giriş yapar, telefonunun kilit ekranından QR kodunu turnikeye okutup salona girer, PT'sinden gelen mesajı okur, bugünkü antrenman programını ve geçmiş ölçümlerini görüntüler.
+> **Kritik toolchain kararı — `apps/mobile` pnpm workspace'inin DIŞINDA, kendi `npm`/`package-lock.json`'ıyla yönetiliyor.** Sebep: pnpm'in peer-dependency hash'li `.pnpm/<paket>@<peers>/` klasör adları (ör. `expo-modules-core@57.0.6_react-native@0.86.0_@babel+core@7.29.7_...`) Android/CMake native build'lerinin (`expo-modules-core` prefab adımı) ürettiği dosya yollarıyla birleşince Windows'un 260 karakterlik `MAX_PATH` sınırını aşıyor (`CreateProcess error=2` ile sessizce başarısız oluyor — dosya gerçekten var ama JVM'in native process başlatıcısı onu bulamıyor). Windows'ta `LongPathsEnabled` registry ayarı bir sistem ayarı değişikliği olduğu için otomatik yapılmadı; bunun yerine `apps/mobile`'ı `pnpm-workspace.yaml`'da `!apps/mobile` ile hariç tutup düz (flat, hash'siz) `npm install` kullanmak native build'i çalışır hale getirdi. **Yeni katkıda bulunanlar için:** `apps/mobile`'da bağımlılık eklerken kök dizinden `pnpm add` DEĞİL, `apps/mobile` içinden `npm install <paket>` çalıştırılmalı.
 
-### 20.1 Proje iskeleti ve kimlik doğrulama
-- [ ] `apps/mobile` — Expo (managed workflow, EAS Build ile yerel Android SDK kurulumu gerekmeden bulut üzerinden APK üretimi) veya bare React Native CLI kararı verilir; imzasız APK hedefi için **Expo + EAS Build (yerel/development profili)** önerilir — Android Studio/SDK kurulum yükü olmadan hızlı iterasyon sağlar
-- [ ] API v1 Bearer token girişi (`POST /api/v1/auth/login`, mevcut resepsiyon uygulamasındaki `api-client.ts` deseniyle tutarlı), token güvenli depoda (`expo-secure-store`) saklanır
-- [ ] Çoklu dil desteği (mevcut 6 dilin mobil karşılığı — aynı `messages/*.json` çevirilerinden faydalanılabilir)
+### 20.1 Proje iskeleti ve kimlik doğrulama — ✅ 2026-07-19
+- [x] `apps/mobile` — Expo (SDK 57, managed workflow), yerel Android SDK + JDK 17 ile `expo prebuild` + `gradlew assembleRelease` (EAS Build kullanılmadı — bu makinede zaten tam bir Android SDK/NDK kurulu olduğu için buluta ihtiyaç duyulmadı)
+- [x] API v1 Bearer token girişi (`POST /api/v1/auth/login`, `scope: 'athlete'`) — token `expo-secure-store` ile güvenli depoda saklanıyor (`src/lib/api.ts`, `src/lib/storage.ts`)
+- [ ] Çoklu dil desteği — **yapılmadı**, MVP tek dilde (Türkçe) sabit metinlerle; sonraki sürümde `next-intl` messages'a eşdeğer bir RN i18n çözümü eklenmeli
 
-### 20.2 Temel sporcu akışları — `/athlete` web portalının native karşılığı
-- [ ] QR check-in ekranı — mevcut check-in QR token formatıyla (Faz 10, HMAC imzalı, Faz 36.11'de tek-kullanımlık hale getirildi) uyumlu, kamera izni + QR üretimi (statik/döner kod, sunucu tarafı mantık değişmez)
-- [ ] Antrenman/beslenme programları görüntüleme (salt okunur, mevcut `TrainingProgram` API'si)
-- [ ] Ölçüm geçmişi görüntüleme + yeni ölçüm ekleme
-- [ ] PT ile mesajlaşma (mevcut `DirectMessage` API'si, gerçek zamanlı için Soketi/polling — resepsiyon uygulamasındaki `pusher-client.ts` deseni mobile taşınır)
+### 20.2 Temel sporcu akışları — `/athlete` web portalının native karşılığı — 🟡 yalnızca QR check-in (MVP kapsamı)
+- [x] QR check-in ekranı — **sporcunun scan ETMEDİĞİ, telefonun QR kodu GÖSTERDİĞİ** akış (web portalındaki `CheckInQrPanel` ile birebir aynı sözleşme: `GET /api/v1/check-in/qr`, 4 dakikada bir otomatik yenileme, `react-native-qrcode-svg` ile render) — kamera/tarama gerekmiyor, bu da MVP'yi önemli ölçüde basitleştirdi
+- [ ] Antrenman/beslenme programları görüntüleme — **ertelendi**, sonraki sürüm
+- [ ] Ölçüm geçmişi görüntüleme + yeni ölçüm ekleme — **ertelendi**, sonraki sürüm
+- [ ] PT ile mesajlaşma — **ertelendi**, sonraki sürüm
 
-### 20.3 İmzasız APK dağıtım hattı
-- [ ] EAS Build (ya da yerel Gradle) ile her sürümde imzasız/debug-signed bir `.apk` üretimi
-- [ ] `sgms.cicibyte.com` üzerinde bir indirme sayfası/linki (mevcut resepsiyon `.exe` indirme linkiyle aynı desen — GitHub Releases'e yüklenip web sitesinden bağlanır, bkz. Faz 19.3)
-- [ ] Kurulum sonrası "bilinmeyen kaynak" uyarısını azaltmak için web sayfasında kısa bir kurulum rehberi (ekran görüntülü)
+### 20.3 İmzasız APK dağıtım hattı — ✅ 2026-07-19
+- [x] Yerel Gradle ile imzasız `.apk` üretimi (`gradlew assembleRelease`, tüm ABI'ler tek APK'da — 72 MB); artifact adı: `SGMS-Sporcu-0.1.0.apk`
+- [x] GitHub Releases'e yüklendi (`mobile-v0.1.0` tag'i, desktop'tan ayrı bir tag namespace'i) ve web sitesinden bağlandı: showroom/marketing sayfasında yeni `#mobile-athlete` bölümü (`MobileDownloadPromo` bileşeni, `ReceptionDownloadPromo` ile aynı desen) + tenant dashboard panelinde ve check-in sayfasında masaüstü kartının hemen yanında bir Android kartı — **giriş gerektirmeden** (showroom herkese açık)
+- [ ] Kurulum sonrası "bilinmeyen kaynak" uyarısı için ekran görüntülü rehber — **yapılmadı**, şimdilik yalnızca kısa bir metin uyarısı (`unsignedNotice` i18n anahtarı) var
 
-**Kabul kriteri:** Bir sporcu web sitesinden APK'yı indirip kurabiliyor, giriş yapabiliyor, QR ile check-in yapabiliyor, ölçümlerini görebiliyor, PT'siyle mesajlaşabiliyor.
+**Kabul kriteri:** ✅ Sporcu web sitesinden (showroom, giriş gerektirmeden) veya panelden APK'yı indirip kurabiliyor, sporcu hesabıyla giriş yapabiliyor, otomatik yenilenen QR koduyla check-in yapabiliyor. ⚠️ Programlar/ölçümler/mesajlaşma bir sonraki sürüme bırakıldı — bu bilinçli bir MVP kapsam kararı, eksiklik değil.
 
-**Ertelendi (v2 — Play Store süreci netleşince):** Push bildirim altyapısı (imzasız/yayınlanmamış bir uygulamada push için Firebase/APNs sertifikasyon riski yüksek — bu, gerçek bir Play Store/imzalı release'e kadar bekletiliyor), widget, iOS sürümü.
+**Ertelendi (v2):** Antrenman programı/ölçüm/mesajlaşma ekranları, çoklu dil, Play Store süreci + push bildirim (imzasız bir uygulamada Firebase/APNs sertifikasyon riski yüksek), iOS sürümü, EAS Build'e geçiş (CI'da otomatik APK üretimi için gerekebilir).
 
-**Dosyalar (öngörülen):** yeni `apps/mobile/` (Expo projesi), root `package.json`'a `mobile:dev`/`mobile:build` script'leri
+**Dosyalar:** `apps/mobile/` (yeni, Expo projesi — kendi `package-lock.json`'ı ile, pnpm workspace dışında), `pnpm-workspace.yaml` (`!apps/mobile` hariç tutma), `apps/web/src/lib/mobile-app.ts` (yeni), `apps/web/src/components/reception/mobile-download-promo.tsx` (yeni), `apps/web/src/app/(marketing)/page.tsx` + `marketing-header.tsx` + `(tenant)/dashboard/page.tsx` + `(tenant)/dashboard/check-in/page.tsx` (indirme bölümleri), `messages/*.json` (6 dil, `mobileAthlete` + `marketing.nav.mobileAthlete` anahtarları)
 
-**Bağımlılık:** yok — API v1 zaten hazır (Faz 7), bu faz web/masaüstünden tamamen bağımsız başlatılabilir
+**Bağımlılık:** yok — API v1 zaten hazır (Faz 7), bu faz web/masaüstünden tamamen bağımsız başlatıldı
 
 ---
 
@@ -1550,11 +1552,13 @@ gerçekten çalıştırıldı ve bu süreçte **iki kritik, canlıda aktif hata*
 `components/two-factor-setup-panel.tsx`, `playwright.config.ts`, `e2e/check-in.spec.ts`,
 `e2e/cash-register.spec.ts`, `e2e/helpers/register-org.ts`, `.gitignore`
 
-Şu anda paralel çalışılıyor (2026-07-19, iki tamamen ayrı uygulama — dosya bazında sıfır çakışma):
-  Faz 19   SGMS Masaüstü yeniden yapılandırma (Electron)  ← bu oturum (Claude) — ikon kök neden
-           düzeltmesi, arayüz modernizasyonu, electron-updater, offline kuyruk
-  Faz 20   SGMS Mobil Uygulama (React Native, apps/mobile) ← Cursor'da — proje iskeleti,
-           QR check-in, imzasız APK dağıtım hattı
+2026-07-19 içinde tamamlanan (plan Cursor'a Faz 20'yi vermeyi öngörmüştü, ama Cursor o gün
+başka işlerle meşgul olduğu için kullanıcı "sen devam et" dedi — ikisi de Claude tarafından
+aynı oturumda yapıldı):
+  Faz 19   SGMS Masaüstü yeniden yapılandırma (Electron) — ikon kök neden düzeltmesi, tema,
+           electron-updater, offline kuyruk; v0.6.0 GitHub Releases'e yayınlandı
+  Faz 20   SGMS Mobil Uygulama (React Native/Expo, apps/mobile) — MVP (giriş + QR check-in),
+           yerel Android SDK ile imzasız APK, v0.1.0 GitHub Releases'e yayınlandı
 
 Sıradaki (Faz 36 sonrası — profesyonel değerlendirme, P0 en önce):
   Faz 32     Ticarileştirme: paket + ek kapasite satışı          ← P0, gelir modeli (kullanıcı onayı gerekli)

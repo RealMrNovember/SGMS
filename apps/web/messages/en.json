@@ -731,7 +731,8 @@
       "trial": "14-Day Trial",
       "loginShort": "Login",
       "trialShort": "14 Days",
-      "receptionDesktop": "Reception App"
+      "receptionDesktop": "Reception App",
+      "mobileAthlete": "Athlete App"
     },
     "hero": {
       "kicker": "Digital Gym Operating System",
@@ -1137,6 +1138,23 @@
     "loginHintText": "Download the Windows app so turnstile events reach reception even when the browser is closed. Sign in with your staff account after install.",
     "checkInHint": "Install on the reception PC; turnstile events arrive as Windows notifications without keeping the browser open.",
     "footerLink": "SGMS Reception (Windows)"
+  },
+  "mobileAthlete": {
+    "badge": "Android Mobile App",
+    "title": "SGMS Athlete",
+    "subtitle": "Athletes check in at the turnstile in seconds with a QR code on their phone; entries show up in your dashboard instantly.",
+    "download": "Download for Android (v{version})",
+    "size": "{size} · {platform}",
+    "features": {
+      "qr": "Auto-refreshing QR check-in code",
+      "fast": "Fast, passwordless return sign-in",
+      "light": "Lightweight, low data usage"
+    },
+    "loginHint": "Athlete mobile app",
+    "loginHintText": "Download the Android app so athletes can check in with a QR code. Sign in with your athlete account after install.",
+    "checkInHint": "Athletes scan their phone's QR code at the turnstile to check in within seconds.",
+    "footerLink": "SGMS Athlete (Android)",
+    "unsignedNotice": "Not yet on Google Play — installing requires allowing \"unknown sources\" on the device."
   },
   "checkIn": {
     "title": "Gym Check-in",

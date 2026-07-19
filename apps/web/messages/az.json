@@ -700,7 +700,8 @@
       "trial": "14-Day Trial",
       "loginShort": "Login",
       "trialShort": "14 Days",
-      "receptionDesktop": "Resepşn Tətbiqi"
+      "receptionDesktop": "Resepşn Tətbiqi",
+      "mobileAthlete": "İdmançı Tətbiqi"
     },
     "hero": {
       "kicker": "Digital Gym Operating System",
@@ -1103,6 +1104,23 @@
     "loginHintText": "Brauzer bağlı olsa belə qapı hadisələrinin resepşnə çatması üçün Windows tətbiqini yükləyin. Quraşdırdıqdan sonra personal hesabınızla daxil olun.",
     "checkInHint": "Resepşn kompüterinə quraşdırın; qapı hadisələri brauzer açıq olmadan Windows bildirişi kimi gəlir.",
     "footerLink": "SGMS Reception (Windows)"
+  },
+  "mobileAthlete": {
+    "badge": "Android Mobil Tətbiq",
+    "title": "SGMS İdmançı",
+    "subtitle": "İdmançılar telefonlarındakı QR kodla saniyələr içində qapıdan keçir; giriş məlumatları panelinizdə dərhal görünür.",
+    "download": "Android üçün yüklə (v{version})",
+    "size": "{size} · {platform}",
+    "features": {
+      "qr": "Avtomatik yenilənən QR check-in kodu",
+      "fast": "Parolsuz sürətli yenidən giriş",
+      "light": "Yüngül, az data istifadə edən tətbiq"
+    },
+    "loginHint": "İdmançı mobil tətbiqi",
+    "loginHintText": "İdmançılarınızın QR kodla giriş edə bilməsi üçün Android tətbiqini yükləyin və idmançı hesabınızla daxil olun.",
+    "checkInHint": "İdmançılar telefonlarındakı QR kodu qapıya oxudaraq saniyələr içində daxil olur.",
+    "footerLink": "SGMS İdmançı (Android)",
+    "unsignedNotice": "Hələ Google Play-də deyil; quraşdırma zamanı cihazda \"naməlum mənbələr\"ə icazə vermək lazımdır."
   },
   "checkIn": {
     "title": "Zala giriş",

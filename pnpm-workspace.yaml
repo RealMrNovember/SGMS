@@ -1,3 +1,7 @@
 packages:
   - "apps/*"
+  # apps/mobile uses npm directly (own package-lock.json) — pnpm's peer-dependency-hashed
+  # .pnpm/<name>@<peers>/ folder names exceed Windows' 260-char MAX_PATH during Android/CMake
+  # native builds (expo-modules-core, react-native-svg prefab steps).
+  - "!apps/mobile"
   - "packages/*"
