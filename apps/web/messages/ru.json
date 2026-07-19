@@ -52,7 +52,8 @@
       "analytics": "Аналитика"
     },
     "paymentPlans": "Планы платежей",
-    "twoFactor": "Безопасность аккаунта (2FA)"
+    "twoFactor": "Безопасность аккаунта (2FA)",
+    "leads": "Лиды"
   },
   "auth": {
     "login": "Войти",
@@ -411,6 +412,56 @@
       "saving": "Сохранение…",
       "submit": "Создать план"
     }
+  },
+  "leads": {
+    "backToOverview": "← Обзор",
+    "title": "Потенциальные клиенты",
+    "subtitle": "Отслеживайте посетителей, которые не оформили абонемент, планируйте повторные контакты и переводите их в участники в один клик.",
+    "noPermission": "Для отслеживания лидов требуется роль OWNER, ADMIN или STAFF.",
+    "addTitle": "Новый лид",
+    "name": "Полное имя",
+    "phone": "Телефон",
+    "email": "Эл. почта",
+    "source": "Источник",
+    "interestedPlan": "Интересующий план",
+    "notes": "Заметки",
+    "submit": "Добавить лида",
+    "saving": "Добавление…",
+    "sources": {
+      "WALK_IN": "Пришёл сам",
+      "REFERRAL": "Рекомендация",
+      "SOCIAL_MEDIA": "Соцсети",
+      "WEBSITE": "Сайт",
+      "OTHER": "Другое"
+    },
+    "columns": {
+      "NEW": "Новый",
+      "CONTACTED": "Связались",
+      "FOLLOW_UP_SCHEDULED": "Повтор запланирован",
+      "CLOSED": "Стал участником / Потерян"
+    },
+    "empty": "На этом этапе лидов нет.",
+    "markContacted": "Отметить связь",
+    "markLost": "Отметить потерянным",
+    "convert": "Перевести в участники",
+    "converting": "Перевод…",
+    "scheduleFollowUp": "Запланировать повтор",
+    "followUpScheduledAt": "Запланированная дата",
+    "followUpMethod": "Способ",
+    "methods": {
+      "CALL": "Звонок",
+      "MESSAGE": "Сообщение",
+      "EMAIL": "Эл. почта"
+    },
+    "followUpNotes": "Заметки",
+    "scheduleSubmit": "Запланировать",
+    "scheduling": "Планирование…",
+    "completeFollowUp": "Отметить выполненным",
+    "overdue": "Просрочено",
+    "dueToday": "Сегодня",
+    "convertedBadge": "Стал участником",
+    "lostBadge": "Потерян",
+    "cancel": "Отмена"
   },
   "programs": {
     "backToOverview": "← Обзор",

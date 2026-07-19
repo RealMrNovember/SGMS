@@ -52,7 +52,8 @@
       "analytics": "Analytics"
     },
     "paymentPlans": "Payment Plans",
-    "twoFactor": "Account Security (2FA)"
+    "twoFactor": "Account Security (2FA)",
+    "leads": "Leads"
   },
   "auth": {
     "login": "Sign In",
@@ -411,6 +412,56 @@
       "saving": "Saving…",
       "submit": "Create Plan"
     }
+  },
+  "leads": {
+    "backToOverview": "← Overview",
+    "title": "Leads",
+    "subtitle": "Track prospects who toured but didn't sign up, schedule follow-ups, and convert them to members in one click.",
+    "noPermission": "OWNER, ADMIN, or STAFF role required for lead tracking.",
+    "addTitle": "New Lead",
+    "name": "Full Name",
+    "phone": "Phone",
+    "email": "Email",
+    "source": "Source",
+    "interestedPlan": "Interested Plan",
+    "notes": "Notes",
+    "submit": "Add Lead",
+    "saving": "Adding…",
+    "sources": {
+      "WALK_IN": "Walk-in",
+      "REFERRAL": "Referral",
+      "SOCIAL_MEDIA": "Social Media",
+      "WEBSITE": "Website",
+      "OTHER": "Other"
+    },
+    "columns": {
+      "NEW": "New",
+      "CONTACTED": "Contacted",
+      "FOLLOW_UP_SCHEDULED": "Follow-up Scheduled",
+      "CLOSED": "Converted / Lost"
+    },
+    "empty": "No leads at this stage.",
+    "markContacted": "Mark contacted",
+    "markLost": "Mark lost",
+    "convert": "Convert to member",
+    "converting": "Converting…",
+    "scheduleFollowUp": "Schedule follow-up",
+    "followUpScheduledAt": "Scheduled date",
+    "followUpMethod": "Method",
+    "methods": {
+      "CALL": "Call",
+      "MESSAGE": "Message",
+      "EMAIL": "Email"
+    },
+    "followUpNotes": "Notes",
+    "scheduleSubmit": "Schedule",
+    "scheduling": "Scheduling…",
+    "completeFollowUp": "Mark complete",
+    "overdue": "Overdue",
+    "dueToday": "Today",
+    "convertedBadge": "Converted",
+    "lostBadge": "Lost",
+    "cancel": "Cancel"
   },
   "programs": {
     "backToOverview": "← Overview",

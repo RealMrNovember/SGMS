@@ -52,7 +52,8 @@
       "analytics": "Análisis"
     },
     "paymentPlans": "Planes de pago",
-    "twoFactor": "Seguridad de la cuenta (2FA)"
+    "twoFactor": "Seguridad de la cuenta (2FA)",
+    "leads": "Candidatos"
   },
   "auth": {
     "login": "Iniciar sesión",
@@ -411,6 +412,56 @@
       "saving": "Guardando…",
       "submit": "Crear plan"
     }
+  },
+  "leads": {
+    "backToOverview": "← Resumen",
+    "title": "Candidatos",
+    "subtitle": "Haga seguimiento a quienes visitaron el gimnasio sin inscribirse, planifique contactos y conviértalos en socios con un clic.",
+    "noPermission": "Se requiere rol OWNER, ADMIN o STAFF para el seguimiento de candidatos.",
+    "addTitle": "Nuevo candidato",
+    "name": "Nombre completo",
+    "phone": "Teléfono",
+    "email": "Correo electrónico",
+    "source": "Origen",
+    "interestedPlan": "Plan de interés",
+    "notes": "Notas",
+    "submit": "Añadir candidato",
+    "saving": "Añadiendo…",
+    "sources": {
+      "WALK_IN": "Visita espontánea",
+      "REFERRAL": "Referencia",
+      "SOCIAL_MEDIA": "Redes sociales",
+      "WEBSITE": "Sitio web",
+      "OTHER": "Otro"
+    },
+    "columns": {
+      "NEW": "Nuevo",
+      "CONTACTED": "Contactado",
+      "FOLLOW_UP_SCHEDULED": "Seguimiento planificado",
+      "CLOSED": "Convertido / Perdido"
+    },
+    "empty": "No hay candidatos en esta etapa.",
+    "markContacted": "Marcar contactado",
+    "markLost": "Marcar perdido",
+    "convert": "Convertir en socio",
+    "converting": "Convirtiendo…",
+    "scheduleFollowUp": "Planificar seguimiento",
+    "followUpScheduledAt": "Fecha planificada",
+    "followUpMethod": "Método",
+    "methods": {
+      "CALL": "Llamada",
+      "MESSAGE": "Mensaje",
+      "EMAIL": "Correo"
+    },
+    "followUpNotes": "Notas",
+    "scheduleSubmit": "Planificar",
+    "scheduling": "Planificando…",
+    "completeFollowUp": "Marcar completado",
+    "overdue": "Atrasado",
+    "dueToday": "Hoy",
+    "convertedBadge": "Convertido",
+    "lostBadge": "Perdido",
+    "cancel": "Cancelar"
   },
   "programs": {
     "backToOverview": "← Resumen",

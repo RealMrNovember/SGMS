@@ -52,7 +52,8 @@
       "analytics": "Analitika"
     },
     "paymentPlans": "Ödəniş Planları",
-    "twoFactor": "Hesab Təhlükəsizliyi (2FA)"
+    "twoFactor": "Hesab Təhlükəsizliyi (2FA)",
+    "leads": "Namizədlər"
   },
   "auth": {
     "login": "Daxil ol",
@@ -411,6 +412,56 @@
       "saving": "Saxlanılır…",
       "submit": "Plan yarat"
     }
+  },
+  "leads": {
+    "backToOverview": "← İcmal",
+    "title": "Namizədlər",
+    "subtitle": "Salonu gəzib qeydiyyatdan keçməyən namizədləri izləyin, geri dönüş planlaşdırın və bir kliklə üzvə çevirin.",
+    "noPermission": "Namizəd izləmə üçün OWNER, ADMIN və ya STAFF rolu lazımdır.",
+    "addTitle": "Yeni namizəd",
+    "name": "Ad Soyad",
+    "phone": "Telefon",
+    "email": "E-poçt",
+    "source": "Mənbə",
+    "interestedPlan": "Maraqlandığı paket",
+    "notes": "Qeyd",
+    "submit": "Namizəd əlavə et",
+    "saving": "Əlavə edilir…",
+    "sources": {
+      "WALK_IN": "Özü gəldi",
+      "REFERRAL": "Tövsiyə",
+      "SOCIAL_MEDIA": "Sosial media",
+      "WEBSITE": "Veb sayt",
+      "OTHER": "Digər"
+    },
+    "columns": {
+      "NEW": "Yeni",
+      "CONTACTED": "Əlaqə saxlanıldı",
+      "FOLLOW_UP_SCHEDULED": "Təqib planlaşdırıldı",
+      "CLOSED": "Üzv oldu / İtirildi"
+    },
+    "empty": "Bu mərhələdə namizəd yoxdur.",
+    "markContacted": "Əlaqə saxlanıldı işarələ",
+    "markLost": "İtirildi işarələ",
+    "convert": "Üzvə çevir",
+    "converting": "Çevrilir…",
+    "scheduleFollowUp": "Təqib planla",
+    "followUpScheduledAt": "Planlaşdırılan tarix",
+    "followUpMethod": "Üsul",
+    "methods": {
+      "CALL": "Zəng",
+      "MESSAGE": "Mesaj",
+      "EMAIL": "E-poçt"
+    },
+    "followUpNotes": "Qeyd",
+    "scheduleSubmit": "Planla",
+    "scheduling": "Planlaşdırılır…",
+    "completeFollowUp": "Tamamlandı işarələ",
+    "overdue": "Gecikmiş",
+    "dueToday": "Bu gün",
+    "convertedBadge": "Üzv oldu",
+    "lostBadge": "İtirildi",
+    "cancel": "İmtina"
   },
   "programs": {
     "backToOverview": "← İcmal",

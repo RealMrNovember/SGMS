@@ -26,6 +26,7 @@ import {
   Settings,
   ShieldCheck,
   Sparkles,
+  UserPlus,
   Users,
   Wallet,
 } from 'lucide-react';
@@ -76,6 +77,9 @@ export default async function TenantDashboardLayout({ children }: { children: Re
 
   const canViewReports = session.user.role === 'OWNER' || session.user.role === 'ADMIN';
   const canViewEnterprise = session.user.isHierarchyMember === true;
+  // Aday takibi resepsiyon/satış görevi — TRAINER kapsam dışı (Faz 17.0, bkz. Faz 36.5 gerekçesi).
+  const canManageLeads =
+    session.user.role === 'OWNER' || session.user.role === 'ADMIN' || session.user.role === 'STAFF';
 
   const comingSoonItems = locked
     ? []
@@ -98,6 +102,7 @@ export default async function TenantDashboardLayout({ children }: { children: Re
           items: [
             { href: '/dashboard/check-in', label: t('checkIn'), icon: <ScanLine /> },
             { href: '/dashboard/members', label: t('members'), icon: <Users /> },
+            ...(canManageLeads ? [{ href: '/dashboard/leads', label: t('leads'), icon: <UserPlus /> }] : []),
             { href: '/dashboard/pos', label: t('pos'), icon: <CreditCard /> },
             { href: '/dashboard/payment-plans', label: t('paymentPlans'), icon: <CalendarClock /> },
             { href: '/dashboard/messages', label: t('messages'), icon: <MessageSquare />, badge: unreadMessages },

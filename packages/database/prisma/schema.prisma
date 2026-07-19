@@ -150,6 +150,11 @@ enum AuditAction {
   STAFF_INVITE_ACCEPTED
   PROFORMA_SENT
   MEMBERSHIP_REMINDER_SENT
+  LEAD_CREATED
+  LEAD_STATUS_CHANGED
+  LEAD_CONVERTED
+  LEAD_FOLLOW_UP_SCHEDULED
+  LEAD_FOLLOW_UP_COMPLETED
 }
 
 enum HierarchyRole {
@@ -348,6 +353,9 @@ model User {
   ptSessionsCreated       PtSession[]              @relation("PtSessionCreatedBy")
   hierarchyMemberships    HierarchyMember[]
   notifications           Notification[]
+  assignedLeads           Lead[]                   @relation("LeadAssignedTo")
+  leadsCreated            Lead[]                   @relation("LeadCreatedBy")
+  leadFollowUpsCreated    LeadFollowUp[]
 
   @@index([status])
   @@index([isSuperAdmin])
@@ -699,6 +707,8 @@ model Organization {
   notifications           Notification[]
   gymAccessLogs           GymAccessLog[]
   gymMemberActivities     GymMemberActivity[]
+  leads                   Lead[]
+  leadFollowUps           LeadFollowUp[]
 
   @@index([status])
   @@index([centralLicenseStatus])
@@ -907,6 +917,7 @@ model GymMember {
   paymentIntents      PaymentIntent[]
   gymAccessLogs       GymAccessLog[]
   gymMemberActivities GymMemberActivity[]
+  convertedFromLead   Lead?               @relation("LeadConvertedToMember")
 
   @@unique([organizationId, nationalId])
   @@unique([organizationId, passportNumber])
@@ -1119,22 +1130,22 @@ model Expense {
 // ---------------------------------------------------------------------------
 
 model Transaction {
-  id                   String          @id @default(cuid())
-  organizationId       String          @map("organization_id")
-  gymMemberId          String          @map("gym_member_id")
-  expenseId            String?         @map("expense_id")
-  invoiceId            String?         @map("invoice_id")
-  gatewayId            String?         @map("gateway_id")
-  gatewayTransactionId String?         @map("gateway_transaction_id")
+  id                    String          @id @default(cuid())
+  organizationId        String          @map("organization_id")
+  gymMemberId           String          @map("gym_member_id")
+  expenseId             String?         @map("expense_id")
+  invoiceId             String?         @map("invoice_id")
+  gatewayId             String?         @map("gateway_id")
+  gatewayTransactionId  String?         @map("gateway_transaction_id")
   /// Kısmi/tam iade: bu kayıt hangi PAYMENT işleminin iadesi?
-  refundOfTransactionId String?        @map("refund_of_transaction_id")
-  amount               Decimal         @db.Decimal(10, 2)
-  currency             String          @default("TRY")
-  type                 TransactionType
-  paymentMethod        PaymentMethod   @map("payment_method")
-  reference            String?
-  notes                String?
-  createdById          String          @map("created_by_id")
+  refundOfTransactionId String?         @map("refund_of_transaction_id")
+  amount                Decimal         @db.Decimal(10, 2)
+  currency              String          @default("TRY")
+  type                  TransactionType
+  paymentMethod         PaymentMethod   @map("payment_method")
+  reference             String?
+  notes                 String?
+  createdById           String          @map("created_by_id")
 
   createdAt DateTime @default(now()) @map("created_at")
 
@@ -1514,4 +1525,86 @@ model GymMemberActivity {
   @@index([gymMemberId, type, activityAt])
   @@index([organizationId, gymMemberId, activityAt])
   @@map("gym_member_activities")
+}
+
+// ---------------------------------------------------------------------------
+// Lead / LeadFollowUp — potansiyel müşteri (satış öncesi) takibi (Faz 17.0).
+// Bir aday salonu gezip kayıt olmadan ayrıldığında burada tutulur; dönüşünce
+// tek tıkla gerçek bir GymMember'a çevrilir (veri tekrar girilmez).
+// ---------------------------------------------------------------------------
+
+enum LeadSource {
+  WALK_IN
+  REFERRAL
+  SOCIAL_MEDIA
+  WEBSITE
+  OTHER
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  FOLLOW_UP_SCHEDULED
+  CONVERTED
+  LOST
+}
+
+enum LeadFollowUpMethod {
+  CALL
+  MESSAGE
+  EMAIL
+}
+
+model Lead {
+  id                String     @id @default(cuid())
+  organizationId    String     @map("organization_id")
+  name              String
+  phone             String?
+  email             String?
+  source            LeadSource @default(WALK_IN)
+  interestedPlan    String?    @map("interested_plan")
+  status            LeadStatus @default(NEW)
+  notes             String?    @db.Text
+  assignedToId      String?    @map("assigned_to_id")
+  createdById       String     @map("created_by_id")
+  convertedMemberId String?    @unique @map("converted_member_id")
+  convertedAt       DateTime?  @map("converted_at")
+  lostAt            DateTime?  @map("lost_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  organization    Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  assignedTo      User?          @relation("LeadAssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
+  createdBy       User           @relation("LeadCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  convertedMember GymMember?     @relation("LeadConvertedToMember", fields: [convertedMemberId], references: [id], onDelete: SetNull)
+  followUps       LeadFollowUp[]
+
+  @@index([organizationId, status])
+  @@index([organizationId, assignedToId])
+  @@index([phone])
+  @@index([email])
+  @@map("leads")
+}
+
+model LeadFollowUp {
+  id             String             @id @default(cuid())
+  organizationId String             @map("organization_id")
+  leadId         String             @map("lead_id")
+  scheduledAt    DateTime           @map("scheduled_at")
+  method         LeadFollowUpMethod @default(CALL)
+  notes          String?            @db.Text
+  completedAt    DateTime?          @map("completed_at")
+  createdById    String             @map("created_by_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  lead         Lead         @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation(fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, scheduledAt])
+  @@index([leadId, scheduledAt])
+  @@map("lead_follow_ups")
 }

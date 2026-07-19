@@ -52,7 +52,8 @@
       "analytics": "Analiz"
     },
     "paymentPlans": "Ödeme Planları",
-    "twoFactor": "Hesap Güvenliği (2FA)"
+    "twoFactor": "Hesap Güvenliği (2FA)",
+    "leads": "Adaylar"
   },
   "auth": {
     "login": "Giriş Yap",
@@ -411,6 +412,56 @@
       "saving": "Kaydediliyor…",
       "submit": "Plan Oluştur"
     }
+  },
+  "leads": {
+    "backToOverview": "← Özet",
+    "title": "Potansiyel Müşteriler",
+    "subtitle": "Salonu gezip kayıt olmayan adayları takip edin, geri dönüş planlayın ve tek tıkla üyeye dönüştürün.",
+    "noPermission": "Aday takibi için OWNER, ADMIN veya STAFF yetkisi gerekir.",
+    "addTitle": "Yeni Aday",
+    "name": "Ad Soyad",
+    "phone": "Telefon",
+    "email": "E-posta",
+    "source": "Kaynak",
+    "interestedPlan": "İlgilendiği Paket",
+    "notes": "Not",
+    "submit": "Aday Ekle",
+    "saving": "Ekleniyor…",
+    "sources": {
+      "WALK_IN": "Yürüyerek geldi",
+      "REFERRAL": "Referans",
+      "SOCIAL_MEDIA": "Sosyal Medya",
+      "WEBSITE": "Web Sitesi",
+      "OTHER": "Diğer"
+    },
+    "columns": {
+      "NEW": "Yeni",
+      "CONTACTED": "İletişime Geçildi",
+      "FOLLOW_UP_SCHEDULED": "Takip Planlandı",
+      "CLOSED": "Üye Oldu / Kayıp"
+    },
+    "empty": "Bu aşamada aday yok.",
+    "markContacted": "İletişime geçildi",
+    "markLost": "Kayıp işaretle",
+    "convert": "Üyeye dönüştür",
+    "converting": "Dönüştürülüyor…",
+    "scheduleFollowUp": "Takip planla",
+    "followUpScheduledAt": "Planlanan tarih",
+    "followUpMethod": "Yöntem",
+    "methods": {
+      "CALL": "Arama",
+      "MESSAGE": "Mesaj",
+      "EMAIL": "E-posta"
+    },
+    "followUpNotes": "Not",
+    "scheduleSubmit": "Planla",
+    "scheduling": "Planlanıyor…",
+    "completeFollowUp": "Tamamlandı",
+    "overdue": "Gecikmiş",
+    "dueToday": "Bugün",
+    "convertedBadge": "Üye oldu",
+    "lostBadge": "Kayıp",
+    "cancel": "Vazgeç"
   },
   "programs": {
     "backToOverview": "← Özet",

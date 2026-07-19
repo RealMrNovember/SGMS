@@ -52,7 +52,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 14 | Demo Hesap Güvenliği & Master Admin Geçişi | 🔄 Devam ediyor | ~90% (Demo PT girişi sırada) |
 | 15 | Kimlik, Onboarding & Uyum Sertleştirme | ✅ Tamamlandı | ~95% (proaktif hatırlatma + 6 dil çevirisi kaldı) |
 | 16 | CiciByte Cloud Ticari Entegrasyonu (Ödeme, Referans/Komisyon, Release) | 🔄 Devam ediyor | ~90% (Platform Ödeme Ayarları paneli — iyzico/PayTR/EFT — 2026-07-19'da eklendi; gerçek anahtarlar bekleniyor) |
-| 17 | Üyelik Senaryoları & Ders/Sınıf Yönetimi | 🔄 Devam ediyor | ~5% (17.0 Lead takibi başlandı — 2026-07-19; 17.1–17.7 planlı) |
+| 17 | Üyelik Senaryoları & Ders/Sınıf Yönetimi | 🔄 Devam ediyor | ~12% (17.0 Lead takibi kapatıldı — 2026-07-19; 17.1–17.7 planlı) |
 | 18 | Uyumluluk & Sağlamlaştırma (2FA, GDPR, E2E, Invoice) | 🔄 Devam ediyor | ~40% (2FA + Playwright E2E tamamlandı — 2026-07-19; GDPR self-servis, vardiya, sağlık formu, Invoice uygulama kodu sırada) |
 | 19 | SGMS Masaüstü — Genişletme | 🔲 Gelecek Vizyon | 0% |
 | 20 | SGMS Mobil Uygulama | 🔲 Gelecek Vizyon | 0% |
@@ -626,10 +626,16 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 ### 17.0 Potansiyel Müşteri (Lead) Takibi — yeni, 2026-07-16 eklendi (pazar analizi — Gymie karşılaştırması)
 
 > **Senaryo:** Bir aday salonu gezer, fiyat teklifi alır ama o gün kayıt olmaz. Bugün SGMS'te bu kişi hiçbir yerde tutulmuyor — resepsiyon bir defter veya WhatsApp'tan hatırlamaya çalışıyor. Rakip ürünlerin (Gymie dahil) neredeyse tamamında bu bir çekirdek CRM özelliğidir; üyelik döngüsünün **en başındaki** adımdır, bu yüzden Faz 17'nin ilk maddesi olarak konumlandırıldı.
-- [ ] `Lead` modeli — `name`, `phone`, `email`, `source` (walk-in/referans/sosyal medya/web sitesi), `interestedPlan`, `status`: `NEW`/`CONTACTED`/`FOLLOW_UP_SCHEDULED`/`CONVERTED`/`LOST`, `assignedToId` (hangi resepsiyonist/satış temsilcisi takip ediyor)
-- [ ] `LeadFollowUp` — planlanan geri dönüş kaydı (`scheduledAt`, `method`: arama/mesaj/e-posta, `notes`, `completedAt`) — Faz 27 Bildirim Merkezi'yle entegre: takip zamanı geldiğinde ilgili personele hatırlatma gider
-- [ ] `/dashboard/leads` — kanban tarzı basit bir pipeline görünümü (Yeni → İletişime Geçildi → Takip Planlandı → Üye Oldu / Kayıp), her aday karta tek tıkla not/arama kaydı düşülebilir
-- [ ] Bir `Lead` üye olduğunda tek tıkla gerçek bir `GymMember` kaydına dönüştürülür (veri tekrar girilmez)
+>
+> **Durum:** ✅ *2026-07-19 kapatıldı.*
+
+- [x] `Lead` modeli — `name`, `phone`, `email`, `source` (`WALK_IN`/`REFERRAL`/`SOCIAL_MEDIA`/`WEBSITE`/`OTHER`), `interestedPlan`, `status`: `NEW`/`CONTACTED`/`FOLLOW_UP_SCHEDULED`/`CONVERTED`/`LOST`, `assignedToId` (hangi resepsiyonist/satış temsilcisi takip ediyor)
+- [x] `LeadFollowUp` — planlanan geri dönüş kaydı (`scheduledAt`, `method`: `CALL`/`MESSAGE`/`EMAIL`, `notes`, `completedAt`). Faz 27 Bildirim Merkezi'ne push entegrasyonu bilinçli olarak **kapsam dışı bırakıldı** (ayrı bir cron/queue altyapısı gerektirir) — bunun yerine gecikmiş/bugünkü takipler kanban kartında görsel olarak (kırmızı "Gecikmiş" rozeti) öne çıkarılıyor
+- [x] `/dashboard/leads` — kanban tarzı pipeline görünümü (Yeni → İletişime Geçildi → Takip Planlandı → Üye Oldu/Kayıp), her aday kartında not, takip planlama ve tek tıkla durum değişimi; OWNER/ADMIN/STAFF erişebilir, TRAINER kapsam dışı (bkz. Faz 36.5 gerekçesi)
+- [x] Bir `Lead` üye olduğunda tek tıkla gerçek bir `GymMember` kaydına dönüştürülür (ad/telefon/e-posta tekrar girilmez; adayın kaynağı üye notuna işlenir); üye limiti kontrolü (`assertWithinMemberLimit`) dönüşümde de uygulanıyor
+- [x] Kabul kriteri: karşılandı — aday kanban panelinde ilerletilebiliyor, takip planlanıp tamamlanabiliyor, tek tıkla üyeye dönüştürülüyor, tüm aksiyonlar audit log'a yazılıyor
+
+**Dosyalar:** `packages/database/prisma/schema.prisma` (Lead/LeadFollowUp), migration `20260719070000_add_lead_tracking`, `actions/leads.ts`, `app/(tenant)/dashboard/leads/page.tsx`, `components/leads/*`, `lib/admin/audit-labels.ts`, `dashboard/layout.tsx` (nav), messages (6 dil)
 
 ### 17.1 Üyelik dondurma/erteleme
 - [ ] `GymMemberStatus`'a `FROZEN` eklenir; `MembershipFreeze` modeli (`startDate`, `endDate`, `reason`: `MILITARY`/`MEDICAL`/`TRAVEL`/`OTHER`, `approvedById`)
@@ -1420,9 +1426,9 @@ Faz 36 tamamlandı (2026-07-19 canlıya alma denetimi — kullanıcı onaylı s�
     check-in debounce · davet pending/resend · üye limiti reaktivasyon ·
     proforma e-posta retry + Master Admin resend
 
-Şu anda paralel çalışılıyor (2026-07-19, çakışmayı önlemek için dosya bazında ayrıldı):
-  Faz 17.0   Potansiyel müşteri (Lead) takibi       ← bu oturum (Claude) — yeni Lead/LeadFollowUp modeli, /dashboard/leads
-  Faz 33/33.1 Kullanım kılavuzu + ayarlar modernizasyonu ← Cursor — yeni HelpArticle modeli, /help, /dashboard/settings
+Paralel çalışma (2026-07-19, çakışmayı önlemek için dosya bazında ayrıldı):
+  Faz 17.0   Potansiyel müşteri (Lead) takibi       ✅ 2026-07-19 (bu oturum/Claude) — Lead/LeadFollowUp modeli, /dashboard/leads
+  Faz 33/33.1 Kullanım kılavuzu + ayarlar modernizasyonu ← Cursor'da devam ediyor — yeni HelpArticle modeli, /help, /dashboard/settings
 
 Sıradaki (Faz 36 sonrası — profesyonel değerlendirme, P0 en önce):
   Faz 32     Ticarileştirme: paket + ek kapasite satışı          ← P0, gelir modeli (kullanıcı onayı gerekli)
@@ -1433,7 +1439,6 @@ Sıradaki (Faz 36 sonrası — profesyonel değerlendirme, P0 en önce):
   Faz 12.4   Master Admin kalıcı silme (hard-delete)             ← P1, düşük efor, veri hijyeni
   Faz 33     Rol bazlı dinamik kullanım kılavuzu + 33.1 ayarlar  ← P1
              ekranı modernizasyonu
-  Faz 17.0   Lead/potansiyel müşteri takibi (follow-up)          ← P1, doğrudan gelir dönüşümü
   Faz 27.3   Serverless kuyruk motoru (QStash/Inngest)           ← P1, Faz 27.2'nin önkoşulu
   Faz 18.1   Otomatik PDF sözleşme/risk formu üretimi            ← P1, mevcut PDF altyapısını genişletir
   Faz 6.3/.4 Dil genişletmesi (İtalyanca/Portekizce) +           ← P1, pazar genişletme

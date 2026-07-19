@@ -15,7 +15,8 @@ export type AuditCategory =
   | 'settings'
   | 'partner'
   | 'trainer'
-  | 'enterprise';
+  | 'enterprise'
+  | 'leads';
 
 export const AUDIT_CATEGORY_ACTIONS: Record<Exclude<AuditCategory, 'all'>, AuditAction[]> = {
   organization: ['ORGANIZATION_CREATED', 'ORGANIZATION_UPDATED'],
@@ -87,6 +88,13 @@ export const AUDIT_CATEGORY_ACTIONS: Record<Exclude<AuditCategory, 'all'>, Audit
     'HIERARCHY_MEMBER_GRANTED',
     'HIERARCHY_MEMBER_REVOKED',
   ],
+  leads: [
+    'LEAD_CREATED',
+    'LEAD_STATUS_CHANGED',
+    'LEAD_CONVERTED',
+    'LEAD_FOLLOW_UP_SCHEDULED',
+    'LEAD_FOLLOW_UP_COMPLETED',
+  ],
 };
 
 export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
@@ -156,6 +164,11 @@ export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   STAFF_INVITE_ACCEPTED: 'Personel daveti kabul edildi',
   PROFORMA_SENT: 'Proforma fatura gönderildi',
   MEMBERSHIP_REMINDER_SENT: 'Üyelik hatırlatması gönderildi',
+  LEAD_CREATED: 'Aday eklendi',
+  LEAD_STATUS_CHANGED: 'Aday durumu değişti',
+  LEAD_CONVERTED: 'Aday üyeye dönüştürüldü',
+  LEAD_FOLLOW_UP_SCHEDULED: 'Aday takibi planlandı',
+  LEAD_FOLLOW_UP_COMPLETED: 'Aday takibi tamamlandı',
 };
 
 export const ALL_AUDIT_ACTIONS = Object.keys(AUDIT_ACTION_LABELS) as AuditAction[];
@@ -176,6 +189,7 @@ export const AUDIT_CATEGORY_LABELS: Record<AuditCategory, string> = {
   partner: 'Temsilci',
   trainer: 'PT Performansı',
   enterprise: 'Kurumsal Hiyerarşi',
+  leads: 'Aday Takibi',
 };
 
 export const LOGIN_FAILURE_LABELS: Record<string, string> = {

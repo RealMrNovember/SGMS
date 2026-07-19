@@ -52,7 +52,8 @@
       "analytics": "Analyses"
     },
     "paymentPlans": "Plans de paiement",
-    "twoFactor": "Sécurité du compte (2FA)"
+    "twoFactor": "Sécurité du compte (2FA)",
+    "leads": "Prospects"
   },
   "auth": {
     "login": "Connexion",
@@ -411,6 +412,56 @@
       "saving": "Enregistrement…",
       "submit": "Créer le forfait"
     }
+  },
+  "leads": {
+    "backToOverview": "← Aperçu",
+    "title": "Prospects",
+    "subtitle": "Suivez les prospects qui ont visité sans s'inscrire, planifiez des relances et convertissez-les en membres en un clic.",
+    "noPermission": "Rôle OWNER, ADMIN ou STAFF requis pour le suivi des prospects.",
+    "addTitle": "Nouveau prospect",
+    "name": "Nom complet",
+    "phone": "Téléphone",
+    "email": "E-mail",
+    "source": "Source",
+    "interestedPlan": "Forfait souhaité",
+    "notes": "Notes",
+    "submit": "Ajouter le prospect",
+    "saving": "Ajout…",
+    "sources": {
+      "WALK_IN": "Visite spontanée",
+      "REFERRAL": "Recommandation",
+      "SOCIAL_MEDIA": "Réseaux sociaux",
+      "WEBSITE": "Site web",
+      "OTHER": "Autre"
+    },
+    "columns": {
+      "NEW": "Nouveau",
+      "CONTACTED": "Contacté",
+      "FOLLOW_UP_SCHEDULED": "Relance planifiée",
+      "CLOSED": "Converti / Perdu"
+    },
+    "empty": "Aucun prospect à cette étape.",
+    "markContacted": "Marquer contacté",
+    "markLost": "Marquer perdu",
+    "convert": "Convertir en membre",
+    "converting": "Conversion…",
+    "scheduleFollowUp": "Planifier une relance",
+    "followUpScheduledAt": "Date planifiée",
+    "followUpMethod": "Méthode",
+    "methods": {
+      "CALL": "Appel",
+      "MESSAGE": "Message",
+      "EMAIL": "E-mail"
+    },
+    "followUpNotes": "Notes",
+    "scheduleSubmit": "Planifier",
+    "scheduling": "Planification…",
+    "completeFollowUp": "Marquer terminé",
+    "overdue": "En retard",
+    "dueToday": "Aujourd'hui",
+    "convertedBadge": "Converti",
+    "lostBadge": "Perdu",
+    "cancel": "Annuler"
   },
   "programs": {
     "backToOverview": "← Aperçu",
