@@ -305,7 +305,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ---
 
-## 🔄 Faz 8 — POS, Kasa, Cari Hesap & Abonelik/Ödeme (Invoice ve 8.7 hariç tamamlandı)
+## ✅ Faz 8 — POS, Kasa, Cari Hesap & Abonelik/Ödeme (tamamlandı — 8.7 2026-07-20'de kapandı)
 
 > **Hedef:** Salon içi market/kafe/ekstra PT borçları (cari hesap) + SaaS abonelik/ödeme yönetimi.
 
@@ -314,7 +314,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | Model | Durum |
 |-------|--------|
 | `ExpenseCategory`, `Expense`, `Transaction` | ✅ |
-| `Invoice` | 🔲 (opsiyonel — sonraki iterasyon, tek eksik kalem) |
+| `Invoice` | ✅ (Faz 18.1 ile gerçek fatura kesme — `issueInvoiceFromPayment`) |
 
 ### 8.2 İş mantığı
 - [x] `actions/expenses.ts` — ekleme, hızlı şablon, tahsilat (FIFO), iptal (audit zorunlu)
@@ -352,15 +352,23 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 **Mimari not:** Var olan `Expense`/`Transaction`/FIFO altyapısı korundu, üstüne ince bir `PaymentPlan` gruplama katmanı + `dueDate`/`paidAmount` eklendi — mevcut cari hesap mantığı kırılmadı, yalnızca genişletildi.
 
-### 8.7 Salon Bazlı Online Ödeme Sağlayıcı Entegrasyonu (Iyzico/PayTR/Banka) — yeni, 2026-07-16 eklendi
+### 8.7 Salon Bazlı Online Ödeme Sağlayıcı Entegrasyonu (Iyzico/PayTR/Banka) — tamamlandı, 2026-07-20
 
 > **Kullanıcı notu (2026-07-16):** *"Şirket sahibinin panelinden ayarlar içerisinden online ödeme alacağı banka/Iyzico/Paytr gibi platformların API'lerini bağlayabilmesi lazım."* **Önemli ayrım:** Bu, Faz 16'daki CiciByte Cloud entegrasyonuyla (SGMS'in CiciByte'a kendi abonelik ödemesini yapması, platform-seviyesinde tek bir iyzico hesabı) **karıştırılmamalı** — burada her salonun **kendi** Iyzico/PayTR/banka sözleşmesiyle **kendi üyesinden** doğrudan tahsilat yapabilmesi hedefleniyor (tenant-seviyesinde, çoklu sağlayıcılı).
-- [ ] Yeni `TenantPaymentProviderSettings` modeli — `organizationId`, `provider` (`IYZICO`/`PAYTR`/`BANK_TRANSFER`), şifrelenmiş API anahtarı/secret, `isActive` — Faz 16.3'teki `IyzicoClient` (IYZWSv2 HMAC, vendor SDK'sız) deseni **yeniden kullanılır**, yeni bir istemci sıfırdan yazılmaz
-- [ ] `/dashboard/settings` → Entegrasyonlar sekmesine (bkz. 33.1) salon sahibinin kendi API anahtarlarını girebileceği bir bölüm — anahtarlar yalnızca sunucu tarafında çözülür, hiçbir zaman client'a gönderilmez
-- [ ] Faz 8.6'daki ödeme planı/borç kalemleri için sporcu portalında **"Kartla Öde"** butonu — salonun kendi yapılandırdığı sağlayıcı üzerinden checkout başlatır, sunucu tarafında doğrulanır (Faz 16.3'teki callback-doğrulama desenini birebir izler)
-- [ ] Sağlayıcı yapılandırılmamışsa buton güvenli şekilde gizlenir/"sağlayıcı yapılandırılmamış" mesajı gösterir — asla sahte/test ödeme oluşturulmaz (Faz 16'daki aynı güvenlik ilkesi)
+>
+> **Uygulama notu (2026-07-20):** Yeni bir `TenantPaymentProviderSettings` modeli açmak yerine, 2026-07-19'daki şema keşfinde bulunan ve hiç uygulama kodu kullanmayan `TenantPaymentGateway` tablosu (zaten production'da mevcuttu, bkz. `20260719030000_reconcile_untracked_tenant_pos_schema`) genişletilerek kullanıldı — aynı amaca hizmet eden ikinci bir tablo açmak veri modelini gereksiz çoğaltırdı. `Transaction.gatewayId`/`gatewayTransactionId` alanları da zaten bu tabloya işaret edecek şekilde tasarlanmıştı, birebir kullanıldı.
+- [x] `TenantPaymentGateway` genişletildi (`merchantKey`/`merchantSalt`/`baseUrl`/`sandbox`/IBAN alanları eklendi) + yeni `TenantCheckoutSession` modeli (platform seviyesindeki `GatewayCheckoutSession`'ın tenant eşleniği) — migration `20260720100000_faz_8_7_tenant_payment_gateway`. Faz 16.3'teki `initiateIyzicoCheckout`/`initiatePaytrCheckout`/`verifyPaytrCallbackHash` fonksiyonları yapısal (structural) tiplere (`IyzicoCredentials`/`PaytrCredentials`) genişletilerek **hiç kod tekrarı olmadan** tenant tarafında da kullanıldı — yeni bir istemci yazılmadı
+- [x] `/dashboard/settings` → Entegrasyonlar sekmesi artık gerçek bir form: `TenantPaymentGatewayPanel` — Iyzico/PayTR anahtarları + banka havalesi IBAN bilgisi, Master Admin'deki `PlatformPaymentSettingsPanel` ile birebir aynı UX (maskeleme, `KEEP` sentinel deseni). `actions/tenant-payment-gateway.ts`, OWNER/ADMIN guard
+- [x] Faz 8.6'daki borç kalemleri (`Expense`) için sporcu portalında (`/athlete/account`) **"Kartla Öde"** butonu (para birimi başına) — `actions/tenant-checkout.ts` salonun kendi sağlayıcısıyla checkout başlatır; `/api/v1/webhooks/tenant-iyzico` + `/api/v1/webhooks/tenant-paytr` sunucu tarafında doğrular (atomik "claim" — Faz 36.7 deseni), `applyPaymentToExpenses`/`issueInvoiceFromPayment` ile **aynı** FIFO tahsilat + fatura kesme mantığını (Faz 8.2/18.1) çağırır — POS'tan elle girilen bir tahsilatla muhasebe açısından ayrım yok
+- [x] Sağlayıcı aktif ama anahtarları eksikse "Kartla Öde" butonu **hiç gösterilmez** (`getActiveTenantCardGateway` yapılandırma eksiksizliğini de kontrol eder) — asla sahte/test ödeme oluşturulmaz (Faz 16'daki aynı güvenlik ilkesi); banka havalesi seçiliyse IBAN bilgisi salt-okunur gösterilir
 
-**Bağımlılık:** Faz 8.6 (ödeme planı — borç kaleminin kendisi önce var olmalı) · Faz 16.3 (yeniden kullanılacak Iyzico client deseni) · Faz 33.1 (Entegrasyonlar sekmesi bu ayarların barınacağı yer)
+**Kabul kriteri:** ✅ Salon sahibi ayarlardan kendi Iyzico/PayTR anahtarlarını girip aktif sağlayıcı seçebiliyor · ✅ sporcu açık bakiyesini kartla öderse borç FIFO kapanıyor ve fatura kesiliyor · ✅ sağlayıcı yapılandırılmamışken buton görünmüyor
+
+**Bağımlılık:** Faz 8.6 (ödeme planı — borç kaleminin kendisi önce var olmalı) ✅ · Faz 16.3 (yeniden kullanılacak Iyzico client deseni) ✅ · Faz 33.1 (Entegrasyonlar sekmesi bu ayarların barınacağı yer) ✅
+
+**Dosyalar:** `packages/database/prisma/schema.prisma` (`TenantPaymentGateway`, `TenantCheckoutSession`, `PaymentProviderType.BANK_TRANSFER`, `AuditAction.TENANT_PAYMENT_GATEWAY_CONFIGURED`), migration `20260720100000_faz_8_7_tenant_payment_gateway`, `lib/payments/gateway.ts` (yapısal tipler), `lib/payments/tenant-gateway.ts`, `lib/payments/tenant-checkout-settle.ts`, `actions/tenant-payment-gateway.ts`, `actions/tenant-checkout.ts`, `components/settings/tenant-payment-gateway-panel.tsx`, `components/athlete/tenant-card-checkout-button.tsx`, `app/api/v1/webhooks/tenant-iyzico/route.ts`, `app/api/v1/webhooks/tenant-paytr/route.ts`, `messages/*.json` (6 dil — `settings.paymentGateway.*`, `expenses.payWithCard` vb.)
+
+**Doğrulama notu (2026-07-20):** Geliştirme makinesinde Node.js/pnpm kurulu olmadığı için ilk turda derlenemedi; kullanıcı onayıyla bu makineye Node.js LTS + pnpm 9.15.0 (`packageManager` alanıyla birebir) kuruldu ve ardından ✅ `prisma validate`, ✅ `prisma generate`, ✅ `pnpm build:packages` (`@sgms/database` + `@sgms/cloud-client`), ✅ `pnpm typecheck` (cloud-client + web, sıfır hata), ✅ `pnpm --filter @sgms/web test` (54/54 mevcut Vitest testi geçti, `settle-payment.test.ts` dahil), ✅ ESLint (yeni/değişen tüm dosyalarda sıfır uyarı) ile tam doğrulandı. Bu turda ayrıca platformun mevcut PayTR abonelik webhook'undaki gerçek bir hata da düzeltildi — bkz. `lib/billing/settings.ts`: `appendBillingRequest()`'teki `id` artık `randomUUID().replace(/-/g, '')` ile tiresiz üretiliyor (PayTR `merchant_oid`'de tireleri sessizce siliyordu, DB'deki `GatewayCheckoutSession.id` ile hiç eşleşmiyordu — ödemesi başarılı PayTR checkout'ları abonelik aktivasyonunu tetiklemiyordu). Kalan adım: canlıya almadan önce gerçek bir Postgres'e karşı `prisma migrate deploy` ile migration'ın uygulanması (bu makinede DB bağlantısı yok, yalnızca placeholder `DATABASE_URL` ile statik doğrulama yapıldı).
 
 ---
 
@@ -1568,11 +1576,17 @@ aynı oturumda yapıldı):
   Faz 20   SGMS Mobil Uygulama (React Native/Expo, apps/mobile) — MVP (giriş + QR check-in),
            yerel Android SDK ile imzasız APK, v0.1.0 GitHub Releases'e yayınlandı
 
+Faz 8.7 tamamlandı (2026-07-20 — Claude, kullanıcı önceliklendirmeyi serbest bıraktı,
+en somut/en az belirsiz P1 madde olduğu için ilk sırada seçildi; kullanıcı onayıyla bu
+makineye Node.js/pnpm kurulup tam derleme+test+lint doğrulaması yapıldı):
+  Faz 8.7    Salon bazlı online ödeme sağlayıcısı (Iyzico/PayTR/Banka) ✅ — bkz. Faz 8.7 bölümü
+  [Bugfix]   Platform PayTR abonelik webhook'u — merchant_oid tire eşleşme hatası ✅ — bkz.
+             lib/billing/settings.ts, kullanıcı "acil" olarak işaretledi, aynı oturumda düzeltildi
+
 Sıradaki (Faz 36 sonrası — profesyonel değerlendirme, P0 en önce):
   Faz 32     Ticarileştirme: paket + ek kapasite satışı          ← P0, gelir modeli (kullanıcı onayı gerekli)
   [Repo]     Git contributors düzenlemesi (cursoragent kaldırma) ← P0, ⚠️ onay gerekli (destructive, force-push)
 
-  Faz 8.7    Salon bazlı online ödeme sağlayıcısı (Iyzico/PayTR) ← P1, Faz 8.6'ya bağımlı, Faz 16.3 deseni yeniden kullanılır
   Faz 27.3   Serverless kuyruk motoru (QStash/Inngest)           ← P1, Faz 27.2'nin önkoşulu
   Faz 6.3/.4 Dil genişletmesi (İtalyanca/Portekizce) +           ← P1, pazar genişletme
              küresel lokasyon veritabanı

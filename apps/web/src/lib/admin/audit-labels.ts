@@ -96,7 +96,12 @@ export const AUDIT_CATEGORY_ACTIONS: Record<Exclude<AuditCategory, 'all'>, Audit
     'STAFF_INVITE_SENT',
     'STAFF_INVITE_ACCEPTED',
   ],
-  settings: ['SETTINGS_CHANGED', 'PLATFORM_PAYMENT_SETTINGS_CHANGED', 'CONTRACT_TEMPLATE_UPDATED'],
+  settings: [
+    'SETTINGS_CHANGED',
+    'PLATFORM_PAYMENT_SETTINGS_CHANGED',
+    'CONTRACT_TEMPLATE_UPDATED',
+    'TENANT_PAYMENT_GATEWAY_CONFIGURED',
+  ],
   partner: [
     'PARTNER_CREATED',
     'PARTNER_UPDATED',
@@ -268,6 +273,7 @@ export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   CASH_SHIFT_OPENED: 'Kasa vardiyası açıldı',
   CASH_SHIFT_CLOSED: 'Kasa vardiyası kapandı',
   CASH_X_REPORT: 'Kasa X raporu',
+  TENANT_PAYMENT_GATEWAY_CONFIGURED: 'Salon ödeme sağlayıcı ayarları değiştirildi',
 };
 
 export const ALL_AUDIT_ACTIONS = Object.keys(AUDIT_ACTION_LABELS) as AuditAction[];

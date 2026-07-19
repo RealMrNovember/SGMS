@@ -201,6 +201,8 @@ enum AuditAction {
   CASH_SHIFT_OPENED
   CASH_SHIFT_CLOSED
   CASH_X_REPORT
+  // Faz 8.7 Tenant payment gateway
+  TENANT_PAYMENT_GATEWAY_CONFIGURED
 }
 
 enum HierarchyRole {
@@ -360,6 +362,7 @@ enum PaymentProviderType {
   PAYTR
   MOKA
   PARAM
+  BANK_TRANSFER
 }
 
 // ---------------------------------------------------------------------------
@@ -782,6 +785,7 @@ model Organization {
   proformaTokens          ProformaToken[]
   gatewayCheckoutSessions GatewayCheckoutSession[]
   tenantPaymentGateways   TenantPaymentGateway[]
+  tenantCheckoutSessions  TenantCheckoutSession[]
   products                Product[]
   memberCards             MemberCard[]
   invoices                Invoice[]
@@ -1034,6 +1038,7 @@ model GymMember {
   paymentIntents      PaymentIntent[]
   gymAccessLogs       GymAccessLog[]
   gymMemberActivities GymMemberActivity[]
+  tenantCheckoutSessions TenantCheckoutSession[]
   convertedFromLead   Lead?               @relation("LeadConvertedToMember")
   membershipFreezes   MembershipFreeze[]
   transfersFrom       MembershipTransfer[] @relation("MembershipTransferFrom")
@@ -1244,6 +1249,7 @@ model Expense {
   paymentPlan  PaymentPlan?     @relation(fields: [paymentPlanId], references: [id], onDelete: SetNull)
   createdBy    User             @relation("ExpenseCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
   transactions Transaction[]
+  checkoutSessions TenantCheckoutSession[]
 
   @@index([organizationId, gymMemberId, status, createdAt])
   @@index([gymMemberId, status])
@@ -1506,9 +1512,18 @@ model SyncBatch {
 
 // ---------------------------------------------------------------------------
 // Tenant-seviyeli POS/fatura/ödeme-ağgeçidi modelleri — bkz. PaymentGateway
-// enum'unun üzerindeki not. Uygulama kodu henüz bunları kullanmıyor.
+// enum'unun üzerindeki not. Bu bloktaki modellerden `TenantPaymentGateway` ve
+// `TenantCheckoutSession` Faz 8.7 ile, `Invoice`/`InvoiceItem` ise Faz 18.1 ile
+// uygulama kodu tarafından kullanılmaya başlandı (bkz. lib/payments/tenant-gateway.ts,
+// actions/tenant-payment-gateway.ts, actions/tenant-checkout.ts, actions/invoices.ts).
+// Product/MemberCard/PaymentIntent/Notification/GymAccessLog/GymMemberActivity hâlâ
+// kullanılmıyor.
 // ---------------------------------------------------------------------------
 
+/// Salon bazlı ödeme sağlayıcı ayarları (Faz 8.7). Her (organizationId, provider) çifti tek
+/// satır — IYZICO/PAYTR satırlarında API kimlik bilgileri, BANK_TRANSFER satırında IBAN
+/// bilgileri kullanılır. Anahtarlar Faz 16.3'teki `PlatformPaymentSettings` ile aynı
+/// düz-metin-at-rest + maskelenmiş-çıktı konvansiyonunu izler (bkz. lib/payments/gateway.ts).
 model TenantPaymentGateway {
   id             String              @id @default(cuid())
   organizationId String              @map("organization_id")
@@ -1516,17 +1531,60 @@ model TenantPaymentGateway {
   apiKey         String?             @map("api_key")
   secretKey      String?             @map("secret_key")
   merchantId     String?             @map("merchant_id")
+  /// PayTR merchant_key (Iyzico'da kullanılmaz, apiKey/secretKey yeterli)
+  merchantKey    String?             @map("merchant_key")
+  /// PayTR merchant_salt
+  merchantSalt   String?             @map("merchant_salt")
+  /// Yalnızca IYZICO — sandbox/production uç noktası
+  baseUrl        String              @default("https://sandbox-api.iyzipay.com") @map("base_url")
+  sandbox        Boolean             @default(true) @map("sandbox")
+  /// Yalnızca BANK_TRANSFER satırı
+  ibanHolderName String?             @map("iban_holder_name")
+  ibanNumber     String?             @map("iban_number")
+  ibanBankName   String?             @map("iban_bank_name")
+  bankTransferNote String?           @map("bank_transfer_note") @db.Text
   isActive       Boolean             @default(false) @map("is_active")
+  updatedById    String?             @map("updated_by_id")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  transactions Transaction[]
+  organization     Organization             @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  transactions     Transaction[]
+  checkoutSessions TenantCheckoutSession[]
 
   @@unique([organizationId, provider])
   @@index([organizationId, isActive])
   @@map("tenant_payment_gateways")
+}
+
+/// iyzico/PayTR'a gönderilen sipariş kimliği ↔ organizasyon/üye/borç kalemi eşlemesi
+/// (Faz 8.7). `GatewayCheckoutSession`'ın (platform aboneliği) tenant-seviyeli eşleniği —
+/// webhook geldiğinde hangi Expense'in ödendiğini bulmak için kullanılır. Aynı atomik
+/// "claim" (updateMany + status: pending→processing) deseni webhook route'larında uygulanır
+/// (bkz. roadmap.md Faz 36.7).
+model TenantCheckoutSession {
+  id             String              @id
+  organizationId String              @map("organization_id")
+  gymMemberId    String              @map("gym_member_id")
+  expenseId      String?             @map("expense_id")
+  gatewayId      String              @map("gateway_id")
+  provider       PaymentProviderType
+  amount         Decimal             @db.Decimal(10, 2)
+  currency       String              @default("TRY")
+  status         String              @default("pending")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  organization Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  gymMember    GymMember            @relation(fields: [gymMemberId], references: [id], onDelete: Cascade)
+  expense      Expense?             @relation(fields: [expenseId], references: [id], onDelete: SetNull)
+  gateway      TenantPaymentGateway @relation(fields: [gatewayId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, gymMemberId])
+  @@index([gatewayId])
+  @@index([expenseId, status])
+  @@map("tenant_checkout_sessions")
 }
 
 model Product {

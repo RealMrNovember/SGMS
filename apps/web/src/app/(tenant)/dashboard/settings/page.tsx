@@ -1,5 +1,6 @@
 import { SettingsWorkspace } from '@/components/settings/settings-workspace';
 import { getDefaultContractTemplate } from '@/actions/contracts';
+import { fetchTenantPaymentSettings } from '@/actions/tenant-payment-gateway';
 import { auth } from '@/lib/auth';
 import { parseOrganizationSettings } from '@/lib/admin/org-settings';
 import { prisma } from '@/lib/prisma';
@@ -35,10 +36,12 @@ export default async function DashboardSettingsPage() {
 
   const settings = parseOrganizationSettings(org.settings);
 
-  const contractTemplate =
-    session.user.role === 'OWNER' || session.user.role === 'ADMIN'
-      ? await getDefaultContractTemplate(session.user.organizationId)
-      : null;
+  const isOrgAdmin = session.user.role === 'OWNER' || session.user.role === 'ADMIN';
+
+  const [contractTemplate, paymentGatewaySettings] = await Promise.all([
+    isOrgAdmin ? getDefaultContractTemplate(session.user.organizationId) : Promise.resolve(null),
+    isOrgAdmin ? fetchTenantPaymentSettings() : Promise.resolve(null),
+  ]);
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -48,6 +51,7 @@ export default async function DashboardSettingsPage() {
         settings={settings}
         contractTemplateName={contractTemplate?.name}
         contractTemplateBody={contractTemplate?.bodyText}
+        paymentGatewaySettings={paymentGatewaySettings}
       />
     </div>
   );

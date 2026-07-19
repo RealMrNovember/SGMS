@@ -56,6 +56,25 @@ export async function getPublicBankTransferInfo() {
   };
 }
 
+/**
+ * Yapısal (structural) tipler — `initiateIyzicoCheckout`/`initiatePaytrCheckout`/
+ * `verifyPaytrCallbackHash` yalnızca bu alanlara ihtiyaç duyar. `PlatformPaymentSettings`
+ * bu şekle zaten uyar; Faz 8.7'de tenant-seviyeli `TenantPaymentGateway` satırından
+ * türetilen bir eşleme de aynı fonksiyonları hiçbir kod tekrarı olmadan kullanabilir.
+ */
+export type IyzicoCredentials = {
+  iyzicoApiKey: string | null;
+  iyzicoSecretKey: string | null;
+  iyzicoBaseUrl: string;
+};
+
+export type PaytrCredentials = {
+  paytrMerchantId: string | null;
+  paytrMerchantKey: string | null;
+  paytrMerchantSalt: string | null;
+  paytrSandbox: boolean;
+};
+
 export type CheckoutBuyer = {
   id: string;
   name: string;
@@ -81,7 +100,7 @@ export type InitiateCheckoutInput = {
  * kullanılır. Gerçek anahtarlar girilmeden (sandbox/test anahtarı dahi) çağrılmamalı.
  */
 export async function initiateIyzicoCheckout(
-  settings: PlatformPaymentSettings,
+  settings: IyzicoCredentials,
   input: InitiateCheckoutInput,
 ): Promise<{ ok: true; paymentPageUrl: string } | { ok: false; error: string }> {
   if (!settings.iyzicoApiKey || !settings.iyzicoSecretKey) {
@@ -167,7 +186,7 @@ export async function initiateIyzicoCheckout(
  * şeması (HMAC-SHA256) burada elle uygulanır. Kaynak: PayTR entegrasyon kılavuzu.
  */
 export async function initiatePaytrCheckout(
-  settings: PlatformPaymentSettings,
+  settings: PaytrCredentials,
   input: InitiateCheckoutInput,
   merchantOkUrl: string,
   merchantFailUrl: string,
@@ -244,7 +263,7 @@ export async function initiatePaytrCheckout(
 }
 
 export function verifyPaytrCallbackHash(
-  settings: PlatformPaymentSettings,
+  settings: PaytrCredentials,
   fields: { merchant_oid: string; status: string; total_amount: string; hash: string },
 ) {
   if (!settings.paytrMerchantKey || !settings.paytrMerchantSalt) return false;

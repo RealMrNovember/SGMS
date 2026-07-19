@@ -1,10 +1,12 @@
 import { AthletePasswordForm } from '@/components/athlete-password-form';
 import { AthleteProfileForm } from '@/components/athlete-profile-form';
 import { AvatarUpload } from '@/components/avatar-upload';
+import { TenantCardCheckoutButton } from '@/components/athlete/tenant-card-checkout-button';
 import { MembershipLifecyclePanel } from '@/components/membership/membership-lifecycle-panel';
 import { auth } from '@/lib/auth';
 import { intlLocaleFor } from '@/lib/format-locale';
 import { decimalToNumber, getMemberAccountSummary } from '@/lib/member-balance';
+import { getActiveTenantCardGateway, getTenantBankTransferInfo } from '@/lib/payments/tenant-gateway';
 import { getMemberPaymentPlans } from '@/lib/payment-plans';
 import { prisma } from '@/lib/prisma';
 import { getLocale, getTranslations } from 'next-intl/server';
@@ -22,7 +24,7 @@ export default async function AthleteAccountPage() {
   const locale = await getLocale();
   const dateLocale = intlLocaleFor(locale);
 
-  const [summary, paymentPlans, profile] = await Promise.all([
+  const [summary, paymentPlans, profile, activeCardGateway, bankTransferInfo] = await Promise.all([
     getMemberAccountSummary(session.user.organizationId, session.user.gymMemberId),
     getMemberPaymentPlans(session.user.organizationId, session.user.gymMemberId),
     prisma.gymMember.findFirst({
@@ -38,6 +40,8 @@ export default async function AthleteAccountPage() {
         user: { select: { name: true } },
       },
     }),
+    getActiveTenantCardGateway(session.user.organizationId),
+    getTenantBankTransferInfo(session.user.organizationId),
   ]);
 
   const openBalance = decimalToNumber(summary.openBalance);
@@ -126,7 +130,37 @@ export default async function AthleteAccountPage() {
         {balanceEntries.length === 0 ? (
           <p className="muted mt-3 text-sm">{t('noDebt')}</p>
         ) : (
-          <p className="muted mt-3 text-sm">{t('payAtDesk')}</p>
+          <>
+            <p className="muted mt-3 text-sm">{t('payAtDesk')}</p>
+            {activeCardGateway ? (
+              <div className="mt-4 flex flex-wrap justify-center gap-3">
+                {balanceEntries.map(([code]) => (
+                  <TenantCardCheckoutButton key={code} currency={code} />
+                ))}
+              </div>
+            ) : null}
+            {bankTransferInfo ? (
+              <div className="mt-4 rounded-xl border border-[var(--border)] bg-white/5 p-4 text-left text-sm">
+                <p className="font-medium">{t('bankTransferTitle')}</p>
+                {bankTransferInfo.ibanHolderName ? (
+                  <p className="muted mt-1">
+                    {t('bankTransferAccountHolder')}: {bankTransferInfo.ibanHolderName}
+                  </p>
+                ) : null}
+                {bankTransferInfo.ibanNumber ? (
+                  <p className="muted">{bankTransferInfo.ibanNumber}</p>
+                ) : null}
+                {bankTransferInfo.ibanBankName ? (
+                  <p className="muted">
+                    {t('bankTransferBank')}: {bankTransferInfo.ibanBankName}
+                  </p>
+                ) : null}
+                {bankTransferInfo.bankTransferNote ? (
+                  <p className="muted mt-1 text-xs">{bankTransferInfo.bankTransferNote}</p>
+                ) : null}
+              </div>
+            ) : null}
+          </>
         )}
         <div className="muted mt-4 flex flex-wrap justify-center gap-4 text-sm">
           <a

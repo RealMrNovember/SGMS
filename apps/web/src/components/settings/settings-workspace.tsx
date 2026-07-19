@@ -5,6 +5,10 @@ import {
   OrganizationSettingsPanel,
 } from '@/components/organization-settings-panel';
 import { PrivacySettingsPanel } from '@/components/settings/privacy-settings-panel';
+import {
+  TenantPaymentGatewayPanel,
+  type TenantPaymentSettingsProps,
+} from '@/components/settings/tenant-payment-gateway-panel';
 import { ContextualHelpButton } from '@/components/help/contextual-help-button';
 import type { OrganizationSettings } from '@/lib/admin/org-settings';
 import type { OrganizationRole } from '@sgms/database';
@@ -88,12 +92,14 @@ export function SettingsWorkspace({
   settings,
   contractTemplateName,
   contractTemplateBody,
+  paymentGatewaySettings,
 }: {
   role: OrganizationRole;
   orgName: string;
   settings: OrganizationSettings;
   contractTemplateName?: string;
   contractTemplateBody?: string;
+  paymentGatewaySettings?: TenantPaymentSettingsProps | null;
 }) {
   const t = useTranslations('settings');
   const visibleTabs = useMemo(
@@ -182,13 +188,22 @@ export function SettingsWorkspace({
           ) : null}
 
           {current.id === 'integrations' ? (
-            <div className="space-y-3 rounded-xl border border-dashed border-[var(--border)] bg-white/5 p-4">
-              <p className="text-sm font-medium">{t('sections.integrations.prepTitle')}</p>
-              <p className="muted text-sm leading-6">{t('sections.integrations.body')}</p>
-              <ul className="muted list-disc space-y-1 pl-5 text-sm">
-                <li>{t('sections.integrations.itemPayment')}</li>
-                <li>{t('sections.integrations.itemHardware')}</li>
-              </ul>
+            <div className="space-y-5">
+              {paymentGatewaySettings ? (
+                <TenantPaymentGatewayPanel
+                  iyzico={paymentGatewaySettings.iyzico}
+                  paytr={paymentGatewaySettings.paytr}
+                  bankTransfer={paymentGatewaySettings.bankTransfer}
+                />
+              ) : (
+                <p className="muted text-sm leading-6">{t('sections.integrations.body')}</p>
+              )}
+              <div className="rounded-xl border border-dashed border-[var(--border)] bg-white/5 p-4">
+                <p className="text-sm font-medium">{t('sections.integrations.prepTitle')}</p>
+                <ul className="muted mt-2 list-disc space-y-1 pl-5 text-sm">
+                  <li>{t('sections.integrations.itemHardware')}</li>
+                </ul>
+              </div>
             </div>
           ) : null}
 
