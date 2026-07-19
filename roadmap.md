@@ -53,14 +53,14 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 15 | Kimlik, Onboarding & Uyum Sertleştirme | ✅ Tamamlandı | ~95% (proaktif hatırlatma + 6 dil çevirisi kaldı) |
 | 16 | CiciByte Cloud Ticari Entegrasyonu (Ödeme, Referans/Komisyon, Release) | 🔄 Devam ediyor | ~90% (Platform Ödeme Ayarları paneli — iyzico/PayTR/EFT — 2026-07-19'da eklendi; gerçek anahtarlar bekleniyor) |
 | 17 | Üyelik Senaryoları & Ders/Sınıf Yönetimi | ✅ Tamamlandı | 100% (17.0–17.7 — Lead, dondurma/devir, grup üyelik, ders/yoklama/QR, kupon, POS stok, Guest Pass — 2026-07-19) |
-| 18 | Uyumluluk & Sağlamlaştırma (2FA, GDPR, E2E, Invoice) | 🔄 Devam ediyor | ~40% (2FA + Playwright E2E tamamlandı — 2026-07-19; GDPR self-servis, vardiya, sağlık formu, Invoice uygulama kodu sırada) |
+| 18 | Uyumluluk & Sağlamlaştırma (2FA, GDPR, E2E, Invoice) | 🔄 Devam ediyor | ~40% (2FA + Playwright E2E tamamlandı — 2026-07-19; GDPR self-servis, vardiya, sağlık formu + 18.1 PDF, Invoice Cursor'da devam ediyor) |
 | 19 | SGMS Masaüstü — Genişletme | 🔲 Gelecek Vizyon | 0% |
 | 20 | SGMS Mobil Uygulama | 🔲 Gelecek Vizyon | 0% |
 | 21 | PT Performans, Komisyon & Prim Yönetimi | ✅ Tamamlandı | 100% (CSV export ve POS entegrasyonu v2'ye ertelendi) |
-| 22 | Personel Yönetimi / HR | 🔲 Planlandı | 0% |
-| 23 | Ekipman Yönetimi & Bakım Planları | 🔲 Planlandı | 0% |
+| 22 | Personel Yönetimi / HR | 🔄 Devam ediyor | 0% (Cursor'da başladı — 2026-07-19) |
+| 23 | Ekipman Yönetimi & Bakım Planları | 🔄 Devam ediyor | 0% (Cursor'da başladı — 2026-07-19) |
 | 24 | Temizlik Yönetimi | 🔲 Planlandı | 0% |
-| 25 | Kasa Yönetimi (Vardiya, X/Z Raporu) | 🔲 Planlandı | 0% |
+| 25 | Kasa Yönetimi (Vardiya, X/Z Raporu) | 🔄 Devam ediyor | 0% (Cursor'da başladı — 2026-07-19) |
 | 26 | Dijital Üyelik Kartı (Wallet/NFC) | 🔲 Planlandı | 0% |
 | 27 | Bildirim Merkezi (Push/SMS/WhatsApp/Mail) | 🔄 Devam ediyor | ~35% (tarayıcı Web Push tamamlandı) |
 | 28 | İleri Raporlama & Business Intelligence | ✅ Tamamlandı | ~80% (ARR, churn-anketi, Excel/PDF export v2'ye ertelendi) |
@@ -1453,24 +1453,29 @@ Tamamlanan paralel çalışma (2026-07-19, çakışmayı önlemek için dosya ba
                  kupon, POS stok, Guest Pass
   Faz 12.4 + 14.3 Master Admin kalıcı silme + Demo PT girişi     ✅ 2026-07-19 (Claude) — düşük efor, dosya bazında sıfır çakışma
 
+Şu anda paralel çalışılıyor (2026-07-19, geniş/uzun kapsamlı ikinci Cursor partisi):
+  Faz 18 + 18.1  Uyumluluk & sağlamlaştırma + otomatik PDF sözleşme  ← Cursor — GDPR self-servis, vardiya planlama,
+                 sağlık formu/rıza + ContractTemplate PDF motoru, Invoice modeli (bağımlılık artık karşılandı: Faz 15-17 bitti)
+  Faz 22         Personel Yönetimi / HR                              ← Cursor — LeaveRequest, Shift/ShiftAssignment,
+                 PerformanceReview, DisciplinaryRecord, /dashboard/hr
+  Faz 23         Ekipman Yönetimi & Bakım Planları                   ← Cursor — GymEquipment, EquipmentServiceLog,
+                 MaintenanceSchedule, QR ile arıza bildirme
+  Faz 25         Kasa Yönetimi (Vardiya, X/Z Raporu)                  ← Cursor — CashRegisterShift, X/Z raporu,
+                 /dashboard/pos/shifts
+
 Sıradaki (Faz 36 sonrası — profesyonel değerlendirme, P0 en önce):
   Faz 32     Ticarileştirme: paket + ek kapasite satışı          ← P0, gelir modeli (kullanıcı onayı gerekli)
   [Repo]     Git contributors düzenlemesi (cursoragent kaldırma) ← P0, ⚠️ onay gerekli (destructive, force-push)
 
   Faz 8.7    Salon bazlı online ödeme sağlayıcısı (Iyzico/PayTR) ← P1, Faz 8.6'ya bağımlı, Faz 16.3 deseni yeniden kullanılır
   Faz 27.3   Serverless kuyruk motoru (QStash/Inngest)           ← P1, Faz 27.2'nin önkoşulu
-  Faz 18.1   Otomatik PDF sözleşme/risk formu üretimi            ← P1, mevcut PDF altyapısını genişletir
   Faz 6.3/.4 Dil genişletmesi (İtalyanca/Portekizce) +           ← P1, pazar genişletme
              küresel lokasyon veritabanı
 
   Faz 34.6   İnteraktif antrenman programı görünümü              ← P2
-  Faz 22     Personel Yönetimi / HR                              ← P2
-  Faz 23     Ekipman yönetimi & bakım planları                   ← P2
-  Faz 25     Kasa yönetimi (vardiya, X/Z raporu)                 ← P2
-  Faz 26     Dijital üyelik kartı (Wallet/NFC)                   ← P2
+  Faz 26     Dijital üyelik kartı (Wallet/NFC)                   ← P2, Apple/Google Wallet imzalama sertifikası gerekli (henüz yok)
   Faz 29     Yapay Zeka öngörüleri                                ← P2, Faz 28 verisine dayanır
   Faz 31     Entegrasyon Pazaryeri + 31.0 donanım API v2/RFID     ← P2, Faz 27 soyutlamasına dayanır
-  Faz 18     Uyumluluk & sağlamlaştırma (2FA, GDPR, Invoice)      ← P2
   Faz 24     Temizlik yönetimi                                    ← P3
   Faz 19     SGMS Masaüstü — genişletme                          ← P2, web tamamlanınca
   Faz 20     SGMS Mobil Uygulama                                  ← P3, web+masaüstü tamamlanınca
