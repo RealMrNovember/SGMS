@@ -4,6 +4,7 @@ import {
   OrganizationNotificationSettingsPanel,
   OrganizationSettingsPanel,
 } from '@/components/organization-settings-panel';
+import { PrivacySettingsPanel } from '@/components/settings/privacy-settings-panel';
 import { ContextualHelpButton } from '@/components/help/contextual-help-button';
 import type { OrganizationSettings } from '@/lib/admin/org-settings';
 import type { OrganizationRole } from '@sgms/database';
@@ -11,6 +12,7 @@ import {
   Bell,
   CreditCard,
   Link2,
+  Lock,
   ShieldCheck,
   SlidersHorizontal,
   Users,
@@ -25,6 +27,7 @@ type SettingsTabId =
   | 'notifications'
   | 'billing'
   | 'integrations'
+  | 'privacy'
   | 'security';
 
 type TabDef = {
@@ -66,6 +69,12 @@ const TAB_DEFS: TabDef[] = [
     icon: <Link2 className="h-4 w-4" />,
   },
   {
+    id: 'privacy',
+    roles: ['OWNER', 'ADMIN'],
+    helpSlug: 'topic-settings',
+    icon: <Lock className="h-4 w-4" />,
+  },
+  {
     id: 'security',
     roles: ['OWNER', 'ADMIN', 'STAFF', 'TRAINER', 'VIEWER'],
     helpSlug: 'topic-security',
@@ -77,10 +86,14 @@ export function SettingsWorkspace({
   role,
   orgName,
   settings,
+  contractTemplateName,
+  contractTemplateBody,
 }: {
   role: OrganizationRole;
   orgName: string;
   settings: OrganizationSettings;
+  contractTemplateName?: string;
+  contractTemplateBody?: string;
 }) {
   const t = useTranslations('settings');
   const visibleTabs = useMemo(
@@ -177,6 +190,13 @@ export function SettingsWorkspace({
                 <li>{t('sections.integrations.itemHardware')}</li>
               </ul>
             </div>
+          ) : null}
+
+          {current.id === 'privacy' && contractTemplateName && contractTemplateBody ? (
+            <PrivacySettingsPanel
+              contractTemplateName={contractTemplateName}
+              contractTemplateBody={contractTemplateBody}
+            />
           ) : null}
 
           {current.id === 'security' ? (

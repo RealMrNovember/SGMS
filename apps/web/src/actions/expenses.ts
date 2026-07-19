@@ -4,10 +4,12 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { getTenantWriteBlockReason } from '@/lib/tenant-access';
 import { applyPaymentToExpenses, applyRefundToExpenses } from '@/lib/billing/settle-payment';
+import { issueInvoiceFromPayment } from '@/actions/invoices';
 import { MANAGER_ROLES } from '@/lib/billing/roles';
 import type { OrganizationRole, PaymentMethod } from '@sgms/database';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+import { resolveCashShiftForPayment } from '@/actions/cash-register';
 import {
   decimalToNumber,
   getMemberOpenBalancesByCurrency,
@@ -346,6 +348,12 @@ export async function recordPayment(
     }
   }
 
+  const paymentMethod = parsed.data.paymentMethod as PaymentMethod;
+  const shiftResolution = await resolveCashShiftForPayment(context.organizationId, paymentMethod);
+  if (shiftResolution.error) {
+    return { error: shiftResolution.error };
+  }
+
   await prisma.$transaction(async (tx) => {
     const transaction = await tx.transaction.create({
       data: {
@@ -355,7 +363,8 @@ export async function recordPayment(
         amount: parsed.data.amount,
         currency,
         type: 'PAYMENT',
-        paymentMethod: parsed.data.paymentMethod as PaymentMethod,
+        paymentMethod,
+        cashRegisterShiftId: shiftResolution.shiftId,
         notes: parsed.data.notes ?? null,
         createdById: context.userId,
       },
@@ -368,6 +377,31 @@ export async function recordPayment(
       currency,
       targetExpenseId: parsed.data.expenseId,
     });
+
+    const invoiceFlags = formData.getAll('issueInvoice');
+    const shouldIssueInvoice =
+      invoiceFlags.includes('1') ||
+      (invoiceFlags.length === 0 && !formData.has('issueInvoice'));
+
+    if (shouldIssueInvoice) {
+      const invoice = await issueInvoiceFromPayment(
+        {
+          organizationId: context.organizationId,
+          gymMemberId: parsed.data.gymMemberId,
+          amount: parsed.data.amount,
+          currency,
+          expenseId: parsed.data.expenseId,
+          notes: parsed.data.notes ?? undefined,
+          issuedById: context.userId,
+        },
+        tx,
+      );
+
+      await tx.transaction.update({
+        where: { id: transaction.id },
+        data: { invoiceId: invoice.id },
+      });
+    }
 
     await tx.auditLog.create({
       data: {
@@ -388,6 +422,7 @@ export async function recordPayment(
   revalidatePath(`/dashboard/members/${parsed.data.gymMemberId}`);
   revalidatePath('/athlete/account');
   revalidatePath('/dashboard/pos');
+  revalidatePath('/dashboard/pos/shifts');
 
   return { success: `Tahsilat kaydedildi (${currency}).` };
 }
@@ -454,6 +489,16 @@ export async function recordRefund(
   }
 
   const currency = original.currency.toUpperCase();
+  const refundPaymentMethod = (parsed.data.paymentMethod ??
+    original.paymentMethod) as PaymentMethod;
+  const shiftResolution = await resolveCashShiftForPayment(
+    context.organizationId,
+    refundPaymentMethod,
+    'refund',
+  );
+  if (shiftResolution.error) {
+    return { error: shiftResolution.error };
+  }
 
   await prisma.$transaction(async (tx) => {
     const refund = await tx.transaction.create({
@@ -464,7 +509,8 @@ export async function recordRefund(
         amount: parsed.data.amount,
         currency,
         type: 'REFUND',
-        paymentMethod: (parsed.data.paymentMethod ?? original.paymentMethod) as PaymentMethod,
+        paymentMethod: refundPaymentMethod,
+        cashRegisterShiftId: shiftResolution.shiftId,
         notes: parsed.data.reason.trim(),
         refundOfTransactionId: original.id,
         createdById: context.userId,
@@ -500,6 +546,7 @@ export async function recordRefund(
   revalidatePath(`/dashboard/members/${original.gymMemberId}`);
   revalidatePath('/athlete/account');
   revalidatePath('/dashboard/pos');
+  revalidatePath('/dashboard/pos/shifts');
   revalidatePath('/dashboard/reports');
 
   return {

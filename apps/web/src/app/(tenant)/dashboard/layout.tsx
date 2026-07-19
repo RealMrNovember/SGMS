@@ -33,6 +33,7 @@ import {
   UsersRound,
   Wallet,
   CircleHelp,
+  Wrench,
 } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
@@ -86,11 +87,16 @@ export default async function TenantDashboardLayout({ children }: { children: Re
     session.user.role === 'OWNER' || session.user.role === 'ADMIN' || session.user.role === 'STAFF';
   const canManageFaz17 =
     session.user.role === 'OWNER' || session.user.role === 'ADMIN' || session.user.role === 'STAFF';
+  const canViewHr =
+    session.user.role === 'OWNER' ||
+    session.user.role === 'ADMIN' ||
+    session.user.role === 'STAFF' ||
+    session.user.role === 'TRAINER';
 
   const comingSoonItems = locked
     ? []
     : (
-        ['hr', 'equipment', 'cashShifts', 'notifications', 'insights'] as const
+        ['cashShifts', 'notifications', 'insights'] as const
       ).map((feature) => ({
         href: `/dashboard/coming-soon/${feature}`,
         label: tComingSoon(`features.${feature}.title`),
@@ -120,6 +126,7 @@ export default async function TenantDashboardLayout({ children }: { children: Re
             { href: '/dashboard/programs', label: t('programs'), icon: <ClipboardList /> },
             { href: '/dashboard/trainers', label: t('trainers'), icon: <Dumbbell /> },
             { href: '/dashboard/team', label: t('team'), icon: <IdCard /> },
+            ...(canViewHr ? [{ href: '/dashboard/hr', label: t('hr'), icon: <UsersRound /> }] : []),
             { href: '/dashboard/plans', label: t('plans'), icon: <Layers /> },
             ...(canManageFaz17
               ? [
@@ -127,6 +134,7 @@ export default async function TenantDashboardLayout({ children }: { children: Re
                   { href: '/dashboard/groups', label: t('groups'), icon: <UsersRound /> },
                   { href: '/dashboard/discounts', label: t('discounts'), icon: <Ticket /> },
                   { href: '/dashboard/guest-passes', label: t('guestPasses'), icon: <IdCard /> },
+                  { href: '/dashboard/equipment', label: t('equipment'), icon: <Wrench /> },
                 ]
               : []),
             { href: '/dashboard/settings', label: t('settings'), icon: <Settings /> },

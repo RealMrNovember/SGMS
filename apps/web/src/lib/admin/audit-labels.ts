@@ -19,7 +19,10 @@ export type AuditCategory =
   | 'partner'
   | 'trainer'
   | 'enterprise'
-  | 'leads';
+  | 'leads'
+  | 'compliance'
+  | 'hr'
+  | 'equipment';
 
 export const AUDIT_CATEGORY_ACTIONS: Record<Exclude<AuditCategory, 'all'>, AuditAction[]> = {
   organization: ['ORGANIZATION_CREATED', 'ORGANIZATION_UPDATED', 'ORGANIZATION_DELETED'],
@@ -40,7 +43,7 @@ export const AUDIT_CATEGORY_ACTIONS: Record<Exclude<AuditCategory, 'all'>, Audit
     'CLOUD_SYNC_FAILED',
   ],
   team: ['MEMBER_INVITED', 'USER_CREATED', 'USER_UPDATED', 'MEMBER_UPDATED', 'MEMBER_REMOVED'],
-  members: ['MEMBER_REGISTERED', 'MEASUREMENT_ADDED', 'MEMBERSHIP_REMINDER_SENT'],
+  members: ['MEMBER_REGISTERED', 'MEASUREMENT_ADDED', 'MEMBERSHIP_REMINDER_SENT', 'HEALTH_CONSENT_RECORDED'],
   devices: ['DEVICE_REGISTERED', 'DEVICE_UPDATED', 'DEVICE_DISABLED'],
   finance: [
     'EXPENSE_ADDED',
@@ -50,6 +53,10 @@ export const AUDIT_CATEGORY_ACTIONS: Record<Exclude<AuditCategory, 'all'>, Audit
     'PAYMENT_PLAN_CREATED',
     'PAYMENT_PLAN_CANCELLED',
     'PROFORMA_SENT',
+    'INVOICE_ISSUED',
+    'CASH_SHIFT_OPENED',
+    'CASH_SHIFT_CLOSED',
+    'CASH_X_REPORT',
   ],
   content: ['HELP_ARTICLE_CREATED', 'HELP_ARTICLE_UPDATED', 'HELP_ARTICLE_DELETED'],
   membership: [
@@ -89,7 +96,7 @@ export const AUDIT_CATEGORY_ACTIONS: Record<Exclude<AuditCategory, 'all'>, Audit
     'STAFF_INVITE_SENT',
     'STAFF_INVITE_ACCEPTED',
   ],
-  settings: ['SETTINGS_CHANGED', 'PLATFORM_PAYMENT_SETTINGS_CHANGED'],
+  settings: ['SETTINGS_CHANGED', 'PLATFORM_PAYMENT_SETTINGS_CHANGED', 'CONTRACT_TEMPLATE_UPDATED'],
   partner: [
     'PARTNER_CREATED',
     'PARTNER_UPDATED',
@@ -119,6 +126,31 @@ export const AUDIT_CATEGORY_ACTIONS: Record<Exclude<AuditCategory, 'all'>, Audit
     'LEAD_CONVERTED',
     'LEAD_FOLLOW_UP_SCHEDULED',
     'LEAD_FOLLOW_UP_COMPLETED',
+  ],
+  compliance: [
+    'DATA_EXPORT_REQUESTED',
+    'ACCOUNT_DELETION_REQUESTED',
+    'HEALTH_CONSENT_RECORDED',
+    'CONTRACT_TEMPLATE_UPDATED',
+    'CONTRACT_PDF_GENERATED',
+    'INVOICE_ISSUED',
+  ],
+  hr: [
+    'LEAVE_REQUESTED',
+    'LEAVE_APPROVED',
+    'LEAVE_REJECTED',
+    'SHIFT_CREATED',
+    'SHIFT_ASSIGNED',
+    'PERFORMANCE_REVIEW_CREATED',
+    'DISCIPLINARY_RECORD_CREATED',
+    'STAFF_COMPENSATION_UPDATED',
+  ],
+  equipment: [
+    'EQUIPMENT_CREATED',
+    'EQUIPMENT_UPDATED',
+    'EQUIPMENT_ISSUE_REPORTED',
+    'EQUIPMENT_SERVICE_LOGGED',
+    'MAINTENANCE_SCHEDULE_UPDATED',
   ],
 };
 
@@ -214,6 +246,28 @@ export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   DISCOUNT_CODE_REDEEMED: 'İndirim kodu kullanıldı',
   GUEST_PASS_ISSUED: 'Misafir geçiş izni verildi',
   GUEST_PASS_REVOKED: 'Misafir geçiş izni iptal edildi',
+  DATA_EXPORT_REQUESTED: 'KVKK veri dışa aktarımı',
+  ACCOUNT_DELETION_REQUESTED: 'Hesap silme talebi',
+  HEALTH_CONSENT_RECORDED: 'Sağlık/rıza onayı kaydedildi',
+  CONTRACT_TEMPLATE_UPDATED: 'Sözleşme şablonu güncellendi',
+  CONTRACT_PDF_GENERATED: 'Üyelik sözleşmesi PDF üretildi',
+  INVOICE_ISSUED: 'Fatura düzenlendi',
+  LEAVE_REQUESTED: 'İzin talebi oluşturuldu',
+  LEAVE_APPROVED: 'İzin onaylandı',
+  LEAVE_REJECTED: 'İzin reddedildi',
+  SHIFT_CREATED: 'Vardiya şablonu oluşturuldu',
+  SHIFT_ASSIGNED: 'Vardiya atandı',
+  PERFORMANCE_REVIEW_CREATED: 'Performans değerlendirmesi',
+  DISCIPLINARY_RECORD_CREATED: 'Disiplin kaydı',
+  STAFF_COMPENSATION_UPDATED: 'Personel maaş/prim güncellendi',
+  EQUIPMENT_CREATED: 'Ekipman eklendi',
+  EQUIPMENT_UPDATED: 'Ekipman güncellendi',
+  EQUIPMENT_ISSUE_REPORTED: 'Ekipman arızası bildirildi',
+  EQUIPMENT_SERVICE_LOGGED: 'Ekipman servis kaydı',
+  MAINTENANCE_SCHEDULE_UPDATED: 'Bakım planı güncellendi',
+  CASH_SHIFT_OPENED: 'Kasa vardiyası açıldı',
+  CASH_SHIFT_CLOSED: 'Kasa vardiyası kapandı',
+  CASH_X_REPORT: 'Kasa X raporu',
 };
 
 export const ALL_AUDIT_ACTIONS = Object.keys(AUDIT_ACTION_LABELS) as AuditAction[];
@@ -238,6 +292,9 @@ export const AUDIT_CATEGORY_LABELS: Record<AuditCategory, string> = {
   trainer: 'PT Performansı',
   enterprise: 'Kurumsal Hiyerarşi',
   leads: 'Aday Takibi',
+  compliance: 'Uyumluluk / KVKK',
+  hr: 'Personel / HR',
+  equipment: 'Ekipman',
 };
 
 export const LOGIN_FAILURE_LABELS: Record<string, string> = {

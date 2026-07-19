@@ -260,6 +260,11 @@ export function MemberAccountPanel({
               placeholder={t('paymentNotes')}
               className={`input ${currencyOptions.length > 1 ? 'md:col-span-1' : 'md:col-span-2'}`}
             />
+            <label className="flex items-center gap-2 text-sm md:col-span-2">
+              <input type="hidden" name="issueInvoice" value="0" />
+              <input type="checkbox" name="issueInvoice" value="1" defaultChecked className="rounded" />
+              <span className="muted">{t('issueInvoice')}</span>
+            </label>
             <button type="submit" disabled={payPending} className="button px-4 py-2 text-sm">
               {payPending ? tCommon('ellipsis') : t('recordPayment')}
             </button>

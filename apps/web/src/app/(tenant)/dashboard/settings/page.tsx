@@ -1,4 +1,5 @@
 import { SettingsWorkspace } from '@/components/settings/settings-workspace';
+import { getDefaultContractTemplate } from '@/actions/contracts';
 import { auth } from '@/lib/auth';
 import { parseOrganizationSettings } from '@/lib/admin/org-settings';
 import { prisma } from '@/lib/prisma';
@@ -34,9 +35,20 @@ export default async function DashboardSettingsPage() {
 
   const settings = parseOrganizationSettings(org.settings);
 
+  const contractTemplate =
+    session.user.role === 'OWNER' || session.user.role === 'ADMIN'
+      ? await getDefaultContractTemplate(session.user.organizationId)
+      : null;
+
   return (
     <div className="mx-auto max-w-5xl space-y-6">
-      <SettingsWorkspace role={session.user.role} orgName={org.name} settings={settings} />
+      <SettingsWorkspace
+        role={session.user.role}
+        orgName={org.name}
+        settings={settings}
+        contractTemplateName={contractTemplate?.name}
+        contractTemplateBody={contractTemplate?.bodyText}
+      />
     </div>
   );
 }

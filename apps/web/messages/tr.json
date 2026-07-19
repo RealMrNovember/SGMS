@@ -58,7 +58,9 @@
     "classes": "Dersler",
     "groups": "Gruplar",
     "discounts": "Kuponlar",
-    "guestPasses": "Misafir Kartları"
+    "guestPasses": "Misafir Kartları",
+    "equipment": "Ekipman",
+    "hr": "Personel Yönetimi"
   },
   "auth": {
     "login": "Giriş Yap",
@@ -612,6 +614,7 @@
     "void": "İptal",
     "exportCsv": "CSV ekstre indir",
     "exportPdf": "PDF ekstre indir",
+    "issueInvoice": "Tahsilat için fatura kes",
     "refund": "İade",
     "refundAmount": "İade tutarı",
     "refundReason": "İade gerekçesi",
@@ -686,7 +689,36 @@
       "openCount": "{count} açık kalem",
       "noPayments": "Bugün tahsilat yok"
     },
-    "overdueInstallmentBadge": "Vadesi geçen taksit"
+    "overdueInstallmentBadge": "Vadesi geçen taksit",
+    "cashShift": {
+      "title": "Kasa vardiyası",
+      "subtitle": "Nakit tahsilat için vardiya açık olmalıdır. Kart ve havale vardiya olmadan alınabilir.",
+      "openShift": "Vardiya aç",
+      "closeShift": "Vardiya kapat (Z raporu)",
+      "xReport": "X raporu",
+      "viewArchive": "Geçmiş vardiyalar",
+      "shiftOpen": "Açık vardiya",
+      "openedAt": "Açılış",
+      "openedBy": "Açan",
+      "openingBalance": "Açılış bakiyesi",
+      "expectedBalance": "Beklenen kasa",
+      "countedBalance": "Sayılan kasa",
+      "discrepancy": "Fark",
+      "cashIn": "Nakit tahsilat",
+      "cashOut": "Nakit iade",
+      "notes": "Not",
+      "openHint": "Kasada saydığınız nakit tutarını girin. Nakit tahsilat bu vardiyaya bağlanır.",
+      "reportTitle": "Vardiya özeti",
+      "method": "Yöntem",
+      "payments": "Tahsilat",
+      "refunds": "İade",
+      "net": "Net",
+      "methods": {
+        "CASH": "Nakit",
+        "CARD": "Kart",
+        "TRANSFER": "Havale"
+      }
+    }
   },
   "marketing": {
     "nav": {
@@ -984,6 +1016,7 @@
       "notifications": "Bildirimler",
       "billing": "Fatura",
       "integrations": "Entegrasyonlar",
+      "privacy": "Gizlilik / KVKK",
       "security": "Güvenlik"
     },
     "general": {
@@ -1022,11 +1055,26 @@
         "itemPayment": "Iyzico / PayTR (salon sahibi anahtarları)",
         "itemHardware": "RFID / turnike donanım entegrasyonları"
       },
+      "privacy": {
+        "subtitle": "Veri dışa aktarma, hesap silme talebi ve sözleşme şablonları."
+      },
       "security": {
         "subtitle": "İki faktörlü doğrulama ve hesap güvenliği.",
         "body": "Authenticator 2FA, yedek kodlar ve kurtarma seçenekleri güvenlik sayfasındadır.",
         "cta": "Güvenlik ayarlarına git"
       }
+    },
+    "privacy": {
+      "exportTitle": "Salon verilerini indir",
+      "exportBody": "Üye kayıtları, cari hareketler ve mesajlar JSON veya CSV olarak indirilebilir. İşlem denetim kaydına yazılır.",
+      "downloadJson": "JSON indir",
+      "downloadCsv": "Üyeler CSV",
+      "deletionTitle": "Hesap silme talebi",
+      "deletionBody": "Salon hesabınızın kalıcı silinmesi için talep gönderin. Veriler hemen silinmez; platform yöneticisi inceler.",
+      "deletionReasonPlaceholder": "Silme gerekçenizi yazın (en az 10 karakter)…",
+      "deletionSubmit": "Silme talebi gönder",
+      "submitting": "Gönderiliyor…",
+      "saving": "Kaydediliyor…"
     }
   },
   "billing": {
@@ -1662,6 +1710,225 @@
       "used": "Kullanıldı",
       "revoked": "İptal",
       "revoke": "İptal et"
+    }
+  },
+  "faz23": {
+    "back": "← Özet",
+    "backToList": "← Ekipman listesi",
+    "title": "Ekipman & Bakım",
+    "subtitle": "Envanter, garanti durumu, servis geçmişi ve periyodik bakım planları. QR ile arıza bildirimi.",
+    "scanTitle": "Ekipman QR",
+    "createTitle": "Yeni ekipman",
+    "createSubmit": "Ekipman ekle",
+    "listTitle": "Ekipman envanteri",
+    "empty": "Henüz ekipman kaydı yok.",
+    "name": "Ekipman adı",
+    "category": "Kategori",
+    "categories": {
+      "CARDIO": "Kardiyo",
+      "STRENGTH": "Ağırlık",
+      "GROUP_CLASS": "Grup dersi",
+      "OTHER": "Diğer"
+    },
+    "status": "Durum",
+    "statuses": {
+      "OPERATIONAL": "Çalışır",
+      "UNDER_MAINTENANCE": "Bakımda",
+      "OUT_OF_SERVICE": "Servis dışı",
+      "RETIRED": "Emekli"
+    },
+    "serialNumber": "Seri no",
+    "location": "Konum / salon",
+    "purchaseDate": "Satın alma tarihi",
+    "purchasePrice": "Satın alma bedeli (TRY)",
+    "warrantyExpiresAt": "Garanti bitişi",
+    "photoUrl": "Fotoğraf URL",
+    "publicCodeLabel": "Kod",
+    "qrTitle": "Ekipman QR",
+    "qrHint": "Bu kod yalnızca bir kez gösterilir; yazdırın veya ekran görüntüsü alın.",
+    "overdue": "Gecikmiş bakım",
+    "dueToday": "Bugün",
+    "lastService": "Son servis",
+    "nextMaintenance": "Sonraki bakım",
+    "noServiceYet": "Henüz servis kaydı yok",
+    "noMaintenanceScheduled": "Bakım planı yok",
+    "warrantyStatus": "Garanti",
+    "warrantyActive": "Garanti geçerli",
+    "warrantyExpired": "Garanti süresi dolmuş",
+    "warrantyUnknown": "Garanti bilgisi yok",
+    "reportIssueTitle": "Arıza bildir",
+    "issueDescription": "Açıklama",
+    "setUnderMaintenance": "Durumu bakımda olarak işaretle",
+    "reportIssueSubmit": "Arızayı bildir",
+    "addServiceLogTitle": "Servis kaydı ekle",
+    "serviceProvider": "Servis sağlayıcı",
+    "serviceDate": "Servis tarihi",
+    "cost": "Maliyet (TRY)",
+    "warrantyClaim": "Garanti kapsamında",
+    "addServiceLogSubmit": "Kaydet",
+    "maintenanceScheduleTitle": "Bakım planı oluştur",
+    "maintenanceTitle": "Plan adı",
+    "frequency": "Sıklık",
+    "frequencies": {
+      "MONTHLY": "Aylık",
+      "QUARTERLY": "3 aylık",
+      "YEARLY": "Yıllık"
+    },
+    "nextDueDate": "Sonraki bakım",
+    "lastDoneAt": "Son yapılan",
+    "notes": "Notlar",
+    "maintenanceScheduleSubmit": "Plan oluştur",
+    "markMaintenanceDone": "Bakım yapıldı",
+    "maintenancePlansTitle": "Bakım planları",
+    "serviceHistoryTitle": "Servis geçmişi",
+    "noServiceDate": "Tarih yok",
+    "viewPhoto": "Fotoğrafı gör",
+    "purchaseInfoTitle": "Satın alma bilgileri",
+    "scanHint": "QR tarama yolu"
+  },
+  "faz22": {
+    "back": "← Özet",
+    "title": "Personel Yönetimi",
+    "subtitle": "İzin talepleri, vardiya planı ve personel değerlendirmeleri.",
+    "stats": {
+      "pendingLeaves": "Bekleyen izin",
+      "onLeaveToday": "Bugün izinde",
+      "onShiftToday": "Bugün vardiyada"
+    },
+    "quickLinks": "Hızlı erişim",
+    "links": {
+      "leaves": "İzinler",
+      "shifts": "Vardiyalar"
+    },
+    "pendingLeavesTitle": "Bekleyen izin talepleri",
+    "pendingLeavesEmpty": "Bekleyen izin talebi yok.",
+    "onLeaveTodayTitle": "Bugün izinde olanlar",
+    "onLeaveTodayEmpty": "Bugün izinde kimse yok.",
+    "onShiftTodayTitle": "Bugün vardiyada olanlar",
+    "onShiftTodayEmpty": "Bugün tanımlı vardiya yok.",
+    "unassignedShift": "Atama yok",
+    "leaves": {
+      "back": "← Personel",
+      "title": "İzin Yönetimi",
+      "subtitle": "İzin talebi oluşturun veya bekleyen talepleri inceleyin.",
+      "requestTitle": "İzin talebi",
+      "type": "İzin türü",
+      "types": {
+        "ANNUAL": "Yıllık",
+        "EXCUSED": "Mazeret",
+        "MEDICAL": "Sağlık"
+      },
+      "startDate": "Başlangıç",
+      "endDate": "Bitiş",
+      "reason": "Gerekçe",
+      "submitRequest": "Talep gönder",
+      "listTitle": "İzin taleplerim",
+      "listTitleAdmin": "Tüm izin talepleri",
+      "empty": "Henüz izin talebi yok.",
+      "approve": "Onayla",
+      "reject": "Reddet",
+      "reviewNotesPlaceholder": "İnceleme notu (opsiyonel)",
+      "status": {
+        "PENDING": "Bekliyor",
+        "APPROVED": "Onaylandı",
+        "REJECTED": "Reddedildi",
+        "CANCELLED": "İptal"
+      }
+    },
+    "shifts": {
+      "back": "← Personel",
+      "title": "Vardiya Planı",
+      "subtitle": "Haftalık vardiya şablonları ve personel atamaları.",
+      "createTitle": "Yeni vardiya şablonu",
+      "name": "Vardiya adı",
+      "dayOfWeek": "Gün",
+      "startTime": "Başlangıç saati",
+      "endTime": "Bitiş saati",
+      "createSubmit": "Vardiya oluştur",
+      "assignTitle": "Personele ata",
+      "shift": "Vardiya",
+      "staff": "Personel",
+      "selectShift": "Vardiya seçin",
+      "selectStaff": "Personel seçin",
+      "weekStartDate": "Hafta başlangıcı (opsiyonel)",
+      "weekStartHint": "Boş bırakılırsa şablon vardiya olarak uygulanır.",
+      "notes": "Not",
+      "assignSubmit": "Atamayı kaydet",
+      "calendarTitle": "Haftalık takvim",
+      "noShifts": "—",
+      "unassigned": "Atama yok",
+      "weekdays": {
+        "mon": "Pzt",
+        "tue": "Sal",
+        "wed": "Çar",
+        "thu": "Per",
+        "fri": "Cum",
+        "sat": "Cmt",
+        "sun": "Paz"
+      }
+    },
+    "performance": {
+      "createTitle": "Performans değerlendirmesi",
+      "subject": "Personel",
+      "selectStaff": "Personel seçin",
+      "periodLabel": "Dönem",
+      "score": "Puan (1–5)",
+      "notes": "Değerlendirme notu",
+      "submit": "Kaydet"
+    },
+    "disciplinary": {
+      "createTitle": "Disiplin kaydı",
+      "subject": "Personel",
+      "selectStaff": "Personel seçin",
+      "severity": "Seviye",
+      "severities": {
+        "WARNING": "Uyarı",
+        "REPRIMAND": "İkaz",
+        "SUSPENSION": "Askıya alma"
+      },
+      "title": "Başlık",
+      "description": "Açıklama",
+      "occurredAt": "Olay tarihi",
+      "submit": "Kaydet"
+    },
+    "compensation": {
+      "title": "Maaş / prim referansı",
+      "hint": "Bordro değil — muhasebeye aktarım için referans tutarlar.",
+      "baseSalary": "Referans maaş (TRY)",
+      "bonusSummary": "Prim özeti",
+      "save": "Kaydet",
+      "exportCsv": "CSV dışa aktar"
+    }
+  },
+  "faz25": {
+    "backToPos": "← POS / Kasa",
+    "title": "Kasa vardiyaları",
+    "subtitle": "Kapanmış vardiyaların arşivi — beklenen/sayılan kasa farkı ve Z raporu kırılımı.",
+    "archiveTitle": "Kapanmış vardiyalar",
+    "empty": "Henüz kapanmış vardiya yok.",
+    "openedBy": "Açan",
+    "closedBy": "Kapatan",
+    "discrepancyBadge": "Fark {amount}",
+    "balanced": "Dengede",
+    "zReport": "Z raporu (ödeme kırılımı)"
+  },
+  "faz18": {
+    "healthConsent": {
+      "title": "Sağlık formu / risk rızası",
+      "subtitle": "Üyenin sağlık beyanı ve risk kabul formunu onayladığını kaydedin; sözleşme PDF'ine otomatik eklenir.",
+      "checkboxLabel": "Üye sağlık formunu okudu ve riskleri kabul etti.",
+      "versionPlaceholder": "Form sürümü (ör. 1.0)",
+      "submit": "Rızayı kaydet",
+      "update": "Rızayı güncelle",
+      "saving": "Kaydediliyor…",
+      "recorded": "{date} — {by} (sürüm {version})",
+      "downloadContract": "Sözleşmeyi indir (PDF)"
+    },
+    "contracts": {
+      "templateTitle": "Üyelik sözleşmesi şablonu",
+      "templateHint": "PDF sözleşmede kullanılacak metin. Değişkenler otomatik doldurulur.",
+      "varsHint": "Değişkenler: {uyeAdi}, {planAdi}, {tarih}, {fiyat}, {salonAdi}, {rizaTarihi}, {rizaKullanici}",
+      "saveTemplate": "Şablonu kaydet"
     }
   }
 }

@@ -53,7 +53,9 @@
     "leads": "Лиды",
     "classes": "Занятия",
     "discounts": "Купоны",
-    "guestPasses": "Гостевые пропуска"
+    "guestPasses": "Гостевые пропуска",
+    "hr": "HR",
+    "equipment": "Оборудование"
   },
   "auth": {
     "login": "Войти",
@@ -975,7 +977,8 @@
       "notifications": "Notifications",
       "billing": "Billing",
       "integrations": "Integrations",
-      "security": "Security"
+      "security": "Security",
+      "privacy": "Конфиденциальность / GDPR"
     },
     "general": {
       "defaultLocale": "Default language",
@@ -1018,6 +1021,18 @@
         "body": "Authenticator 2FA, backup codes, and recovery live on the security page.",
         "cta": "Open security settings"
       }
+    },
+    "privacy": {
+      "exportTitle": "Download gym data",
+      "exportBody": "Member records, ledger activity, and messages can be exported as JSON or CSV. The action is audit-logged.",
+      "downloadJson": "Download JSON",
+      "downloadCsv": "Members CSV",
+      "deletionTitle": "Account deletion request",
+      "deletionBody": "Request permanent deletion of your gym account. Data is not removed immediately; a platform admin will review.",
+      "deletionReasonPlaceholder": "Explain why you want deletion (min. 10 characters)…",
+      "deletionSubmit": "Submit deletion request",
+      "submitting": "Submitting…",
+      "saving": "Saving…"
     }
   },
   "billing": {
@@ -1654,5 +1669,224 @@
       "revoked": "Revoked",
       "revoke": "Revoke"
     }
+  },
+  "faz18": {
+    "healthConsent": {
+      "title": "Health form / risk waiver",
+      "subtitle": "Record that the member accepted the health declaration; it is embedded in the contract PDF.",
+      "checkboxLabel": "Member has read the health form and accepts the risks.",
+      "versionPlaceholder": "Form version (e.g. 1.0)",
+      "submit": "Record consent",
+      "update": "Update consent",
+      "saving": "Saving…",
+      "recorded": "{date} — {by} (version {version})",
+      "downloadContract": "Download contract (PDF)"
+    },
+    "contracts": {
+      "templateTitle": "Membership contract template",
+      "templateHint": "Text used in the PDF contract. Variables are filled automatically.",
+      "varsHint": "Variables: {uyeAdi}, {planAdi}, {tarih}, {fiyat}, {salonAdi}, {rizaTarihi}, {rizaKullanici}",
+      "saveTemplate": "Save template"
+    }
+  },
+  "faz22": {
+    "back": "← Overview",
+    "title": "HR & Staff",
+    "subtitle": "Leave requests, shift planning, and staff evaluations.",
+    "stats": {
+      "pendingLeaves": "Pending leave",
+      "onLeaveToday": "On leave today",
+      "onShiftToday": "On shift today"
+    },
+    "quickLinks": "Quick links",
+    "links": {
+      "leaves": "Leaves",
+      "shifts": "Shifts"
+    },
+    "pendingLeavesTitle": "Pending leave requests",
+    "pendingLeavesEmpty": "No pending leave requests.",
+    "onLeaveTodayTitle": "On leave today",
+    "onLeaveTodayEmpty": "No one is on leave today.",
+    "onShiftTodayTitle": "On shift today",
+    "onShiftTodayEmpty": "No shifts scheduled today.",
+    "unassignedShift": "Unassigned",
+    "leaves": {
+      "back": "← HR",
+      "title": "Leave Management",
+      "subtitle": "Submit leave requests or review pending ones.",
+      "requestTitle": "Leave request",
+      "type": "Leave type",
+      "types": {
+        "ANNUAL": "Annual",
+        "EXCUSED": "Excused",
+        "MEDICAL": "Medical"
+      },
+      "startDate": "Start date",
+      "endDate": "End date",
+      "reason": "Reason",
+      "submitRequest": "Submit request",
+      "listTitle": "My leave requests",
+      "listTitleAdmin": "All leave requests",
+      "empty": "No leave requests yet.",
+      "approve": "Approve",
+      "reject": "Reject",
+      "reviewNotesPlaceholder": "Review notes (optional)",
+      "status": {
+        "PENDING": "Pending",
+        "APPROVED": "Approved",
+        "REJECTED": "Rejected",
+        "CANCELLED": "Cancelled"
+      }
+    },
+    "shifts": {
+      "back": "← HR",
+      "title": "Shift Schedule",
+      "subtitle": "Weekly shift templates and staff assignments.",
+      "createTitle": "New shift template",
+      "name": "Shift name",
+      "dayOfWeek": "Day",
+      "startTime": "Start time",
+      "endTime": "End time",
+      "createSubmit": "Create shift",
+      "assignTitle": "Assign to staff",
+      "shift": "Shift",
+      "staff": "Staff member",
+      "selectShift": "Select shift",
+      "selectStaff": "Select staff",
+      "weekStartDate": "Week start (optional)",
+      "weekStartHint": "Leave blank to apply as a recurring template shift.",
+      "notes": "Notes",
+      "assignSubmit": "Save assignment",
+      "calendarTitle": "Weekly calendar",
+      "noShifts": "—",
+      "unassigned": "Unassigned",
+      "weekdays": {
+        "mon": "Mon",
+        "tue": "Tue",
+        "wed": "Wed",
+        "thu": "Thu",
+        "fri": "Fri",
+        "sat": "Sat",
+        "sun": "Sun"
+      }
+    },
+    "performance": {
+      "createTitle": "Performance review",
+      "subject": "Staff member",
+      "selectStaff": "Select staff",
+      "periodLabel": "Period",
+      "score": "Score (1–5)",
+      "notes": "Review notes",
+      "submit": "Save"
+    },
+    "disciplinary": {
+      "createTitle": "Disciplinary record",
+      "subject": "Staff member",
+      "selectStaff": "Select staff",
+      "severity": "Severity",
+      "severities": {
+        "WARNING": "Warning",
+        "REPRIMAND": "Reprimand",
+        "SUSPENSION": "Suspension"
+      },
+      "title": "Title",
+      "description": "Description",
+      "occurredAt": "Occurred at",
+      "submit": "Save"
+    },
+    "compensation": {
+      "title": "Salary / bonus reference",
+      "hint": "Not payroll — reference amounts for accounting export.",
+      "baseSalary": "Reference salary (TRY)",
+      "bonusSummary": "Bonus summary",
+      "save": "Save",
+      "exportCsv": "Export CSV"
+    }
+  },
+  "faz23": {
+    "back": "← Overview",
+    "backToList": "← Equipment list",
+    "title": "Equipment & Maintenance",
+    "subtitle": "Inventory, warranty status, service history, and maintenance schedules. Report issues via QR.",
+    "scanTitle": "Equipment QR",
+    "createTitle": "New equipment",
+    "createSubmit": "Add equipment",
+    "listTitle": "Equipment inventory",
+    "empty": "No equipment records yet.",
+    "name": "Equipment name",
+    "category": "Category",
+    "categories": {
+      "CARDIO": "Cardio",
+      "STRENGTH": "Strength",
+      "GROUP_CLASS": "Group class",
+      "OTHER": "Other"
+    },
+    "status": "Status",
+    "statuses": {
+      "OPERATIONAL": "Operational",
+      "UNDER_MAINTENANCE": "Under maintenance",
+      "OUT_OF_SERVICE": "Out of service",
+      "RETIRED": "Retired"
+    },
+    "serialNumber": "Serial number",
+    "location": "Location / room",
+    "purchaseDate": "Purchase date",
+    "purchasePrice": "Purchase price (TRY)",
+    "warrantyExpiresAt": "Warranty expires",
+    "photoUrl": "Photo URL",
+    "publicCodeLabel": "Code",
+    "qrTitle": "Equipment QR",
+    "qrHint": "This code is shown once — print it or take a screenshot.",
+    "overdue": "Overdue maintenance",
+    "dueToday": "Due today",
+    "lastService": "Last service",
+    "nextMaintenance": "Next maintenance",
+    "noServiceYet": "No service records yet",
+    "noMaintenanceScheduled": "No maintenance scheduled",
+    "warrantyStatus": "Warranty",
+    "warrantyActive": "Under warranty",
+    "warrantyExpired": "Warranty expired",
+    "warrantyUnknown": "No warranty info",
+    "reportIssueTitle": "Report issue",
+    "issueDescription": "Description",
+    "setUnderMaintenance": "Mark status as under maintenance",
+    "reportIssueSubmit": "Report issue",
+    "addServiceLogTitle": "Add service log",
+    "serviceProvider": "Service provider",
+    "serviceDate": "Service date",
+    "cost": "Cost (TRY)",
+    "warrantyClaim": "Warranty claim",
+    "addServiceLogSubmit": "Save",
+    "maintenanceScheduleTitle": "Create maintenance schedule",
+    "maintenanceTitle": "Schedule name",
+    "frequency": "Frequency",
+    "frequencies": {
+      "MONTHLY": "Monthly",
+      "QUARTERLY": "Quarterly",
+      "YEARLY": "Yearly"
+    },
+    "nextDueDate": "Next due",
+    "lastDoneAt": "Last done",
+    "notes": "Notes",
+    "maintenanceScheduleSubmit": "Create schedule",
+    "markMaintenanceDone": "Mark done",
+    "maintenancePlansTitle": "Maintenance plans",
+    "serviceHistoryTitle": "Service history",
+    "noServiceDate": "No date",
+    "viewPhoto": "View photo",
+    "purchaseInfoTitle": "Purchase details",
+    "scanHint": "QR scan path"
+  },
+  "faz25": {
+    "backToPos": "← POS / Cash desk",
+    "title": "Cash register shifts",
+    "subtitle": "Archive of closed shifts with expected vs counted cash and Z report breakdown.",
+    "archiveTitle": "Closed shifts",
+    "empty": "No closed shifts yet.",
+    "openedBy": "Opened by",
+    "closedBy": "Closed by",
+    "discrepancyBadge": "Discrepancy {amount}",
+    "balanced": "Balanced",
+    "zReport": "Z report (payment breakdown)"
   }
 }

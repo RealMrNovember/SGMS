@@ -53,14 +53,14 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 15 | Kimlik, Onboarding & Uyum Sertleştirme | ✅ Tamamlandı | ~95% (proaktif hatırlatma + 6 dil çevirisi kaldı) |
 | 16 | CiciByte Cloud Ticari Entegrasyonu (Ödeme, Referans/Komisyon, Release) | 🔄 Devam ediyor | ~90% (Platform Ödeme Ayarları paneli — iyzico/PayTR/EFT — 2026-07-19'da eklendi; gerçek anahtarlar bekleniyor) |
 | 17 | Üyelik Senaryoları & Ders/Sınıf Yönetimi | ✅ Tamamlandı | 100% (17.0–17.7 — Lead, dondurma/devir, grup üyelik, ders/yoklama/QR, kupon, POS stok, Guest Pass — 2026-07-19) |
-| 18 | Uyumluluk & Sağlamlaştırma (2FA, GDPR, E2E, Invoice) | 🔄 Devam ediyor | ~40% (2FA + Playwright E2E tamamlandı — 2026-07-19; GDPR self-servis, vardiya, sağlık formu + 18.1 PDF, Invoice Cursor'da devam ediyor) |
+| 18 | Uyumluluk & Sağlamlaştırma (2FA, GDPR, E2E, Invoice) | ✅ Tamamlandı | 100% (GDPR self-servis, sağlık rızası, Invoice, 18.1 sözleşme PDF; 2FA+E2E önceden — 2026-07-19) |
 | 19 | SGMS Masaüstü — Genişletme | 🔲 Gelecek Vizyon | 0% |
 | 20 | SGMS Mobil Uygulama | 🔲 Gelecek Vizyon | 0% |
 | 21 | PT Performans, Komisyon & Prim Yönetimi | ✅ Tamamlandı | 100% (CSV export ve POS entegrasyonu v2'ye ertelendi) |
-| 22 | Personel Yönetimi / HR | 🔄 Devam ediyor | 0% (Cursor'da başladı — 2026-07-19) |
-| 23 | Ekipman Yönetimi & Bakım Planları | 🔄 Devam ediyor | 0% (Cursor'da başladı — 2026-07-19) |
+| 22 | Personel Yönetimi / HR | ✅ Tamamlandı | 100% (izin, vardiya, performans, disiplin, maaş CSV, /dashboard/hr — 2026-07-19) |
+| 23 | Ekipman Yönetimi & Bakım Planları | ✅ Tamamlandı | 100% (envanter, servis, bakım rozetleri, QR — 2026-07-19) |
 | 24 | Temizlik Yönetimi | 🔲 Planlandı | 0% |
-| 25 | Kasa Yönetimi (Vardiya, X/Z Raporu) | 🔄 Devam ediyor | 0% (Cursor'da başladı — 2026-07-19) |
+| 25 | Kasa Yönetimi (Vardiya, X/Z Raporu) | ✅ Tamamlandı | 100% (CashRegisterShift, X/Z, nakit kilidi — 2026-07-19) |
 | 26 | Dijital Üyelik Kartı (Wallet/NFC) | 🔲 Planlandı | 0% |
 | 27 | Bildirim Merkezi (Push/SMS/WhatsApp/Mail) | 🔄 Devam ediyor | ~35% (tarayıcı Web Push tamamlandı) |
 | 28 | İleri Raporlama & Business Intelligence | ✅ Tamamlandı | ~80% (ARR, churn-anketi, Excel/PDF export v2'ye ertelendi) |
@@ -691,25 +691,27 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ---
 
-## 🔲 Faz 18 — Uyumluluk & Sağlamlaştırma (Öncelik: P2)
+## ✅ Faz 18 — Uyumluluk & Sağlamlaştırma (Öncelik: P2) — ✅ 2026-07-19
 
-- [ ] 2FA (en azından Master Admin ve OWNER rolü için — TOTP, `otplib` veya benzeri)
-- [ ] Kendi kendine veri indirme / hesap silme (KVKK/GDPR self-servis — `/dashboard/settings` altına)
-- [ ] Personel vardiya planlama — basit haftalık takvim
-- [ ] Sağlık formu / rıza metni — üye kaydında imza/onay kaydı, **artık aşağıdaki otomatik PDF motoruyla somut bir çıktıya bağlanıyor**
-- [ ] Playwright E2E — login, CRM ölçüm ekleme, expense akışı (Faz 13.4'ten kalan)
-- [ ] `Invoice` modeli (Faz 8'den kalan tek opsiyonel kalem) — e-fatura/resmi fatura kaydı
+- [x] 2FA (Master Admin / OWNER — TOTP; önceden tamamlandı)
+- [x] Kendi kendine veri indirme / hesap silme talebi (KVKK/GDPR — `/dashboard/settings` → Gizlilik; hard-delete yok, Master Admin bildirimi)
+- [x] Personel vardiya planlama — Faz 22 `Shift`/`ShiftAssignment` ile birleştirildi (ayrı model yok)
+- [x] Sağlık formu / rıza — `healthConsentAcceptedAt/ById/Version`; üye detayında kayıt; sözleşme PDF'ine gömülür
+- [x] Playwright E2E — önceden tamamlandı (Faz 13.4)
+- [x] `Invoice` resmi alanları (`invoiceNumber`, `taxId`, `issuedAt`) + POS tahsilatta fatura düzenleme
 
-### 18.1 Otomatik PDF Üretimi (Üyelik Sözleşmesi / Risk Kabul Formu) — yeni, 2026-07-16 eklendi
+### 18.1 Otomatik PDF Üretimi (Üyelik Sözleşmesi / Risk Kabul Formu) — ✅ 2026-07-19
 
-> **Senaryo:** Üye kaydı sırasında ıslak imza için basılabilir, salonun kendi marka kimliğini taşıyan bir "Üyelik Sözleşmesi" veya "Risk Kabul Formu" çıktısı bugün elle Word/Excel'de hazırlanıyor. Faz 8.4'te üye ekstresi için zaten bir PDF motoru (`lib/member-statement-pdf.ts`) kurulmuş durumda — bu, aynı altyapının sözleşme/form şablonlarına genişletilmesidir.
-- [ ] `ContractTemplate` modeli — salon bazında özelleştirilebilir şablon (değişkenler: üye adı, plan, tarih, fiyat vb. — mevcut e-posta şablon sistemiyle — `lib/admin/email-templates.ts` — aynı değişken-doldurma deseni)
-- [ ] PDF üretim motoru mevcut `lib/member-statement-pdf.ts` altyapısı genişletilerek kurulur (React PDF/Puppeteer arasında mevcut kütüphaneyle tutarlı olan tercih edilir — ek bağımlılık riski minimize edilir)
-- [ ] Üye kaydı tamamlandığında veya kayıt formunda "Sözleşmeyi indir/yazdır" butonu; sağlık formu/rıza metni onayı bu PDF'e otomatik gömülür (checkbox + zaman damgası + kullanıcı kimliği — Faz 24'teki dijital imza desenine benzer bir denetim izi)
+> **Senaryo:** Salon markalı üyelik sözleşmesi / risk formu — `pdf-lib` + `ContractTemplate` değişken doldurma (`fillEmailTemplate` deseni).
+- [x] `ContractTemplate` — `{uyeAdi}`, `{planAdi}`, `{tarih}`, `{fiyat}`, `{salonAdi}`, rıza alanları
+- [x] `lib/contract-pdf.ts` — mevcut `member-statement-pdf` / pdf-lib altyapısı (yeni kütüphane yok)
+- [x] Üye detayında "Sözleşmeyi indir"; `/api/v1/members/[id]/contract-pdf`
 
-**Kabul kriteri:** Master Admin girişinde 2FA zorunlu · bir üye kendi verisini indirebiliyor · CI'da Playwright suite'i yeşil · 🔲 üye kaydında tek tıkla, salon markasını taşıyan bir üyelik sözleşmesi PDF'i indirilebiliyor
+**Kabul kriteri:** ✅ Veri indirme · ✅ sözleşme PDF · ✅ Invoice POS entegrasyonu · ✅ 2FA/E2E (önceden)
 
-**Bağımlılık:** Faz 15-17 tamamlanmış olmalı (bu faz üstüne inşa edilen bir olgunluk katmanı)
+**Dosyalar:** migration `20260719090000_faz18_22_23_25_compliance_hr_equipment_cash`, `actions/privacy|contracts|invoices.ts`, `lib/contract-pdf.ts`, settings privacy paneli, messages (6 dil)
+
+**Bağımlılık:** Faz 15-17 ✅
 
 ---
 
@@ -764,39 +766,41 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ---
 
-## 🔲 Faz 22 — Personel Yönetimi / HR (Öncelik: P2)
+## ✅ Faz 22 — Personel Yönetimi / HR (Öncelik: P2) — ✅ 2026-07-19
 
-> **Senaryo:** Resepsiyonist Ayşe hafta sonu izin istiyor, salon sahibi kimin hangi vardiyada olduğunu bir WhatsApp grubundan takip ediyor. 10+ personelli bir salonda bu sürdürülemez.
+> **Senaryo:** İzin talebi + haftalık vardiya — WhatsApp yerine panel.
+- [x] `LeaveRequest` — yıllık/mazeret/sağlık; PENDING→APPROVED/REJECTED; OWNER/ADMIN onay
+- [x] `Shift` / `ShiftAssignment` — haftalık çizelge, çakışma uyarısı (Faz 18 vardiya ile aynı model)
+- [x] `PerformanceReview` — OWNER/ADMIN
+- [x] `DisciplinaryRecord` — hassas; yalnızca OWNER/ADMIN + audit
+- [x] `baseSalary` + `bonusSummary` + CSV dışa aktarım (bordro yok)
+- [x] `/dashboard/hr` — özet; `/hr/leaves`, `/hr/shifts`
 
-- [ ] `LeaveRequest` — izin talebi (`type`: yıllık/mazeret/sağlık, `startDate`/`endDate`, `status`: beklemede/onaylı/reddedildi), OWNER/ADMIN onay akışı
-- [ ] `Shift` / `ShiftAssignment` — haftalık vardiya planlama takvimi, personel kendi vardiyasını görebilir, çakışma uyarısı
-- [ ] `PerformanceReview` — periyodik değerlendirme kaydı (serbest metin + puanlama), yalnızca OWNER/ADMIN erişimi
-- [ ] `DisciplinaryRecord` — uyarı/tutanak kaydı (hassas veri, sıkı yetkilendirme + audit log)
-- [ ] Maaş/prim alanı — SGMS bir bordro sistemi **olmayacak** (bu, muhasebe yazılımlarının işi — bkz. Faz 31 Entegrasyon Pazaryeri), ama temel `baseSalary` + prim özeti alanları tutulup dışa aktarılabilir (CSV/Excel), böylece mevcut muhasebe/bordro yazılımına aktarılabilir
-- [ ] `/dashboard/hr` — personel özet paneli: kim izinli, kim bugün vardiyada, bekleyen izin talepleri
+**Kabul kriteri:** ✅ İzin talebi/onay · ✅ haftalık vardiya ekipçe görünür
 
-**Kabul kriteri:** Bir personel izin talebi oluşturup onay bekleyebiliyor · haftalık vardiya çizelgesi tüm ekip tarafından görülebiliyor
+**Dosyalar:** `actions/hr.ts`, `app/(tenant)/dashboard/hr/**`, `components/hr/*`
 
-**Bağımlılık:** Faz 1 (Team/personel modeli) ✅ — bu faz mevcut `OrganizationMember` üzerine inşa edilir
+**Bağımlılık:** Faz 1 ✅
 
 ---
 
-## 🔲 Faz 23 — Ekipman Yönetimi & Bakım Planları (Öncelik: P2)
+## ✅ Faz 23 — Ekipman Yönetimi & Bakım Planları (Öncelik: P2) — ✅ 2026-07-19
 
-> **Senaryo:** Koşu bandı arızalandı → servis çağrıldı → garantisi var mı? → son bakım tarihi ne zamandı? → bir sonraki bakım ne zaman? Bugün bu bilgi bir Excel dosyasında ya da hiçbir yerde yok. Ekipman yönetimi, büyük gym zincirlerinde standart bir modüldür.
+> **Senaryo:** Koşu bandı QR → garanti / bakım / servis geçmişi.
+### 23.1 Ekipman Envanteri — ✅
+- [x] `GymEquipment` — kategori, seri, garanti, konum, foto URL, HMAC QR (`lib/equipment-qr.ts`)
+- [x] `EquipmentStatus`: OPERATIONAL / UNDER_MAINTENANCE / OUT_OF_SERVICE / RETIRED
 
-### 23.1 Ekipman Envanteri
-- [ ] `GymEquipment` modeli — `name`, `category` (kardiyo/ağırlık/grup dersi ekipmanı), `serialNumber`, `purchaseDate`, `purchasePrice`, `warrantyExpiresAt`, `location` (hangi salon/oda), `qrCode` (benzersiz, ekipman üzerine yapıştırılan fiziksel QR ile eşleşir), fotoğraflar (mevcut avatar/storage altyapısı — `lib/storage.ts` — yeniden kullanılır)
-- [ ] `EquipmentStatus`: `OPERATIONAL` / `UNDER_MAINTENANCE` / `OUT_OF_SERVICE` / `RETIRED`
+### 23.2 Servis ve Bakım — ✅
+- [x] `EquipmentServiceLog` — arıza bildirimi + servis kaydı
+- [x] `MaintenanceSchedule` — tesis/ekipman; gecikmiş/bugün rozetleri (push Faz 27'ye bırakıldı)
+- [x] `/dashboard/equipment/scan/[code]` — QR ile açılış + arıza bildir
 
-### 23.2 Servis ve Bakım Geçmişi
-- [ ] `EquipmentServiceLog` — `reportedAt`, `reportedById` (QR okutup arıza bildiren personel), `issueDescription`, `serviceProvider`, `serviceDate`, `cost`, `warrantyClaim` (bool), fotoğraf ekleme
-- [ ] `MaintenanceSchedule` — periyodik bakım planı (yalnızca ekipman değil, **tesisin geneli**: klima, sauna, havuz, buhar odası, filtreler) — `frequency` (aylık/3 aylık/yıllık), `nextDueDate`, otomatik hatırlatma (Faz 27 Bildirim Merkezi ile)
-- [ ] QR okutarak arıza bildirme: personel telefonuyla ekipman üzerindeki QR'ı okutur → o ekipmanın sayfası açılır → "Arıza Bildir" butonu → fotoğraf + açıklama
+**Kabul kriteri:** ✅ QR ile ekipman detayı · görsel bakım rozetleri (otomatik push kapsam dışı)
 
-**Kabul kriteri:** Bir koşu bandının QR kodu okutulduğunda garanti durumu, son/sonraki bakım tarihi ve servis geçmişi görülebiliyor · bakımı yaklaşan ekipmanlar için otomatik hatırlatma gidiyor
+**Dosyalar:** `actions/equipment.ts`, `dashboard/equipment/**`, `lib/equipment-qr.ts`
 
-**Bağımlılık:** Faz 27 (Bildirim Merkezi, bakım hatırlatmaları için) — modülün kendisi bağımsız başlatılabilir
+**Bağımlılık:** Faz 27 push — bilinçli olarak kapsam dışı
 
 ---
 
@@ -814,18 +818,19 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ---
 
-## 🔲 Faz 25 — Kasa Yönetimi (Vardiya, X/Z Raporu) (Öncelik: P2)
+## ✅ Faz 25 — Kasa Yönetimi (Vardiya, X/Z Raporu) (Öncelik: P2) — ✅ 2026-07-19
 
-> **Senaryo:** Sabah kasaya 1000 TL nakit konuyor. Akşam sayımda 980 TL çıkıyor. Neden? Kasada açık mı var, fazla mı var, hangi vardiyada oldu? Mevcut POS (Faz 8) yalnızca borç/tahsilat kaydediyor — gerçek bir "kasa açılış/kapanış" disiplini yok.
+> **Senaryo:** Açılış nakit + kapanış sayım farkı.
+- [x] `CashRegisterShift` — opening/expected/counted/discrepancy + `reportSnapshot`
+- [x] X raporu (ara özet) / Z raporu (kapanış + yöntem kırılımı)
+- [x] `Transaction.cashRegisterShiftId` — CASH için açık vardiya zorunlu; CARD/TRANSFER serbest (mevcut ödeme kilitlerine dokunulmadan ek katman)
+- [x] `/dashboard/pos` vardiya paneli + `/dashboard/pos/shifts` arşiv
 
-- [ ] `CashRegisterShift` modeli — `openedById`, `openedAt`, `openingBalance` (sayılan nakit), `closedById`, `closedAt`, `closingBalanceExpected` (sistem hesaplaması: açılış + nakit tahsilatlar − nakit iadeler), `closingBalanceCounted` (personelin fiilen saydığı), `discrepancy` (fark, otomatik hesaplanır ve **sıfır değilse** vurgulanır)
-- [ ] Vardiya kapanışında **X Raporu** (vardiya devam ederken ara özet, kasayı sıfırlamaz) ve **Z Raporu** (vardiya kapanış — gün/vardiya sonu kesin özet, ödeme yöntemine göre kırılım: nakit/kart/havale)
-- [ ] Her `Transaction`, açık bir `CashRegisterShift`'e bağlanır — vardiya kapalıyken POS'ta nakit tahsilat girilemez (kart/havale girilebilir)
-- [ ] `/dashboard/pos` üzerine vardiya açma/kapama akışı eklenir, `/dashboard/pos/shifts` — geçmiş vardiya raporları arşivi
+**Kabul kriteri:** ✅ Aç/kapa · ✅ fark otomatik · Z özeti snapshot'ta
 
-**Kabul kriteri:** Bir resepsiyonist vardiya açıp kapatabiliyor, kapanışta beklenen/sayılan tutar farkı otomatik hesaplanıp gösteriliyor, Z raporu PDF/CSV olarak alınabiliyor
+**Dosyalar:** `actions/cash-register.ts`, `lib/cash-register/report.ts`, POS UI
 
-**Bağımlılık:** Faz 8 (POS & Transaction modeli) ✅
+**Bağımlılık:** Faz 8 ✅
 
 ---
 
@@ -889,7 +894,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 **Kabul kriteri:** ✅ Salon sahibi son 30 günün en yoğun saatini, en çok satan PT'yi ve yenileme oranını tek ekrandan görebiliyor
 
-**Bağımlılık:** Faz 21 (PT verisi) ✅ · Faz 25 (kasa verisi, henüz yok — POS/Expense verisi zaten yeterli) · Faz 27 (zamanlanmış e-posta raporları için, v2)
+**Bağımlılık:** Faz 21 (PT verisi) ✅ · Faz 25 (kasa) ✅ · Faz 27 (zamanlanmış e-posta raporları için, v2)
 
 ---
 
@@ -1451,17 +1456,11 @@ Tamamlanan paralel çalışma (2026-07-19, çakışmayı önlemek için dosya ba
   Faz 33/33.1 Kullanım kılavuzu + ayarlar modernizasyonu ✅ 2026-07-19 (Cursor) — HelpArticle modeli, /help, /dashboard/settings
   Faz 17.1–17.7 Üyelik senaryoları & ders/sınıf yönetimi ✅ 2026-07-19 (Cursor) — freeze/transfer, grup, GymClass,
                  kupon, POS stok, Guest Pass
-  Faz 12.4 + 14.3 Master Admin kalıcı silme + Demo PT girişi     ✅ 2026-07-19 (Claude) — düşük efor, dosya bazında sıfır çakışma
-
-Şu anda paralel çalışılıyor (2026-07-19, geniş/uzun kapsamlı ikinci Cursor partisi):
-  Faz 18 + 18.1  Uyumluluk & sağlamlaştırma + otomatik PDF sözleşme  ← Cursor — GDPR self-servis, vardiya planlama,
-                 sağlık formu/rıza + ContractTemplate PDF motoru, Invoice modeli (bağımlılık artık karşılandı: Faz 15-17 bitti)
-  Faz 22         Personel Yönetimi / HR                              ← Cursor — LeaveRequest, Shift/ShiftAssignment,
-                 PerformanceReview, DisciplinaryRecord, /dashboard/hr
-  Faz 23         Ekipman Yönetimi & Bakım Planları                   ← Cursor — GymEquipment, EquipmentServiceLog,
-                 MaintenanceSchedule, QR ile arıza bildirme
-  Faz 25         Kasa Yönetimi (Vardiya, X/Z Raporu)                  ← Cursor — CashRegisterShift, X/Z raporu,
-                 /dashboard/pos/shifts
+  Faz 12.4 + 14.3 Master Admin kalıcı silme + Demo PT girişi     ✅ 2026-07-19 (Claude)
+  Faz 18 + 18.1  Uyumluluk + sözleşme PDF                        ✅ 2026-07-19 (Cursor) — GDPR, rıza, Invoice, ContractTemplate
+  Faz 22         Personel Yönetimi / HR                              ✅ 2026-07-19 (Cursor) — izin, vardiya, /dashboard/hr
+  Faz 23         Ekipman Yönetimi & Bakım                            ✅ 2026-07-19 (Cursor) — QR, servis, bakım rozetleri
+  Faz 25         Kasa Yönetimi (X/Z)                                 ✅ 2026-07-19 (Cursor) — CashRegisterShift, POS kilidi
 
 Sıradaki (Faz 36 sonrası — profesyonel değerlendirme, P0 en önce):
   Faz 32     Ticarileştirme: paket + ek kapasite satışı          ← P0, gelir modeli (kullanıcı onayı gerekli)

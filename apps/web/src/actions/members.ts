@@ -300,3 +300,77 @@ export async function updateMemberRfid(
 
   return { success: rfidTag ? 'RFID kartı kaydedildi.' : 'RFID kartı kaldırıldı.' };
 }
+
+const healthConsentSchema = z.object({
+  gymMemberId: z.string().cuid(),
+  version: z.string().max(32).optional(),
+});
+
+export type HealthConsentState = {
+  error?: string;
+  success?: string;
+};
+
+export async function recordHealthConsent(
+  _prev: HealthConsentState,
+  formData: FormData,
+): Promise<HealthConsentState> {
+  const session = await auth();
+  if (!session?.user || session.user.isSuperAdmin) {
+    return { error: 'Bu işlem için tenant oturumu gerekir.' };
+  }
+
+  const organizationId = session.user.organizationId;
+  const role = session.user.role;
+  const userId = session.user.id;
+
+  if (!organizationId || !role || !MEMBER_MANAGER_ROLES.has(role)) {
+    return { error: 'Sağlık rızası kaydı için OWNER, ADMIN veya STAFF yetkisi gerekir.' };
+  }
+
+  const parsed = healthConsentSchema.safeParse({
+    gymMemberId: formData.get('gymMemberId'),
+    version: formData.get('version') || undefined,
+  });
+
+  if (!parsed.success) {
+    return { error: 'Geçersiz form verisi.' };
+  }
+
+  const member = await prisma.gymMember.findFirst({
+    where: { id: parsed.data.gymMemberId, organizationId },
+  });
+
+  if (!member) {
+    return { error: 'Üye bulunamadı.' };
+  }
+
+  const version = parsed.data.version?.trim() || '1.0';
+  const now = new Date();
+
+  await prisma.$transaction(async (tx) => {
+    await tx.gymMember.update({
+      where: { id: parsed.data.gymMemberId },
+      data: {
+        healthConsentAcceptedAt: now,
+        healthConsentAcceptedById: userId,
+        healthConsentVersion: version,
+      },
+    });
+
+    await tx.auditLog.create({
+      data: {
+        actorId: userId,
+        organizationId,
+        action: 'HEALTH_CONSENT_RECORDED',
+        entityType: 'gym_member',
+        entityId: parsed.data.gymMemberId,
+        metadata: { version },
+      },
+    });
+  });
+
+  revalidatePath(`/dashboard/members/${parsed.data.gymMemberId}`);
+
+  return { success: 'Sağlık formu rızası kaydedildi.' };
+}

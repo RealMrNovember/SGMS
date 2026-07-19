@@ -5,6 +5,7 @@ import { MemberHealthHistoryTable } from '@/components/member-health-history-tab
 import { MemberRfidForm } from '@/components/member-rfid-form';
 import { MembershipRenewalPanel } from '@/components/membership-renewal-panel';
 import { MembershipLifecyclePanel } from '@/components/membership/membership-lifecycle-panel';
+import { HealthConsentForm } from '@/components/membership/health-consent-form';
 import { ProgramContentView } from '@/components/program-content-view';
 import { auth } from '@/lib/auth';
 import { intlLocaleFor } from '@/lib/format-locale';
@@ -57,6 +58,7 @@ export default async function MemberDetailPage({
         plan: true,
         trainer: { select: { id: true, name: true, email: true } },
         user: { select: { id: true, name: true, email: true } },
+        healthConsentBy: { select: { name: true, email: true } },
         healthMeasurements: {
           orderBy: { measuredAt: 'desc' },
         },
@@ -207,6 +209,18 @@ export default async function MemberDetailPage({
           </dl>
         </section>
       </div>
+
+      {canManageMember ? (
+        <HealthConsentForm
+          gymMemberId={member.id}
+          acceptedAt={member.healthConsentAcceptedAt?.toISOString() ?? null}
+          acceptedByLabel={
+            member.healthConsentBy?.name ?? member.healthConsentBy?.email ?? null
+          }
+          version={member.healthConsentVersion}
+          canManage={canManageMember}
+        />
+      ) : null}
 
       {canManageMember ? (
         <MembershipLifecyclePanel

@@ -1,6 +1,8 @@
+import { CashShiftPanel } from '@/components/cash-shift-panel';
 import { ExpenseCategoryManager } from '@/components/expense-category-manager';
 import { ContextualHelpButton } from '@/components/help/contextual-help-button';
 import { PosTerminal } from '@/components/pos-terminal';
+import { getOpenCashShift } from '@/actions/cash-register';
 import { auth } from '@/lib/auth';
 import { intlLocaleFor } from '@/lib/format-locale';
 import { getDailyPosSummary } from '@/lib/pos-summary';
@@ -32,7 +34,7 @@ export default async function PosPage() {
   const locale = await getLocale();
   const dateLocale = intlLocaleFor(locale);
 
-  const [members, categories, allCategories, summary] = await Promise.all([
+  const [members, categories, allCategories, summary, openShift] = await Promise.all([
     prisma.gymMember.findMany({
       where: { organizationId, status: 'ACTIVE' },
       orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
@@ -60,6 +62,7 @@ export default async function PosPage() {
         })
       : Promise.resolve([]),
     canViewSummary ? getDailyPosSummary(organizationId) : Promise.resolve(null),
+    getOpenCashShift(organizationId),
   ]);
 
   const currency = 'TRY';
@@ -122,6 +125,20 @@ export default async function PosPage() {
           </article>
         </section>
       ) : null}
+
+      <CashShiftPanel
+        currency={currency}
+        openShift={
+          openShift
+            ? {
+                id: openShift.id,
+                openedAt: openShift.openedAt.toISOString(),
+                openingBalance: openShift.openingBalance.toString(),
+                openedByName: openShift.openedBy.name ?? '—',
+              }
+            : null
+        }
+      />
 
       <PosTerminal
         members={members.map((m) => ({
