@@ -763,36 +763,43 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ---
 
-## 🟡 Faz 20 — SGMS Mobil Uygulama (React Native) (Öncelik: P1) — MVP yayınlandı (v0.1.0), 2026-07-19
+## 🟡 Faz 20 — SGMS Mobil Uygulama (React Native) (Öncelik: P1) — v0.2.0 yayınlandı, 2026-07-19
 
 > **Kullanıcı talebi (2026-07-19, ilk plan):** *"Mobil uygulama hiç yazmadık ama şu süreçte imzasız apk dosyası yazabiliriz ve sitemiz içerisinden direk indirme linki koyabiliriz."*
-> **Kullanıcı talebi (2026-07-19, uygulama günü):** *"Panelde desktop app'in olduğu yere android app de eklememiz lazım... showroom sayfasına da eklememiz lazım... Desktop app ve mobil app'in güncel ve çalışır olduklarına emin ol ve yayınla."* — kapsam netleştirildi: **şimdi minimal MVP** (giriş + QR check-in), diğer özellikler bir sonraki sürüme.
+> **Kullanıcı talebi (2026-07-19, uygulama günü):** *"Panelde desktop app'in olduğu yere android app de eklememiz lazım... showroom sayfasına da eklememiz lazım... Desktop app ve mobil app'in güncel ve çalışır olduklarına emin ol ve yayınla."* → v0.1.0 minimal MVP (giriş + QR check-in) yayınlandı.
+> **Kullanıcı geri bildirimi (2026-07-19, aynı gün):** *"Mobil uygulama sadece giriş için QR kod gösteriyor başka hiç bir şey yok uygulamada. Sohbet yok hesabı yok ödemelerini göremiyor, hiç bir şey yok. Tam + Tam eksiksiz bir uygulama bas."* + *"Mobil uygulama otomatik güncelleme alabiliyor olması lazım."* → v0.1.0'ın kapsamı yetersiz bulundu; **aynı gün içinde v0.2.0** ile tam kapsamlı hale getirildi (programlar, ölçümler, mesajlaşma, hesap/ödeme özeti, otomatik güncelleme kontrolü).
 >
-> **Karar (kullanıcı onaylı):** React Native (Expo) ile sıfırdan native bir uygulama. İlk sürüm **yalnızca Android**, **imzasız APK** olarak GitHub Releases üzerinden doğrudan indirme linkiyle dağıtılır. Backend zaten hazır: API v1, Bearer token (Faz 7) — mobil için hiçbir yeni sunucu ucu gerekmedi.
+> **Karar (kullanıcı onaylı):** React Native (Expo) ile sıfırdan native bir uygulama. İlk sürüm **yalnızca Android**, **imzasız APK** olarak GitHub Releases üzerinden doğrudan indirme linkiyle dağıtılır. Backend zaten hazır: API v1, Bearer token (Faz 7) — yalnızca sporcunun kendi ödeme/bakiye özetini görebilmesi için yeni, read-only, self-scoped bir uç nokta eklendi (`/api/v1/me/statement`).
 >
 > **Kritik toolchain kararı — `apps/mobile` pnpm workspace'inin DIŞINDA, kendi `npm`/`package-lock.json`'ıyla yönetiliyor.** Sebep: pnpm'in peer-dependency hash'li `.pnpm/<paket>@<peers>/` klasör adları (ör. `expo-modules-core@57.0.6_react-native@0.86.0_@babel+core@7.29.7_...`) Android/CMake native build'lerinin (`expo-modules-core` prefab adımı) ürettiği dosya yollarıyla birleşince Windows'un 260 karakterlik `MAX_PATH` sınırını aşıyor (`CreateProcess error=2` ile sessizce başarısız oluyor — dosya gerçekten var ama JVM'in native process başlatıcısı onu bulamıyor). Windows'ta `LongPathsEnabled` registry ayarı bir sistem ayarı değişikliği olduğu için otomatik yapılmadı; bunun yerine `apps/mobile`'ı `pnpm-workspace.yaml`'da `!apps/mobile` ile hariç tutup düz (flat, hash'siz) `npm install` kullanmak native build'i çalışır hale getirdi. **Yeni katkıda bulunanlar için:** `apps/mobile`'da bağımlılık eklerken kök dizinden `pnpm add` DEĞİL, `apps/mobile` içinden `npm install <paket>` çalıştırılmalı.
+>
+> **Otomatik güncelleme mekanizması (electron-updater'ın mobil karşılığı):** İmzasız/sideload bir APK'da OS seviyesinde sessiz güncelleme mümkün değil (Android her zaman kullanıcının paket kurulumunu onaylamasını ister). Bunun yerine `src/lib/update-check.ts` uygulama açılışında GitHub'ın public Releases API'sini (`/repos/RealMrNovember/SGMS/releases`, kimlik doğrulama gerekmez) sorgular, `mobile-v*` etiketli en güncel sürümü kendi versiyonuyla karşılaştırır; daha yeni bir sürüm varsa ekranın üstünde bir rozet + "İndir ve Güncelle" butonu belirir (`Linking.openURL` ile tarayıcıda APK indirilir, kullanıcı indirilen dosyaya dokunup kurar — sideload APK'lar için gerçekçi olan en otomatik akış budur).
 
 ### 20.1 Proje iskeleti ve kimlik doğrulama — ✅ 2026-07-19
 - [x] `apps/mobile` — Expo (SDK 57, managed workflow), yerel Android SDK + JDK 17 ile `expo prebuild` + `gradlew assembleRelease` (EAS Build kullanılmadı — bu makinede zaten tam bir Android SDK/NDK kurulu olduğu için buluta ihtiyaç duyulmadı)
 - [x] API v1 Bearer token girişi (`POST /api/v1/auth/login`, `scope: 'athlete'`) — token `expo-secure-store` ile güvenli depoda saklanıyor (`src/lib/api.ts`, `src/lib/storage.ts`)
-- [ ] Çoklu dil desteği — **yapılmadı**, MVP tek dilde (Türkçe) sabit metinlerle; sonraki sürümde `next-intl` messages'a eşdeğer bir RN i18n çözümü eklenmeli
+- [ ] Çoklu dil desteği — **yapılmadı**, uygulama tek dilde (Türkçe) sabit metinlerle; sonraki sürümde `next-intl` messages'a eşdeğer bir RN i18n çözümü eklenmeli
 
-### 20.2 Temel sporcu akışları — `/athlete` web portalının native karşılığı — 🟡 yalnızca QR check-in (MVP kapsamı)
-- [x] QR check-in ekranı — **sporcunun scan ETMEDİĞİ, telefonun QR kodu GÖSTERDİĞİ** akış (web portalındaki `CheckInQrPanel` ile birebir aynı sözleşme: `GET /api/v1/check-in/qr`, 4 dakikada bir otomatik yenileme, `react-native-qrcode-svg` ile render) — kamera/tarama gerekmiyor, bu da MVP'yi önemli ölçüde basitleştirdi
-- [ ] Antrenman/beslenme programları görüntüleme — **ertelendi**, sonraki sürüm
-- [ ] Ölçüm geçmişi görüntüleme + yeni ölçüm ekleme — **ertelendi**, sonraki sürüm
-- [ ] PT ile mesajlaşma — **ertelendi**, sonraki sürüm
+### 20.2 Temel sporcu akışları — `/athlete` web portalının native karşılığı — ✅ 2026-07-19 (v0.2.0)
+- [x] QR check-in ekranı (Ana Sayfa'ya taşındı) — **sporcunun scan ETMEDİĞİ, telefonun QR kodu GÖSTERDİĞİ** akış (web portalındaki `CheckInQrPanel` ile birebir aynı sözleşme: `GET /api/v1/check-in/qr`, 4 dakikada bir otomatik yenileme, `react-native-qrcode-svg` ile render)
+- [x] Ana Sayfa — üyelik/plan özeti, istatistik kartları (program/kilo/mesaj sayısı, dokunulunca ilgili taba geçiyor), son ölçüm özeti, antrenör bilgisi (`HomeScreen.tsx`)
+- [x] Antrenman/beslenme programları görüntüleme — salt okunur liste, tip/tarih/antrenör/içerik özeti (`ProgramsScreen.tsx`, `GET /api/v1/programs`) — **web'deki interaktif set/tekrar işaretleme (`InteractiveWorkoutView`) taşınmadı**, yalnızca içerik özeti gösteriliyor
+- [x] Ölçüm geçmişi görüntüleme + yeni ölçüm ekleme (`MeasurementsScreen.tsx`, `GET`/`POST /api/v1/measurements`)
+- [x] PT ile mesajlaşma (`MessagesScreen.tsx`) — inbox+sent birleştirilip antrenöre göre filtrelenen tek-thread sohbet, 15sn polling ile yenileme (gerçek zamanlı Pusher/Soketi entegrasyonu değil — yeni native bağımlılık eklememek için bilinçli tercih)
+- [x] Hesabım/ödeme özeti (`AccountScreen.tsx`) — profil, üyelik durumu, bakiye, aktif ödeme planı, son ödemeler/işlemler — **yeni backend uç noktası** `GET /api/v1/me/statement` (athlete-scoped, yalnızca kendi `gymMemberId`'sine erişebilir; `/api/v1/transactions` bilinçli olarak yalnızca staff'a kapalı tutulduğu için — Faz 36.5 — bu ayrı, salt-okunur, self-scoped bir uç nokta olarak eklendi)
+- [x] Alt tab navigasyonu (`TabBar.tsx`) — 5 sekme, ek native bağımlılık (react-navigation vb.) eklemeden basit state tabanlı geçiş
 
-### 20.3 İmzasız APK dağıtım hattı — ✅ 2026-07-19
-- [x] Yerel Gradle ile imzasız `.apk` üretimi (`gradlew assembleRelease`, tüm ABI'ler tek APK'da — 72 MB); artifact adı: `SGMS-Sporcu-0.1.0.apk`
-- [x] GitHub Releases'e yüklendi (`mobile-v0.1.0` tag'i, desktop'tan ayrı bir tag namespace'i) ve web sitesinden bağlandı: showroom/marketing sayfasında yeni `#mobile-athlete` bölümü (`MobileDownloadPromo` bileşeni, `ReceptionDownloadPromo` ile aynı desen) + tenant dashboard panelinde ve check-in sayfasında masaüstü kartının hemen yanında bir Android kartı — **giriş gerektirmeden** (showroom herkese açık)
+### 20.3 İmzasız APK dağıtım hattı + otomatik güncelleme — ✅ 2026-07-19
+- [x] Yerel Gradle ile imzasız `.apk` üretimi (`gradlew assembleRelease`, tüm ABI'ler tek APK'da — ~72 MB)
+- [x] GitHub Releases'e yüklendi (v0.1.0 → `mobile-v0.1.0`, v0.2.0 → `mobile-v0.2.0`, desktop'tan ayrı bir tag namespace'i) ve web sitesinden bağlandı: showroom/marketing sayfasında `#mobile-athlete` bölümü + tenant dashboard panelinde/check-in sayfasında masaüstü kartının yanında Android kartı — **giriş gerektirmeden** (showroom herkese açık)
+- [x] Otomatik güncelleme kontrolü — `src/lib/update-check.ts`, uygulama açılışında GitHub Releases API'sini kontrol eder, yeni sürüm varsa banner + indirme linki (yukarıya bkz.)
 - [ ] Kurulum sonrası "bilinmeyen kaynak" uyarısı için ekran görüntülü rehber — **yapılmadı**, şimdilik yalnızca kısa bir metin uyarısı (`unsignedNotice` i18n anahtarı) var
 
-**Kabul kriteri:** ✅ Sporcu web sitesinden (showroom, giriş gerektirmeden) veya panelden APK'yı indirip kurabiliyor, sporcu hesabıyla giriş yapabiliyor, otomatik yenilenen QR koduyla check-in yapabiliyor. ⚠️ Programlar/ölçümler/mesajlaşma bir sonraki sürüme bırakıldı — bu bilinçli bir MVP kapsam kararı, eksiklik değil.
+**Kabul kriteri:** ✅ Sporcu web sitesinden (showroom, giriş gerektirmeden) veya panelden APK'yı indirip kurabiliyor, sporcu hesabıyla giriş yapabiliyor, QR ile check-in yapabiliyor, programlarını/ölçümlerini görebiliyor, antrenörüyle mesajlaşabiliyor, bakiye/ödeme geçmişini görebiliyor, yeni sürüm çıkınca uygulama içinden haberdar oluyor.
 
-**Ertelendi (v2):** Antrenman programı/ölçüm/mesajlaşma ekranları, çoklu dil, Play Store süreci + push bildirim (imzasız bir uygulamada Firebase/APNs sertifikasyon riski yüksek), iOS sürümü, EAS Build'e geçiş (CI'da otomatik APK üretimi için gerekebilir).
+**Ertelendi (v3):** Çoklu dil, Play Store süreci + push bildirim (imzasız bir uygulamada Firebase/APNs sertifikasyon riski yüksek), iOS sürümü, EAS Build'e geçiş (CI'da otomatik APK üretimi için gerekebilir), interaktif antrenman (set/tekrar işaretleme), gerçek zamanlı mesajlaşma (Pusher/Soketi).
 
-**Dosyalar:** `apps/mobile/` (yeni, Expo projesi — kendi `package-lock.json`'ı ile, pnpm workspace dışında), `pnpm-workspace.yaml` (`!apps/mobile` hariç tutma), `apps/web/src/lib/mobile-app.ts` (yeni), `apps/web/src/components/reception/mobile-download-promo.tsx` (yeni), `apps/web/src/app/(marketing)/page.tsx` + `marketing-header.tsx` + `(tenant)/dashboard/page.tsx` + `(tenant)/dashboard/check-in/page.tsx` (indirme bölümleri), `messages/*.json` (6 dil, `mobileAthlete` + `marketing.nav.mobileAthlete` anahtarları)
+**Dosyalar:** `apps/mobile/` (Expo projesi, kendi `package-lock.json`'ı ile pnpm workspace dışında) — `App.tsx`, `src/components/{TabBar,UpdateBanner}.tsx`, `src/screens/{Home,Programs,Measurements,Messages,Account,Login}Screen.tsx`, `src/lib/{api,types,theme,storage,update-check,constants}.ts`; `pnpm-workspace.yaml` (`!apps/mobile` hariç tutma); `apps/web/src/app/api/v1/me/statement/route.ts` (yeni); `apps/web/src/lib/mobile-app.ts`, `apps/web/src/components/reception/mobile-download-promo.tsx`, `apps/web/src/app/(marketing)/page.tsx` + `marketing-header.tsx` + `(tenant)/dashboard/page.tsx` + `(tenant)/dashboard/check-in/page.tsx`, `messages/*.json` (6 dil)
 
 **Bağımlılık:** yok — API v1 zaten hazır (Faz 7), bu faz web/masaüstünden tamamen bağımsız başlatıldı
 
