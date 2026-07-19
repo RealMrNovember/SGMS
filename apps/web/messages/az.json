@@ -184,6 +184,37 @@
       "step1": "Şəxsi Məlumatlar",
       "step2": "Üzvlük",
       "step3": "Qeydlər & Təsdiq"
+    },
+    "renewal": {
+      "title": "Paketi yenilə / Müddəti uzat",
+      "subtitle": "Current end: {ends}. Active memberships stack on top; expired ones restart today.",
+      "noEndDate": "not set",
+      "sellTitle": "Paket sat (yeniləmə)",
+      "sellHint": "Updates the member record, creates a charge; pay-now settles it immediately.",
+      "noPlans": "No active membership plans. Add one under Plans first.",
+      "plan": "Membership plan",
+      "planOption": "{name} — {days} days — {price} {currency}",
+      "stackHint": "This plan adds {days} days (on top if still active, otherwise from today).",
+      "paymentMode": "Payment",
+      "payNow": "Collect now (cash/card/transfer)",
+      "chargeOpen": "Leave open (collect later via POS)",
+      "paymentMethod": "Payment method",
+      "methods": {
+        "cash": "Cash",
+        "card": "Card",
+        "transfer": "Bank transfer"
+      },
+      "notes": "Note (optional)",
+      "notesPlaceholder": "e.g. annual promo",
+      "selling": "Selling…",
+      "sellSubmit": "Paketi sat və müddəti uzat",
+      "extendTitle": "Manual / pulsuz uzatma",
+      "extendHint": "OWNER/ADMIN only. Reason is audited; no charge is created.",
+      "extraDays": "Days to add",
+      "reason": "Reason",
+      "reasonPlaceholder": "e.g. goodwill / management approval",
+      "extending": "Extending…",
+      "extendSubmit": "Müddəti uzat"
     }
   },
   "measurements": {
@@ -226,7 +257,8 @@
       "email": "E-poçt",
       "role": "Rol",
       "joined": "Qoşulma",
-      "rfid": "Qapı kartı"
+      "rfid": "Qapı kartı",
+      "status": "Status"
     },
     "invite": {
       "noPermission": "Personal dəvət etmək üçün OWNER və ya ADMIN rolu lazımdır.",
@@ -244,7 +276,13 @@
       "passwordModeEmailInvite": "Personel e-poçt vasitəsilə özü təyin etsin",
       "passwordModeOwnerSet": "Şifrəni mən təyin edəcəyəm",
       "password": "Şifrə"
-    }
+    },
+    "statusPending": "Dəvət gözləyir",
+    "statusActive": "Aktiv",
+    "invitedAt": "Dəvət: {date}",
+    "resendInvite": "Dəvəti yenidən göndər",
+    "cancelInvite": "Dəvəti ləğv et",
+    "cancelInviteConfirm": "Gözləyən dəvət ləğv edilib yer boşaltılsın?"
   },
   "dashboard": {
     "welcome": "Xoş gəlmisiniz, {name}",
@@ -955,7 +993,11 @@
       "licenseExpired": "Mərkəzi lisenziyanın müddəti bitib. Ödəniş vasitəsilə davam edin və ya bizimlə əlaqə saxlayın.",
       "orgSuspended": "Hesab dayandırılıb. Dəstəklə əlaqə saxlayın.",
       "noSubscription": "Aktiv abunəlik tapılmadı."
-    }
+    },
+    "deviceGraceTitle": "Turniket hələ açıqdır — güzəşt müddəti",
+    "deviceGraceBody": "Panel kilidlidir, lakin turniket/cihaz check-in {total} günlük güzəşt müddəti ilə işləyir. Qalan: {days} gün (bitiş: {ends}). Müddət bitincə turniket də bağlanır.",
+    "deviceBlockedTitle": "Turniket də bağlandı",
+    "deviceBlockedBody": "Güzəşt müddəti bitdi. Turniket və cihaz check-in-ləri rədd edilir. Ödəniş təsdiqlənəndə panel və turniket birlikdə açılır."
   },
   "receptionDesktop": {
     "badge": "Windows Tətbiqi",
@@ -1025,7 +1067,11 @@
       },
       "register": "Cihazı qeydə al",
       "registering": "Saxlanılır…",
-      "disable": "Deaktiv et"
+      "disable": "Deaktiv et (boşalt)",
+      "finalizeDisable": "Qalıcı bağla",
+      "forceDisable": "Məcburi bağla",
+      "forceDisableConfirm": "Gözləyən offline qeydlər serverə çatmaya bilər. Yenə də qalıcı bağlansın?",
+      "drainingHint": "Boşaltma rejimi: canlı check-in bağlıdır; gözləyən offline paketlər hələ göndərilə bilər."
     },
     "rfid": {
       "label": "RFID kart",

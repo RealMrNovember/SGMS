@@ -1,9 +1,9 @@
 'use client';
 
-import { registerDevice, type DeviceFormState } from '@/actions/devices';
-import { disableDevice } from '@/actions/devices';
+import { registerDevice, disableDevice, type DeviceFormState } from '@/actions/devices';
 import { useTranslations } from 'next-intl';
-import { useActionState } from 'react';
+import { useActionState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 
 const initialState: DeviceFormState = {};
 
@@ -25,7 +25,9 @@ export function DeviceManagementPanel({
   canManage: boolean;
 }) {
   const t = useTranslations('checkIn.devices');
+  const router = useRouter();
   const [state, formAction, pending] = useActionState(registerDevice, initialState);
+  const [busy, startTransition] = useTransition();
 
   if (!canManage) {
     return (
@@ -46,6 +48,13 @@ export function DeviceManagementPanel({
         </ul>
       </section>
     );
+  }
+
+  function runDisable(deviceId: string, force: boolean) {
+    startTransition(async () => {
+      await disableDevice(deviceId, { force });
+      router.refresh();
+    });
   }
 
   return (
@@ -108,19 +117,37 @@ export function DeviceManagementPanel({
                 {d.hardwareId}
                 {d.location ? ` · ${d.location}` : ''}
               </p>
+              {d.status === 'DRAINING' ? (
+                <p className="mt-1 text-xs text-amber-200/90">{t('drainingHint')}</p>
+              ) : null}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="badge">{d.status}</span>
               {d.status !== 'DISABLED' ? (
-                <form
-                  action={async () => {
-                    await disableDevice(d.id);
-                  }}
-                >
-                  <button type="submit" className="text-xs text-rose-300 hover:text-rose-200">
-                    {t('disable')}
+                <>
+                  <button
+                    type="button"
+                    className="text-xs text-rose-300 hover:text-rose-200 disabled:opacity-50"
+                    disabled={busy}
+                    onClick={() => runDisable(d.id, false)}
+                  >
+                    {d.status === 'DRAINING' ? t('finalizeDisable') : t('disable')}
                   </button>
-                </form>
+                  {d.status === 'DRAINING' ? (
+                    <button
+                      type="button"
+                      className="text-xs text-amber-300/90 hover:text-amber-200 disabled:opacity-50"
+                      disabled={busy}
+                      onClick={() => {
+                        if (window.confirm(t('forceDisableConfirm'))) {
+                          runDisable(d.id, true);
+                        }
+                      }}
+                    >
+                      {t('forceDisable')}
+                    </button>
+                  ) : null}
+                </>
               ) : null}
             </div>
           </li>

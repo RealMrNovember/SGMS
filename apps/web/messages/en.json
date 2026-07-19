@@ -149,6 +149,37 @@
         "trainer": "Trainer (PT)"
       }
     },
+    "renewal": {
+      "title": "Renew plan / Extend membership",
+      "subtitle": "Current end: {ends}. Active memberships stack on top; expired ones restart today.",
+      "noEndDate": "not set",
+      "sellTitle": "Sell plan (renewal)",
+      "sellHint": "Updates the member record, creates a charge; pay-now settles it immediately.",
+      "noPlans": "No active membership plans. Add one under Plans first.",
+      "plan": "Membership plan",
+      "planOption": "{name} — {days} days — {price} {currency}",
+      "stackHint": "This plan adds {days} days (on top if still active, otherwise from today).",
+      "paymentMode": "Payment",
+      "payNow": "Collect now (cash/card/transfer)",
+      "chargeOpen": "Leave open (collect later via POS)",
+      "paymentMethod": "Payment method",
+      "methods": {
+        "cash": "Cash",
+        "card": "Card",
+        "transfer": "Bank transfer"
+      },
+      "notes": "Note (optional)",
+      "notesPlaceholder": "e.g. annual promo",
+      "selling": "Selling…",
+      "sellSubmit": "Sell plan & extend",
+      "extendTitle": "Manual / complimentary extension",
+      "extendHint": "OWNER/ADMIN only. Reason is audited; no charge is created.",
+      "extraDays": "Days to add",
+      "reason": "Reason",
+      "reasonPlaceholder": "e.g. goodwill / management approval",
+      "extending": "Extending…",
+      "extendSubmit": "Extend membership"
+    },
     "add": {
       "noPermission": "You need OWNER, ADMIN or STAFF role to add members.",
       "title": "New Athlete / Member",
@@ -226,8 +257,15 @@
       "email": "Email",
       "role": "Role",
       "rfid": "Turnstile card",
-      "joined": "Joined"
+      "joined": "Joined",
+      "status": "Status"
     },
+    "statusPending": "Invite pending",
+    "statusActive": "Active",
+    "invitedAt": "Invited: {date}",
+    "resendInvite": "Resend invite",
+    "cancelInvite": "Cancel invite",
+    "cancelInviteConfirm": "Cancel the pending invite and free the seat?",
     "invite": {
       "noPermission": "You need OWNER or ADMIN role to invite staff.",
       "title": "Invite New Staff",
@@ -920,6 +958,10 @@
     "lockedKicker": "Access locked",
     "lockedTitle": "Your trial has ended",
     "lockedBanner": "The panel is locked. Select a plan and submit a payment request, or reach us on WhatsApp. Access unlocks automatically after approval.",
+    "deviceGraceTitle": "Turnstile still open — grace period",
+    "deviceGraceBody": "The panel is locked, but turnstile/device check-in keeps working for a {total}-day grace window. Remaining: {days} days (ends: {ends}). After that the turnstile closes too — renew your subscription.",
+    "deviceBlockedTitle": "Turnstile is also closed",
+    "deviceBlockedBody": "The grace period has ended. Turnstile and device check-ins are denied. Once payment is approved, panel and turnstile reopen together.",
     "layoutLockBanner": "Subscription required — only billing and contact are available:",
     "backToDashboard": "Back to dashboard",
     "trialReminder": "{days} days left on your trial.",
@@ -1025,7 +1067,11 @@
       },
       "register": "Register device",
       "registering": "Saving…",
-      "disable": "Disable"
+      "disable": "Disable (drain)",
+      "finalizeDisable": "Finalize disable",
+      "forceDisable": "Force disable",
+      "forceDisableConfirm": "Pending offline records may never reach the server. Disable permanently anyway?",
+      "drainingHint": "Drain mode: live check-in is off; pending offline packages can still sync."
     },
     "rfid": {
       "label": "RFID card",

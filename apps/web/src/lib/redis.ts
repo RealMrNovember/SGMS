@@ -78,6 +78,24 @@ export async function redisSetEx(key: string, ttlSeconds: number, value: string)
   }
 }
 
+/** Atomik "yalnızca yoksa yaz" — true: ilk kez yazıldı, false: anahtar zaten vardı, null: Redis yok. */
+export async function redisSetNx(
+  key: string,
+  ttlSeconds: number,
+  value: string,
+): Promise<boolean | null> {
+  const redis = await getRedisClient();
+  if (!redis) {
+    return null;
+  }
+  try {
+    const result = await redis.set(key, value, { NX: true, EX: Math.max(1, ttlSeconds) });
+    return result === 'OK';
+  } catch {
+    return null;
+  }
+}
+
 export async function redisIncrWithExpiry(
   key: string,
   windowSeconds: number,

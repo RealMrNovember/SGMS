@@ -1,8 +1,12 @@
-import { verifyCheckInQrToken } from '@/lib/check-in/qr-token';
+import { verifyAndConsumeCheckInQrToken } from '@/lib/check-in/qr-token';
 import { publishCheckInEvent, type CheckInCreatedPayload } from '@/lib/realtime/hub';
 import { sendPushToUsers } from '@/lib/push/send';
 import { prisma } from '@/lib/prisma';
+import { consumeRateLimit } from '@/lib/rate-limit';
 import type { AccessDirection, AccessSubjectType, CheckInMethod, OrganizationRole } from '@sgms/database';
+
+/** Aynı üye/personelin saniyeler içinde çift ENTRY üretmesini engeller. */
+const CHECK_IN_DEBOUNCE_SECONDS = 8;
 
 const RECEPTION_PUSH_ROLES: OrganizationRole[] = ['OWNER', 'ADMIN', 'STAFF', 'TRAINER'];
 
@@ -59,7 +63,18 @@ export type ProcessCheckInResult =
       duplicateWithinHour: boolean;
       idempotent: boolean;
     }
-  | { ok: false; code: 'member_not_found' | 'member_inactive' | 'membership_expired' | 'invalid_qr' | 'org_mismatch' | 'sync_conflict' };
+  | {
+      ok: false;
+      code:
+        | 'member_not_found'
+        | 'member_inactive'
+        | 'membership_expired'
+        | 'invalid_qr'
+        | 'qr_already_used'
+        | 'org_mismatch'
+        | 'sync_conflict'
+        | 'too_rapid';
+    };
 
 type ResolvedSubject =
   | {
@@ -91,7 +106,7 @@ export { parseDirection };
 
 async function resolveSubject(input: ProcessCheckInInput): Promise<
   | ResolvedSubject
-  | { error: 'member_not_found' | 'invalid_qr' | 'org_mismatch' | 'member_inactive' }
+  | { error: 'member_not_found' | 'invalid_qr' | 'qr_already_used' | 'org_mismatch' | 'member_inactive' }
 > {
   if (input.staffUserId) {
     const membership = await prisma.organizationMember.findFirst({
@@ -138,14 +153,18 @@ async function resolveSubject(input: ProcessCheckInInput): Promise<
   }
 
   if (input.qrToken) {
-    const payload = verifyCheckInQrToken(input.qrToken);
-    if (!payload) {
-      return { error: 'invalid_qr' };
+    const verified = await verifyAndConsumeCheckInQrToken(input.qrToken);
+    if (!verified.ok) {
+      return { error: verified.reason === 'already_used' ? 'qr_already_used' : 'invalid_qr' };
     }
-    if (payload.organizationId !== input.organizationId) {
+    if (verified.payload.organizationId !== input.organizationId) {
       return { error: 'org_mismatch' };
     }
-    return resolveSubject({ ...input, gymMemberId: payload.gymMemberId, qrToken: undefined });
+    return resolveSubject({
+      ...input,
+      gymMemberId: verified.payload.gymMemberId,
+      qrToken: undefined,
+    });
   }
 
   if (input.rfidTag) {
@@ -339,6 +358,39 @@ export async function processCheckIn(input: ProcessCheckInInput): Promise<Proces
 
   const direction = await inferDirection(input.organizationId, subject, input.direction, checkedInAt);
 
+  // Aynı üye + aynı yön, birkaç saniye içinde → istatistik şişmesini önle.
+  // Offline senkron (tarihsel checkedInAt) için DB penceresi; canlı için Redis kilidi (yarış koruması).
+  const subjectKey =
+    subject.subjectType === 'GYM_MEMBER' ? subject.gymMemberId! : subject.staffUserId!;
+  const isNearRealtime = Math.abs(Date.now() - checkedInAt.getTime()) < 60_000;
+
+  if (isNearRealtime) {
+    const debounce = await consumeRateLimit(
+      `rl:checkin:${input.organizationId}:${subjectKey}:${direction}`,
+      1,
+      CHECK_IN_DEBOUNCE_SECONDS,
+    );
+    if (!debounce.allowed) {
+      return { ok: false, code: 'too_rapid' };
+    }
+  } else {
+    const rapidWindowStart = new Date(checkedInAt.getTime() - CHECK_IN_DEBOUNCE_SECONDS * 1000);
+    const rapidSame = await prisma.checkIn.findFirst({
+      where: {
+        organizationId: input.organizationId,
+        direction,
+        checkedInAt: { gte: rapidWindowStart, lte: checkedInAt },
+        ...(subject.subjectType === 'GYM_MEMBER'
+          ? { gymMemberId: subject.gymMemberId }
+          : { staffUserId: subject.staffUserId }),
+      },
+      select: { id: true },
+    });
+    if (rapidSame) {
+      return { ok: false, code: 'too_rapid' };
+    }
+  }
+
   const hourBefore = new Date(checkedInAt.getTime() - 60 * 60 * 1000);
   const recent = await prisma.checkIn.findFirst({
     where: {
@@ -395,9 +447,17 @@ export async function processCheckIn(input: ProcessCheckInInput): Promise<Proces
   });
 
   if (input.deviceId) {
+    const deviceRow = await prisma.device.findFirst({
+      where: { id: input.deviceId },
+      select: { status: true },
+    });
     await prisma.device.update({
       where: { id: input.deviceId },
-      data: { lastSeenAt: new Date(), status: 'ONLINE' },
+      data: {
+        lastSeenAt: new Date(),
+        // DRAINING penceresini bozma — offline boşaltma tamamlanana kadar korunur.
+        ...(deviceRow?.status === 'DRAINING' ? {} : { status: 'ONLINE' as const }),
+      },
     });
   }
 

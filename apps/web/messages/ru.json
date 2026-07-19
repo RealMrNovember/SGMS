@@ -184,6 +184,37 @@
       "step1": "Личные данные",
       "step2": "Абонемент",
       "step3": "Заметки и подтверждение"
+    },
+    "renewal": {
+      "title": "Продлить / Обновить пакет",
+      "subtitle": "Current end: {ends}. Active memberships stack on top; expired ones restart today.",
+      "noEndDate": "not set",
+      "sellTitle": "Продать пакет (продление)",
+      "sellHint": "Updates the member record, creates a charge; pay-now settles it immediately.",
+      "noPlans": "No active membership plans. Add one under Plans first.",
+      "plan": "Membership plan",
+      "planOption": "{name} — {days} days — {price} {currency}",
+      "stackHint": "This plan adds {days} days (on top if still active, otherwise from today).",
+      "paymentMode": "Payment",
+      "payNow": "Collect now (cash/card/transfer)",
+      "chargeOpen": "Leave open (collect later via POS)",
+      "paymentMethod": "Payment method",
+      "methods": {
+        "cash": "Cash",
+        "card": "Card",
+        "transfer": "Bank transfer"
+      },
+      "notes": "Note (optional)",
+      "notesPlaceholder": "e.g. annual promo",
+      "selling": "Selling…",
+      "sellSubmit": "Продать и продлить",
+      "extendTitle": "Ручное / бесплатное продление",
+      "extendHint": "OWNER/ADMIN only. Reason is audited; no charge is created.",
+      "extraDays": "Days to add",
+      "reason": "Reason",
+      "reasonPlaceholder": "e.g. goodwill / management approval",
+      "extending": "Extending…",
+      "extendSubmit": "Продлить членство"
     }
   },
   "measurements": {
@@ -226,7 +257,8 @@
       "email": "Эл. почта",
       "role": "Роль",
       "joined": "Вступление",
-      "rfid": "Карта турникета"
+      "rfid": "Карта турникета",
+      "status": "Статус"
     },
     "invite": {
       "noPermission": "Для приглашения персонала нужна роль OWNER или ADMIN.",
@@ -244,7 +276,13 @@
       "passwordModeEmailInvite": "Сотрудник сам установит пароль по ссылке из письма",
       "passwordModeOwnerSet": "Я установлю пароль сам",
       "password": "Пароль"
-    }
+    },
+    "statusPending": "Приглашение ожидает",
+    "statusActive": "Активен",
+    "invitedAt": "Приглашён: {date}",
+    "resendInvite": "Отправить приглашение снова",
+    "cancelInvite": "Отменить приглашение",
+    "cancelInviteConfirm": "Отменить ожидающее приглашение и освободить место?"
   },
   "dashboard": {
     "welcome": "Добро пожаловать, {name}",
@@ -955,7 +993,11 @@
       "licenseExpired": "Центральная лицензия истекла. Продолжите через оплату или свяжитесь с нами.",
       "orgSuspended": "Аккаунт приостановлен. Свяжитесь с поддержкой.",
       "noSubscription": "Активная подписка не найдена."
-    }
+    },
+    "deviceGraceTitle": "Турникет ещё открыт — льготный период",
+    "deviceGraceBody": "Панель заблокирована, но check-in турникета/устройства работает ещё {total} дней. Осталось: {days} дн. (до: {ends}).",
+    "deviceBlockedTitle": "Турникет тоже закрыт",
+    "deviceBlockedBody": "Льготный период истёк. Check-in отклоняется. После оплаты панель и турникет откроются вместе."
   },
   "receptionDesktop": {
     "badge": "Windows-приложение",
@@ -1025,7 +1067,11 @@
       },
       "register": "Зарегистрировать устройство",
       "registering": "Сохранение…",
-      "disable": "Отключить"
+      "disable": "Отключить (слив)",
+      "finalizeDisable": "Отключить навсегда",
+      "forceDisable": "Принудительно отключить",
+      "forceDisableConfirm": "Ожидающие офлайн-записи могут не достичь сервера. Всё равно отключить навсегда?",
+      "drainingHint": "Режим слива: живой check-in выключен; ожидающие офлайн-пакеты ещё могут синхронизироваться."
     },
     "rfid": {
       "label": "RFID-карта",

@@ -149,6 +149,37 @@
         "trainer": "Antrenör (PT)"
       }
     },
+    "renewal": {
+      "title": "Paketi Yenile / Süre Uzat",
+      "subtitle": "Mevcut bitiş: {ends}. Aktif üyelikte süre üzerine eklenir; dolmuşsa bugünden başlar.",
+      "noEndDate": "tanımsız",
+      "sellTitle": "Paket sat (yenileme)",
+      "sellHint": "Seçilen plan üye kaydına yazılır, borç oluşturulur; peşin tahsilat seçerseniz anında kapanır.",
+      "noPlans": "Aktif üyelik paketi yok. Önce Planlar sayfasından paket ekleyin.",
+      "plan": "Üyelik paketi",
+      "planOption": "{name} — {days} gün — {price} {currency}",
+      "stackHint": "Bu paket {days} gün ekler (aktif süre varsa üzerine, yoksa bugünden).",
+      "paymentMode": "Tahsilat",
+      "payNow": "Peşin tahsil et (nakit/kart/havale)",
+      "chargeOpen": "Açık borç bırak (sonra POS/cari)",
+      "paymentMethod": "Ödeme yöntemi",
+      "methods": {
+        "cash": "Nakit",
+        "card": "Kart",
+        "transfer": "Havale/EFT"
+      },
+      "notes": "Not (opsiyonel)",
+      "notesPlaceholder": "Örn. yıllık kampanya",
+      "selling": "Satılıyor…",
+      "sellSubmit": "Paketi sat ve süreyi uzat",
+      "extendTitle": "Manuel / ücretsiz uzatma",
+      "extendHint": "Yalnızca OWNER/ADMIN. Gerekçe audit log'a yazılır; borç oluşmaz.",
+      "extraDays": "Eklenecek gün",
+      "reason": "Gerekçe",
+      "reasonPlaceholder": "Örn. şikayet telafisi / yönetim onayı",
+      "extending": "Uzatılıyor…",
+      "extendSubmit": "Süreyi uzat"
+    },
     "add": {
       "noPermission": "Üye eklemek için OWNER, ADMIN veya STAFF rolüne sahip olmanız gerekir.",
       "title": "Yeni Sporcu / Üye Kaydı",
@@ -226,8 +257,15 @@
       "email": "E-posta",
       "role": "Rol",
       "rfid": "Turnike kartı",
-      "joined": "Katılım"
+      "joined": "Katılım",
+      "status": "Durum"
     },
+    "statusPending": "Davet bekliyor",
+    "statusActive": "Aktif",
+    "invitedAt": "Davet: {date}",
+    "resendInvite": "Daveti yeniden gönder",
+    "cancelInvite": "Daveti iptal et",
+    "cancelInviteConfirm": "Bekleyen davet iptal edilsin ve koltuk serbest bırakılsın mı?",
     "invite": {
       "noPermission": "Personel eklemek için OWNER veya ADMIN rolüne sahip olmanız gerekir.",
       "title": "Yeni Personel Davet Et",
@@ -923,6 +961,10 @@
     "lockedKicker": "Erişim kilitlendi",
     "lockedTitle": "Deneme süreniz sona erdi",
     "lockedBanner": "Panel kilitlendi. Devam etmek için paket seçip ödeme talebi gönderin veya WhatsApp ile bize ulaşın. Onay sonrası erişim otomatik açılır.",
+    "deviceGraceTitle": "Turnike henüz açık — nezaket penceresi",
+    "deviceGraceBody": "Panel kilitli olsa da turnike/cihaz check-in {total} günlük nezaket süresiyle çalışmaya devam ediyor. Kalan: {days} gün (bitiş: {ends}). Süre dolunca turnike de kapanır — aboneliğinizi yenileyin.",
+    "deviceBlockedTitle": "Turnike de kapandı",
+    "deviceBlockedBody": "Nezaket süresi doldu. Turnike ve cihaz check-in'leri reddediliyor. Ödeme onaylanınca panel ve turnike birlikte açılır.",
     "layoutLockBanner": "Abonelik gerekli — yalnızca ödeme ve iletişim sayfasına erişebilirsiniz:",
     "backToDashboard": "Panele dön",
     "trialReminder": "Deneme sürenizin bitmesine {days} gün kaldı.",
@@ -1028,7 +1070,11 @@
       },
       "register": "Cihaz kaydet",
       "registering": "Kaydediliyor…",
-      "disable": "Devre dışı"
+      "disable": "Devre dışı (boşalt)",
+      "finalizeDisable": "Kalıcı kapat",
+      "forceDisable": "Zorla kapat",
+      "forceDisableConfirm": "Bekleyen offline kayıtlar sunucuya ulaşamayabilir. Yine de kalıcı olarak kapansın mı?",
+      "drainingHint": "Senkron boşaltma modu: canlı check-in kapalı, bekleyen offline paketler hâlâ gönderilebilir."
     },
     "rfid": {
       "label": "RFID kart",

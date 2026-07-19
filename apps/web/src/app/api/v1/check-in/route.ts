@@ -3,6 +3,7 @@ import { parseDirection, processCheckIn } from '@/lib/check-in/process';
 import { validateDeviceKey } from '@/lib/api/device-auth';
 import { isStaffContext } from '@/lib/api/auth-context';
 import { requireMemberScopedApiContext, requireTenantWriteAccess } from '@/lib/api/guard';
+import { assertDeviceCheckInAllowed } from '@/lib/billing/assert-device-checkin';
 import { apiErrorI18n } from '@/lib/api/i18n-errors';
 import { apiOk } from '@/lib/api/response';
 import type { CheckInMethod } from '@sgms/database';
@@ -22,6 +23,10 @@ function mapCheckInError(code: string, request: Request) {
       return apiErrorI18n('checkInMembershipExpired', 403, request);
     case 'invalid_qr':
       return apiErrorI18n('checkInInvalidQr', 400, request);
+    case 'qr_already_used':
+      return apiErrorI18n('checkInQrAlreadyUsed', 409, request);
+    case 'too_rapid':
+      return apiErrorI18n('checkInTooRapid', 429, request);
     default:
       return apiErrorI18n('memberNotFound', 404, request);
   }
@@ -34,6 +39,15 @@ export async function POST(request: Request) {
     const device = await validateDeviceKey(deviceKey);
     if (!device) {
       return apiErrorI18n('deviceKeyInvalid', 401, request);
+    }
+
+    const deviceAccess = await assertDeviceCheckInAllowed(device.organizationId);
+    if (!deviceAccess.ok) {
+      return apiErrorI18n('subscriptionDeviceBlocked', 403, request, {
+        phase: deviceAccess.deviceAccess.phase,
+        blockReason: deviceAccess.deviceAccess.blockReason,
+        graceEndsAt: deviceAccess.deviceAccess.graceEndsAt?.toISOString() ?? null,
+      });
     }
 
     let body: Record<string, unknown>;
@@ -76,6 +90,7 @@ export async function POST(request: Request) {
       checkIn: result.checkIn,
       duplicateWithinHour: result.duplicateWithinHour,
       device: { id: device.id, name: device.name },
+      subscriptionDevicePhase: deviceAccess.deviceAccess.phase,
     });
   }
 

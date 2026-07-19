@@ -1,5 +1,9 @@
 import { getCloudClient, syncOrganizationToCloud } from '@/lib/cloud-sync';
-import { createProformaToken } from '@/lib/billing/proforma';
+import {
+  createProformaToken,
+  findLatestProformaForRequest,
+  markProformaEmailResult,
+} from '@/lib/billing/proforma';
 import { prisma } from '@/lib/prisma';
 import { siteConfig } from '@/lib/site-config';
 import type { Prisma } from '@sgms/database';
@@ -86,21 +90,31 @@ export async function activateSubscriptionFromRequest(
   ]);
 
   await syncOrganizationToCloud(organizationId);
-  await sendProformaInvoiceEmail(organizationId, requestId).catch((error) => {
-    console.error('[billing] proforma e-postası gönderilemedi:', error);
-  });
 
-  return { ok: true as const, request };
+  const mail = await sendProformaInvoiceEmail(organizationId, requestId, actorId);
+  if (!mail.ok) {
+    console.error('[billing] proforma e-postası gönderilemedi:', mail.error);
+  }
+
+  return { ok: true as const, request, proformaEmail: mail };
 }
 
-async function sendProformaInvoiceEmail(organizationId: string, billingRequestId: string) {
+export async function sendProformaInvoiceEmail(
+  organizationId: string,
+  billingRequestId: string,
+  actorId: string | null = null,
+): Promise<{ ok: true; tokenId: string } | { ok: false; error: string; tokenId?: string }> {
   const org = await prisma.organization.findUnique({
     where: { id: organizationId },
     select: { name: true, email: true },
   });
-  if (!org?.email) return;
+  if (!org?.email) {
+    return { ok: false, error: 'Organizasyon e-posta adresi yok.' };
+  }
 
-  const { token } = await createProformaToken(organizationId, billingRequestId);
+  // Mevcut başarısız/pending token varsa yeniden kullanma yerine taze link üret
+  // (eski PDF linki hâlâ çalışır; yeniden gönderim yeni link + durum kaydı).
+  const { id: tokenId, token } = await createProformaToken(organizationId, billingRequestId);
   const proformaUrl = `${siteConfig.url}/api/v1/proforma/${token}`;
 
   const html = `
@@ -111,10 +125,64 @@ async function sendProformaInvoiceEmail(organizationId: string, billingRequestId
     <p>İyi çalışmalar dileriz.</p>
   `.trim();
 
-  await getCloudClient().sendMail({
-    to: org.email,
-    subject: 'SGMS — Proforma Faturanız',
-    html,
-    category: 'transactional',
-  });
+  try {
+    const mailResult = await getCloudClient().sendMail({
+      to: org.email,
+      subject: 'SGMS — Proforma Faturanız',
+      html,
+      category: 'transactional',
+    });
+
+    if (!mailResult.ok) {
+      const error = mailResult.message || 'Mail API başarısız';
+      await markProformaEmailResult(tokenId, { ok: false, error });
+      await prisma.auditLog.create({
+        data: {
+          actorId,
+          organizationId,
+          action: 'PROFORMA_SENT',
+          entityType: 'proforma_token',
+          entityId: tokenId,
+          metadata: { billingRequestId, emailSent: false, error },
+        },
+      });
+      return { ok: false, error, tokenId };
+    }
+
+    await markProformaEmailResult(tokenId, { ok: true });
+    await prisma.auditLog.create({
+      data: {
+        actorId,
+        organizationId,
+        action: 'PROFORMA_SENT',
+        entityType: 'proforma_token',
+        entityId: tokenId,
+        metadata: { billingRequestId, emailSent: true },
+      },
+    });
+    return { ok: true, tokenId };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Bilinmeyen mail hatası';
+    await markProformaEmailResult(tokenId, { ok: false, error: message });
+    await prisma.auditLog.create({
+      data: {
+        actorId,
+        organizationId,
+        action: 'PROFORMA_SENT',
+        entityType: 'proforma_token',
+        entityId: tokenId,
+        metadata: { billingRequestId, emailSent: false, error: message },
+      },
+    });
+    return { ok: false, error: message, tokenId };
+  }
+}
+
+/** Master Admin: başarısız/eksik proforma e-postasını yeniden gönder. */
+export async function resendProformaInvoiceEmail(organizationId: string, billingRequestId: string) {
+  const latest = await findLatestProformaForRequest(organizationId, billingRequestId);
+  return sendProformaInvoiceEmail(organizationId, billingRequestId, null).then((result) => ({
+    ...result,
+    previousStatus: latest?.emailStatus ?? null,
+  }));
 }

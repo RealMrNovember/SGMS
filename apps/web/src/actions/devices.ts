@@ -14,6 +14,8 @@ export type DeviceFormState = {
   error?: string;
   success?: string;
   apiKey?: string;
+  /** DRAINING'e alındıysa UI uyarı göstersin. */
+  draining?: boolean;
 };
 
 const registerSchema = z.object({
@@ -104,7 +106,14 @@ export async function registerDevice(
   };
 }
 
-export async function disableDevice(deviceId: string): Promise<{ error?: string }> {
+/**
+ * Güvenli kapatma: önce DRAINING (offline sync hâlâ çalışır, canlı check-in kapalı).
+ * `force: true` ile doğrudan DISABLED — bekleyen paketler sunucuya ulaşamaz.
+ */
+export async function disableDevice(
+  deviceId: string,
+  options?: { force?: boolean },
+): Promise<{ error?: string; draining?: boolean; success?: string }> {
   const ctx = await getDeviceAdminContext();
   if ('error' in ctx) {
     return { error: ctx.error };
@@ -117,9 +126,16 @@ export async function disableDevice(deviceId: string): Promise<{ error?: string 
     return { error: 'Cihaz bulunamadı.' };
   }
 
+  if (device.status === 'DISABLED') {
+    return { error: 'Cihaz zaten devre dışı.' };
+  }
+
+  const force = Boolean(options?.force);
+  const nextStatus = force || device.status === 'DRAINING' ? 'DISABLED' : 'DRAINING';
+
   await prisma.device.update({
     where: { id: deviceId },
-    data: { status: 'DISABLED' },
+    data: { status: nextStatus },
   });
 
   await prisma.auditLog.create({
@@ -129,9 +145,27 @@ export async function disableDevice(deviceId: string): Promise<{ error?: string 
       action: 'DEVICE_DISABLED',
       entityType: 'Device',
       entityId: deviceId,
+      metadata: {
+        previousStatus: device.status,
+        nextStatus,
+        force,
+        note:
+          nextStatus === 'DRAINING'
+            ? 'Bekleyen offline senkron boşaltılsın diye DRAINING; canlı check-in kapalı.'
+            : 'Cihaz kalıcı olarak DISABLED; yeni sync reddedilir.',
+      },
     },
   });
 
   revalidatePath('/dashboard/check-in');
-  return {};
+
+  if (nextStatus === 'DRAINING') {
+    return {
+      draining: true,
+      success:
+        'Cihaz senkron boşaltma moduna alındı. Canlı check-in kapandı; turnike bekleyen kayıtları gönderebilir. Bitince tekrar "Devre dışı" veya "Zorla kapat" kullanın.',
+    };
+  }
+
+  return { success: 'Cihaz kalıcı olarak devre dışı bırakıldı.' };
 }

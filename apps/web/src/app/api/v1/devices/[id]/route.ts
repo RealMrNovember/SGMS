@@ -39,9 +39,15 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     data.location = body.location.trim() || null;
   }
   if (typeof body.status === 'string') {
-    const allowed = new Set<DeviceStatus>(['PENDING', 'ONLINE', 'OFFLINE', 'DISABLED']);
+    const allowed = new Set<DeviceStatus>(['PENDING', 'ONLINE', 'OFFLINE', 'DRAINING', 'DISABLED']);
     if (allowed.has(body.status as DeviceStatus)) {
-      data.status = body.status as DeviceStatus;
+      // Canlı check-in kapatırken bekleyen offline veri için önce DRAINING zorunlu;
+      // doğrudan DISABLED yalnızca body.force === true ile.
+      if (body.status === 'DISABLED' && existing.status !== 'DRAINING' && body.force !== true) {
+        data.status = 'DRAINING';
+      } else {
+        data.status = body.status as DeviceStatus;
+      }
     }
   }
 

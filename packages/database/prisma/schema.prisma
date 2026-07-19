@@ -50,6 +50,8 @@ enum DeviceStatus {
   PENDING
   ONLINE
   OFFLINE
+  /// Canlı check-in kapalı; yalnızca bekleyen offline sync boşaltılabilir.
+  DRAINING
   DISABLED
 }
 
@@ -1130,17 +1132,23 @@ model Transaction {
 // ---------------------------------------------------------------------------
 
 model ProformaToken {
-  id               String   @id @default(cuid())
-  organizationId   String   @map("organization_id")
-  billingRequestId String   @map("billing_request_id")
-  tokenHash        String   @unique @map("token_hash")
-  expiresAt        DateTime @map("expires_at")
+  id               String    @id @default(cuid())
+  organizationId   String    @map("organization_id")
+  billingRequestId String    @map("billing_request_id")
+  tokenHash        String    @unique @map("token_hash")
+  expiresAt        DateTime  @map("expires_at")
+  /// pending | sent | failed — e-posta gönderim durumu (sessiz kayıp önleme)
+  emailStatus      String    @default("pending") @map("email_status")
+  emailSentAt      DateTime? @map("email_sent_at")
+  lastEmailError   String?   @map("last_email_error") @db.Text
 
   createdAt DateTime @default(now()) @map("created_at")
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@index([organizationId])
+  @@index([billingRequestId])
+  @@index([emailStatus])
   @@index([expiresAt])
   @@map("proforma_tokens")
 }

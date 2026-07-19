@@ -55,6 +55,11 @@ export async function acceptStaffInvite(
     data: { passwordHash, status: 'ACTIVE' },
   });
 
+  await prisma.organizationMember.updateMany({
+    where: { userId: check.userId, isActive: true, joinedAt: null },
+    data: { joinedAt: new Date() },
+  });
+
   await consumeStaffInviteToken(check.tokenId);
 
   const ctx = await getRequestAuditContext();

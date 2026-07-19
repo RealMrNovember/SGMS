@@ -71,7 +71,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 33 | Dinamik Rol Bazlı Kullanım Kılavuzu | 🔲 Planlandı | 0% |
 | 34 | Tam Responsive Tasarım Sistemi | ✅ Tamamlandı | ~97% (sol menü/tema/ikon + mobil tablo/kart + mesajlaşma + profil özyönetimi + interaktif program görünümü tamamlandı — yalnızca video desteği/ilerleme geçmişi Tier 2'ye ertelendi) |
 | 35 | Temsilci (Partner) Portalı | ✅ Tamamlandı | 100% |
-| 36 | Kritik İş Mantığı Denetimi & Sağlamlaştırma (2026-07-19 canlıya alma denetimi) | 🔄 Devam ediyor | 0% (10 kritik + 7 ikincil bulgu — bkz. detay bölümü, kullanıcı onayıyla önceliklendirildi) |
+| 36 | Kritik İş Mantığı Denetimi & Sağlamlaştırma (2026-07-19 canlıya alma denetimi) | 🔄 Devam ediyor | ~55% (36.11 + 36.1 + 36.8 kapatıldı — 2026-07-19) |
 
 > Fazlar 6/9/10'un durum özeti önceki revizyonlarda detay bölümleriyle **çelişiyordu** (özet tablo güncellenmeden unutulmuştu). Bu revizyon koda göre (tüm alt maddeler `[x]`, gerçek commit geçmişi) düzeltilmiştir.
 
@@ -1103,11 +1103,19 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 ### 36.1 Üyelik Yenileme / Paket & Süre Uzatma Aksiyonu
 
 > **Senaryo:** Bir üyenin 1 aylık paketi bugün bitiyor. Resepsiyonist ya üyeye yeni bir paket sattığında (POS'tan tahsilat alarak) ya da bir temsilci/admin salon adına "süre uzatma" talebiyle bunu düzeltebilmeli — bugün ikisi de mümkün değil, `membershipEndsAt` hiçbir UI'dan güncellenemiyor.
-- [ ] `renewMembership` server action — yeni `GymMembershipPlan` seçilir, `membershipStartsAt`/`membershipEndsAt` otomatik hesaplanır (`durationDays` ile, mevcut bitiş tarihinden mi yoksa bugünden mi başlayacağı — süre dolmamışsa üstüne ekleme, dolmuşsa bugünden başlatma mantığı)
-- [ ] Yenileme, POS/Expense akışına bağlanır — paket satışı otomatik bir `Expense` (tutar = plan fiyatı) oluşturur, ödeme alındığında `Transaction` ile kapanır (mevcut `lib/billing/settle-payment.ts` akışı yeniden kullanılır)
-- [ ] `/dashboard/members/[id]` sayfasına "Paketi Yenile / Süre Uzat" butonu (OWNER/ADMIN/STAFF — rol bazlı, STAFF yalnızca satış yapabilir, admin onayı gerekmeyen serbest uzatma STAFF'a kapalı olabilir — ayarlanabilir)
-- [ ] Temsilci/Master Admin tarafında da salon adına manuel süre uzatma talebi (mevcut Partner'ın "deneme süresi uzatma" desenine benzer, ama bu kez **gym member** seviyesinde) — audit log'a yazılır
-- [ ] Kabul kriteri: bir üyenin süresi dolduğunda resepsiyon "paket sat" diyerek hem tahsilat alıp hem süreyi uzatabiliyor; bir admin/temsilci de talep üzerine ücretsiz/manuel uzatma yapabiliyor; her iki yol da audit log'da görünüyor
+>
+> **Durum:** ✅ *2026-07-19 kapatıldı.*
+
+- [x] `renewMembership` server action — yeni `GymMembershipPlan` seçilir, `membershipStartsAt`/`membershipEndsAt` otomatik hesaplanır (`durationDays` ile; süre dolmamışsa üstüne ekleme, dolmuşsa bugünden başlatma — `lib/membership/dates.ts`)
+- [x] Yenileme, POS/Expense akışına bağlanır — paket satışı `Expense` oluşturur; `pay_now` seçilirse `Transaction` + `applyPaymentToExpenses` ile kapanır (`charge_open` açık borç bırakır)
+- [x] `/dashboard/members/[id]` — "Paketi Yenile / Süre Uzat" paneli (`MembershipRenewalPanel`): OWNER/ADMIN/STAFF satış yapabilir; ücretsiz uzatma yalnızca OWNER/ADMIN
+- [x] Manuel uzatma (`extendMembershipManually`) gerekçe zorunlu, audit `MEMBER_UPDATED` (`kind: membership_extended_manual`); satış yolu `kind: membership_renewed` + EXPENSE/PAYMENT audit
+- [x] Kabul kriteri: resepsiyon paket satıp tahsilat alarak süreyi uzatabiliyor; admin ücretsiz uzatma yapabiliyor; her iki yol audit log'da görünüyor
+- [x] Birim test: `lib/membership/dates.test.ts` (stack / expired / complimentary)
+
+**Dosyalar:** `lib/membership/dates.ts`, `actions/membership.ts`, `components/membership-renewal-panel.tsx`, `dashboard/members/[id]/page.tsx`, messages (6 dil)
+
+**Not:** Partner/Master Admin salon-deneme uzatması (org seviyesi) zaten vardı; gym-member seviyesinde ücretsiz uzatma tenant OWNER/ADMIN üzerinden karşılandı (partner panelinde üye listesi yok — v2'de partner'a üye uzatma eklenebilir).
 
 ### 36.2 Çoklu Para Birimi Doğrulama & Bakiye Motoru
 
@@ -1161,9 +1169,22 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 ### 36.8 Abonelik Kilidi ↔ Cihaz/Turnike Check-in Tutarlılığı
 
 > **Senaryo:** Deneme süresi/ödeme bitip panel kilitlendiğinde, salonun turnikesi de bilinçli bir kurala göre davranmalı — bugün panel kilitli olsa da turnike süresiz çalışmaya devam ediyor, bu da salonun hiç ödemeden sonsuza kadar işletilebileceği anlamına geliyor.
-- [ ] Ürün kararı olarak: `mode: 'billing_only'` durumunda cihaz/turnike check-in'i de **kısa bir ek süre sonra** (örn. 3-7 gün "nezaket" penceresi — panel kilitlenir kilitlenmez turnikeyi de anında kapatmak gerçek bir salonun ortasında kalmasına neden olabilir) kapatılır; pencere süresi boyunca resepsiyon panelinde büyük bir uyarı gösterilir
-- [ ] `api/v1/check-in/route.ts`'deki cihaz-anahtarlı yol da `resolveSubscriptionAccess` kontrolünden geçirilir (bugün yalnızca staff-session yolu kontrol ediyor)
-- [ ] Kabul kriteri: ödemesi gerçekten bitmiş bir salonun turnikesi, tanımlı nezaket süresi sonunda gerçekten kapanıyor; süreç boyunca hem panelde hem (varsa) e-posta ile net uyarılar gidiyor — sürpriz bir kesinti yaşanmıyor
+>
+> **Durum:** ✅ *2026-07-19 kapatıldı.*
+
+- [x] **Nezaket penceresi (ürün kararı):** Panel `billing_only` olduğunda turnike **anında** kapanmaz. Varsayılan **5 gün** (`DEVICE_CHECKIN_GRACE_DAYS` env, 0–30) kilit anından (`trialEndsAt` / `currentPeriodEnd` / `licenseExpiresAt`) itibaren check-in’e izin verilir. `org_suspended` ve `no_subscription` → nezaket yok, anında kapalı.
+- [x] `resolveDeviceCheckInAccess` + `assertDeviceCheckInAllowed` — panel erişiminden bağımsız cihaz fazı: `full` | `grace` | `blocked`
+- [x] Cihaz yolları abonelik kontrolünden geçirildi:
+  - `POST /api/v1/check-in` (X-Device-Key)
+  - `POST /api/v1/webhooks/turnstile`
+  - `POST /api/v1/sync/push`
+  - Red: `403 subscriptionDeviceBlocked`
+- [x] **Panel uyarısı:** Kilitliyken `/dashboard/billing` üzerinde amber (nezaket, kalan gün + bitiş tarihi) veya rose (turnike de kapandı) banner
+- [x] **E-posta:** Nezakete ilk girişte sahibe tek seferlik bilgilendirme (`Redis SET NX` `billing:device-grace-mail:{orgId}`) + audit `device_grace_notified`
+- [x] Birim test: `lib/billing/device-checkin-access.test.ts` (full / grace / exhausted / suspended / PAST_DUE anchor)
+- [x] Kabul kriteri: ödemesi bitmiş salonun turnikesi tanımlı nezaket sonunda kapanıyor; süreç boyunca billing sayfasında ve (ilk seferde) e-postada net uyarı var — sürpriz kesinti yok
+
+**Dosyalar:** `lib/billing/device-checkin-access.ts`, `lib/billing/assert-device-checkin.ts`, `lib/billing/subscription-gate.ts` (`licenseExpiresAt`), check-in/turnstile/sync-push route’ları, billing page, messages (6 dil), i18n-errors
 
 ### 36.9 İade (Refund) Akışı
 
@@ -1182,15 +1203,44 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ### 36.11 İkincil Öncelikli Sağlamlaştırma Kalemleri
 
-- [ ] **QR check-in tek kullanımlık hale getirme** — `verifyCheckInQrToken`'a jti/nonce bazlı "kullanıldı" işaretlemesi (Redis'te kısa TTL'li tek-kullanım kilidi), ekran görüntüsüyle ikinci kişinin girmesi engellenir
-- [ ] **Offline turnike senkronunda `direction` alanının işlenmesi** — `sync/push/route.ts` request body'den `direction`'ı da haritalar, auto-toggle'a güvenmek yerine cihazın gönderdiği gerçek yönü kullanır
-- [ ] **Cihaz devre dışı bırakılırken bekleyen offline veri koruması** — bir cihaz `DISABLED` yapılmadan önce bekleyen senkron verisi var mı kontrol edilir; varsa net bir uyarı ("bu cihazda senkronize edilmemiş X kayıt var") ve/veya devre dışı bırakma yerine geçici "re-key" (yeni anahtar) akışı sunulur
-- [ ] **Check-in idempotency/kilit** — hızlı ardışık (aynı üye, saniyeler içinde) check-in'lere karşı kısa süreli bir uygulama seviyesi kilit (Redis, birkaç saniyelik TTL) eklenir; race'den doğan çift ENTRY kaydı önlenir
-- [ ] **Bekleyen personel davetleri için görünürlük + yeniden gönderme** — `/dashboard/team` listesinde `user.status === 'INVITED'` net bir "Davet Bekliyor" etiketiyle gösterilir, "Daveti Yeniden Gönder" aksiyonu eklenir, uzun süre yanıtsız davetler koltuk limitinden düşülebilir/iptal edilebilir hale gelir
-- [ ] **Üye limiti kontrolünün API reaktivasyon yoluna da uygulanması** — `assertWithinMemberLimit`, `PATCH /api/v1/members/[id]` üzerinden `INACTIVE → ACTIVE` geçişinde de çağrılır
-- [ ] **Proforma e-postası için yeniden deneme/kayıt** — `sendProformaInvoiceEmail` başarısız olursa sessizce yutulmak yerine bir durum kaydı tutulur (örn. `ProformaToken`'a `emailStatus` alanı) ve Master Admin panelinden "yeniden gönder" aksiyonu sunulur; PDF font indirmesi (`raw.githubusercontent.com`) için timeout + yerel fallback eklenir (dış servise bağımlılığı azaltmak için)
+> **Durum (2026-07-19):** Aşağıdaki 7 ikincil açık kodda doğrulandı, gerçek hayat senaryolarıyla kapatıldı ve production migration (`20260719040000_hardening_qr_device_drain_proforma_email`) uygulandı.
 
-**Kabul kriteri (faz geneli):** Yukarıdaki 10 kritik maddenin tamamı üretim ortamında doğrulanmış, gerçek senaryolarla test edilmiş ve audit log'a bağlanmış olmalı; 7 ikincil madde takip listesinde kalabilir ama roadmap'ten düşürülmez.
+- [x] **QR check-in tek kullanımlık hale getirme** — ✅ *2026-07-19 kapatıldı.*
+  - **Senaryo:** Üye Ahmet telefonundaki QR'ı resepsiyonda gösterir; Ali ekran görüntüsü alır ve 3 dk sonra aynı kodla turnikeden geçer → iki kişi tek üyelikle girer.
+  - **Düzeltme:** Token gövdesine `jti` eklendi; `verifyAndConsumeCheckInQrToken` Redis `SET NX` (`qr:used:{jti}`, TTL≈kalan süre) ile tek kullanımlık tüketir; ikinci sunum `409 checkInQrAlreadyUsed`. Redis yoksa süreç-içi bellek fallback.
+  - **Dosyalar:** `lib/check-in/qr-token.ts`, `lib/check-in/process.ts`, `lib/redis.ts` (`redisSetNx`), `lib/api/i18n-errors.ts`
+
+- [x] **Offline turnike senkronunda `direction` alanının işlenmesi** — ✅ *2026-07-19 kapatıldı.*
+  - **Senaryo:** İnternet kesilir; turnike ENTRY@10:01 ve EXIT@10:45 kaydeder ama push sırası ters gelir. Sunucu `direction`'ı yok sayıp `inferDirection` ile auto-toggle yapınca kayıtlar ters düşer; kişi içeri "çıkış" yapmış görünür.
+  - **Düzeltme:** `sync/push/route.ts` body'den `direction` (ENTRY|EXIT) ve `staffUserId` haritalanır; `processSyncPushBatch` zaten `parseDirection` ile kullanıyordu.
+  - **Dosyalar:** `app/api/v1/sync/push/route.ts`
+
+- [x] **Cihaz devre dışı bırakılırken bekleyen offline veri koruması** — ✅ *2026-07-19 kapatıldı.*
+  - **Senaryo:** Teknik servis "eski turnikeyi kapat" der; cihaz `DISABLED` olur. Cihazda 40 offline check-in vardır; push 401 alır, paketler silinince veri kaybolur.
+  - **Düzeltme:** Yeni `DeviceStatus.DRAINING` — canlı check-in reddedilir, `sync/push|pull` kabul edilir. UI önce "Devre dışı (boşalt)" → DRAINING; sonra "Kalıcı kapat" veya onaylı "Zorla kapat" → DISABLED. Pull/processCheckIn DRAINING'i ONLINE'a ezmez.
+  - **Dosyalar:** `schema.prisma`, migration, `lib/api/device-auth.ts` (`validateDeviceKeyForSync`), `actions/devices.ts`, `components/device-management-panel.tsx`, `api/v1/devices/[id]/route.ts`, sync pull/push
+
+- [x] **Check-in idempotency/kilit** — ✅ *2026-07-19 kapatıldı.*
+  - **Senaryo:** Resepsiyon aynı üye kartını 2 sn içinde iki kez okutur / formu çift tıklar → iki ENTRY; günlük "giriş" KPI şişer.
+  - **Düzeltme:** Aynı org+subject+direction için 8 sn Redis debounce (`rl:checkin:...`); tarihsel offline olaylarda DB penceresi. `too_rapid` → 429. ENTRY→EXIT zinciri engellenmez (direction anahtarda).
+  - **Dosyalar:** `lib/check-in/process.ts`, `api/v1/check-in/route.ts`, i18n
+
+- [x] **Bekleyen personel davetleri için görünürlük + yeniden gönderme** — ✅ *2026-07-19 kapatıldı.*
+  - **Senaryo:** Salon Starter (3 personel) planında; davet giden Zeynep maili görmez. Liste "aktif" gösterir, koltuk dolu, yeniden davet/iptal yok → aylarca ghost seat.
+  - **Düzeltme:** `user.status === 'INVITED'` → "Davet bekliyor" rozeti; `resendStaffInvite` / `cancelStaffInvite` (koltuk serbest). E-posta davetinde `joinedAt` null, kabulde set. Eski token'lar resend'de tüketilir.
+  - **Dosyalar:** `actions/team.ts`, `actions/staff-invite.ts`, `components/staff-invite-actions.tsx`, `dashboard/team/page.tsx`, messages (6 dil)
+
+- [x] **Üye limiti kontrolünün API reaktivasyon yoluna da uygulanması** — ✅ *2026-07-19 kapatıldı.*
+  - **Senaryo:** Plan 100 üye; 100 aktif. Entegrasyon `INACTIVE` üyeyi `PATCH … status=ACTIVE` ile geri açar → 101. üye, cap aşılır.
+  - **Düzeltme:** `PATCH /api/v1/members/[id]` içinde `INACTIVE → ACTIVE|SUSPENDED` geçişinde `assertWithinMemberLimit`; aşımsa 403 `memberLimitReached`.
+  - **Dosyalar:** `app/api/v1/members/[id]/route.ts`, i18n
+
+- [x] **Proforma e-postası için yeniden deneme/kayıt** — ✅ *2026-07-19 kapatıldı.*
+  - **Senaryo:** Ödeme onaylanır, abonelik açılır; Cloud mail API 503 verir. `.catch(console.error)` yüzünden salon sahibi faturayı hiç almaz, panelde iz/resend yok.
+  - **Düzeltme:** `ProformaToken.emailStatus` (`pending|sent|failed`) + `emailSentAt` + `lastEmailError`; gönderim sonucu audit `PROFORMA_SENT`; Master Admin "Proforma e-postasını yeniden gönder" (`resendProformaEmail`). Onay UI'sı mail başarısızlığını açıkça bildirir.
+  - **Dosyalar:** `schema.prisma`, migration, `lib/billing/proforma.ts`, `lib/billing/activate.ts`, `actions/admin-billing.ts`, `billing-request-actions.tsx`, admin org detail page
+
+**Kabul kriteri (faz geneli):** Yukarıdaki 10 kritik maddenin tamamı üretim ortamında doğrulanmış, gerçek senaryolarla test edilmiş ve audit log'a bağlanmış olmalı; **7 ikincil madde (36.11) 2026-07-19'da kapatıldı** — QR tek-kullanım, sync direction, DRAINING, check-in debounce, davet pending/resend, üye limiti reaktivasyon, proforma e-posta retry.
 
 **Bağımlılık:** Faz 8 (POS/Cari) · Faz 12 (Master Admin) · Faz 16 (Ödeme sağlayıcı — bu gece eklendi) · Faz 30 (Kurumsal hiyerarşi — 36.6 için)
 
@@ -1300,23 +1350,23 @@ Devam ediyor:
     36.4     Personel çıkarma + gerçek zamanlı oturum iptali        ← güvenlik açığı, orta efor
     36.3     2FA kurtarma (e-posta + Master Admin)                  ← bu gece eklenen riski kapatır, acil
 
-  Faz 36 · Sprint 2 — Para/Defter Bütünlüğü (birbirine bağlı, birlikte yürütülür)
+  Faz 36 · Sprint 2 — Para/Defter Bütünlüğü
+    36.1     Üyelik yenileme / paket & süre uzatma                 ✅ 2026-07-19
     36.2     Çoklu para birimi doğrulama & bakiye motoru
     36.9     İade (refund) akışı
     36.10    Birleşik ciro/rapor motoru
-    36.1     Üyelik yenileme / paket & süre uzatma (POS'a bağlı)
 
   Faz 36 · Sprint 3 — Ödeme Güvenliği & Abonelik Politikası
-    36.7     Ödeme idempotency — çifte aktivasyon önleme            ← en kritik, para güvenliği
-    36.8     Abonelik kilidi ↔ cihaz/turnike check-in tutarlılığı
+    36.7     Ödeme idempotency — çifte aktivasyon önleme
+    36.8     Abonelik kilidi ↔ cihaz/turnike check-in tutarlılığı   ✅ 2026-07-19
 
   Faz 36 · Sprint 4 — Çoklu Şube
     36.6     Çoklu şube personel desteği & organizasyon switcher     ← en büyük kapsam, session/JWT yeniden tasarımı
 
-  Faz 36 · Sprint 5 — İkincil sağlamlaştırma (36.11, tek tek düşük efor)
-    QR tek kullanımlık · offline sync direction · cihaz devre dışı veri koruması ·
-    check-in idempotency kilidi · davet "pending" görünürlüğü/yeniden gönderme ·
-    üye limiti reaktivasyon kontrolü · proforma e-posta retry
+  Faz 36 · Sprint 5 — İkincil sağlamlaştırma (36.11)                          ✅ 2026-07-19
+    QR tek kullanımlık · offline sync direction · cihaz DRAINING ·
+    check-in debounce · davet pending/resend · üye limiti reaktivasyon ·
+    proforma e-posta retry + Master Admin resend
 
 Sıradaki (Faz 36 sonrası — profesyonel değerlendirme, P0 en önce):
   Faz 32     Ticarileştirme: paket + ek kapasite satışı          ← P0, gelir modeli (kullanıcı onayı gerekli)
