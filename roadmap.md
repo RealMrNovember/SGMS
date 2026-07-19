@@ -52,7 +52,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 14 | Demo Hesap Güvenliği & Master Admin Geçişi | 🔄 Devam ediyor | ~90% (Demo PT girişi sırada) |
 | 15 | Kimlik, Onboarding & Uyum Sertleştirme | ✅ Tamamlandı | ~95% (proaktif hatırlatma + 6 dil çevirisi kaldı) |
 | 16 | CiciByte Cloud Ticari Entegrasyonu (Ödeme, Referans/Komisyon, Release) | 🔄 Devam ediyor | ~90% (Platform Ödeme Ayarları paneli — iyzico/PayTR/EFT — 2026-07-19'da eklendi; gerçek anahtarlar bekleniyor) |
-| 17 | Üyelik Senaryoları & Ders/Sınıf Yönetimi | 🔄 Devam ediyor | ~12% (17.0 Lead takibi kapatıldı — 2026-07-19; 17.1–17.7 planlı) |
+| 17 | Üyelik Senaryoları & Ders/Sınıf Yönetimi | 🔄 Devam ediyor | ~12% (17.0 Lead takibi kapatıldı — 2026-07-19; 17.1–17.7 Cursor'da devam ediyor) |
 | 18 | Uyumluluk & Sağlamlaştırma (2FA, GDPR, E2E, Invoice) | 🔄 Devam ediyor | ~40% (2FA + Playwright E2E tamamlandı — 2026-07-19; GDPR self-servis, vardiya, sağlık formu, Invoice uygulama kodu sırada) |
 | 19 | SGMS Masaüstü — Genişletme | 🔲 Gelecek Vizyon | 0% |
 | 20 | SGMS Mobil Uygulama | 🔲 Gelecek Vizyon | 0% |
@@ -1435,17 +1435,20 @@ Faz 36 tamamlandı (2026-07-19 canlıya alma denetimi — kullanıcı onaylı s�
     check-in debounce · davet pending/resend · üye limiti reaktivasyon ·
     proforma e-posta retry + Master Admin resend
 
-Paralel çalışma tamamlandı (2026-07-19, çakışmayı önlemek için dosya bazında ayrılmıştı):
+Tamamlanan paralel çalışma (2026-07-19, çakışmayı önlemek için dosya bazında ayrılmıştı):
   Faz 17.0    Potansiyel müşteri (Lead) takibi           ✅ 2026-07-19 (Claude) — Lead/LeadFollowUp modeli, /dashboard/leads
   Faz 33/33.1 Kullanım kılavuzu + ayarlar modernizasyonu ✅ 2026-07-19 (Cursor) — HelpArticle modeli, /help, /dashboard/settings
+
+Şu anda paralel çalışılıyor (2026-07-19, çakışmayı önlemek için dosya bazında ayrıldı — bu sefer Cursor'a geniş/uzun kapsamlı bir iş yükü verildi):
+  Faz 17.1–17.7  Kalan üyelik senaryoları & ders/sınıf yönetimi ← Cursor — dondurma/devir, kurumsal/aile/çocuk üyelik,
+                 ders/sınıf rezervasyon sistemi (GymClass/ClassSession/ClassBooking), indirim kodu, POS stok, misafir izni
+  Faz 12.4 + 14.3 Master Admin kalıcı silme + Demo PT girişi     ← bu oturum (Claude) — düşük efor, dosya bazında sıfır çakışma
 
 Sıradaki (Faz 36 sonrası — profesyonel değerlendirme, P0 en önce):
   Faz 32     Ticarileştirme: paket + ek kapasite satışı          ← P0, gelir modeli (kullanıcı onayı gerekli)
   [Repo]     Git contributors düzenlemesi (cursoragent kaldırma) ← P0, ⚠️ onay gerekli (destructive, force-push)
 
   Faz 8.7    Salon bazlı online ödeme sağlayıcısı (Iyzico/PayTR) ← P1, Faz 8.6'ya bağımlı, Faz 16.3 deseni yeniden kullanılır
-  Faz 14.3   Demo PT girişi (login ekranı)                       ← P1, düşük efor / yüksek satış-öncesi değer
-  Faz 12.4   Master Admin kalıcı silme (hard-delete)             ← P1, düşük efor, veri hijyeni
   Faz 27.3   Serverless kuyruk motoru (QStash/Inngest)           ← P1, Faz 27.2'nin önkoşulu
   Faz 18.1   Otomatik PDF sözleşme/risk formu üretimi            ← P1, mevcut PDF altyapısını genişletir
   Faz 6.3/.4 Dil genişletmesi (İtalyanca/Portekizce) +           ← P1, pazar genişletme
