@@ -184,6 +184,37 @@
       "step1": "Informations personnelles",
       "step2": "Abonnement",
       "step3": "Notes & confirmation"
+    },
+    "renewal": {
+      "title": "Renouveler / Prolonger",
+      "subtitle": "Current end: {ends}. Active memberships stack on top; expired ones restart today.",
+      "noEndDate": "not set",
+      "sellTitle": "Vendre un forfait",
+      "sellHint": "Updates the member record, creates a charge; pay-now settles it immediately.",
+      "noPlans": "No active membership plans. Add one under Plans first.",
+      "plan": "Membership plan",
+      "planOption": "{name} — {days} days — {price} {currency}",
+      "stackHint": "This plan adds {days} days (on top if still active, otherwise from today).",
+      "paymentMode": "Payment",
+      "payNow": "Collect now (cash/card/transfer)",
+      "chargeOpen": "Leave open (collect later via POS)",
+      "paymentMethod": "Payment method",
+      "methods": {
+        "cash": "Cash",
+        "card": "Card",
+        "transfer": "Bank transfer"
+      },
+      "notes": "Note (optional)",
+      "notesPlaceholder": "e.g. annual promo",
+      "selling": "Selling…",
+      "sellSubmit": "Vendre et prolonger",
+      "extendTitle": "Prolongation manuelle / gratuite",
+      "extendHint": "OWNER/ADMIN only. Reason is audited; no charge is created.",
+      "extraDays": "Days to add",
+      "reason": "Reason",
+      "reasonPlaceholder": "e.g. goodwill / management approval",
+      "extending": "Extending…",
+      "extendSubmit": "Prolonger"
     }
   },
   "measurements": {
@@ -226,7 +257,8 @@
       "email": "E-mail",
       "role": "Rôle",
       "joined": "Arrivée",
-      "rfid": "Carte tourniquet"
+      "rfid": "Carte tourniquet",
+      "status": "Statut"
     },
     "invite": {
       "noPermission": "Le rôle OWNER ou ADMIN est requis pour inviter du personnel.",
@@ -244,7 +276,13 @@
       "passwordModeEmailInvite": "Le membre le définit lui-même par e-mail",
       "passwordModeOwnerSet": "Je le définis moi-même",
       "password": "Mot de passe"
-    }
+    },
+    "statusPending": "Invitation en attente",
+    "statusActive": "Actif",
+    "invitedAt": "Invité : {date}",
+    "resendInvite": "Renvoyer l'invitation",
+    "cancelInvite": "Annuler l'invitation",
+    "cancelInviteConfirm": "Annuler l'invitation en attente et libérer la place ?"
   },
   "dashboard": {
     "welcome": "Bienvenue, {name}",
@@ -955,7 +993,11 @@
       "licenseExpired": "Licence centrale expirée. Continuez via un paiement ou contactez-nous.",
       "orgSuspended": "Compte suspendu. Contactez le support.",
       "noSubscription": "Aucun abonnement actif trouvé."
-    }
+    },
+    "deviceGraceTitle": "Tourniquet encore ouvert — période de grâce",
+    "deviceGraceBody": "Le panneau est verrouillé, mais le check-in tourniquet/appareil reste actif pendant {total} jours. Restant : {days} jours (fin : {ends}).",
+    "deviceBlockedTitle": "Tourniquet également fermé",
+    "deviceBlockedBody": "La période de grâce est terminée. Les check-ins sont refusés. Le paiement rouvre panneau et tourniquet."
   },
   "receptionDesktop": {
     "badge": "Application Windows",
@@ -1025,7 +1067,11 @@
       },
       "register": "Enregistrer l'appareil",
       "registering": "Enregistrement…",
-      "disable": "Désactiver"
+      "disable": "Désactiver (vidage)",
+      "finalizeDisable": "Désactivation définitive",
+      "forceDisable": "Forcer la désactivation",
+      "forceDisableConfirm": "Les enregistrements hors ligne en attente peuvent ne jamais arriver. Désactiver définitivement quand même ?",
+      "drainingHint": "Mode vidage : check-in en direct coupé ; les paquets hors ligne peuvent encore se synchroniser."
     },
     "rfid": {
       "label": "Carte RFID",

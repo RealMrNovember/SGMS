@@ -77,7 +77,12 @@ const API_ERRORS = {
     checkInMemberInactive: 'Üye aktif değil; giriş reddedildi.',
     checkInMembershipExpired: 'Üyelik süresi dolmuş; giriş reddedildi.',
     checkInInvalidQr: 'QR kodu geçersiz veya süresi dolmuş.',
+    checkInQrAlreadyUsed: 'Bu QR kodu zaten kullanıldı.',
+    checkInTooRapid: 'Çok hızlı ardışık check-in. Lütfen birkaç saniye bekleyin.',
     rfidTagTaken: 'Bu RFID kartı başka bir üyeye atanmış.',
+    memberLimitReached: 'SaaS plan üye limitine ulaşıldı; reaktivasyon yapılamaz.',
+    subscriptionDeviceBlocked:
+      'Salon aboneliği sona erdi; turnike/cihaz check-in nezaket süresi de doldu. Ödeme sonrası yeniden açılır.',
   },
   en: {
     unauthorized: 'Authentication required.',
@@ -154,7 +159,12 @@ const API_ERRORS = {
     checkInMemberInactive: 'Member is not active; check-in denied.',
     checkInMembershipExpired: 'Membership expired; check-in denied.',
     checkInInvalidQr: 'QR code is invalid or expired.',
+    checkInQrAlreadyUsed: 'This QR code has already been used.',
+    checkInTooRapid: 'Check-in too rapid. Please wait a few seconds.',
     rfidTagTaken: 'This RFID card is assigned to another member.',
+    memberLimitReached: 'Member plan limit reached; reactivation denied.',
+    subscriptionDeviceBlocked:
+      'Gym subscription ended and the turnstile grace period has expired. Renew billing to reopen access.',
   },
 } as const;
 

@@ -3,6 +3,7 @@ import { AvatarUpload } from '@/components/avatar-upload';
 import { MemberAccountPanel } from '@/components/member-account-panel';
 import { MemberHealthHistoryTable } from '@/components/member-health-history-table';
 import { MemberRfidForm } from '@/components/member-rfid-form';
+import { MembershipRenewalPanel } from '@/components/membership-renewal-panel';
 import { ProgramContentView } from '@/components/program-content-view';
 import { auth } from '@/lib/auth';
 import { intlLocaleFor } from '@/lib/format-locale';
@@ -20,6 +21,7 @@ const AVATAR_MANAGER_ROLES = new Set<OrganizationRole>(['OWNER', 'ADMIN', 'STAFF
 const ACCOUNT_ROLES = new Set<OrganizationRole>(['OWNER', 'ADMIN', 'STAFF']);
 const MEMBER_MANAGER_ROLES = new Set<OrganizationRole>(['OWNER', 'ADMIN', 'STAFF']);
 const VOID_ROLES = new Set<OrganizationRole>(['OWNER', 'ADMIN']);
+const FREE_EXTEND_ROLES = new Set<OrganizationRole>(['OWNER', 'ADMIN']);
 
 export default async function MemberDetailPage({
   params,
@@ -40,12 +42,14 @@ export default async function MemberDetailPage({
   const canManageAccount = role ? ACCOUNT_ROLES.has(role) : false;
   const canVoidExpenses = role ? VOID_ROLES.has(role) : false;
   const canManageMember = role ? MEMBER_MANAGER_ROLES.has(role) : false;
+  const canSellMembership = role ? MEMBER_MANAGER_ROLES.has(role) : false;
+  const canExtendFree = role ? FREE_EXTEND_ROLES.has(role) : false;
 
   const t = await getTranslations('members');
   const locale = await getLocale();
   const dateLocale = intlLocaleFor(locale);
 
-  const [member, accountSummary, expenseCategories, paymentPlans] = await Promise.all([
+  const [member, accountSummary, expenseCategories, paymentPlans, membershipPlans] = await Promise.all([
     prisma.gymMember.findFirst({
       where: { id, organizationId },
       include: {
@@ -71,6 +75,11 @@ export default async function MemberDetailPage({
       select: { id: true, name: true, defaultAmount: true },
     }),
     getMemberPaymentPlans(organizationId, id),
+    prisma.gymMembershipPlan.findMany({
+      where: { organizationId, isActive: true },
+      orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
+      select: { id: true, name: true, durationDays: true, price: true, currency: true },
+    }),
   ]);
 
   if (!member) {
@@ -186,6 +195,23 @@ export default async function MemberDetailPage({
           </dl>
         </section>
       </div>
+
+      {canSellMembership || canExtendFree ? (
+        <MembershipRenewalPanel
+          gymMemberId={member.id}
+          currentPlanId={member.planId}
+          membershipEndsAt={member.membershipEndsAt?.toISOString() ?? null}
+          canSell={canSellMembership}
+          canExtendFree={canExtendFree}
+          plans={membershipPlans.map((plan) => ({
+            id: plan.id,
+            name: plan.name,
+            durationDays: plan.durationDays,
+            price: plan.price.toString(),
+            currency: plan.currency,
+          }))}
+        />
+      ) : null}
 
       {member.notes ? (
         <section className="card p-6">

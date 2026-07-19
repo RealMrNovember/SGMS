@@ -1,6 +1,7 @@
 import { extractDeviceKey } from '@/lib/check-in/device-key';
 import { processCheckIn, parseDirection } from '@/lib/check-in/process';
 import { validateDeviceKey } from '@/lib/api/device-auth';
+import { assertDeviceCheckInAllowed } from '@/lib/billing/assert-device-checkin';
 import { apiErrorI18n } from '@/lib/api/i18n-errors';
 import { apiOk } from '@/lib/api/response';
 import type { CheckInMethod } from '@sgms/database';
@@ -76,6 +77,15 @@ export async function POST(request: Request) {
   const device = await resolveDevice(request);
   if (!device) {
     return apiErrorI18n('deviceKeyInvalid', 401, request);
+  }
+
+  const deviceAccess = await assertDeviceCheckInAllowed(device.organizationId);
+  if (!deviceAccess.ok) {
+    return apiErrorI18n('subscriptionDeviceBlocked', 403, request, {
+      phase: deviceAccess.deviceAccess.phase,
+      blockReason: deviceAccess.deviceAccess.blockReason,
+      graceEndsAt: deviceAccess.deviceAccess.graceEndsAt?.toISOString() ?? null,
+    });
   }
 
   let body: Record<string, unknown>;

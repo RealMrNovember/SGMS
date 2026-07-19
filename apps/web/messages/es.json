@@ -184,6 +184,37 @@
       "step1": "Información personal",
       "step2": "Membresía",
       "step3": "Notas y confirmación"
+    },
+    "renewal": {
+      "title": "Renovar plan / Ampliar",
+      "subtitle": "Current end: {ends}. Active memberships stack on top; expired ones restart today.",
+      "noEndDate": "not set",
+      "sellTitle": "Vender plan (renovación)",
+      "sellHint": "Updates the member record, creates a charge; pay-now settles it immediately.",
+      "noPlans": "No active membership plans. Add one under Plans first.",
+      "plan": "Membership plan",
+      "planOption": "{name} — {days} days — {price} {currency}",
+      "stackHint": "This plan adds {days} days (on top if still active, otherwise from today).",
+      "paymentMode": "Payment",
+      "payNow": "Collect now (cash/card/transfer)",
+      "chargeOpen": "Leave open (collect later via POS)",
+      "paymentMethod": "Payment method",
+      "methods": {
+        "cash": "Cash",
+        "card": "Card",
+        "transfer": "Bank transfer"
+      },
+      "notes": "Note (optional)",
+      "notesPlaceholder": "e.g. annual promo",
+      "selling": "Selling…",
+      "sellSubmit": "Vender y ampliar",
+      "extendTitle": "Ampliación manual / gratuita",
+      "extendHint": "OWNER/ADMIN only. Reason is audited; no charge is created.",
+      "extraDays": "Days to add",
+      "reason": "Reason",
+      "reasonPlaceholder": "e.g. goodwill / management approval",
+      "extending": "Extending…",
+      "extendSubmit": "Ampliar membresía"
     }
   },
   "measurements": {
@@ -226,7 +257,8 @@
       "email": "Correo",
       "role": "Rol",
       "joined": "Ingreso",
-      "rfid": "Tarjeta de torniquete"
+      "rfid": "Tarjeta de torniquete",
+      "status": "Estado"
     },
     "invite": {
       "noPermission": "Se requiere rol OWNER o ADMIN para invitar personal.",
@@ -244,7 +276,13 @@
       "passwordModeEmailInvite": "El personal la establece por correo electrónico",
       "passwordModeOwnerSet": "La estableceré yo mismo",
       "password": "Contraseña"
-    }
+    },
+    "statusPending": "Invitación pendiente",
+    "statusActive": "Activo",
+    "invitedAt": "Invitado: {date}",
+    "resendInvite": "Reenviar invitación",
+    "cancelInvite": "Cancelar invitación",
+    "cancelInviteConfirm": "¿Cancelar la invitación pendiente y liberar el puesto?"
   },
   "dashboard": {
     "welcome": "Bienvenido, {name}",
@@ -955,7 +993,11 @@
       "licenseExpired": "Licencia central vencida. Continúe mediante pago o contáctenos.",
       "orgSuspended": "Cuenta suspendida. Contacte con soporte.",
       "noSubscription": "No se encontró suscripción activa."
-    }
+    },
+    "deviceGraceTitle": "Torniquete aún abierto — periodo de gracia",
+    "deviceGraceBody": "El panel está bloqueado, pero el check-in de torniquete/dispositivo sigue {total} días. Quedan: {days} días (fin: {ends}).",
+    "deviceBlockedTitle": "Torniquete también cerrado",
+    "deviceBlockedBody": "El periodo de gracia terminó. Los check-ins se rechazan. Al aprobar el pago se reabren panel y torniquete."
   },
   "receptionDesktop": {
     "badge": "Aplicación Windows",
@@ -1025,7 +1067,11 @@
       },
       "register": "Registrar dispositivo",
       "registering": "Guardando…",
-      "disable": "Deshabilitar"
+      "disable": "Desactivar (vaciar)",
+      "finalizeDisable": "Cerrar permanentemente",
+      "forceDisable": "Forzar desactivación",
+      "forceDisableConfirm": "Los registros offline pendientes podrían no llegar al servidor. ¿Desactivar de forma permanente de todos modos?",
+      "drainingHint": "Modo vaciado: check-in en vivo off; los paquetes offline pendientes aún pueden sincronizarse."
     },
     "rfid": {
       "label": "Tarjeta RFID",

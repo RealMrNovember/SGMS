@@ -19,6 +19,7 @@ import {
   subscriptionTone,
 } from '@/lib/admin/format';
 import { parseBillingSettings } from '@/lib/billing/settings';
+import { prisma } from '@/lib/prisma';
 import {
   getOrganizationAdminDetail,
   listActivePartners,
@@ -63,6 +64,26 @@ export default async function AdminOrganizationDetailPage({
   const settings = parseBillingSettings(org.settings);
   const trialDays = daysUntil(subscription?.trialEndsAt ?? org.licenseExpiresAt);
   const isTrialing = subscription?.status === 'TRIALING';
+
+  const approvedRequestIds = (settings.billingRequests ?? [])
+    .filter((r) => r.status === 'approved')
+    .map((r) => r.id);
+
+  const proformaStatusRows =
+    approvedRequestIds.length > 0
+      ? await prisma.proformaToken.findMany({
+          where: { organizationId: org.id, billingRequestId: { in: approvedRequestIds } },
+          orderBy: { createdAt: 'desc' },
+          select: { billingRequestId: true, emailStatus: true },
+        })
+      : [];
+
+  const proformaEmailByRequest = new Map<string, string>();
+  for (const row of proformaStatusRows) {
+    if (!proformaEmailByRequest.has(row.billingRequestId)) {
+      proformaEmailByRequest.set(row.billingRequestId, row.emailStatus);
+    }
+  }
 
   const emailVars = {
     salonAdi: org.name,
@@ -204,8 +225,13 @@ export default async function AdminOrganizationDetailPage({
                     {req.notes ? <p className="muted mt-2 text-xs">{req.notes}</p> : null}
                     <p className="muted mt-1 text-xs">{formatDateTimeTr(new Date(req.createdAt))}</p>
                   </div>
-                  {req.status === 'pending' ? (
-                    <BillingRequestActions organizationId={org.id} requestId={req.id} />
+                  {req.status === 'pending' || req.status === 'approved' ? (
+                    <BillingRequestActions
+                      organizationId={org.id}
+                      requestId={req.id}
+                      status={req.status}
+                      emailStatus={proformaEmailByRequest.get(req.id) ?? null}
+                    />
                   ) : null}
                 </div>
               </li>

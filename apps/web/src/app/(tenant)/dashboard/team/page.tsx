@@ -1,5 +1,6 @@
 import { InviteTeamForm } from '@/components/invite-team-form';
 import { RemoveStaffButton } from '@/components/remove-staff-button';
+import { StaffInviteActions } from '@/components/staff-invite-actions';
 import { StaffRfidField } from '@/components/staff-rfid-field';
 import { UserAvatar } from '@/components/user-avatar';
 import { auth } from '@/lib/auth';
@@ -62,90 +63,141 @@ export default async function TeamPage() {
         </div>
 
         <div className="data-card-list p-4 md:hidden">
-          {members.map((member) => (
-            <div key={member.id} className="data-card">
-              <div className="flex items-center gap-3">
-                <UserAvatar name={member.user.name ?? member.user.email} avatarUrl={member.user.avatarUrl} size="sm" />
-                <div className="min-w-0">
-                  <p className="truncate font-medium">{member.user.name}</p>
-                  <p className="muted truncate text-xs">{member.user.email}</p>
-                </div>
-              </div>
-              <div className="mt-3">
-                <div className="data-card-row">
-                  <span className="data-card-label">{t('columns.role')}</span>
-                  <span className="badge">{member.role}</span>
-                </div>
-                <div className="data-card-row">
-                  <span className="data-card-label">{t('columns.joined')}</span>
-                  <span className="data-card-value">
-                    {(member.joinedAt ?? member.invitedAt ?? member.createdAt).toLocaleDateString(dateLocale)}
-                  </span>
-                </div>
-                <div className="data-card-row">
-                  <span className="data-card-label">{t('columns.rfid')}</span>
-                </div>
-                <StaffRfidField membershipId={member.id} currentRfid={member.rfidTag} canManage={canInvite} />
-                {canInvite && member.userId !== session.user.id ? (
-                  <div className="mt-2">
-                    <RemoveStaffButton membershipId={member.id} name={member.user.name} />
+          {members.map((member) => {
+            const pending = member.user.status === 'INVITED';
+            return (
+              <div key={member.id} className="data-card">
+                <div className="flex items-center gap-3">
+                  <UserAvatar name={member.user.name ?? member.user.email} avatarUrl={member.user.avatarUrl} size="sm" />
+                  <div className="min-w-0">
+                    <p className="truncate font-medium">{member.user.name}</p>
+                    <p className="muted truncate text-xs">{member.user.email}</p>
                   </div>
-                ) : null}
+                </div>
+                <div className="mt-3">
+                  <div className="data-card-row">
+                    <span className="data-card-label">{t('columns.role')}</span>
+                    <span className="badge">{member.role}</span>
+                  </div>
+                  <div className="data-card-row">
+                    <span className="data-card-label">{t('columns.status')}</span>
+                    {pending ? (
+                      <span className="badge border border-amber-400/40 bg-amber-500/15 text-amber-100">
+                        {t('statusPending')}
+                      </span>
+                    ) : (
+                      <span className="badge">{t('statusActive')}</span>
+                    )}
+                  </div>
+                  <div className="data-card-row">
+                    <span className="data-card-label">{t('columns.joined')}</span>
+                    <span className="data-card-value">
+                      {pending
+                        ? t('invitedAt', {
+                            date: (member.invitedAt ?? member.createdAt).toLocaleDateString(dateLocale),
+                          })
+                        : (member.joinedAt ?? member.invitedAt ?? member.createdAt).toLocaleDateString(
+                            dateLocale,
+                          )}
+                    </span>
+                  </div>
+                  {pending && canInvite ? (
+                    <div className="mt-2">
+                      <StaffInviteActions membershipId={member.id} />
+                    </div>
+                  ) : (
+                    <>
+                      <div className="data-card-row">
+                        <span className="data-card-label">{t('columns.rfid')}</span>
+                      </div>
+                      <StaffRfidField membershipId={member.id} currentRfid={member.rfidTag} canManage={canInvite} />
+                      {canInvite && member.userId !== session.user.id ? (
+                        <div className="mt-2">
+                          <RemoveStaffButton membershipId={member.id} name={member.user.name} />
+                        </div>
+                      ) : null}
+                    </>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <div className="hidden overflow-x-auto md:block">
-          <table className="w-full min-w-[640px] text-left text-sm">
+          <table className="w-full min-w-[720px] text-left text-sm">
             <thead className="muted border-b border-[var(--border)] text-xs uppercase tracking-wide">
               <tr>
                 <th className="px-6 py-3 font-medium">{t('columns.name')}</th>
                 <th className="px-6 py-3 font-medium">{t('columns.email')}</th>
                 <th className="px-6 py-3 font-medium">{t('columns.role')}</th>
+                <th className="px-6 py-3 font-medium">{t('columns.status')}</th>
                 <th className="px-6 py-3 font-medium">{t('columns.rfid')}</th>
                 <th className="px-6 py-3 font-medium">{t('columns.joined')}</th>
                 {canInvite ? <th className="px-6 py-3 font-medium"></th> : null}
               </tr>
             </thead>
             <tbody>
-              {members.map((member) => (
-                <tr key={member.id} className="border-b border-[var(--border)] last:border-none">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <UserAvatar
-                        name={member.user.name ?? member.user.email}
-                        avatarUrl={member.user.avatarUrl}
-                        size="sm"
-                      />
-                      <span className="font-medium">{member.user.name}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">{member.user.email}</td>
-                  <td className="px-6 py-4">
-                    <span className="badge">{member.role}</span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <StaffRfidField
-                      membershipId={member.id}
-                      currentRfid={member.rfidTag}
-                      canManage={canInvite}
-                    />
-                  </td>
-                  <td className="muted px-6 py-4">
-                    {(member.joinedAt ?? member.invitedAt ?? member.createdAt).toLocaleDateString(
-                      dateLocale,
-                    )}
-                  </td>
-                  {canInvite ? (
+              {members.map((member) => {
+                const pending = member.user.status === 'INVITED';
+                return (
+                  <tr key={member.id} className="border-b border-[var(--border)] last:border-none">
                     <td className="px-6 py-4">
-                      {member.userId !== session.user.id ? (
-                        <RemoveStaffButton membershipId={member.id} name={member.user.name} />
-                      ) : null}
+                      <div className="flex items-center gap-3">
+                        <UserAvatar
+                          name={member.user.name ?? member.user.email}
+                          avatarUrl={member.user.avatarUrl}
+                          size="sm"
+                        />
+                        <span className="font-medium">{member.user.name}</span>
+                      </div>
                     </td>
-                  ) : null}
-                </tr>
-              ))}
+                    <td className="px-6 py-4">{member.user.email}</td>
+                    <td className="px-6 py-4">
+                      <span className="badge">{member.role}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      {pending ? (
+                        <div className="space-y-2">
+                          <span className="badge border border-amber-400/40 bg-amber-500/15 text-amber-100">
+                            {t('statusPending')}
+                          </span>
+                          {canInvite ? <StaffInviteActions membershipId={member.id} /> : null}
+                        </div>
+                      ) : (
+                        <span className="badge">{t('statusActive')}</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      {pending ? (
+                        <span className="muted text-xs">—</span>
+                      ) : (
+                        <StaffRfidField
+                          membershipId={member.id}
+                          currentRfid={member.rfidTag}
+                          canManage={canInvite}
+                        />
+                      )}
+                    </td>
+                    <td className="muted px-6 py-4">
+                      {pending
+                        ? t('invitedAt', {
+                            date: (member.invitedAt ?? member.createdAt).toLocaleDateString(dateLocale),
+                          })
+                        : (member.joinedAt ?? member.invitedAt ?? member.createdAt).toLocaleDateString(
+                            dateLocale,
+                          )}
+                    </td>
+                    {canInvite ? (
+                      <td className="px-6 py-4">
+                        {!pending && member.userId !== session.user.id ? (
+                          <RemoveStaffButton membershipId={member.id} name={member.user.name} />
+                        ) : null}
+                      </td>
+                    ) : null}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

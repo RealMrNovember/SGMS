@@ -20,6 +20,8 @@ export type SubscriptionAccessState = {
   subscriptionStatus: SubscriptionStatus | null;
   trialEndsAt: Date | null;
   currentPeriodEnd: Date | null;
+  /** Merkezi lisans bitişi — cihaz nezaket penceresi hesabı için. */
+  licenseExpiresAt: Date | null;
   daysRemaining: number | null;
   planName: string | null;
   centralLicenseStatus: string;
@@ -120,6 +122,7 @@ export async function resolveSubscriptionAccess(
       subscriptionStatus: null,
       trialEndsAt: null,
       currentPeriodEnd: null,
+      licenseExpiresAt: null,
       daysRemaining: null,
       planName: null,
       centralLicenseStatus: 'UNKNOWN',
@@ -131,6 +134,7 @@ export async function resolveSubscriptionAccess(
     subscriptionStatus: subscription?.status ?? null,
     trialEndsAt: subscription?.trialEndsAt ?? null,
     currentPeriodEnd: subscription?.currentPeriodEnd ?? null,
+    licenseExpiresAt: organization.licenseExpiresAt ?? null,
     planName: subscription?.plan.name ?? null,
     centralLicenseStatus: organization.centralLicenseStatus,
     organizationStatus: organization.status,

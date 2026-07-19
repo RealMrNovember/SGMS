@@ -1,6 +1,7 @@
 import { BillingCheckoutPanel } from '@/components/billing/billing-checkout-panel';
 import { BillingStatusPoller } from '@/components/billing/billing-status-poller';
 import { auth } from '@/lib/auth';
+import { assertDeviceCheckInAllowed } from '@/lib/billing/assert-device-checkin';
 import { getPendingBillingRequest, parseBillingSettings } from '@/lib/billing/settings';
 import { resolveSubscriptionAccess } from '@/lib/billing/subscription-gate';
 import { getPublicBankTransferInfo } from '@/lib/payments/gateway';
@@ -24,7 +25,7 @@ export default async function BillingPage({
   const orgId = session.user.organizationId;
   const t = await getTranslations('billing');
 
-  const [access, org, plans, bankTransfer] = await Promise.all([
+  const [access, org, plans, bankTransfer, deviceGate] = await Promise.all([
     resolveSubscriptionAccess(orgId),
     prisma.organization.findUnique({
       where: { id: orgId },
@@ -35,6 +36,7 @@ export default async function BillingPage({
       orderBy: { sortOrder: 'asc' },
     }),
     getPublicBankTransferInfo(),
+    assertDeviceCheckInAllowed(orgId),
   ]);
 
   if (!org) {
@@ -110,6 +112,28 @@ export default async function BillingPage({
       {locked ? (
         <section className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-5 py-4 text-sm text-rose-100">
           {t('lockedBanner')}
+        </section>
+      ) : null}
+
+      {locked && deviceGate.deviceAccess.phase === 'grace' ? (
+        <section className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-5 py-4 text-sm text-amber-50">
+          <p className="font-medium">{t('deviceGraceTitle')}</p>
+          <p className="mt-2 leading-6">
+            {t('deviceGraceBody', {
+              days: deviceGate.deviceAccess.graceDaysRemaining ?? 0,
+              ends: deviceGate.deviceAccess.graceEndsAt
+                ? deviceGate.deviceAccess.graceEndsAt.toLocaleDateString('tr-TR')
+                : '—',
+              total: deviceGate.deviceAccess.graceDaysTotal,
+            })}
+          </p>
+        </section>
+      ) : null}
+
+      {locked && deviceGate.deviceAccess.phase === 'blocked' ? (
+        <section className="rounded-xl border border-rose-500/40 bg-rose-500/15 px-5 py-4 text-sm text-rose-50">
+          <p className="font-medium">{t('deviceBlockedTitle')}</p>
+          <p className="mt-2 leading-6">{t('deviceBlockedBody')}</p>
         </section>
       ) : null}
 

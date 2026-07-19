@@ -146,7 +146,8 @@ export async function inviteTeamMember(
         role: data.role,
         isActive: true,
         invitedAt: new Date(),
-        joinedAt: new Date(),
+        // E-posta davetinde joinedAt kabul sonrası set edilir (koltuk "bekliyor" görünürlüğü).
+        joinedAt: data.passwordMode === 'owner_set' ? new Date() : null,
       },
     });
 
@@ -213,6 +214,152 @@ export async function inviteTeamMember(
   }
 
   return { success: `${data.name} personel olarak eklendi.` };
+}
+
+export type StaffInviteActionState = { error?: string; success?: string };
+
+/** Bekleyen daveti yeniden gönderir (eski token'lar iptal edilir). */
+export async function resendStaffInvite(membershipId: string): Promise<StaffInviteActionState> {
+  const context = await getTenantContext();
+  if ('error' in context) {
+    return { error: context.error };
+  }
+
+  const writeBlock = await getTenantWriteBlockReason(context.organizationId);
+  if (writeBlock) {
+    return { error: writeBlock };
+  }
+
+  const membership = await prisma.organizationMember.findFirst({
+    where: { id: membershipId, organizationId: context.organizationId, isActive: true },
+    include: { user: { select: { id: true, name: true, email: true, status: true } } },
+  });
+
+  if (!membership) {
+    return { error: 'Personel kaydı bulunamadı.' };
+  }
+  if (membership.user.status !== 'INVITED') {
+    return { error: 'Yalnızca bekleyen davetler yeniden gönderilebilir.' };
+  }
+
+  await prisma.staffInviteToken.updateMany({
+    where: {
+      userId: membership.userId,
+      organizationId: context.organizationId,
+      usedAt: null,
+    },
+    data: { usedAt: new Date() },
+  });
+
+  const { token } = await createStaffInviteToken(membership.userId, context.organizationId);
+  const inviteUrl = `${siteConfig.url}/staff-invite?token=${token}`;
+  const name = membership.user.name ?? membership.user.email;
+
+  const html = `
+    <p>Merhaba ${name},</p>
+    <p>SGMS personel davetinizi yeniledik. Parolanızı belirlemek için:</p>
+    <p><a href="${inviteUrl}">${inviteUrl}</a></p>
+    <p>Bu bağlantı 7 gün içinde geçerliliğini yitirecektir.</p>
+  `.trim();
+
+  const mailResult = await getCloudClient().sendMail({
+    to: membership.user.email,
+    subject: 'SGMS — personel davetiniz yenilendi',
+    html,
+    category: 'transactional',
+  });
+
+  const ctx = await getRequestAuditContext();
+  await prisma.auditLog.create({
+    data: {
+      actorId: context.actorId,
+      organizationId: context.organizationId,
+      action: 'STAFF_INVITE_SENT',
+      entityType: 'user',
+      entityId: membership.userId,
+      metadata: { email: membership.user.email, emailSent: mailResult.ok, resend: true },
+      ipAddress: ctx.ipAddress,
+      userAgent: ctx.userAgent,
+    },
+  });
+
+  if (!mailResult.ok) {
+    return {
+      error: `Davet e-postası gönderilemedi. Bağlantıyı manuel iletin: ${inviteUrl}`,
+    };
+  }
+
+  revalidatePath('/dashboard/team');
+  return { success: 'Davet e-postası yeniden gönderildi.' };
+}
+
+/** Bekleyen daveti iptal eder; koltuk limitinden düşer. */
+export async function cancelStaffInvite(membershipId: string): Promise<StaffInviteActionState> {
+  const context = await getTenantContext();
+  if ('error' in context) {
+    return { error: context.error };
+  }
+
+  const writeBlock = await getTenantWriteBlockReason(context.organizationId);
+  if (writeBlock) {
+    return { error: writeBlock };
+  }
+
+  const membership = await prisma.organizationMember.findFirst({
+    where: { id: membershipId, organizationId: context.organizationId, isActive: true },
+    include: { user: { select: { id: true, status: true } } },
+  });
+
+  if (!membership) {
+    return { error: 'Personel kaydı bulunamadı.' };
+  }
+  if (membership.user.status !== 'INVITED') {
+    return { error: 'Yalnızca bekleyen davetler iptal edilebilir.' };
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.organizationMember.update({
+      where: { id: membershipId },
+      data: { isActive: false },
+    });
+    await tx.staffInviteToken.updateMany({
+      where: {
+        userId: membership.userId,
+        organizationId: context.organizationId,
+        usedAt: null,
+      },
+      data: { usedAt: new Date() },
+    });
+
+    const otherActive = await tx.organizationMember.count({
+      where: {
+        userId: membership.userId,
+        isActive: true,
+        NOT: { id: membershipId },
+      },
+    });
+    // Başka aktif üyelik yoksa davetli hesabı kapat; aksi halde yalnız bu org'dan çıkar.
+    if (otherActive === 0 && membership.user.status === 'INVITED') {
+      await tx.user.update({
+        where: { id: membership.userId },
+        data: { status: 'DISABLED' },
+      });
+    }
+
+    await tx.auditLog.create({
+      data: {
+        actorId: context.actorId,
+        organizationId: context.organizationId,
+        action: 'MEMBER_REMOVED',
+        entityType: 'organization_member',
+        entityId: membership.userId,
+        metadata: { reason: 'staff_invite_cancelled' },
+      },
+    });
+  });
+
+  revalidatePath('/dashboard/team');
+  return { success: 'Davet iptal edildi; koltuk serbest bırakıldı.' };
 }
 
 export type UpdateStaffRfidState = { error?: string; success?: string };
