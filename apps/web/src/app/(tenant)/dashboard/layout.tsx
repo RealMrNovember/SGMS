@@ -28,6 +28,7 @@ import {
   Sparkles,
   Users,
   Wallet,
+  CircleHelp,
 } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
@@ -111,6 +112,7 @@ export default async function TenantDashboardLayout({ children }: { children: Re
             { href: '/dashboard/team', label: t('team'), icon: <IdCard /> },
             { href: '/dashboard/plans', label: t('plans'), icon: <Layers /> },
             { href: '/dashboard/settings', label: t('settings'), icon: <Settings /> },
+            { href: '/help', label: t('help'), icon: <CircleHelp /> },
             { href: '/dashboard/account/security', label: t('twoFactor'), icon: <ShieldCheck /> },
           ],
         },

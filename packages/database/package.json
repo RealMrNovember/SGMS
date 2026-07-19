@@ -19,6 +19,7 @@
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "admin:seed": "tsx prisma/seed-master-admin.ts",
+    "help:seed": "tsx prisma/seed-help-articles.ts",
     "db:studio": "prisma studio"
   },
   "dependencies": {

@@ -52,7 +52,8 @@
       "analytics": "Análisis"
     },
     "paymentPlans": "Planes de pago",
-    "twoFactor": "Seguridad de la cuenta (2FA)"
+    "twoFactor": "Seguridad de la cuenta (2FA)",
+    "help": "Ayuda"
   },
   "auth": {
     "login": "Iniciar sesión",
@@ -951,11 +952,67 @@
     "plansTitle": "Gestión de planes SaaS",
     "plansSubtitle": "Edite precios, límites y visibilidad de las suscripciones de prueba y de pago.",
     "billingRequestsTitle": "Solicitudes de pago",
-    "noBillingRequests": "No hay solicitudes de pago."
+    "noBillingRequests": "No hay solicitudes de pago.",
+    "helpNav": "Contenido de ayuda"
   },
   "settings": {
-    "title": "Configuración del gimnasio",
-    "subtitle": "Idioma y preferencias de funciones opcionales para {name}."
+    "title": "Ajustes",
+    "subtitle": "{name} — a role-filtered professional settings hub.",
+    "save": "Guardar",
+    "on": "On",
+    "off": "Off",
+    "openHelp": "Abrir guía",
+    "noAccess": "No settings sections are available for this account.",
+    "tabs": {
+      "general": "General",
+      "team": "Team & Roles",
+      "notifications": "Notifications",
+      "billing": "Billing",
+      "integrations": "Integrations",
+      "security": "Security"
+    },
+    "general": {
+      "defaultLocale": "Default language",
+      "defaultLocaleHint": "Applies to new staff and users without a locale cookie."
+    },
+    "notifications": {
+      "typingIndicator": "Typing indicator",
+      "messageReports": "Message reports",
+      "signedAvatarUrls": "Signed avatar URLs (R2)",
+      "signedOff": "Off (public CDN)",
+      "signedOn": "On (signed URL)",
+      "tokenRevokeRedisCache": "Token revoke Redis cache"
+    },
+    "sections": {
+      "general": {
+        "subtitle": "Gym language and basic preferences."
+      },
+      "team": {
+        "subtitle": "Staff invites, roles, and removals.",
+        "body": "Team management lives on a dedicated screen for invites and removals.",
+        "cta": "Open team screen"
+      },
+      "notifications": {
+        "subtitle": "Messaging and optional notification features."
+      },
+      "billing": {
+        "subtitle": "SGMS subscription and payment requests.",
+        "body": "Plan selection, payments, and turnstile grace status are on Billing.",
+        "cta": "Go to billing"
+      },
+      "integrations": {
+        "subtitle": "Payment providers and hardware keys.",
+        "prepTitle": "Prep area",
+        "body": "Tenant API keys will stay server-side only and never be sent to the browser.",
+        "itemPayment": "Iyzico / PayTR (owner keys)",
+        "itemHardware": "RFID / turnstile hardware integrations"
+      },
+      "security": {
+        "subtitle": "Two-factor authentication and account security.",
+        "body": "Authenticator 2FA, backup codes, and recovery live on the security page.",
+        "cta": "Open security settings"
+      }
+    }
   },
   "billing": {
     "nav": "Facturación y Pago",
@@ -1376,6 +1433,30 @@
       "amount": "Monto",
       "status": "Estado",
       "action": "Acción"
+    }
+  },
+  "help": {
+    "title": "Centro de ayuda",
+    "subtitle": "Guías por rol, búsqueda y ayuda contextual.",
+    "backHome": "← Volver al panel",
+    "backToHub": "← Centro de ayuda",
+    "search": "Buscar",
+    "searchPlaceholder": "Buscar en guías…",
+    "onboardingTitle": "Guías de inicio",
+    "onboardingBadge": "Inicio",
+    "empty": "Aún no hay guías para este rol o no hay coincidencias.",
+    "contextualTitle": "Ayuda de esta página",
+    "categories": {
+      "onboarding": "Inicio",
+      "checkin": "Check-in",
+      "pos": "POS / Caja",
+      "members": "Miembros",
+      "programs": "Programas",
+      "settings": "Ajustes",
+      "billing": "Facturación",
+      "security": "Seguridad",
+      "integrations": "Integraciones",
+      "general": "General"
     }
   }
 }

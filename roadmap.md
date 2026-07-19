@@ -68,7 +68,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 30 | Kurumsal Hiyerarşi & Çoklu Şube/Bölge Yönetimi | ✅ Tamamlandı | v1 (branch pricing/finans-İK rolleri v2'ye ertelendi) |
 | 31 | Entegrasyon Pazaryeri | 🔲 Planlandı | 0% |
 | 32 | Ticarileştirme: Paket & Ek Kapasite Satışı | 🔲 Planlandı | 0% |
-| 33 | Dinamik Rol Bazlı Kullanım Kılavuzu | 🔄 Devam ediyor | ~5% (Cursor tarafından başlandı — 2026-07-19) |
+| 33 | Dinamik Rol Bazlı Kullanım Kılavuzu + Ayarlar Modernizasyonu | ✅ Tamamlandı | 100% (HelpArticle, /help, bağlamsal ?, Master Admin CRUD, ayarlar sekmeleri — 2026-07-19) |
 | 34 | Tam Responsive Tasarım Sistemi | ✅ Tamamlandı | ~97% (sol menü/tema/ikon + mobil tablo/kart + mesajlaşma + profil özyönetimi + interaktif program görünümü tamamlandı — yalnızca video desteği/ilerleme geçmişi Tier 2'ye ertelendi) |
 | 35 | Temsilci (Partner) Portalı | ✅ Tamamlandı | 100% |
 | 36 | Kritik İş Mantığı Denetimi & Sağlamlaştırma (2026-07-19 canlıya alma denetimi) | ✅ Tamamlandı | 100% (36.1–36.11 tamamı kapatıldı — 2026-07-19) |
@@ -981,25 +981,34 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ---
 
-## 🔲 Faz 33 — Dinamik, Rol Bazlı Kullanım Kılavuzu (Help Center) (Öncelik: P1)
+## ✅ Faz 33 — Dinamik, Rol Bazlı Kullanım Kılavuzu (Help Center) (Öncelik: P1) — tamamlandı 2026-07-19
 
 > **Hedef:** Her kullanıcı tipi SGMS'i farklı amaçla kullanır — bir PT'nin ihtiyacı olan bilgiyle bir salon sahibinin ihtiyacı olan bilgi tamamen farklıdır. Tek, genel bir "yardım" sayfası yerine **role özel, bağlamsal** bir kılavuz sistemi.
+>
+> **Durum:** ✅ *2026-07-19 kapatıldı.*
 
-- [ ] `HelpArticle` modeli — `audience`: `OWNER`/`ADMIN`/`STAFF`/`TRAINER`/`ATHLETE`/`RECEPTION`, `category`, `title`, `bodyMarkdown`, çok dilli (8 dil — Faz 6.3'teki İtalyanca/Portekizce dahil), `relatedFeatureFlag` (Faz 32'deki "yakında" özellikleriyle ilişkilendirilebilir)
-- [ ] `/help` — role göre otomatik filtrelenen kılavuz merkezi; her sayfanın sağ üstünde **bağlamsal yardım** ikonu (ör. `/dashboard/pos` sayfasındaki "?" ikonu doğrudan POS kılavuzuna götürür)
-- [ ] 4 ayrı "başlangıç rehberi" (onboarding checklist tarzı): **Salon Sahibi Rehberi** (kurulum, ekip davet etme, plan yönetimi), **Resepsiyon Rehberi** (check-in, POS, üye kaydı), **PT Rehberi** (program atama, ölçüm girişi, ders yönetimi), **Sporcu Rehberi** (mobil check-in, mesajlaşma, ölçüm takibi)
-- [ ] İçerik yönetimi: Master Admin panelinden `HelpArticle` CRUD (kod değişikliği gerektirmeden içerik güncellenebilir)
-- [ ] Arama: kılavuz içeriğinde tam metin arama
+- [x] `HelpArticle` + `HelpArticleTranslation` modeli — `audiences`: `OWNER`/`ADMIN`/`STAFF`/`TRAINER`/`ATHLETE`/`RECEPTION`, `category`, çok dilli çeviriler (UI 6 dil + yapısal `it`/`pt` hazır), `relatedFeatureFlag`, onboarding bayrakları
+- [x] `/help` — role göre otomatik filtrelenen kılavuz merkezi + tam metin arama (`title`/`bodyMarkdown` contains)
+- [x] Bağlamsal yardım: `ContextualHelpButton` (sayfa `?` ikonu → ilgili slug); POS/check-in/ayarlar sekmelerinde aktif; pathname→slug haritası (`HELP_TOPIC_BY_PATH`)
+- [x] 4 başlangıç rehberi seed: Salon Sahibi, Resepsiyon, PT, Sporcu (+ konu makaleleri: POS, check-in, üyeler, programlar, ayarlar, fatura, ekip, güvenlik, entegrasyonlar)
+- [x] Master Admin CRUD: `/admin/help`, `/admin/help/new`, `/admin/help/[id]` + audit `HELP_ARTICLE_*`
+- [x] Nav: tenant sidebar **Kılavuz**, sporcu header linki, admin **Kılavuz içerikleri**
 
-### 33.1 Profesyonel "Ayarlar" Ekranı Modernizasyonu — yeni, 2026-07-16 eklendi
+### 33.1 Profesyonel "Ayarlar" Ekranı Modernizasyonu — tamamlandı 2026-07-19
 
-> **Kullanıcı notu (2026-07-16):** *"Müşteriler ve personeller ayarlar menüsüne girdiğinde çok profesyonel bir ekranla karşılaşmalı."* Faz 34'teki sol-menü/tema yenilemesi mevcut sayfaların **kabuğunu** modernize etti; `/dashboard/settings`'in kendi iç düzeni ise hâlâ eski, tek-sütun bir form listesi. Bu madde, o sayfanın Faz 33 kılavuz sistemiyle **birlikte** yeniden tasarlanmasını kapsar.
-- [ ] `/dashboard/settings` — kategorilere ayrılmış (Genel, Ekip & Roller, Bildirimler, Fatura, Entegrasyonlar — Faz 31.0 donanım/RFID + Faz 8.7 ödeme sağlayıcıları, Güvenlik) sekmeli/bölümlü bir düzen; her bölümün yanında ilgili `HelpArticle`'a doğrudan bağlantı
-- [ ] Rol bazlı görünürlük: bir STAFF/TRAINER, yalnızca kendi rolüyle ilgili ayar bölümlerini görür (OWNER'a özel faturalandırma/entegrasyon ayarları gizlenir, karmaşa azalır)
+> **Kullanıcı notu (2026-07-16):** *"Müşteriler ve personeller ayarlar menüsüne girdiğinde çok profesyonel bir ekranla karşılaşmalı."*
+>
+> **Durum:** ✅ *2026-07-19 kapatıldı.*
 
-**Kabul kriteri:** Yeni işe başlayan bir resepsiyonist, kendi rolüne özel bir başlangıç rehberiyle karşılanıyor · herhangi bir sayfada "?" ikonuna tıklandığında o sayfaya özel yardım açılıyor · 🔲 ayarlar ekranı role göre filtrelenen, kategorilere ayrılmış profesyonel bir düzene kavuşmuş olacak
+- [x] `/dashboard/settings` — sekmeli düzen: Genel, Ekip & Roller, Bildirimler, Fatura, Entegrasyonlar, Güvenlik; her sekmede ilgili HelpArticle linki + `?`
+- [x] Rol bazlı görünürlük: OWNER/ADMIN tüm sekmeler; STAFF/TRAINER/VIEWER yalnızca **Güvenlik** (karmaşa yok)
+- [x] Entegrasyonlar sekmesi: API anahtarlarının sunucu-side kalacağı hazırlık alanı (Faz 8.7 / donanım için)
 
-**Bağımlılık:** yok — bağımsız, ama Faz 32'nin "yakında" özellik etiketleriyle doğal olarak bütünleşir
+**Kabul kriteri:** ✅ Yeni resepsiyonist kendi rol rehberini `/help`’te görüyor · ✅ sayfa `?` ikonu bağlamsal kılavuza gidiyor · ✅ ayarlar role göre filtrelenmiş profesyonel sekmeli düzen
+
+**Dosyalar:** migration `20260719070000_help_articles`, `lib/help/*`, `app/help/*`, `admin/help/*`, `components/settings/settings-workspace.tsx`, `pnpm --filter @sgms/database help:seed`
+
+**Bağımlılık:** yok — Faz 32 coming-soon bayraklarıyla `relatedFeatureFlag` üzerinden bütünleşir
 
 ---
 
@@ -1422,7 +1431,6 @@ Faz 36 tamamlandı (2026-07-19 canlıya alma denetimi — kullanıcı onaylı s�
 
 Şu anda paralel çalışılıyor (2026-07-19, çakışmayı önlemek için dosya bazında ayrıldı):
   Faz 17.0   Potansiyel müşteri (Lead) takibi       ← bu oturum (Claude) — yeni Lead/LeadFollowUp modeli, /dashboard/leads
-  Faz 33/33.1 Kullanım kılavuzu + ayarlar modernizasyonu ← Cursor — yeni HelpArticle modeli, /help, /dashboard/settings
 
 Sıradaki (Faz 36 sonrası — profesyonel değerlendirme, P0 en önce):
   Faz 32     Ticarileştirme: paket + ek kapasite satışı          ← P0, gelir modeli (kullanıcı onayı gerekli)
@@ -1431,8 +1439,6 @@ Sıradaki (Faz 36 sonrası — profesyonel değerlendirme, P0 en önce):
   Faz 8.7    Salon bazlı online ödeme sağlayıcısı (Iyzico/PayTR) ← P1, Faz 8.6'ya bağımlı, Faz 16.3 deseni yeniden kullanılır
   Faz 14.3   Demo PT girişi (login ekranı)                       ← P1, düşük efor / yüksek satış-öncesi değer
   Faz 12.4   Master Admin kalıcı silme (hard-delete)             ← P1, düşük efor, veri hijyeni
-  Faz 33     Rol bazlı dinamik kullanım kılavuzu + 33.1 ayarlar  ← P1
-             ekranı modernizasyonu
   Faz 17.0   Lead/potansiyel müşteri takibi (follow-up)          ← P1, doğrudan gelir dönüşümü
   Faz 27.3   Serverless kuyruk motoru (QStash/Inngest)           ← P1, Faz 27.2'nin önkoşulu
   Faz 18.1   Otomatik PDF sözleşme/risk formu üretimi            ← P1, mevcut PDF altyapısını genişletir

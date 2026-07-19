@@ -150,6 +150,9 @@ enum AuditAction {
   STAFF_INVITE_ACCEPTED
   PROFORMA_SENT
   MEMBERSHIP_REMINDER_SENT
+  HELP_ARTICLE_CREATED
+  HELP_ARTICLE_UPDATED
+  HELP_ARTICLE_DELETED
 }
 
 enum HierarchyRole {
@@ -175,6 +178,15 @@ enum GymMemberStatus {
   ACTIVE
   INACTIVE
   SUSPENDED
+}
+
+enum HelpAudience {
+  OWNER
+  ADMIN
+  STAFF
+  TRAINER
+  ATHLETE
+  RECEPTION
 }
 
 enum Gender {
@@ -1233,6 +1245,45 @@ model AuditLog {
   @@index([action, createdAt])
   @@index([entityType, entityId])
   @@map("audit_logs")
+}
+
+// ---------------------------------------------------------------------------
+// HelpArticle — rol bazlı kullanım kılavuzu (Faz 33)
+// ---------------------------------------------------------------------------
+
+model HelpArticle {
+  id                 String         @id @default(cuid())
+  slug               String         @unique
+  audiences          HelpAudience[]
+  category           String
+  sortOrder          Int            @default(0) @map("sort_order")
+  isPublished        Boolean        @default(true) @map("is_published")
+  relatedFeatureFlag String?        @map("related_feature_flag")
+  isOnboardingGuide  Boolean        @default(false) @map("is_onboarding_guide")
+  onboardingKey      String?        @map("onboarding_key")
+  createdAt          DateTime       @default(now()) @map("created_at")
+  updatedAt          DateTime       @updatedAt @map("updated_at")
+
+  translations HelpArticleTranslation[]
+
+  @@index([category, sortOrder])
+  @@index([isOnboardingGuide])
+  @@index([isPublished])
+  @@map("help_articles")
+}
+
+model HelpArticleTranslation {
+  id           String @id @default(cuid())
+  articleId    String @map("article_id")
+  locale       String
+  title        String
+  bodyMarkdown String @map("body_markdown") @db.Text
+
+  article HelpArticle @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@unique([articleId, locale])
+  @@index([locale])
+  @@map("help_article_translations")
 }
 
 // ---------------------------------------------------------------------------

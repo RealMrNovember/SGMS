@@ -42,12 +42,18 @@ export async function updateOrganizationSettings(
   _prev: OrganizationSettingsState,
   formData: FormData,
 ): Promise<OrganizationSettingsState> {
+  const hasFeatureFields =
+    formData.has('typingIndicator') ||
+    formData.has('messageReports') ||
+    formData.has('signedAvatarUrls') ||
+    formData.has('tokenRevokeRedisCache');
+
   const parsed = settingsSchema.safeParse({
     defaultLocale: formData.get('defaultLocale'),
-    typingIndicator: formData.get('typingIndicator') ?? 'on',
-    messageReports: formData.get('messageReports') ?? 'on',
-    signedAvatarUrls: formData.get('signedAvatarUrls') ?? 'off',
-    tokenRevokeRedisCache: formData.get('tokenRevokeRedisCache') ?? 'off',
+    typingIndicator: formData.get('typingIndicator') ?? undefined,
+    messageReports: formData.get('messageReports') ?? undefined,
+    signedAvatarUrls: formData.get('signedAvatarUrls') ?? undefined,
+    tokenRevokeRedisCache: formData.get('tokenRevokeRedisCache') ?? undefined,
   });
 
   if (!parsed.success) {
@@ -73,13 +79,27 @@ export async function updateOrganizationSettings(
     const nextSettings: OrganizationSettings = {
       ...current,
       defaultLocale: locale,
-      features: {
-        ...current.features,
-        typingIndicator: parsed.data.typingIndicator !== 'off',
-        messageReports: parsed.data.messageReports !== 'off',
-        signedAvatarUrls: parsed.data.signedAvatarUrls === 'on',
-        tokenRevokeRedisCache: parsed.data.tokenRevokeRedisCache === 'on',
-      },
+      features: hasFeatureFields
+        ? {
+            ...current.features,
+            typingIndicator:
+              parsed.data.typingIndicator != null
+                ? parsed.data.typingIndicator !== 'off'
+                : current.features?.typingIndicator,
+            messageReports:
+              parsed.data.messageReports != null
+                ? parsed.data.messageReports !== 'off'
+                : current.features?.messageReports,
+            signedAvatarUrls:
+              parsed.data.signedAvatarUrls != null
+                ? parsed.data.signedAvatarUrls === 'on'
+                : current.features?.signedAvatarUrls,
+            tokenRevokeRedisCache:
+              parsed.data.tokenRevokeRedisCache != null
+                ? parsed.data.tokenRevokeRedisCache === 'on'
+                : current.features?.tokenRevokeRedisCache,
+          }
+        : current.features,
     };
 
     await prisma.$transaction([

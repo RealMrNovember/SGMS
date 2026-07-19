@@ -9,6 +9,7 @@ export type AuditCategory =
   | 'members'
   | 'devices'
   | 'finance'
+  | 'content'
   | 'checkin'
   | 'auth'
   | 'security'
@@ -47,6 +48,7 @@ export const AUDIT_CATEGORY_ACTIONS: Record<Exclude<AuditCategory, 'all'>, Audit
     'PAYMENT_PLAN_CANCELLED',
     'PROFORMA_SENT',
   ],
+  content: ['HELP_ARTICLE_CREATED', 'HELP_ARTICLE_UPDATED', 'HELP_ARTICLE_DELETED'],
   checkin: ['MEMBER_CHECK_IN'],
   auth: ['USER_LOGIN', 'USER_LOGOUT'],
   security: [
@@ -155,6 +157,9 @@ export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   STAFF_INVITE_SENT: 'Personel daveti gönderildi',
   STAFF_INVITE_ACCEPTED: 'Personel daveti kabul edildi',
   PROFORMA_SENT: 'Proforma fatura gönderildi',
+  HELP_ARTICLE_CREATED: 'Kılavuz makalesi oluşturuldu',
+  HELP_ARTICLE_UPDATED: 'Kılavuz makalesi güncellendi',
+  HELP_ARTICLE_DELETED: 'Kılavuz makalesi silindi',
   MEMBERSHIP_REMINDER_SENT: 'Üyelik hatırlatması gönderildi',
 };
 
@@ -169,6 +174,7 @@ export const AUDIT_CATEGORY_LABELS: Record<AuditCategory, string> = {
   members: 'Sporcu',
   devices: 'Cihaz',
   finance: 'Finans',
+  content: 'İçerik / Kılavuz',
   checkin: 'Turnike',
   auth: 'Oturum',
   security: 'Güvenlik',

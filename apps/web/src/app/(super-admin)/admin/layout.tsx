@@ -19,6 +19,7 @@ import {
   ShieldAlert,
   ShieldCheck,
   UserCog,
+  BookOpen,
 } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
@@ -64,6 +65,7 @@ export default async function SuperAdminLayout({ children }: { children: React.R
         { href: '/admin/admins', label: tAdmin('adminsNav'), icon: <UserCog /> },
         { href: '/admin/payments', label: tAdmin('paymentsNav'), icon: <CreditCard /> },
         { href: '/admin/communications', label: tAdmin('communicationsNav'), icon: <Mail /> },
+        { href: '/admin/help', label: tAdmin('helpNav'), icon: <BookOpen /> },
         { href: '/admin/organizations/new', label: t('newCustomer'), icon: <PlusCircle /> },
       ],
     },

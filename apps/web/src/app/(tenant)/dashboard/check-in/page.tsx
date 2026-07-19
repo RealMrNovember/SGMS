@@ -1,5 +1,6 @@
 import { CheckInLiveRefresh } from '@/components/check-in-live-refresh';
 import { DeviceManagementPanel } from '@/components/device-management-panel';
+import { ContextualHelpButton } from '@/components/help/contextual-help-button';
 import { ManualCheckInForm } from '@/components/manual-check-in-form';
 import { ReceptionDownloadPromo } from '@/components/reception/reception-download-promo';
 import { UserAvatar } from '@/components/user-avatar';
@@ -74,6 +75,7 @@ export default async function CheckInDashboardPage() {
       <div>
         <div className="flex flex-wrap items-center gap-3">
           <h2 className="text-2xl font-semibold">{t('title')}</h2>
+          <ContextualHelpButton topic="topic-checkin" />
           <span className="badge border-emerald-500/40 bg-emerald-500/10 text-emerald-200">
             {t('live')}
           </span>
