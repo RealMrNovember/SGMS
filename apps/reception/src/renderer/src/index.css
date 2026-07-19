@@ -1,4 +1,5 @@
 :root {
+  color-scheme: dark;
   --bg: #070b14;
   --bg-elevated: #0f1624;
   --bg-panel: rgba(15, 22, 36, 0.82);
@@ -17,6 +18,29 @@
   --danger: #f87171;
   --radius: 16px;
   --shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+}
+
+/* Faz 19.2 — web panelindeki (Faz 34) aynı ikili tema deseni: aynı değişken adları,
+   açık zemine göre koyulaştırılmış ton değerleri. */
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg: #f3f5fa;
+  --bg-elevated: #ffffff;
+  --bg-panel: rgba(255, 255, 255, 0.92);
+  --gold: #a8792f;
+  --gold-soft: rgba(168, 121, 47, 0.14);
+  --gold-glow: rgba(168, 121, 47, 0.28);
+  --cyan: #0284c7;
+  --cyan-soft: rgba(2, 132, 199, 0.12);
+  --entry: #059669;
+  --entry-soft: rgba(5, 150, 105, 0.12);
+  --exit: #d97706;
+  --exit-soft: rgba(217, 119, 6, 0.12);
+  --text: #0f172a;
+  --muted: #64748b;
+  --border: rgba(15, 23, 42, 0.12);
+  --danger: #e11d48;
+  --shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
 }
 
 * {
@@ -59,7 +83,7 @@ input {
   align-items: center;
   justify-content: space-between;
   padding: 0 12px 0 16px;
-  background: rgba(7, 11, 20, 0.92);
+  background: var(--bg-elevated);
   border-bottom: 1px solid var(--border);
   -webkit-app-region: drag;
 }
@@ -93,6 +117,24 @@ input {
 
 .titlebar-actions {
   -webkit-app-region: no-drag;
+}
+
+.titlebar-update-badge {
+  -webkit-app-region: no-drag;
+  margin-left: 10px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(201, 169, 98, 0.35);
+  background: var(--gold-soft);
+  color: var(--gold);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.titlebar-update-badge:hover {
+  background: rgba(201, 169, 98, 0.28);
 }
 
 .titlebar-btn {
@@ -199,7 +241,7 @@ input {
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border);
-  color: #cbd5e1;
+  color: var(--text);
 }
 
 .login-features span {
@@ -219,7 +261,7 @@ input {
   flex-direction: column;
   justify-content: center;
   gap: 16px;
-  background: linear-gradient(180deg, rgba(15, 22, 36, 0.55), rgba(7, 11, 20, 0.2));
+  background: var(--bg-elevated);
 }
 
 .login-form-head h2 {
@@ -241,7 +283,7 @@ input {
 .login-form label span {
   font-size: 12px;
   font-weight: 600;
-  color: #cbd5e1;
+  color: var(--text);
 }
 
 .login-form input {
@@ -249,7 +291,7 @@ input {
   padding: 14px 16px;
   border-radius: 12px;
   border: 1px solid var(--border);
-  background: rgba(7, 11, 20, 0.75);
+  background: var(--bg-elevated);
   color: var(--text);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
@@ -437,7 +479,7 @@ input {
   padding: 12px 14px;
   border-radius: 12px;
   border: 1px solid var(--border);
-  background: rgba(7, 11, 20, 0.75);
+  background: var(--bg-elevated);
   color: var(--text);
 }
 
@@ -463,7 +505,7 @@ input {
   gap: 8px;
   font-size: 12px;
   font-weight: 600;
-  color: #cbd5e1;
+  color: var(--text);
 }
 
 .form-grid {
@@ -500,7 +542,7 @@ input {
 .data-table th {
   position: sticky;
   top: 0;
-  background: rgba(15, 22, 36, 0.98);
+  background: var(--bg-elevated);
   color: var(--muted);
   font-size: 11px;
   text-transform: uppercase;
@@ -736,7 +778,7 @@ input {
 .sidebar {
   padding: 28px 24px;
   border-right: 1px solid var(--border);
-  background: linear-gradient(180deg, rgba(15, 22, 36, 0.95), rgba(7, 11, 20, 0.85));
+  background: var(--bg-elevated);
   display: flex;
   flex-direction: column;
   gap: 22px;
@@ -793,6 +835,16 @@ input {
 
 .connection--offline .connection-pulse {
   background: var(--exit);
+}
+
+.connection--queue {
+  border-color: rgba(251, 191, 36, 0.28);
+  background: var(--exit-soft);
+}
+
+.connection--queue .connection-pulse {
+  background: var(--exit);
+  animation: pulse 2s infinite;
 }
 
 @keyframes pulse {
@@ -1142,7 +1194,7 @@ input {
   font-size: 11px;
   font-weight: 600;
   border: 1px solid var(--border);
-  color: #cbd5e1;
+  color: var(--text);
 }
 
 .pill--member {

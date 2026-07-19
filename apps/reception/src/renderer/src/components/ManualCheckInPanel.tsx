@@ -26,10 +26,17 @@ export function ManualCheckInPanel() {
       return;
     }
 
-    setMessage({
-      type: 'ok',
-      text: direction === 'ENTRY' ? 'Giriş başarıyla kaydedildi' : 'Çıkış başarıyla kaydedildi',
-    });
+    if (result.data?.queued) {
+      setMessage({
+        type: 'ok',
+        text: 'Bağlantı yok — kayıt çevrimdışı kuyruğa alındı, bağlantı gelince otomatik gönderilecek.',
+      });
+    } else {
+      setMessage({
+        type: 'ok',
+        text: direction === 'ENTRY' ? 'Giriş başarıyla kaydedildi' : 'Çıkış başarıyla kaydedildi',
+      });
+    }
     setMemberId('');
   }
 

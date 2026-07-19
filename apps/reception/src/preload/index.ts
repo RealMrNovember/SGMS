@@ -1,5 +1,7 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import type { CheckInNotificationPayload, LoginInput, ReceptionConfig } from '../shared/types';
+import type { UpdateStatus } from '../main/auto-updater';
+import type { QueueStatus } from '../main/offline-queue';
 
 contextBridge.exposeInMainWorld('reception', {
   login: (input: LoginInput) => ipcRenderer.invoke('login', input) as Promise<ReceptionConfig>,
@@ -34,4 +36,14 @@ contextBridge.exposeInMainWorld('reception', {
   onMaximizedChange: (handler: (maximized: boolean) => void) => {
     ipcRenderer.on('window:maximized', (_event, maximized: boolean) => handler(maximized));
   },
+  onUpdateStatus: (handler: (status: UpdateStatus) => void) => {
+    ipcRenderer.on('update-status', (_event, status: UpdateStatus) => handler(status));
+  },
+  installUpdateNow: () => ipcRenderer.invoke('install-update-now') as Promise<void>,
+  getQueueStatus: () => ipcRenderer.invoke('get-queue-status') as Promise<QueueStatus>,
+  onQueueStatus: (handler: (status: QueueStatus) => void) => {
+    ipcRenderer.on('queue-status', (_event, status: QueueStatus) => handler(status));
+  },
+  getTheme: () => ipcRenderer.invoke('get-theme') as Promise<'dark' | 'light'>,
+  setTheme: (theme: 'dark' | 'light') => ipcRenderer.invoke('set-theme', theme) as Promise<'dark' | 'light'>,
 });

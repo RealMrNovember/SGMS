@@ -1,6 +1,8 @@
 /// <reference types="vite/client" />
 
 import type { CheckInNotificationPayload, LoginInput, ReceptionConfig } from '../../../shared/types';
+import type { UpdateStatus } from '../../main/auto-updater';
+import type { QueueStatus } from '../../main/offline-queue';
 
 declare module '*.svg' {
   const src: string;
@@ -31,6 +33,12 @@ declare global {
       onLoggedIn: (handler: (config: ReceptionConfig) => void) => void;
       onLaunchAtStartup: (handler: (payload: { enabled: boolean }) => void) => void;
       onMaximizedChange: (handler: (maximized: boolean) => void) => void;
+      onUpdateStatus: (handler: (status: UpdateStatus) => void) => void;
+      installUpdateNow: () => Promise<void>;
+      getQueueStatus: () => Promise<QueueStatus>;
+      onQueueStatus: (handler: (status: QueueStatus) => void) => void;
+      getTheme: () => Promise<'dark' | 'light'>;
+      setTheme: (theme: 'dark' | 'light') => Promise<'dark' | 'light'>;
     };
   }
 }

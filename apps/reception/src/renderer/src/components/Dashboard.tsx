@@ -13,6 +13,7 @@ type Props = {
   feed: CheckInNotificationPayload[];
   online: boolean;
   connectionMode?: 'realtime' | 'polling';
+  pendingQueueCount?: number;
   launchAtStartup: boolean;
   onLaunchAtStartupChange: (enabled: boolean) => void;
   onLogout: () => void;
@@ -23,6 +24,7 @@ export function Dashboard({
   feed,
   online,
   connectionMode = 'polling',
+  pendingQueueCount = 0,
   launchAtStartup,
   onLaunchAtStartupChange,
   onLogout,
@@ -61,6 +63,16 @@ export function Dashboard({
             </p>
           </div>
         </div>
+
+        {pendingQueueCount > 0 ? (
+          <div className="connection connection--queue">
+            <span className="connection-pulse" />
+            <div>
+              <strong>Çevrimdışı · {pendingQueueCount} olay bekliyor</strong>
+              <p>Bağlantı kurulunca otomatik ve sırayla gönderilecek.</p>
+            </div>
+          </div>
+        ) : null}
 
         <div className="sidebar-user">
           <span className="sidebar-user-label">Resepsiyon</span>

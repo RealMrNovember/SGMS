@@ -13,10 +13,12 @@
     "preview": "electron-vite preview",
     "start": "electron-vite preview",
     "pack": "pnpm icons && pnpm build && electron-builder --dir --win",
-    "dist": "pnpm icons && pnpm build && electron-builder --win"
+    "dist": "pnpm icons && pnpm build && electron-builder --win",
+    "release": "pnpm icons && pnpm build && electron-builder --win --publish always"
   },
   "dependencies": {
     "electron-store": "^8.2.0",
+    "electron-updater": "^6.3.9",
     "pusher-js": "^8.5.0"
   },
   "devDependencies": {
@@ -68,10 +70,9 @@
     },
     "nsis": {
       "oneClick": false,
-      "perMachine": true,
+      "perMachine": false,
       "include": "installer-branding/installer.nsh",
       "allowToChangeInstallationDirectory": false,
-      "allowElevation": true,
       "installerIcon": "installer-branding/icon.ico",
       "uninstallerIcon": "installer-branding/icon.ico",
       "installerHeaderIcon": "installer-branding/icon.ico",
@@ -81,6 +82,11 @@
       "license": "installer-branding/LICENSE.txt",
       "runAfterFinish": true,
       "deleteAppDataOnUninstall": false
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "RealMrNovember",
+      "repo": "SGMS"
     }
   }
 }

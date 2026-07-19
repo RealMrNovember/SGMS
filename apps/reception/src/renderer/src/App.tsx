@@ -10,14 +10,20 @@ export default function App() {
   const [online, setOnline] = useState(false);
   const [connectionMode, setConnectionMode] = useState<'realtime' | 'polling'>('polling');
   const [launchAtStartup, setLaunchAtStartup] = useState(false);
+  const [pendingQueueCount, setPendingQueueCount] = useState(0);
 
   useEffect(() => {
+    window.reception.getTheme().then((theme) => {
+      document.documentElement.dataset.theme = theme;
+    });
     window.reception.getLaunchAtStartup().then(setLaunchAtStartup);
     window.reception.getConfig().then((saved) => {
       if (saved) {
         setConfig(saved);
       }
     });
+    window.reception.getQueueStatus().then((status) => setPendingQueueCount(status.pending));
+    window.reception.onQueueStatus((status) => setPendingQueueCount(status.pending));
 
     window.reception.onLoggedIn((next) => setConfig(next));
     window.reception.onFeedInit(({ items }) => {
@@ -61,6 +67,7 @@ export default function App() {
           feed={feed}
           online={online}
           connectionMode={connectionMode}
+          pendingQueueCount={pendingQueueCount}
           launchAtStartup={launchAtStartup}
           onLaunchAtStartupChange={handleLaunchAtStartupChange}
           onLogout={handleLogout}

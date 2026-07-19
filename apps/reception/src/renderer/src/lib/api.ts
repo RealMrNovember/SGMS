@@ -70,7 +70,9 @@ export async function createMember(input: {
 }
 
 export async function manualCheckIn(gymMemberId: string, direction: 'ENTRY' | 'EXIT' = 'ENTRY') {
-  return apiRequest('POST', '/api/v1/check-in', { gymMemberId, direction });
+  // `queued: true` — Faz 19.4: ağ hatası nedeniyle offline kuyruğa alındı, bağlantı
+  // gelince otomatik gönderilecek (bkz. main/offline-queue.ts).
+  return apiRequest<{ queued?: boolean }>('POST', '/api/v1/check-in', { gymMemberId, direction });
 }
 
 export async function fetchOpenBalance(gymMemberId: string) {

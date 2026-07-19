@@ -18,6 +18,8 @@ import {
   setLaunchAtStartup,
   shouldStartHidden,
 } from './launch-at-startup';
+import { initAutoUpdater, installUpdateNow } from './auto-updater';
+import { enqueueCheckIn, flushQueue, getQueueStatus, onQueueStatusChange } from './offline-queue';
 import type {
   CheckInNotificationPayload,
   LoginInput,
@@ -25,7 +27,7 @@ import type {
   ReceptionConfig,
 } from '../shared/types';
 
-const store = new Store<{ config?: ReceptionConfig }>({ name: 'sgms-reception' });
+const store = new Store<{ config?: ReceptionConfig; theme?: 'dark' | 'light' }>({ name: 'sgms-reception' });
 
 let tray: Tray | null = null;
 let window: BrowserWindow | null = null;
@@ -180,6 +182,7 @@ function connectRealtime(config: ReceptionConfig) {
 
   pusher.connection.bind('connected', () => {
     window?.webContents.send('status', { online: true, mode: 'realtime' });
+    void flushQueue(config);
   });
   pusher.connection.bind('disconnected', () => {
     window?.webContents.send('status', { online: false, mode: 'polling' });
@@ -397,7 +400,21 @@ ipcMain.handle('api-request', async (_event, payload: { method: string; path: st
   if (!config?.accessToken) {
     return { ok: false, status: 401, error: 'Oturum bulunamadı' };
   }
-  return apiRequest(config, payload.method, payload.path, payload.body);
+
+  const result = await apiRequest(config, payload.method, payload.path, payload.body);
+
+  // Faz 19.4 — yalnızca manuel check-in için offline kuyruk: ağ hatası (status 0)
+  // durumunda kayıp olmasın diye kalıcı kuyruğa alınır, arayüze "kuyruğa alındı"
+  // bilgisi (queued: true) dönülür — sert bir hata gibi gösterilmez.
+  if (!result.ok && result.status === 0 && payload.method === 'POST' && payload.path === '/api/v1/check-in') {
+    const body = payload.body as { gymMemberId?: string; direction?: 'ENTRY' | 'EXIT' } | undefined;
+    if (body?.gymMemberId && body.direction) {
+      enqueueCheckIn(body.gymMemberId, body.direction);
+      return { ok: true, status: 202, data: { queued: true } };
+    }
+  }
+
+  return result;
 });
 ipcMain.handle('fetch-recent-checkins', async () => {
   const config = store.get('config');
@@ -429,6 +446,13 @@ ipcMain.handle('set-launch-at-startup', async (_event, enabled: boolean) => {
   refreshTrayMenu();
   return next;
 });
+ipcMain.handle('install-update-now', async () => installUpdateNow());
+ipcMain.handle('get-queue-status', async () => getQueueStatus());
+ipcMain.handle('get-theme', async () => store.get('theme', 'dark'));
+ipcMain.handle('set-theme', async (_event, theme: 'dark' | 'light') => {
+  store.set('theme', theme);
+  return theme;
+});
 
 const gotLock = app.requestSingleInstanceLock();
 if (!gotLock) {
@@ -447,6 +471,25 @@ if (process.platform === 'win32') {
 app.whenReady().then(async () => {
   createWindow();
   createTray();
+
+  // Faz 19.3 — geliştirme ortamında (paketlenmemiş) autoUpdater'ın "app not packaged"
+  // hatası atmasını önlemek için yalnızca paketlenmiş (kurulmuş) sürümde etkinleştirilir.
+  if (app.isPackaged) {
+    initAutoUpdater(() => window);
+  }
+
+  // Faz 19.4 — Pusher yeniden bağlandığında (`connected` event) zaten flush tetikleniyor;
+  // bu, polling modunda (Soketi hiç bağlanamadığında) veya Pusher'ın "connected" event'i
+  // kaçırıldığı nadir durumlarda bir güvenlik ağı olarak periyodik yeniden dener.
+  onQueueStatusChange((status) => {
+    window?.webContents.send('queue-status', status);
+  });
+  setInterval(() => {
+    const config = store.get('config');
+    if (config?.accessToken) {
+      void flushQueue(config);
+    }
+  }, 30_000);
 
   const saved = store.get('config');
   if (saved?.accessToken) {
