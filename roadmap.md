@@ -52,7 +52,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 14 | Demo Hesap Güvenliği & Master Admin Geçişi | 🔄 Devam ediyor | ~90% (Demo PT girişi sırada) |
 | 15 | Kimlik, Onboarding & Uyum Sertleştirme | ✅ Tamamlandı | ~95% (proaktif hatırlatma + 6 dil çevirisi kaldı) |
 | 16 | CiciByte Cloud Ticari Entegrasyonu (Ödeme, Referans/Komisyon, Release) | 🔄 Devam ediyor | ~90% (Platform Ödeme Ayarları paneli — iyzico/PayTR/EFT — 2026-07-19'da eklendi; gerçek anahtarlar bekleniyor) |
-| 17 | Üyelik Senaryoları & Ders/Sınıf Yönetimi | 🔲 Planlandı | 0% |
+| 17 | Üyelik Senaryoları & Ders/Sınıf Yönetimi | 🔄 Devam ediyor | ~5% (17.0 Lead takibi başlandı — 2026-07-19; 17.1–17.7 planlı) |
 | 18 | Uyumluluk & Sağlamlaştırma (2FA, GDPR, E2E, Invoice) | 🔄 Devam ediyor | ~40% (2FA + Playwright E2E tamamlandı — 2026-07-19; GDPR self-servis, vardiya, sağlık formu, Invoice uygulama kodu sırada) |
 | 19 | SGMS Masaüstü — Genişletme | 🔲 Gelecek Vizyon | 0% |
 | 20 | SGMS Mobil Uygulama | 🔲 Gelecek Vizyon | 0% |
@@ -68,7 +68,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 30 | Kurumsal Hiyerarşi & Çoklu Şube/Bölge Yönetimi | ✅ Tamamlandı | v1 (branch pricing/finans-İK rolleri v2'ye ertelendi) |
 | 31 | Entegrasyon Pazaryeri | 🔲 Planlandı | 0% |
 | 32 | Ticarileştirme: Paket & Ek Kapasite Satışı | 🔲 Planlandı | 0% |
-| 33 | Dinamik Rol Bazlı Kullanım Kılavuzu | 🔲 Planlandı | 0% |
+| 33 | Dinamik Rol Bazlı Kullanım Kılavuzu | 🔄 Devam ediyor | ~5% (Cursor tarafından başlandı — 2026-07-19) |
 | 34 | Tam Responsive Tasarım Sistemi | ✅ Tamamlandı | ~97% (sol menü/tema/ikon + mobil tablo/kart + mesajlaşma + profil özyönetimi + interaktif program görünümü tamamlandı — yalnızca video desteği/ilerleme geçmişi Tier 2'ye ertelendi) |
 | 35 | Temsilci (Partner) Portalı | ✅ Tamamlandı | 100% |
 | 36 | Kritik İş Mantığı Denetimi & Sağlamlaştırma (2026-07-19 canlıya alma denetimi) | ✅ Tamamlandı | 100% (36.1–36.11 tamamı kapatıldı — 2026-07-19) |
@@ -1419,6 +1419,10 @@ Faz 36 tamamlandı (2026-07-19 canlıya alma denetimi — kullanıcı onaylı s�
     QR tek kullanımlık · offline sync direction · cihaz DRAINING ·
     check-in debounce · davet pending/resend · üye limiti reaktivasyon ·
     proforma e-posta retry + Master Admin resend
+
+Şu anda paralel çalışılıyor (2026-07-19, çakışmayı önlemek için dosya bazında ayrıldı):
+  Faz 17.0   Potansiyel müşteri (Lead) takibi       ← bu oturum (Claude) — yeni Lead/LeadFollowUp modeli, /dashboard/leads
+  Faz 33/33.1 Kullanım kılavuzu + ayarlar modernizasyonu ← Cursor — yeni HelpArticle modeli, /help, /dashboard/settings
 
 Sıradaki (Faz 36 sonrası — profesyonel değerlendirme, P0 en önce):
   Faz 32     Ticarileştirme: paket + ek kapasite satışı          ← P0, gelir modeli (kullanıcı onayı gerekli)
