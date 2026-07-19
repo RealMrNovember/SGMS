@@ -62,10 +62,42 @@ jobs:
         run: pnpm lint
 
       - name: Run migrations against CI database
-        run: pnpm --filter @sgms/database exec prisma migrate deploy
+        # 20260715130000/20260715210000: iki tarihi migration, 2026-06-30'da production'da
+        # yaşanmış BİR KEZLİK bir manuel-kurtarma olayını düzeltiyor (bkz. migration.sql
+        # yorumları) — o olay hiç yaşanmamış TERTEMİZ bir veritabanında (CI'nınki gibi)
+        # replay edilemezler. Üretimde zaten uygulanmış olan bu dosyaları checksum
+        # uyuşmazlığı riskiyle değiştirmek yerine, yalnızca CI'da "resolve --applied" ile
+        # atlanıyor. Normal deploy başarısız olursa (beklenen: tertemiz DB) bu iki
+        # migration'ı çözüp yeniden dener; gerçek bir migration hatasında yine başarısız olur.
+        run: |
+          pnpm --filter @sgms/database exec prisma migrate deploy || {
+            echo "İlk deploy başarısız — bilinen tarihi migration'lar çözülüp yeniden deneniyor..."
+            pnpm --filter @sgms/database exec prisma migrate resolve --applied 20260715130000_fix_expense_status_enum_case
+            pnpm --filter @sgms/database exec prisma migrate resolve --applied 20260715210000_fix_expense_status_enum_values
+            pnpm --filter @sgms/database exec prisma migrate deploy
+          }
+
+      - name: Seed demo data (e2e fixtures)
+        run: pnpm --filter @sgms/database db:seed
 
       - name: Unit tests
         run: pnpm test
 
       - name: Build web app
         run: pnpm web:build
+
+      - name: Install Playwright browsers
+        run: pnpm --filter @sgms/web exec playwright install --with-deps chromium
+
+      - name: E2E tests
+        env:
+          CI: true
+        run: pnpm --filter @sgms/web test:e2e
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: apps/web/playwright-report/
+          retention-days: 7

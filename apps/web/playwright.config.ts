@@ -13,7 +13,7 @@ export default defineConfig({
   // sonuçlar çıkabiliyor. CI önceden build edilmiş (`next start`) sunucuyu kullandığı
   // için orada paralellik güvenli.
   workers: process.env.CI ? 2 : 1,
-  reporter: [['list']],
+  reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : [['list']],
   // Next dev sadece ilk ziyarette rota derler (cold compile) — bekleme listesi/dashboard gibi
   // ağır server component'lerde bu birkaç saniye sürebilir; varsayılan 5s expect timeout'u
   // ilk hit'te yanlış negatif verir.
