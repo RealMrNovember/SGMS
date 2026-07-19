@@ -1,6 +1,6 @@
 'use client';
 
-import { Activity, ClipboardList, Home, MessageSquare, User } from 'lucide-react';
+import { Activity, CalendarDays, ClipboardList, Home, MessageSquare, User } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl';
 const NAV_ITEMS = [
   { href: '/athlete', exact: true, key: 'home' as const, icon: Home },
   { href: '/athlete/measurements', exact: false, key: 'measurements' as const, icon: Activity },
+  { href: '/athlete/classes', exact: false, key: 'classes' as const, icon: CalendarDays },
   { href: '/athlete/programs', exact: false, key: 'programs' as const, icon: ClipboardList },
   { href: '/athlete/messages', exact: false, key: 'messages' as const, icon: MessageSquare },
   { href: '/athlete/account', exact: false, key: 'account' as const, icon: User },

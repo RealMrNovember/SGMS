@@ -198,7 +198,7 @@ export default async function DashboardPage() {
         </section>
       ) : null}
 
-      <section className="grid gap-4 md:grid-cols-4">
+      <section className="grid gap-4 md:grid-cols-4 xl:grid-cols-5">
         <article className="card p-5">
           <p className="muted text-sm">{t('kpis.checkInsToday')}</p>
           <p className="mt-2 text-3xl font-semibold tabular-nums">{kpis.checkInsToday}</p>
@@ -235,6 +235,15 @@ export default async function DashboardPage() {
           <p className="mt-2 text-3xl font-semibold tabular-nums">{kpis.overdueInstallmentCount}</p>
           <Link href="/dashboard/payment-plans" className="muted mt-2 inline-block text-xs hover:text-white">
             {t('kpis.overdueInstallmentsLink')} →
+          </Link>
+        </article>
+        <article
+          className={`card p-5 ${kpis.lowStockCount > 0 ? 'border-amber-500/40 bg-amber-500/5' : ''}`}
+        >
+          <p className="muted text-sm">{t('kpis.lowStock')}</p>
+          <p className="mt-2 text-3xl font-semibold tabular-nums">{kpis.lowStockCount}</p>
+          <Link href="/dashboard/pos" className="muted mt-2 inline-block text-xs hover:text-white">
+            {t('kpis.lowStockLink')} →
           </Link>
         </article>
       </section>

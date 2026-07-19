@@ -52,7 +52,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 14 | Demo Hesap Güvenliği & Master Admin Geçişi | ✅ Tamamlandı | 100% (Demo PT girişi — 2026-07-19 kapatıldı) |
 | 15 | Kimlik, Onboarding & Uyum Sertleştirme | ✅ Tamamlandı | ~95% (proaktif hatırlatma + 6 dil çevirisi kaldı) |
 | 16 | CiciByte Cloud Ticari Entegrasyonu (Ödeme, Referans/Komisyon, Release) | 🔄 Devam ediyor | ~90% (Platform Ödeme Ayarları paneli — iyzico/PayTR/EFT — 2026-07-19'da eklendi; gerçek anahtarlar bekleniyor) |
-| 17 | Üyelik Senaryoları & Ders/Sınıf Yönetimi | 🔄 Devam ediyor | ~12% (17.0 Lead takibi kapatıldı — 2026-07-19; 17.1–17.7 Cursor'da devam ediyor) |
+| 17 | Üyelik Senaryoları & Ders/Sınıf Yönetimi | ✅ Tamamlandı | 100% (17.0–17.7 — Lead, dondurma/devir, grup üyelik, ders/yoklama/QR, kupon, POS stok, Guest Pass — 2026-07-19) |
 | 18 | Uyumluluk & Sağlamlaştırma (2FA, GDPR, E2E, Invoice) | 🔄 Devam ediyor | ~40% (2FA + Playwright E2E tamamlandı — 2026-07-19; GDPR self-servis, vardiya, sağlık formu, Invoice uygulama kodu sırada) |
 | 19 | SGMS Masaüstü — Genişletme | 🔲 Gelecek Vizyon | 0% |
 | 20 | SGMS Mobil Uygulama | 🔲 Gelecek Vizyon | 0% |
@@ -629,7 +629,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ---
 
-## 🔲 Faz 17 — Üyelik Senaryoları & Ders/Sınıf Yönetimi (Öncelik: P1)
+## ✅ Faz 17 — Üyelik Senaryoları & Ders/Sınıf Yönetimi (Öncelik: P1)
 
 > **Kullanıcı notu (2026-07-15):** *"Adam 12 aylık aldı, 3 ay sonra askere gitti, üyelik donduruldu, sonra eşine devretti... kurumsal üyelik, aile paketi, çift paketi, çocuk üyeliği — bunlar oldukça yaygın."* Gerçek bir salonda üyelik tek bir "aktif/pasif" durumu değil; bir **yaşam döngüsü**dür. Bu faz, ürün denetiminin "Önemli" bulgusu olan büyüme özelliklerini gerçek hayat senaryolarıyla derinleştirir.
 
@@ -647,46 +647,47 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 **Dosyalar:** `packages/database/prisma/schema.prisma` (Lead/LeadFollowUp), migration `20260719070000_add_lead_tracking`, `actions/leads.ts`, `app/(tenant)/dashboard/leads/page.tsx`, `components/leads/*`, `lib/admin/audit-labels.ts`, `dashboard/layout.tsx` (nav), messages (6 dil)
 
-### 17.1 Üyelik dondurma/erteleme
-- [ ] `GymMemberStatus`'a `FROZEN` eklenir; `MembershipFreeze` modeli (`startDate`, `endDate`, `reason`: `MILITARY`/`MEDICAL`/`TRAVEL`/`OTHER`, `approvedById`)
-- [ ] Dondurma süresi kadar `membershipEndsAt` otomatik ileri kayar (askerlik/sağlık raporu gibi belgeli durumlarda süre sınırı yok, kişisel tercihte örn. yılda max 60 gün gibi salon ayarı)
-- [ ] Sporcu portalından dondurma talebi oluşturma → resepsiyon/OWNER onayı akışı
+### 17.1 Üyelik dondurma/erteleme — ✅ 2026-07-19
+- [x] `GymMemberStatus`'a `FROZEN`; `MembershipFreeze` (`startDate`, `endDate`, `reason`: `MILITARY`/`MEDICAL`/`TRAVEL`/`OTHER`, onay akışı)
+- [x] Onayda dondurma süresi kadar `membershipEndsAt` ileri kayar; çözmede `ACTIVE`'e dönüş
+- [x] Sporcu portalından talep → staff onay/red; üye detayında dondurma/çözme paneli
 
-### 17.2 Üyelik devri ve hak satışı
-- [ ] **Senaryo — devir:** Üye A, kalan 9 aylık üyeliğini eşi/aile bireyi Üye B'ye devrediyor. `MembershipTransfer` kaydı (`fromMemberId`, `toMemberId`, `transferredAt`, `remainingDays`, `approvedById`) — yeni üye mevcut kayıtları (ölçüm geçmişi vb.) devralmaz, yalnızca kalan süre ve plan aktarılır
-- [ ] **Senaryo — kalan hakkın iadesi/satışı:** Üye ayrılırken kalan gün karşılığı cari hesaba kısmi iade veya sonraki faturaya mahsup (`Expense` ile entegre)
+### 17.2 Üyelik devri ve hak satışı — ✅ 2026-07-19
+- [x] `MembershipTransfer` — kalan gün/plan aktarımı (`fromMemberId` → `toMemberId`)
+- [x] Kalan hak kredisi — cari hesaba mahsup (`Expense` / credit kaydı)
 
-### 17.3 Kurumsal, aile, çift ve çocuk üyelikleri
-- [ ] `MembershipGroupType`: `INDIVIDUAL` / `COUPLE` / `FAMILY` / `CORPORATE`
-- [ ] `MembershipGroup` modeli — bir kurumsal/aile paketine bağlı birden fazla `GymMember`, ortak faturalandırma (tek `Organization`'a değil, tek bir grup cari hesabına borç yazılır) ve grup içi toplu iskonto oranı
-- [ ] Kurumsal üyelikte İK/firma yetkilisi için "şirket panosu" (kaç çalışanı üye, kullanım oranı) — büyük şirket anlaşmaları (banka, holding vb.) için satış aracı
-- [ ] Çocuk üyeliği: veli/vasi bilgisi zorunlu alan, 18 yaş altı için ayrı onay/rıza akışı (KVKK açısından da önemli — veli onayı olmadan çocuk verisi işlenemez)
+### 17.3 Kurumsal, aile, çift ve çocuk üyelikleri — ✅ 2026-07-19
+- [x] `MembershipGroupType`: `INDIVIDUAL` / `COUPLE` / `FAMILY` / `CORPORATE`
+- [x] `MembershipGroup` + üye bağlama, grup iskontosu, firma adı; `/dashboard/groups` şirket panosu (üye sayısı + 30g check-in kullanımı)
+- [x] Çocuk/veli: `guardian*` alanları + veli onay akışı (üyelik grubu/üye kaydı)
 
-### 17.4 Ders/Sınıf Yönetimi (Group Class Scheduling)
-> **Senaryo:** Pazartesi 18:00 Pilates dersi, eğitmen Ayşe, A Salonu, 15 kişi kapasiteli. 15. kişi kayıt olduğunda sistem otomatik bekleme listesine alır; biri iptal ederse sıradaki kişiye SMS/push ile "yeriniz açıldı, 15 dakika içinde onaylayın" bildirimi gider.
-- [ ] `GymClass` modeli — `name` (Yoga/Pilates/Crossfit/Spinning/serbest), `trainerId`, `roomName`, `capacity`, `durationMinutes`, tekrarlayan program (`RRULE` benzeri haftalık şablon)
-- [ ] `ClassSession` — `GymClass`'ın belirli bir tarih/saatteki somut oturumu (eğitmen değişikliği, iptal, kapasite override edilebilir)
-- [ ] `ClassBooking` — üye kaydı, `status`: `BOOKED`/`WAITLISTED`/`CANCELLED`/`ATTENDED`/`NO_SHOW`, bekleme listesi otomatik sıraya alma + boşalınca otomasyon
-- [ ] Sporcu portalı: haftalık ders programı görünümü, tek tıkla kayıt/iptal
-- [ ] QR ile derse giriş — mevcut check-in altyapısı (Faz 10) genişletilir: `CheckIn`'e opsiyonel `classSessionId` bağlanır, derse kayıtlı olmayan biri QR okutursa net bir uyarı verir
-- [ ] Resepsiyon/PT paneli: günlük ders akışı, yoklama alma (attendance) ekranı
+### 17.4 Ders/Sınıf Yönetimi (Group Class Scheduling) — ✅ 2026-07-19
+> **Senaryo:** Pazartesi 18:00 Pilates dersi… kontenjan dolunca bekleme listesi; iptalde sıradaki otomatik yükseltilir (SMS/push Faz 27'ye bırakıldı).
+- [x] `GymClass` — kapasite, süre, salon, eğitmen, haftalık gün şablonu
+- [x] `ClassSession` — somut oturum; 4 haftalık seans üretimi
+- [x] `ClassBooking` — `BOOKED`/`WAITLISTED`/`CANCELLED`/`ATTENDED`/`NO_SHOW`; bekleme listesi otomasyonu
+- [x] Sporcu portalı `/athlete/classes` — yaklaşan seanslar, rezervasyon/iptal
+- [x] QR derse giriş — `CheckIn.classSessionId`; kayıtlı olmayan için net red
+- [x] Resepsiyon yoklama — `/dashboard/classes/[sessionId]`
 
-### 17.5 İndirim/kupon/referans kodu sistemi
-- [ ] `DiscountCode` modeli — sabit tutar/yüzde, kullanım limiti, geçerlilik tarihi, `/trial` ve plan değişikliğinde uygulanabilir
+### 17.5 İndirim/kupon/referans kodu sistemi — ✅ 2026-07-19
+- [x] `DiscountCode` + `DiscountRedemption` — yüzde/sabit, kullanım limiti, geçerlilik; `/dashboard/discounts`
 
-### 17.6 POS stok/envanter takibi
-- [ ] `ExpenseCategory`'ye `stockQuantity`, satışta otomatik düşüm, düşük stok uyarısı (dashboard KPI'sına eklenir)
+### 17.6 POS stok/envanter takibi — ✅ 2026-07-19
+- [x] `ExpenseCategory.stockQuantity` / `lowStockThreshold`; satışta otomatik düşüm; dashboard düşük stok KPI
 
-### 17.7 Misafir Geçiş İzni (Guest Pass) — yeni, 2026-07-16 eklendi
+### 17.7 Misafir Geçiş İzni (Guest Pass) — ✅ 2026-07-19
 
-> **Senaryo:** Bir üyenin arkadaşı salonu bir günlüğüne denemek istiyor, ya da bir aday resepsiyonla görüşmeden önce salonu gezmek istiyor. Bugün bu kişi ya kayıt dışı elle turnikeden geçiriliyor (denetimsiz) ya da hiç giremiyor.
-- [ ] `GuestPass` modeli — `issuedById` (resepsiyonist), `guestName`, `hostMemberId` (opsiyonel — hangi üyenin misafiri), `validFrom`/`validUntil` (genelde tek gün, saatlik de olabilir), `qrToken` (mevcut Faz 10 QR check-in altyapısıyla aynı HMAC imzalı token deseni)
-- [ ] Resepsiyon paneli: tek tıkla misafir izni oluşturma → anlık QR gösterimi (yazdırma veya telefona gönderme)
-- [ ] Check-in sırasında `GuestPass` süresi dolmuşsa turnike/resepsiyon net bir "misafir izni süresi doldu" uyarısı verir — üye check-in akışıyla karışmaz, ayrı bir `CheckIn.subjectType` değeri (`GUEST`) kullanılır
+> **Senaryo:** Üye arkadaşı / aday için tek günlük misafir QR.
+- [x] `GuestPass` — host üye, geçerlilik aralığı, HMAC QR; `AccessSubjectType.GUEST`
+- [x] `/dashboard/guest-passes` — oluşturma + anlık QR; iptal
+- [x] `/api/v1/check-in/guest` + process hook — süresi dolmuş/geçersiz misafir için net uyarı
 
-**Kabul kriteri:** Bir üye askerlik nedeniyle üyeliğini dondurabiliyor ve eşine devredebiliyor · bir şirket 50 çalışanı için kurumsal üyelik alıp kullanım oranını görebiliyor · pilates dersine kontenjan dahilinde kayıt olunup QR ile girilebiliyor, kontenjan dolunca bekleme listesi otomatik işliyor · bir aday salonu gezip fiyat aldıktan sonra sistemde bir "Lead" olarak takip ediliyor · resepsiyon bir misafire tek tıkla günlük geçiş izni verebiliyor
+**Kabul kriteri:** ✅ Karşılandı — dondurma/devir · grup/kurumsal pano · ders rezervasyonu + bekleme + yoklama/QR · Lead (17.0) · Guest Pass · POS stok KPI
 
-**Bağımlılık:** Faz 15 (arama/filtre altyapısı) · Faz 27 (Bildirim Merkezi — bekleme listesi ve lead takip bildirimleri için) · Faz 10 (QR check-in altyapısı — Guest Pass için)
+**Dosyalar (17.1–17.7):** migration `20260719080000_faz17_membership_scenarios`, `actions/membership-lifecycle|membership-groups|classes|discount-codes|guest-passes.ts`, dashboard/athlete sayfaları, `lib/check-in/guest-qr.ts`, messages (6 dil)
+
+**Bağımlılık:** Faz 15 · Faz 27 (bekleme listesi SMS/push — bilinçli olarak kapsam dışı) · Faz 10 (QR)
 
 ---
 
@@ -1448,10 +1449,8 @@ Faz 36 tamamlandı (2026-07-19 canlıya alma denetimi — kullanıcı onaylı s�
 Tamamlanan paralel çalışma (2026-07-19, çakışmayı önlemek için dosya bazında ayrılmıştı):
   Faz 17.0    Potansiyel müşteri (Lead) takibi           ✅ 2026-07-19 (Claude) — Lead/LeadFollowUp modeli, /dashboard/leads
   Faz 33/33.1 Kullanım kılavuzu + ayarlar modernizasyonu ✅ 2026-07-19 (Cursor) — HelpArticle modeli, /help, /dashboard/settings
-
-Paralel çalışma (2026-07-19, çakışmayı önlemek için dosya bazında ayrıldı — bu sefer Cursor'a geniş/uzun kapsamlı bir iş yükü verildi):
-  Faz 17.1–17.7  Kalan üyelik senaryoları & ders/sınıf yönetimi ← Cursor'da devam ediyor — dondurma/devir, kurumsal/aile/çocuk üyelik,
-                 ders/sınıf rezervasyon sistemi (GymClass/ClassSession/ClassBooking), indirim kodu, POS stok, misafir izni
+  Faz 17.1–17.7 Üyelik senaryoları & ders/sınıf yönetimi ✅ 2026-07-19 (Cursor) — freeze/transfer, grup, GymClass,
+                 kupon, POS stok, Guest Pass
   Faz 12.4 + 14.3 Master Admin kalıcı silme + Demo PT girişi     ✅ 2026-07-19 (Claude) — düşük efor, dosya bazında sıfır çakışma
 
 Sıradaki (Faz 36 sonrası — profesyonel değerlendirme, P0 en önce):
@@ -1463,10 +1462,8 @@ Sıradaki (Faz 36 sonrası — profesyonel değerlendirme, P0 en önce):
   Faz 18.1   Otomatik PDF sözleşme/risk formu üretimi            ← P1, mevcut PDF altyapısını genişletir
   Faz 6.3/.4 Dil genişletmesi (İtalyanca/Portekizce) +           ← P1, pazar genişletme
              küresel lokasyon veritabanı
-  Faz 17     Üyelik senaryoları & ders/sınıf yönetimi (kalan)    ← P1, büyük kapsam
 
   Faz 34.6   İnteraktif antrenman programı görünümü              ← P2
-  Faz 17.7   Misafir geçiş izni (Guest Pass)                     ← P2, düşük efor
   Faz 22     Personel Yönetimi / HR                              ← P2
   Faz 23     Ekipman yönetimi & bakım planları                   ← P2
   Faz 25     Kasa yönetimi (vardiya, X/Z raporu)                 ← P2

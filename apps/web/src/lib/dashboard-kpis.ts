@@ -22,6 +22,8 @@ export type DashboardKpis = {
   billedThisMonth: number;
   membershipsExpiringSoonCount: number;
   overdueInstallmentCount: number;
+  /** Stok eşiğinin altındaki POS kalemleri (17.6). */
+  lowStockCount: number;
 };
 
 /** Ana dashboard için operasyonel özet — "hesap ayarları" değil, günlük çalışan bir salon komuta merkezi. */
@@ -30,7 +32,7 @@ export async function getDashboardKpis(organizationId: string, now = new Date())
   const month = monthBounds(now);
   const soon = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
-  const [checkInsToday, revenue, membershipsExpiringSoonCount, overdueInstallmentCount] =
+  const [checkInsToday, revenue, membershipsExpiringSoonCount, overdueInstallmentCount, lowStockCategories] =
     await Promise.all([
       prisma.checkIn.count({
         where: {
@@ -59,11 +61,24 @@ export async function getDashboardKpis(organizationId: string, now = new Date())
           dueDate: { lt: now },
         },
       }),
+      prisma.expenseCategory.findMany({
+        where: {
+          organizationId,
+          isActive: true,
+          stockQuantity: { not: null },
+        },
+        select: { stockQuantity: true, lowStockThreshold: true },
+      }),
     ]);
 
   // Tüm para birimlerinin net tahsilat toplamı (dashboard tek rakam gösteriyor; TRY ağırlıklı)
   const collectedAll = revenue.byCurrency.reduce((sum, c) => sum + c.collected, 0);
   const billedAll = revenue.byCurrency.reduce((sum, c) => sum + c.billed, 0);
+  const lowStockCount = lowStockCategories.filter((c) => {
+    const qty = c.stockQuantity ?? 0;
+    const threshold = c.lowStockThreshold ?? 5;
+    return qty <= threshold;
+  }).length;
 
   return {
     checkInsToday,
@@ -71,5 +86,6 @@ export async function getDashboardKpis(organizationId: string, now = new Date())
     billedThisMonth: billedAll,
     membershipsExpiringSoonCount,
     overdueInstallmentCount,
+    lowStockCount,
   };
 }

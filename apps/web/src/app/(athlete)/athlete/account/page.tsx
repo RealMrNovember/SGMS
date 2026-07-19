@@ -1,6 +1,7 @@
 import { AthletePasswordForm } from '@/components/athlete-password-form';
 import { AthleteProfileForm } from '@/components/athlete-profile-form';
 import { AvatarUpload } from '@/components/avatar-upload';
+import { MembershipLifecyclePanel } from '@/components/membership/membership-lifecycle-panel';
 import { auth } from '@/lib/auth';
 import { intlLocaleFor } from '@/lib/format-locale';
 import { decimalToNumber, getMemberAccountSummary } from '@/lib/member-balance';
@@ -31,6 +32,9 @@ export default async function AthleteAccountPage() {
         email: true,
         birthDate: true,
         avatarUrl: true,
+        status: true,
+        firstName: true,
+        lastName: true,
         user: { select: { name: true } },
       },
     }),
@@ -89,6 +93,18 @@ export default async function AthleteAccountPage() {
       />
 
       <AthletePasswordForm />
+
+      {profile && (profile.status === 'ACTIVE' || profile.status === 'FROZEN') ? (
+        <MembershipLifecyclePanel
+          gymMemberId={session.user.gymMemberId}
+          memberName={`${profile.firstName} ${profile.lastName}`}
+          memberStatus={profile.status}
+          pendingFreezes={[]}
+          memberOptions={[]}
+          canManage={false}
+          isAthleteView
+        />
+      ) : null}
 
       <section className="card p-5 text-center">
         <p className="muted text-sm">{t('openBalance')}</p>

@@ -159,6 +159,22 @@ enum AuditAction {
   HELP_ARTICLE_CREATED
   HELP_ARTICLE_UPDATED
   HELP_ARTICLE_DELETED
+  MEMBERSHIP_FREEZE_REQUESTED
+  MEMBERSHIP_FREEZE_APPROVED
+  MEMBERSHIP_FREEZE_REJECTED
+  MEMBERSHIP_TRANSFER_COMPLETED
+  MEMBERSHIP_RIGHTS_CREDITED
+  MEMBERSHIP_GROUP_CREATED
+  MEMBERSHIP_GROUP_UPDATED
+  CLASS_CREATED
+  CLASS_SESSION_UPDATED
+  CLASS_BOOKING_CREATED
+  CLASS_BOOKING_CANCELLED
+  CLASS_ATTENDANCE_MARKED
+  DISCOUNT_CODE_CREATED
+  DISCOUNT_CODE_REDEEMED
+  GUEST_PASS_ISSUED
+  GUEST_PASS_REVOKED
 }
 
 enum HierarchyRole {
@@ -184,6 +200,7 @@ enum GymMemberStatus {
   ACTIVE
   INACTIVE
   SUSPENDED
+  FROZEN
 }
 
 enum HelpAudience {
@@ -227,6 +244,7 @@ enum AccessDirection {
 enum AccessSubjectType {
   GYM_MEMBER
   STAFF
+  GUEST
 }
 
 enum SyncBatchStatus {
@@ -369,6 +387,15 @@ model User {
   assignedLeads           Lead[]                   @relation("LeadAssignedTo")
   leadsCreated            Lead[]                   @relation("LeadCreatedBy")
   leadFollowUpsCreated    LeadFollowUp[]
+  membershipFreezesApproved MembershipFreeze[] @relation("MembershipFreezeApprovedBy")
+  membershipFreezesRequested MembershipFreeze[] @relation("MembershipFreezeRequestedBy")
+  membershipTransfersApproved MembershipTransfer[] @relation("MembershipTransferApprovedBy")
+  membershipGroupsCreated MembershipGroup[] @relation("MembershipGroupCreatedBy")
+  gymClassesAsTrainer     GymClass[] @relation("GymClassTrainer")
+  gymClassesCreated       GymClass[] @relation("GymClassCreatedBy")
+  classBookings           ClassBooking[] @relation("ClassBookingCreatedBy")
+  discountCodesCreated    DiscountCode[] @relation("DiscountCodeCreatedBy")
+  guestPassesIssued       GuestPass[] @relation("GuestPassIssuedBy")
 
   @@index([status])
   @@index([isSuperAdmin])
@@ -722,6 +749,15 @@ model Organization {
   gymMemberActivities     GymMemberActivity[]
   leads                   Lead[]
   leadFollowUps           LeadFollowUp[]
+  membershipFreezes       MembershipFreeze[]
+  membershipTransfers     MembershipTransfer[]
+  membershipGroups        MembershipGroup[]
+  gymClasses              GymClass[]
+  classSessions           ClassSession[]
+  classBookings           ClassBooking[]
+  discountCodes           DiscountCode[]
+  discountRedemptions     DiscountRedemption[]
+  guestPasses             GuestPass[]
 
   @@index([status])
   @@index([centralLicenseStatus])
@@ -874,6 +910,7 @@ model GymMembershipPlan {
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   gymMembers   GymMember[]
+  transfers    MembershipTransfer[]
 
   @@unique([organizationId, name])
   @@index([organizationId, isActive, sortOrder])
@@ -908,6 +945,10 @@ model GymMember {
   locale             String          @default("tr")
   avatarUrl          String?         @map("avatar_url")
   rfidTag            String?         @map("rfid_tag")
+  membershipGroupId  String?         @map("membership_group_id")
+  guardianName       String?         @map("guardian_name")
+  guardianPhone      String?         @map("guardian_phone")
+  guardianConsentAt  DateTime?       @map("guardian_consent_at")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -916,6 +957,7 @@ model GymMember {
   plan                GymMembershipPlan?  @relation(fields: [planId], references: [id], onDelete: SetNull)
   user                User?               @relation("GymMemberAccount", fields: [userId], references: [id], onDelete: SetNull)
   trainer             User?               @relation("GymMemberTrainer", fields: [trainerId], references: [id], onDelete: SetNull)
+  membershipGroup     MembershipGroup?    @relation(fields: [membershipGroupId], references: [id], onDelete: SetNull)
   healthMeasurements  HealthMeasurement[]
   trainingPrograms    TrainingProgram[]
   exerciseSetLogs     ExerciseSetLog[]
@@ -931,6 +973,12 @@ model GymMember {
   gymAccessLogs       GymAccessLog[]
   gymMemberActivities GymMemberActivity[]
   convertedFromLead   Lead?               @relation("LeadConvertedToMember")
+  membershipFreezes   MembershipFreeze[]
+  transfersFrom       MembershipTransfer[] @relation("MembershipTransferFrom")
+  transfersTo         MembershipTransfer[] @relation("MembershipTransferTo")
+  classBookings       ClassBooking[]
+  hostedGuestPasses   GuestPass[]          @relation("GuestPassHost")
+  discountRedemptions DiscountRedemption[]
 
   @@unique([organizationId, nationalId])
   @@unique([organizationId, passportNumber])
@@ -940,6 +988,7 @@ model GymMember {
   @@index([organizationId, trainerId])
   @@index([trainerId])
   @@index([userId])
+  @@index([membershipGroupId])
   @@index([phone])
   @@index([email])
   @@map("gym_members")
@@ -1088,6 +1137,8 @@ model ExpenseCategory {
   name           String
   description    String?
   defaultAmount  Decimal? @map("default_amount") @db.Decimal(10, 2)
+  stockQuantity  Int?     @map("stock_quantity")
+  lowStockThreshold Int?  @map("low_stock_threshold")
   sortOrder      Int      @default(0) @map("sort_order")
   isActive       Boolean  @default(true) @map("is_active")
 
@@ -1340,6 +1391,8 @@ model CheckIn {
   deviceId       String?           @map("device_id")
   clientEventId  String?           @map("client_event_id")
   method         CheckInMethod
+  classSessionId String?           @map("class_session_id")
+  guestPassId    String?           @map("guest_pass_id")
   checkedInAt    DateTime          @default(now()) @map("checked_in_at")
   metadata       Json              @default("{}")
 
@@ -1347,6 +1400,8 @@ model CheckIn {
   gymMember    GymMember?   @relation(fields: [gymMemberId], references: [id], onDelete: Cascade)
   staffUser    User?        @relation("StaffCheckIn", fields: [staffUserId], references: [id], onDelete: SetNull)
   device       Device?      @relation(fields: [deviceId], references: [id], onDelete: SetNull)
+  classSession ClassSession? @relation(fields: [classSessionId], references: [id], onDelete: SetNull)
+  guestPass    GuestPass?    @relation(fields: [guestPassId], references: [id], onDelete: SetNull)
 
   @@unique([deviceId, clientEventId])
   @@index([organizationId, checkedInAt])
@@ -1354,6 +1409,8 @@ model CheckIn {
   @@index([gymMemberId, checkedInAt])
   @@index([staffUserId, checkedInAt])
   @@index([deviceId, checkedInAt])
+  @@index([classSessionId])
+  @@index([guestPassId])
   @@map("check_ins")
 }
 
@@ -1659,4 +1716,269 @@ model LeadFollowUp {
   @@index([organizationId, scheduledAt])
   @@index([leadId, scheduledAt])
   @@map("lead_follow_ups")
+}
+
+// ---------------------------------------------------------------------------
+// Faz 17 — Üyelik senaryoları, ders yönetimi, kupon, misafir
+// ---------------------------------------------------------------------------
+
+enum MembershipFreezeReason {
+  MILITARY
+  MEDICAL
+  TRAVEL
+  OTHER
+}
+
+enum MembershipFreezeStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum MembershipGroupType {
+  INDIVIDUAL
+  COUPLE
+  FAMILY
+  CORPORATE
+}
+
+enum ClassBookingStatus {
+  BOOKED
+  WAITLISTED
+  CANCELLED
+  ATTENDED
+  NO_SHOW
+}
+
+enum DiscountType {
+  FIXED
+  PERCENT
+}
+
+model MembershipFreeze {
+  id              String                 @id @default(cuid())
+  organizationId  String                 @map("organization_id")
+  gymMemberId     String                 @map("gym_member_id")
+  startDate       DateTime               @map("start_date") @db.Date
+  endDate         DateTime               @map("end_date") @db.Date
+  reason          MembershipFreezeReason @default(OTHER)
+  notes           String?                @db.Text
+  status          MembershipFreezeStatus @default(PENDING)
+  requestedById   String?                @map("requested_by_id")
+  approvedById    String?                @map("approved_by_id")
+  decidedAt       DateTime?              @map("decided_at")
+  daysExtended    Int                    @default(0) @map("days_extended")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  gymMember    GymMember    @relation(fields: [gymMemberId], references: [id], onDelete: Cascade)
+  requestedBy  User?        @relation("MembershipFreezeRequestedBy", fields: [requestedById], references: [id], onDelete: SetNull)
+  approvedBy   User?        @relation("MembershipFreezeApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, status])
+  @@index([gymMemberId, status])
+  @@map("membership_freezes")
+}
+
+model MembershipTransfer {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  fromMemberId   String   @map("from_member_id")
+  toMemberId     String   @map("to_member_id")
+  remainingDays  Int      @map("remaining_days")
+  planId         String?  @map("plan_id")
+  notes          String?  @db.Text
+  approvedById   String   @map("approved_by_id")
+  transferredAt  DateTime @default(now()) @map("transferred_at")
+  creditAmount   Decimal? @map("credit_amount") @db.Decimal(10, 2)
+  creditCurrency String?  @map("credit_currency")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  organization Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  fromMember   GymMember          @relation("MembershipTransferFrom", fields: [fromMemberId], references: [id], onDelete: Restrict)
+  toMember     GymMember          @relation("MembershipTransferTo", fields: [toMemberId], references: [id], onDelete: Restrict)
+  plan         GymMembershipPlan? @relation(fields: [planId], references: [id], onDelete: SetNull)
+  approvedBy   User               @relation("MembershipTransferApprovedBy", fields: [approvedById], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, transferredAt])
+  @@index([fromMemberId])
+  @@index([toMemberId])
+  @@map("membership_transfers")
+}
+
+model MembershipGroup {
+  id               String              @id @default(cuid())
+  organizationId   String              @map("organization_id")
+  name             String
+  type             MembershipGroupType @default(FAMILY)
+  discountPercent  Decimal             @default(0) @map("discount_percent") @db.Decimal(5, 2)
+  companyName      String?             @map("company_name")
+  billingNotes     String?             @map("billing_notes") @db.Text
+  createdById      String              @map("created_by_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation("MembershipGroupCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  members      GymMember[]
+
+  @@index([organizationId, type])
+  @@map("membership_groups")
+}
+
+model GymClass {
+  id              String  @id @default(cuid())
+  organizationId  String  @map("organization_id")
+  name            String
+  description     String? @db.Text
+  trainerId       String? @map("trainer_id")
+  roomName        String? @map("room_name")
+  capacity        Int     @default(15)
+  durationMinutes Int     @default(60) @map("duration_minutes")
+  /// Haftanın günleri 0=Pazar … 6=Cumartesi
+  weeklyDays      Int[]   @map("weekly_days")
+  /// "HH:mm" yerel saat
+  startTime       String  @map("start_time")
+  isActive        Boolean @default(true) @map("is_active")
+  createdById     String  @map("created_by_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  trainer      User?         @relation("GymClassTrainer", fields: [trainerId], references: [id], onDelete: SetNull)
+  createdBy    User          @relation("GymClassCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  sessions     ClassSession[]
+
+  @@index([organizationId, isActive])
+  @@index([trainerId])
+  @@map("gym_classes")
+}
+
+model ClassSession {
+  id             String    @id @default(cuid())
+  organizationId String    @map("organization_id")
+  gymClassId     String    @map("gym_class_id")
+  startsAt       DateTime  @map("starts_at")
+  endsAt         DateTime  @map("ends_at")
+  capacity       Int
+  trainerId      String?   @map("trainer_id")
+  roomName       String?   @map("room_name")
+  isCancelled    Boolean   @default(false) @map("is_cancelled")
+  notes          String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  gymClass     GymClass      @relation(fields: [gymClassId], references: [id], onDelete: Cascade)
+  bookings     ClassBooking[]
+  checkIns     CheckIn[]
+
+  @@unique([gymClassId, startsAt])
+  @@index([organizationId, startsAt])
+  @@index([gymClassId, startsAt])
+  @@map("class_sessions")
+}
+
+model ClassBooking {
+  id             String             @id @default(cuid())
+  organizationId String             @map("organization_id")
+  classSessionId String             @map("class_session_id")
+  gymMemberId    String             @map("gym_member_id")
+  status         ClassBookingStatus @default(BOOKED)
+  waitlistPos    Int?               @map("waitlist_pos")
+  promotedAt     DateTime?          @map("promoted_at")
+  createdById    String?            @map("created_by_id")
+  cancelledAt    DateTime?          @map("cancelled_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  classSession ClassSession @relation(fields: [classSessionId], references: [id], onDelete: Cascade)
+  gymMember    GymMember    @relation(fields: [gymMemberId], references: [id], onDelete: Cascade)
+  createdBy    User?        @relation("ClassBookingCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@unique([classSessionId, gymMemberId])
+  @@index([organizationId, status])
+  @@index([gymMemberId, createdAt])
+  @@map("class_bookings")
+}
+
+model DiscountCode {
+  id             String       @id @default(cuid())
+  organizationId String?      @map("organization_id")
+  code           String
+  type           DiscountType @default(PERCENT)
+  value          Decimal      @db.Decimal(10, 2)
+  maxUses        Int?         @map("max_uses")
+  usedCount      Int          @default(0) @map("used_count")
+  validFrom      DateTime?    @map("valid_from")
+  validUntil     DateTime?    @map("valid_until")
+  isActive       Boolean      @default(true) @map("is_active")
+  createdById    String       @map("created_by_id")
+  notes          String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  organization Organization?        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User                 @relation("DiscountCodeCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  redemptions  DiscountRedemption[]
+
+  @@unique([organizationId, code])
+  @@index([code])
+  @@index([organizationId, isActive])
+  @@map("discount_codes")
+}
+
+model DiscountRedemption {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  discountCodeId String   @map("discount_code_id")
+  gymMemberId    String?  @map("gym_member_id")
+  amountSaved    Decimal  @map("amount_saved") @db.Decimal(10, 2)
+  context        String?
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  discountCode DiscountCode @relation(fields: [discountCodeId], references: [id], onDelete: Cascade)
+  gymMember    GymMember?   @relation(fields: [gymMemberId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+  @@index([discountCodeId])
+  @@map("discount_redemptions")
+}
+
+model GuestPass {
+  id             String    @id @default(cuid())
+  organizationId String    @map("organization_id")
+  guestName      String    @map("guest_name")
+  guestPhone     String?   @map("guest_phone")
+  hostMemberId   String?   @map("host_member_id")
+  issuedById     String    @map("issued_by_id")
+  validFrom      DateTime  @map("valid_from")
+  validUntil     DateTime  @map("valid_until")
+  qrTokenHash    String    @unique @map("qr_token_hash")
+  revokedAt      DateTime? @map("revoked_at")
+  usedAt         DateTime? @map("used_at")
+  notes          String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  hostMember   GymMember?   @relation("GuestPassHost", fields: [hostMemberId], references: [id], onDelete: SetNull)
+  issuedBy     User         @relation("GuestPassIssuedBy", fields: [issuedById], references: [id], onDelete: Restrict)
+  checkIns     CheckIn[]
+
+  @@index([organizationId, validUntil])
+  @@index([hostMemberId])
+  @@map("guest_passes")
 }

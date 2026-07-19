@@ -46,15 +46,14 @@
     "more": "Más",
     "collapseSidebar": "Contraer menú",
     "expandSidebar": "Expandir menú",
-    "groups": {
-      "dailyOps": "Operaciones diarias",
-      "management": "Gestión",
-      "analytics": "Análisis"
-    },
+    "groups": "Grupos",
     "paymentPlans": "Planes de pago",
     "twoFactor": "Seguridad de la cuenta (2FA)",
     "help": "Ayuda",
-    "leads": "Candidatos"
+    "leads": "Candidatos",
+    "classes": "Clases",
+    "discounts": "Cupones",
+    "guestPasses": "Pases de invitado"
   },
   "auth": {
     "login": "Iniciar sesión",
@@ -299,7 +298,9 @@
       "expiringSoon": "Memberships Expiring in 7 Days",
       "expiringSoonLink": "View members",
       "overdueInstallments": "Cuotas vencidas",
-      "overdueInstallmentsLink": "Ver planes de pago"
+      "overdueInstallmentsLink": "Ver planes de pago",
+      "lowStock": "Stock bajo",
+      "lowStockLink": "Ver stock POS"
     },
     "cards": {
       "organization": "Organización",
@@ -676,7 +677,10 @@
       "openCount": "{count} abiertos",
       "noPayments": "Sin pagos hoy"
     },
-    "overdueInstallmentBadge": "Cuota vencida"
+    "overdueInstallmentBadge": "Cuota vencida",
+    "categoryStock": "Cantidad en stock",
+    "categoryLowStock": "Umbral de stock bajo",
+    "stockLabel": "Stock: {count}"
   },
   "marketing": {
     "nav": {
@@ -1510,5 +1514,145 @@
     "convertedBadge": "Convertido",
     "lostBadge": "Perdido",
     "cancel": "Cancelar"
+  },
+  "faz17": {
+    "freezes": {
+      "requestTitle": "Freeze Request",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "reason": "Reason",
+      "reasons": {
+        "MILITARY": "Military service",
+        "MEDICAL": "Medical",
+        "TRAVEL": "Travel",
+        "OTHER": "Other"
+      },
+      "notes": "Notes",
+      "submitRequest": "Submit request",
+      "pendingTitle": "Pending freeze requests",
+      "approve": "Approve",
+      "reject": "Reject",
+      "unfreezeTitle": "End freeze",
+      "unfreezeHint": "Reactivate membership for {name}.",
+      "unfreeze": "Reactivate",
+      "transferTitle": "Membership transfer",
+      "fromMember": "From member",
+      "toMember": "To member",
+      "selectMember": "Select member",
+      "creditAmount": "Credit amount (TRY)",
+      "transferSubmit": "Transfer",
+      "creditTitle": "Remaining rights credit",
+      "creditSubmit": "Record credit"
+    },
+    "groups": {
+      "back": "← Overview",
+      "title": "Membership Groups",
+      "subtitle": "Manage family, couple, and corporate groups; track check-in usage over the last 30 days.",
+      "createTitle": "New group",
+      "name": "Group name",
+      "type": "Type",
+      "types": {
+        "INDIVIDUAL": "Individual",
+        "COUPLE": "Couple",
+        "FAMILY": "Family",
+        "CORPORATE": "Corporate"
+      },
+      "discountPercent": "Discount %",
+      "companyName": "Company name",
+      "billingNotes": "Billing notes",
+      "createSubmit": "Create group",
+      "boardTitle": "Corporate board",
+      "empty": "No groups yet.",
+      "members": "members",
+      "usage30d": "Check-in usage (30d)"
+    },
+    "classes": {
+      "back": "← Classes",
+      "title": "Group Classes",
+      "subtitle": "Weekly class schedule, session generation, and booking management.",
+      "createTitle": "New class",
+      "name": "Class name",
+      "startTime": "Start time",
+      "capacity": "Capacity",
+      "duration": "Duration (min)",
+      "trainer": "Trainer",
+      "noTrainer": "Unassigned",
+      "room": "Room",
+      "weeklyDays": "Weekly days",
+      "weekdays": {
+        "mon": "Mon",
+        "tue": "Tue",
+        "wed": "Wed",
+        "thu": "Thu",
+        "fri": "Fri",
+        "sat": "Sat",
+        "sun": "Sun"
+      },
+      "description": "Description",
+      "createSubmit": "Create class",
+      "generateSessions": "Generate 4 weeks",
+      "classList": "Class definitions",
+      "noClasses": "No classes defined yet.",
+      "capacityLabel": "spots",
+      "sessions": "sessions",
+      "todaySessions": "Today's sessions",
+      "noToday": "No sessions scheduled today.",
+      "booked": "booked",
+      "attendanceLink": "Attendance →",
+      "attendanceTitle": "Attendance",
+      "attended": "Attended",
+      "noShow": "No show",
+      "waitlist": "Waitlist",
+      "athleteBack": "Home",
+      "athleteTitle": "Class Booking",
+      "athleteSubtitle": "Book or cancel upcoming sessions.",
+      "upcoming": "Upcoming sessions",
+      "noUpcoming": "No upcoming sessions.",
+      "book": "Book",
+      "joinWaitlist": "Join waitlist",
+      "cancelBooking": "Cancel"
+    },
+    "discounts": {
+      "back": "← Overview",
+      "title": "Discount Codes",
+      "subtitle": "Define campaign and coupon codes.",
+      "createTitle": "New coupon",
+      "code": "Code",
+      "type": "Type",
+      "types": {
+        "PERCENT": "Percent",
+        "FIXED": "Fixed amount"
+      },
+      "value": "Value",
+      "maxUses": "Max uses",
+      "validFrom": "Valid from",
+      "validUntil": "Valid until",
+      "createSubmit": "Create coupon",
+      "listTitle": "Defined codes",
+      "empty": "No coupons yet.",
+      "uses": "uses",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "guestPass": {
+      "back": "← Overview",
+      "title": "Guest Passes",
+      "subtitle": "Single-day or timed guest access QR codes.",
+      "issueTitle": "Issue guest pass",
+      "guestName": "Guest name",
+      "guestPhone": "Phone",
+      "hostMember": "Host member",
+      "noHost": "None",
+      "validFrom": "Valid from",
+      "validUntil": "Valid until",
+      "issueSubmit": "Issue pass",
+      "qrTitle": "Guest QR",
+      "qrHint": "This code is shown once; take a screenshot.",
+      "recentTitle": "Recent passes",
+      "empty": "No guest passes yet.",
+      "used": "Used",
+      "revoked": "Revoked",
+      "revoke": "Revoke"
+    }
   }
 }

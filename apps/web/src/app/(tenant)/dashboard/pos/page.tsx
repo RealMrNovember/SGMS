@@ -54,6 +54,8 @@ export default async function PosPage() {
             defaultAmount: true,
             sortOrder: true,
             isActive: true,
+            stockQuantity: true,
+            lowStockThreshold: true,
           },
         })
       : Promise.resolve([]),
@@ -143,6 +145,8 @@ export default async function PosPage() {
             defaultAmount: c.defaultAmount?.toString() ?? null,
             sortOrder: c.sortOrder,
             isActive: c.isActive,
+            stockQuantity: c.stockQuantity,
+            lowStockThreshold: c.lowStockThreshold,
           }))}
         />
       ) : null}

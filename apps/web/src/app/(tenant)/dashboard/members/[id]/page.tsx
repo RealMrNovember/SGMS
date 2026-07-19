@@ -4,6 +4,7 @@ import { MemberAccountPanel } from '@/components/member-account-panel';
 import { MemberHealthHistoryTable } from '@/components/member-health-history-table';
 import { MemberRfidForm } from '@/components/member-rfid-form';
 import { MembershipRenewalPanel } from '@/components/membership-renewal-panel';
+import { MembershipLifecyclePanel } from '@/components/membership/membership-lifecycle-panel';
 import { ProgramContentView } from '@/components/program-content-view';
 import { auth } from '@/lib/auth';
 import { intlLocaleFor } from '@/lib/format-locale';
@@ -49,7 +50,7 @@ export default async function MemberDetailPage({
   const locale = await getLocale();
   const dateLocale = intlLocaleFor(locale);
 
-  const [member, accountSummary, expenseCategories, paymentPlans, membershipPlans] = await Promise.all([
+  const [member, accountSummary, expenseCategories, paymentPlans, membershipPlans, pendingFreezes, allMembers] = await Promise.all([
     prisma.gymMember.findFirst({
       where: { id, organizationId },
       include: {
@@ -79,6 +80,17 @@ export default async function MemberDetailPage({
       where: { organizationId, isActive: true },
       orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
       select: { id: true, name: true, durationDays: true, price: true, currency: true },
+    }),
+    prisma.membershipFreeze.findMany({
+      where: { organizationId, status: 'PENDING' },
+      orderBy: { createdAt: 'asc' },
+      include: { gymMember: { select: { firstName: true, lastName: true } } },
+    }),
+    prisma.gymMember.findMany({
+      where: { organizationId, status: { not: 'INACTIVE' } },
+      orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
+      select: { id: true, firstName: true, lastName: true },
+      take: 300,
     }),
   ]);
 
@@ -195,6 +207,28 @@ export default async function MemberDetailPage({
           </dl>
         </section>
       </div>
+
+      {canManageMember ? (
+        <MembershipLifecyclePanel
+          gymMemberId={member.id}
+          memberName={fullName}
+          memberStatus={member.status}
+          pendingFreezes={pendingFreezes.map((f) => ({
+            id: f.id,
+            startDate: f.startDate.toISOString(),
+            endDate: f.endDate.toISOString(),
+            reason: f.reason,
+            status: f.status,
+            notes: f.notes,
+            gymMemberName: `${f.gymMember.firstName} ${f.gymMember.lastName}`,
+          }))}
+          memberOptions={allMembers.map((m) => ({
+            id: m.id,
+            label: `${m.firstName} ${m.lastName}`,
+          }))}
+          canManage={canManageMember}
+        />
+      ) : null}
 
       {canSellMembership || canExtendFree ? (
         <MembershipRenewalPanel

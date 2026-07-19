@@ -11,6 +11,7 @@ import { auth } from '@/lib/auth';
 import { isBillingPath, resolveSubscriptionAccess } from '@/lib/billing/subscription-gate';
 import { prisma } from '@/lib/prisma';
 import {
+  CalendarDays,
   BarChart3,
   Building2,
   CalendarClock,
@@ -26,8 +27,10 @@ import {
   Settings,
   ShieldCheck,
   Sparkles,
+  Ticket,
   UserPlus,
   Users,
+  UsersRound,
   Wallet,
   CircleHelp,
 } from 'lucide-react';
@@ -81,6 +84,8 @@ export default async function TenantDashboardLayout({ children }: { children: Re
   // Aday takibi resepsiyon/satış görevi — TRAINER kapsam dışı (Faz 17.0, bkz. Faz 36.5 gerekçesi).
   const canManageLeads =
     session.user.role === 'OWNER' || session.user.role === 'ADMIN' || session.user.role === 'STAFF';
+  const canManageFaz17 =
+    session.user.role === 'OWNER' || session.user.role === 'ADMIN' || session.user.role === 'STAFF';
 
   const comingSoonItems = locked
     ? []
@@ -116,6 +121,14 @@ export default async function TenantDashboardLayout({ children }: { children: Re
             { href: '/dashboard/trainers', label: t('trainers'), icon: <Dumbbell /> },
             { href: '/dashboard/team', label: t('team'), icon: <IdCard /> },
             { href: '/dashboard/plans', label: t('plans'), icon: <Layers /> },
+            ...(canManageFaz17
+              ? [
+                  { href: '/dashboard/classes', label: t('classes'), icon: <CalendarDays /> },
+                  { href: '/dashboard/groups', label: t('groups'), icon: <UsersRound /> },
+                  { href: '/dashboard/discounts', label: t('discounts'), icon: <Ticket /> },
+                  { href: '/dashboard/guest-passes', label: t('guestPasses'), icon: <IdCard /> },
+                ]
+              : []),
             { href: '/dashboard/settings', label: t('settings'), icon: <Settings /> },
             { href: '/help', label: t('help'), icon: <CircleHelp /> },
             { href: '/dashboard/account/security', label: t('twoFactor'), icon: <ShieldCheck /> },

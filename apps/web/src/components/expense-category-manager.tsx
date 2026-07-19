@@ -15,6 +15,8 @@ type CategoryRow = {
   defaultAmount: string | null;
   sortOrder: number;
   isActive: boolean;
+  stockQuantity: number | null;
+  lowStockThreshold: number | null;
 };
 
 const initialState: ExpenseActionState = {};
@@ -74,6 +76,20 @@ export function ExpenseCategoryManager({
           placeholder={t('categorySort')}
           className="input"
         />
+        <input
+          name="stockQuantity"
+          type="number"
+          min="0"
+          placeholder={t('categoryStock')}
+          className="input"
+        />
+        <input
+          name="lowStockThreshold"
+          type="number"
+          min="0"
+          placeholder={t('categoryLowStock')}
+          className="input"
+        />
         <button type="submit" disabled={pending} className="button px-4 py-2 text-sm md:col-span-4">
           {pending ? tCommon('ellipsis') : t('addCategory')}
         </button>
@@ -100,6 +116,9 @@ export function ExpenseCategoryManager({
                     ? formatter.format(Number(category.defaultAmount))
                     : t('noDefaultAmount')}{' '}
                   · #{category.sortOrder}
+                  {category.stockQuantity != null
+                    ? ` · ${t('stockLabel', { count: category.stockQuantity })}`
+                    : ''}
                 </p>
               </div>
               <button

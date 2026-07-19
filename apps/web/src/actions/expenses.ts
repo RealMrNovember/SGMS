@@ -79,6 +79,7 @@ export async function addMemberExpense(
   }
 
   let categoryName: string | null = null;
+  let stockCategoryId: string | null = null;
   if (parsed.data.categoryId) {
     const category = await prisma.expenseCategory.findFirst({
       where: {
@@ -91,6 +92,12 @@ export async function addMemberExpense(
       return { error: 'Kategori bulunamadı.' };
     }
     categoryName = category.name;
+    if (category.stockQuantity != null) {
+      if (category.stockQuantity <= 0) {
+        return { error: `"${category.name}" stokta kalmadı.` };
+      }
+      stockCategoryId = category.id;
+    }
   }
 
   const currency = (parsed.data.currency ?? 'TRY').toUpperCase();
@@ -109,29 +116,56 @@ export async function addMemberExpense(
     };
   }
 
-  const expense = await prisma.expense.create({
-    data: {
-      organizationId: context.organizationId,
-      gymMemberId: parsed.data.gymMemberId,
-      categoryId: parsed.data.categoryId ?? null,
-      amount: parsed.data.amount,
-      currency,
-      description,
-      status: 'OPEN',
-      createdById: context.userId,
-    },
+  const expense = await prisma.$transaction(async (tx) => {
+    if (stockCategoryId) {
+      const updated = await tx.expenseCategory.updateMany({
+        where: {
+          id: stockCategoryId,
+          organizationId: context.organizationId,
+          stockQuantity: { gt: 0 },
+        },
+        data: { stockQuantity: { decrement: 1 } },
+      });
+      if (updated.count === 0) {
+        throw new Error('STOCK_DEPLETED');
+      }
+    }
+
+    const created = await tx.expense.create({
+      data: {
+        organizationId: context.organizationId,
+        gymMemberId: parsed.data.gymMemberId,
+        categoryId: parsed.data.categoryId ?? null,
+        amount: parsed.data.amount,
+        currency,
+        description,
+        status: 'OPEN',
+        createdById: context.userId,
+      },
+    });
+
+    await tx.auditLog.create({
+      data: {
+        actorId: context.userId,
+        organizationId: context.organizationId,
+        action: 'EXPENSE_ADDED',
+        entityType: 'expense',
+        entityId: created.id,
+        metadata: { gymMemberId: parsed.data.gymMemberId, amount: parsed.data.amount },
+      },
+    });
+
+    return created;
+  }).catch((err: unknown) => {
+    if (err instanceof Error && err.message === 'STOCK_DEPLETED') {
+      return null;
+    }
+    throw err;
   });
 
-  await prisma.auditLog.create({
-    data: {
-      actorId: context.userId,
-      organizationId: context.organizationId,
-      action: 'EXPENSE_ADDED',
-      entityType: 'expense',
-      entityId: expense.id,
-      metadata: { gymMemberId: parsed.data.gymMemberId, amount: parsed.data.amount },
-    },
-  });
+  if (!expense) {
+    return { error: 'Stok yetersiz — işlem iptal edildi.' };
+  }
 
   revalidatePath(`/dashboard/members/${parsed.data.gymMemberId}`);
   revalidatePath('/athlete/account');
@@ -170,6 +204,10 @@ export async function quickAddCategoryExpense(
     return { error: 'Kategori veya varsayılan tutar bulunamadı.' };
   }
 
+  if (category.stockQuantity != null && category.stockQuantity <= 0) {
+    return { error: `"${category.name}" stokta yok.` };
+  }
+
   const currency = 'TRY';
   const openCurrencies = await getMemberOpenCurrencyCodes(context.organizationId, gymMemberId);
   if (openCurrencies.length > 0 && !openCurrencies.includes(currency)) {
@@ -178,18 +216,40 @@ export async function quickAddCategoryExpense(
     };
   }
 
-  const expense = await prisma.expense.create({
-    data: {
-      organizationId: context.organizationId,
-      gymMemberId,
-      categoryId: category.id,
-      amount: category.defaultAmount,
-      currency,
-      description: category.name,
-      status: 'OPEN',
-      createdById: context.userId,
-    },
+  const expense = await prisma.$transaction(async (tx) => {
+    if (category.stockQuantity != null) {
+      const updated = await tx.expenseCategory.updateMany({
+        where: {
+          id: category.id,
+          organizationId: context.organizationId,
+          stockQuantity: { gte: 1 },
+        },
+        data: { stockQuantity: { decrement: 1 } },
+      });
+      if (updated.count === 0) {
+        throw new Error(`"${category.name}" stokta yok.`);
+      }
+    }
+
+    return tx.expense.create({
+      data: {
+        organizationId: context.organizationId,
+        gymMemberId,
+        categoryId: category.id,
+        amount: category.defaultAmount!,
+        currency,
+        description: category.name,
+        status: 'OPEN',
+        createdById: context.userId,
+      },
+    });
+  }).catch((error: unknown) => {
+    return { error: error instanceof Error ? error.message : 'Satış kaydı oluşturulamadı.' } as const;
   });
+
+  if (expense && 'error' in expense) {
+    return { error: expense.error };
+  }
 
   await prisma.auditLog.create({
     data: {
@@ -198,7 +258,7 @@ export async function quickAddCategoryExpense(
       action: 'EXPENSE_ADDED',
       entityType: 'expense',
       entityId: expense.id,
-      metadata: { gymMemberId, categoryId, quick: true },
+      metadata: { gymMemberId, categoryId, quick: true, stockDecremented: category.stockQuantity != null },
     },
   });
 
@@ -499,6 +559,8 @@ const categorySchema = z.object({
   name: z.string().min(1).max(80),
   defaultAmount: z.coerce.number().positive().max(1_000_000).optional(),
   sortOrder: z.coerce.number().int().min(0).max(999).optional(),
+  stockQuantity: z.coerce.number().int().min(0).max(1_000_000).optional(),
+  lowStockThreshold: z.coerce.number().int().min(0).max(1_000_000).optional(),
 });
 
 export async function saveExpenseCategory(
@@ -520,13 +582,27 @@ export async function saveExpenseCategory(
     name: formData.get('name'),
     defaultAmount: formData.get('defaultAmount') || undefined,
     sortOrder: formData.get('sortOrder') || undefined,
+    stockQuantity:
+      formData.get('stockQuantity') === '' || formData.get('stockQuantity') == null
+        ? undefined
+        : formData.get('stockQuantity'),
+    lowStockThreshold:
+      formData.get('lowStockThreshold') === '' || formData.get('lowStockThreshold') == null
+        ? undefined
+        : formData.get('lowStockThreshold'),
   });
 
   if (!parsed.success) {
     return { error: 'Geçersiz kategori verisi.' };
   }
 
-  const { categoryId, name, defaultAmount, sortOrder } = parsed.data;
+  const { categoryId, name, defaultAmount, sortOrder, stockQuantity, lowStockThreshold } =
+    parsed.data;
+
+  const stockData = {
+    stockQuantity: stockQuantity ?? null,
+    lowStockThreshold: lowStockThreshold ?? null,
+  };
 
   if (categoryId) {
     const existing = await prisma.expenseCategory.findFirst({
@@ -541,6 +617,7 @@ export async function saveExpenseCategory(
         name,
         defaultAmount: defaultAmount ?? null,
         sortOrder: sortOrder ?? 0,
+        ...stockData,
       },
     });
   } else {
@@ -550,6 +627,7 @@ export async function saveExpenseCategory(
         name,
         defaultAmount: defaultAmount ?? null,
         sortOrder: sortOrder ?? 0,
+        ...stockData,
       },
     });
   }

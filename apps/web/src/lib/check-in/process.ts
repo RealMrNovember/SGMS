@@ -1,4 +1,9 @@
 import { verifyAndConsumeCheckInQrToken } from '@/lib/check-in/qr-token';
+import {
+  hashGuestPassToken,
+  isGuestPassQrToken,
+  verifyGuestPassQrToken,
+} from '@/lib/check-in/guest-qr';
 import { publishCheckInEvent, type CheckInCreatedPayload } from '@/lib/realtime/hub';
 import { sendPushToUsers } from '@/lib/push/send';
 import { prisma } from '@/lib/prisma';
@@ -71,6 +76,10 @@ export type ProcessCheckInResult =
         | 'membership_expired'
         | 'invalid_qr'
         | 'qr_already_used'
+        | 'invalid_guest_pass'
+        | 'guest_pass_expired'
+        | 'guest_pass_revoked'
+        | 'guest_pass_used'
         | 'org_mismatch'
         | 'sync_conflict'
         | 'too_rapid';
@@ -81,6 +90,7 @@ type ResolvedSubject =
       subjectType: 'GYM_MEMBER';
       gymMemberId: string;
       staffUserId: null;
+      guestPassId: null;
       personName: string;
       subtitle: string;
       avatarUrl: string | null;
@@ -89,10 +99,20 @@ type ResolvedSubject =
       subjectType: 'STAFF';
       gymMemberId: null;
       staffUserId: string;
+      guestPassId: null;
       personName: string;
       subtitle: string;
       avatarUrl: string | null;
       role: OrganizationRole;
+    }
+  | {
+      subjectType: 'GUEST';
+      gymMemberId: null;
+      staffUserId: null;
+      guestPassId: string;
+      personName: string;
+      subtitle: string;
+      avatarUrl: null;
     };
 
 function parseDirection(value: unknown): AccessDirection | null {
@@ -106,7 +126,18 @@ export { parseDirection };
 
 async function resolveSubject(input: ProcessCheckInInput): Promise<
   | ResolvedSubject
-  | { error: 'member_not_found' | 'invalid_qr' | 'qr_already_used' | 'org_mismatch' | 'member_inactive' }
+  | {
+      error:
+        | 'member_not_found'
+        | 'invalid_qr'
+        | 'qr_already_used'
+        | 'org_mismatch'
+        | 'member_inactive'
+        | 'invalid_guest_pass'
+        | 'guest_pass_expired'
+        | 'guest_pass_revoked'
+        | 'guest_pass_used';
+    }
 > {
   if (input.staffUserId) {
     const membership = await prisma.organizationMember.findFirst({
@@ -124,6 +155,7 @@ async function resolveSubject(input: ProcessCheckInInput): Promise<
       subjectType: 'STAFF',
       gymMemberId: null,
       staffUserId: input.staffUserId,
+      guestPassId: null,
       personName: membership.user.name,
       subtitle: `Personel · ${membership.role}`,
       avatarUrl: membership.user.avatarUrl,
@@ -146,9 +178,48 @@ async function resolveSubject(input: ProcessCheckInInput): Promise<
       subjectType: 'GYM_MEMBER',
       gymMemberId: member.id,
       staffUserId: null,
+      guestPassId: null,
       personName: `${member.firstName} ${member.lastName}`,
       subtitle: member.plan?.name ? `Üye · ${member.plan.name}` : 'Üye',
       avatarUrl: member.avatarUrl,
+    };
+  }
+
+  if (input.qrToken && isGuestPassQrToken(input.qrToken)) {
+    const payload = verifyGuestPassQrToken(input.qrToken);
+    if (!payload) {
+      return { error: 'invalid_guest_pass' };
+    }
+    if (payload.organizationId !== input.organizationId) {
+      return { error: 'org_mismatch' };
+    }
+
+    const tokenHash = hashGuestPassToken(input.qrToken);
+    const pass = await prisma.guestPass.findFirst({
+      where: { id: payload.guestPassId, organizationId: input.organizationId, qrTokenHash: tokenHash },
+    });
+    if (!pass) {
+      return { error: 'invalid_guest_pass' };
+    }
+    const now = new Date();
+    if (pass.revokedAt) {
+      return { error: 'guest_pass_revoked' };
+    }
+    if (pass.validFrom > now || pass.validUntil < now) {
+      return { error: 'guest_pass_expired' };
+    }
+    if (pass.usedAt) {
+      return { error: 'guest_pass_used' };
+    }
+
+    return {
+      subjectType: 'GUEST',
+      gymMemberId: null,
+      staffUserId: null,
+      guestPassId: pass.id,
+      personName: pass.guestName,
+      subtitle: 'Misafir',
+      avatarUrl: null,
     };
   }
 
@@ -181,6 +252,7 @@ async function resolveSubject(input: ProcessCheckInInput): Promise<
         subjectType: 'GYM_MEMBER',
         gymMemberId: member.id,
         staffUserId: null,
+        guestPassId: null,
         personName: `${member.firstName} ${member.lastName}`,
         subtitle: member.plan?.name ? `Üye · ${member.plan.name}` : 'Üye',
         avatarUrl: member.avatarUrl,
@@ -200,6 +272,7 @@ async function resolveSubject(input: ProcessCheckInInput): Promise<
         subjectType: 'STAFF',
         gymMemberId: null,
         staffUserId: staffMembership.user.id,
+        guestPassId: null,
         personName: staffMembership.user.name,
         subtitle: `Personel · ${staffMembership.role}`,
         avatarUrl: staffMembership.user.avatarUrl,
@@ -229,7 +302,9 @@ async function inferDirection(
       checkedInAt: { lte: at },
       ...(subject.subjectType === 'GYM_MEMBER'
         ? { gymMemberId: subject.gymMemberId }
-        : { staffUserId: subject.staffUserId }),
+        : subject.subjectType === 'STAFF'
+          ? { staffUserId: subject.staffUserId }
+          : { guestPassId: subject.guestPassId }),
     },
     orderBy: { checkedInAt: 'desc' },
     select: { direction: true },
@@ -361,7 +436,11 @@ export async function processCheckIn(input: ProcessCheckInInput): Promise<Proces
   // Aynı üye + aynı yön, birkaç saniye içinde → istatistik şişmesini önle.
   // Offline senkron (tarihsel checkedInAt) için DB penceresi; canlı için Redis kilidi (yarış koruması).
   const subjectKey =
-    subject.subjectType === 'GYM_MEMBER' ? subject.gymMemberId! : subject.staffUserId!;
+    subject.subjectType === 'GYM_MEMBER'
+      ? subject.gymMemberId!
+      : subject.subjectType === 'STAFF'
+        ? subject.staffUserId!
+        : subject.guestPassId!;
   const isNearRealtime = Math.abs(Date.now() - checkedInAt.getTime()) < 60_000;
 
   if (isNearRealtime) {
@@ -382,7 +461,9 @@ export async function processCheckIn(input: ProcessCheckInInput): Promise<Proces
         checkedInAt: { gte: rapidWindowStart, lte: checkedInAt },
         ...(subject.subjectType === 'GYM_MEMBER'
           ? { gymMemberId: subject.gymMemberId }
-          : { staffUserId: subject.staffUserId }),
+          : subject.subjectType === 'STAFF'
+            ? { staffUserId: subject.staffUserId }
+            : { guestPassId: subject.guestPassId }),
       },
       select: { id: true },
     });
@@ -398,7 +479,9 @@ export async function processCheckIn(input: ProcessCheckInInput): Promise<Proces
       checkedInAt: { gte: hourBefore, lte: checkedInAt },
       ...(subject.subjectType === 'GYM_MEMBER'
         ? { gymMemberId: subject.gymMemberId }
-        : { staffUserId: subject.staffUserId }),
+        : subject.subjectType === 'STAFF'
+          ? { staffUserId: subject.staffUserId }
+          : { guestPassId: subject.guestPassId }),
     },
     orderBy: { checkedInAt: 'desc' },
   });
@@ -417,6 +500,7 @@ export async function processCheckIn(input: ProcessCheckInInput): Promise<Proces
       direction,
       gymMemberId: subject.gymMemberId,
       staffUserId: subject.staffUserId,
+      guestPassId: subject.guestPassId,
       deviceId: input.deviceId ?? null,
       clientEventId: input.clientEventId ?? null,
       method: input.method,
@@ -424,6 +508,13 @@ export async function processCheckIn(input: ProcessCheckInInput): Promise<Proces
       metadata: {},
     },
   });
+
+  if (subject.subjectType === 'GUEST' && direction === 'ENTRY') {
+    await prisma.guestPass.update({
+      where: { id: subject.guestPassId },
+      data: { usedAt: checkedInAt },
+    });
+  }
 
   await prisma.auditLog.create({
     data: {

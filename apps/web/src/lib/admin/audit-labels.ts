@@ -10,6 +10,8 @@ export type AuditCategory =
   | 'devices'
   | 'finance'
   | 'content'
+  | 'membership'
+  | 'classes'
   | 'checkin'
   | 'auth'
   | 'security'
@@ -50,6 +52,27 @@ export const AUDIT_CATEGORY_ACTIONS: Record<Exclude<AuditCategory, 'all'>, Audit
     'PROFORMA_SENT',
   ],
   content: ['HELP_ARTICLE_CREATED', 'HELP_ARTICLE_UPDATED', 'HELP_ARTICLE_DELETED'],
+  membership: [
+    'MEMBERSHIP_FREEZE_REQUESTED',
+    'MEMBERSHIP_FREEZE_APPROVED',
+    'MEMBERSHIP_FREEZE_REJECTED',
+    'MEMBERSHIP_TRANSFER_COMPLETED',
+    'MEMBERSHIP_RIGHTS_CREDITED',
+    'MEMBERSHIP_GROUP_CREATED',
+    'MEMBERSHIP_GROUP_UPDATED',
+    'MEMBERSHIP_REMINDER_SENT',
+  ],
+  classes: [
+    'CLASS_CREATED',
+    'CLASS_SESSION_UPDATED',
+    'CLASS_BOOKING_CREATED',
+    'CLASS_BOOKING_CANCELLED',
+    'CLASS_ATTENDANCE_MARKED',
+    'DISCOUNT_CODE_CREATED',
+    'DISCOUNT_CODE_REDEEMED',
+    'GUEST_PASS_ISSUED',
+    'GUEST_PASS_REVOKED',
+  ],
   checkin: ['MEMBER_CHECK_IN'],
   auth: ['USER_LOGIN', 'USER_LOGOUT'],
   security: [
@@ -175,6 +198,22 @@ export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   LEAD_CONVERTED: 'Aday üyeye dönüştürüldü',
   LEAD_FOLLOW_UP_SCHEDULED: 'Aday takibi planlandı',
   LEAD_FOLLOW_UP_COMPLETED: 'Aday takibi tamamlandı',
+  MEMBERSHIP_FREEZE_REQUESTED: 'Üyelik dondurma talebi',
+  MEMBERSHIP_FREEZE_APPROVED: 'Üyelik dondurma onaylandı',
+  MEMBERSHIP_FREEZE_REJECTED: 'Üyelik dondurma reddedildi',
+  MEMBERSHIP_TRANSFER_COMPLETED: 'Üyelik devri tamamlandı',
+  MEMBERSHIP_RIGHTS_CREDITED: 'Kalan üyelik hakkı kredilendi',
+  MEMBERSHIP_GROUP_CREATED: 'Üyelik grubu oluşturuldu',
+  MEMBERSHIP_GROUP_UPDATED: 'Üyelik grubu güncellendi',
+  CLASS_CREATED: 'Grup dersi oluşturuldu',
+  CLASS_SESSION_UPDATED: 'Ders oturumu güncellendi',
+  CLASS_BOOKING_CREATED: 'Ders kaydı oluşturuldu',
+  CLASS_BOOKING_CANCELLED: 'Ders kaydı iptal edildi',
+  CLASS_ATTENDANCE_MARKED: 'Ders yoklaması alındı',
+  DISCOUNT_CODE_CREATED: 'İndirim kodu oluşturuldu',
+  DISCOUNT_CODE_REDEEMED: 'İndirim kodu kullanıldı',
+  GUEST_PASS_ISSUED: 'Misafir geçiş izni verildi',
+  GUEST_PASS_REVOKED: 'Misafir geçiş izni iptal edildi',
 };
 
 export const ALL_AUDIT_ACTIONS = Object.keys(AUDIT_ACTION_LABELS) as AuditAction[];
@@ -189,6 +228,8 @@ export const AUDIT_CATEGORY_LABELS: Record<AuditCategory, string> = {
   devices: 'Cihaz',
   finance: 'Finans',
   content: 'İçerik / Kılavuz',
+  membership: 'Üyelik yaşam döngüsü',
+  classes: 'Ders / Kupon / Misafir',
   checkin: 'Turnike',
   auth: 'Oturum',
   security: 'Güvenlik',
