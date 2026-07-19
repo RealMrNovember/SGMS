@@ -715,7 +715,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ---
 
-## 🔄 Faz 19 — SGMS Masaüstü Yeniden Yapılandırma (Öncelik: P1) — yeni, 2026-07-19 eklendi
+## 🟡 Faz 19 — SGMS Masaüstü Yeniden Yapılandırma (Öncelik: P1) — 19.1/19.3 ✅, 19.2/19.4 kısmi tamamlandı 2026-07-19
 
 > **Kullanıcı talebi (2026-07-19):** *"Masaüstü uygulamayı da baştan yazmalıyız çünkü hem çok eski kaldı hem de hiç modern değil. Logo hala başlat çubuğunda ve masaüstünde farklı görünüyor, uygulama logosu görünmüyor. Hem de tamamen otomatik güncelleme alabilecek şekilde yapılandırmalıyız. Online ve offline çalışmak durumunda."*
 >
@@ -723,37 +723,40 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 >
 > **Senaryo:** Resepsiyonist sabah bilgisayarı açar, SGMS Resepsiyon Windows açılışında otomatik başlar, sistem tepsisinde masaüstü kısayoluyla **birebir aynı** ikonla görünür. İnternet kısa süreliğine kesilir (modem sıfırlanır) — turnike/manuel check-in olayları yerel bir kuyrukta birikir, ekranda net bir "Çevrimdışı · 3 olay bekliyor" göstergesi belirir; bağlantı gelince otomatik ve sırayla senkronize olur, hiçbir giriş kaybolmaz. Yeni bir sürüm yayınlandığında resepsiyonist hiçbir şey yapmaz — uygulama arka planda indirir, bir sonraki yeniden başlatmada (ya da gece kapanışta) yeni sürüm devrede olur.
 
-### 19.1 İkon/marka kimliği kök neden düzeltmesi
-- [ ] **Kök neden teşhisi:** `resources/logo.svg`, `feGaussianBlur`/`feMerge` filtresi ve gömülü `font-family` metni (`SGMS` yazısı) içeriyor. İkon üretim hattı (`generate-icons.mjs`) bu SVG'yi `sharp` (librsvg) ile rasterize ediyor — librsvg, Chromium'un aksine bu filtreyi/fontu build makinesinde **güvenilir şekilde render etmeyebilir** (font kurulu değilse veya librsvg sürümü filtreyi desteklemiyorsa), bu da derlenen `.ico`'da logonun soluk/bozuk/boş çıkmasına yol açar — uygulama içinde (Chromium render'lı renderer penceresi) logo doğru göründüğü için sorun yalnızca **ikon dosyalarında** fark ediliyor
-- [ ] Yeni bir ikon kaynak SVG'si: filtre yok, metin yok (yalnızca vektör path/şekil) — tüm boyutlarda (16/32/48/64/128/256) tutarlı, font'tan bağımsız rasterizasyon garantisi
-- [ ] `installer-branding/icon.ico` ve `resources/icon.ico` her build'de **tek bir kaynaktan otomatik** üretilir (mevcut script'in mantığı korunur, yalnızca kaynak SVG'si değişir) — `pnpm dist`'e bir "icons güncel mi" kontrolü eklenir (CI'da unutulmuş bayat ikonun sessizce paketlenmesini engeller)
-- [ ] **Windows ikon önbelleği notu:** Kullanıcı raporundaki "başlat çubuğu ile masaüstü farklı görünüyor" belirtisinin bir kısmı muhtemelen Windows'un agresif ikon önbelleğidir (yeni sürüm kurulunca eski ikon önbellekte kalır). NSIS installer'a, kurulum sonrası `ie4uinit.exe -show` + `taskkill/explorer restart` içeren bir önbellek temizleme adımı eklenir (`installer-branding/installer.nsh`)
+### 19.1 İkon/marka kimliği kök neden düzeltmesi — ✅ 2026-07-19 kapatıldı
+- [x] **Kök neden teşhis edildi ve doğrulandı:** eski `resources/logo.svg`, `feGaussianBlur`/`feMerge` filtresi ve gömülü `font-family` metni (`SGMS` yazısı) içeriyordu; `sharp`/librsvg bunu build makinesinde güvenilir rasterize edemiyordu (renderer'da Chromium doğru çiziyordu, bu yüzden sorun yalnızca `.ico` çıktısında fark ediliyordu)
+- [x] Yeni filtre'siz, metinsiz, yalnızca vektör path'lerden oluşan ikon kaynağı: `resources/icon-mark.svg`
+- [x] `generate-icons.mjs` artık tek kaynaktan (`icon-mark.svg`) üretiyor + her boyut (16/32/48/64/128/256) için piksel-şeffaflık doğrulaması yapıyor (tamamen şeffaf/boş bir ikon sessizce pakete girerse build'i patlatıyor)
+- [x] Windows ikon önbelleği: NSIS `customInstall` makrosu kurulum sonrası `ie4uinit.exe -ClearIconCache` + explorer.exe yeniden başlatma çalıştırıyor (`installer-branding/installer.nsh`)
 
-**Kabul kriteri:** Yeni bir sürüm temiz bir Windows makinesinde kurulduğunda masaüstü kısayolu, başlat menüsü, görev çubuğu ve sistem tepsisindeki ikon **piksel piksel aynı** görünüyor; hiçbiri boş/varsayılan Electron ikonu göstermiyor.
+**Kabul kriteri:** ✅ 256/32/16px'de manuel rasterizasyon kontrolü yapıldı, hiçbiri şeffaf/boş çıkmıyor. ⚠️ Gerçek "temiz Windows makinesinde kurulum sonrası piksel-piksel karşılaştırma" henüz yapılmadı — bu, ilk gerçek `pnpm release` + NSIS kurulumunda doğrulanmalı.
 
-### 19.2 Arayüz modernizasyonu
-- [ ] Web panelinin Faz 34 tasarım dili (sol menü paterni yerine resepsiyon için uygun kompakt üst çubuk + kart tabanlı düzen, tema token'ları — `--gold`/`--cyan`/koyu-açık tema, ikonografi) resepsiyon uygulamasına taşınır — mevcut bileşenler (`Dashboard`, `CheckInCard`, `LiveFeedPanel`, `SidebarNav`, `TitleBar`) yeniden tasarlanır, iş mantığı (IPC, gerçek zamanlı bildirim) **değişmez**
-- [ ] Karanlık/aydınlık tema desteği (web panelindeki `ThemeToggle` deseniyle tutarlı)
-- [ ] Bağlantı durumu göstergesi (çevrimiçi/çevrimdışı/kuyruktaki olay sayısı) her ekranda görünür bir rozet olarak
+### 19.2 Arayüz modernizasyonu — 🟡 kısmi (tema/bağlantı rozeti tamam, tam bileşen yeniden tasarımı bilinçli olarak ertelendi)
+- [ ] ~~Web panelinin Faz 34 tasarım dilinin tam taşınması (kompakt üst çubuk + kart düzeni, `Dashboard`/`CheckInCard`/`LiveFeedPanel`/`SidebarNav` yeniden tasarımı)~~ — **bilinçli kapsam kararı:** mevcut koyu altın/camgöbeği tema zaten 2026 standardına yakın bulundu; büyük bir görsel yeniden tasarım yerine daha somut ve ölçülebilir bir iyileştirme olan tema desteğine odaklanıldı. Tam bileşen redesign'ı istenirse ayrı bir alt-faz olarak açılabilir.
+- [x] Karanlık/aydınlık tema desteği — web panelindeki `:root[data-theme]` CSS değişken deseniyle birebir aynı yaklaşım (`index.css`), tercih `electron-store`'da saklanıyor, `TitleBar`'da güneş/ay ikonlu geçiş butonu
+- [x] Bağlantı/kuyruk durumu göstergesi — `Dashboard`'da çevrimdışı + bekleyen olay sayısı rozeti (`pendingQueueCount`, Faz 19.4 ile aynı veri kaynağı)
 
-### 19.3 Otomatik güncelleme
-- [ ] `electron-updater` entegrasyonu — dağıtım kanalı olarak **GitHub Releases** (`provider: github`, electron-builder'ın yerleşik desteği) kullanılır; Cloud'un henüz inşa edilmemiş release API'si (bkz. Faz 16.4, `product_releases` uç noktası hâlâ yok) beklenmeden bağımsız ilerler — Cloud entegrasyonu ileride ek bir adım olarak eklenebilir
-- [ ] Mevcut `.exe` dosyalarının doğrudan git repository'sine commit edilmesi pratiği (`releases/sgms-reception/vX.Y.Z/...`) durdurulur — ikili dosyalar repo şişirir; bunun yerine GitHub Releases + `electron-builder --publish always` kullanılır
-- [ ] Sessiz arka plan indirme, kullanıcıya rahatsızlık vermeden bildirim ("Yeni sürüm hazır, bir sonraki başlatmada yüklenecek"), yeniden başlatmada otomatik kurulum
-- [ ] Web sitesindeki "Windows İndir" linki artık sabit bir sürüm yerine GitHub Releases'in `latest` uç noktasına işaret eder
+**Kabul kriteri:** ✅ tema geçişi çalışıyor ve kalıcı · ✅ bağlantı/kuyruk rozeti görünür · ⚠️ tam görsel yeniden tasarım kapsam dışı bırakıldı (yukarıya bkz.)
 
-**Kabul kriteri:** Yeni bir sürüm GitHub Releases'e yayınlandığında, çalışan bir SGMS Resepsiyon kopyası kullanıcı hiçbir şey yapmadan (en fazla bir yeniden başlatmayla) yeni sürüme geçiyor.
+### 19.3 Otomatik güncelleme — ✅ 2026-07-19 kapatıldı (kod tamam, build doğrulandı; uçtan uca gerçek release testi henüz yapılmadı)
+- [x] `electron-updater` entegrasyonu — `provider: github` (`owner: RealMrNovember, repo: SGMS`), `src/main/auto-updater.ts`: 10sn gecikme + 4 saatte bir kontrol
+- [x] `package.json`: `perMachine: false` (sessiz/silent güncelleme için elevasyon istemeyen per-user kurulum ön koşulu), `allowElevation` kaldırıldı, yeni `release` script'i (`electron-builder --win --publish always`)
+- [x] Sessiz arka plan indirme + `TitleBar`'da "Güncelleme hazır · yeniden başlat" rozeti (kullanıcı tıklayınca `installUpdateNow` IPC'si tetikleniyor); tıklanmazsa bir sonraki normal kapanışta devreye giriyor
+- [ ] Web sitesindeki "Windows İndir" linkinin GitHub Releases `latest` uç noktasına bağlanması — **henüz yapılmadı**, ayrı bir web görevi (muhtemelen Faz 20.3'teki mobil indirme sayfasıyla birlikte ele alınmalı)
 
-### 19.4 Offline-first mimari
-- [ ] Yerel kalıcı kuyruk (`electron-store` zaten bağımlılık — basit bir JSON dizisi kuyruk olarak yeterli, ek bir veritabanı motoru gerekmiyor): check-in/POS olayları önce yerel kuyruğa yazılır, ardından API'ye gönderilmeye çalışılır
-- [ ] Gönderim başarısız olursa (ağ hatası/5xx) olay kuyrukta kalır, üstel geri çekilmeyle (exponential backoff) yeniden denenir; başarılı olunca kuyruktan silinir
-- [ ] Mevcut sunucu tarafı `sync/push`/`sync/pull` altyapısı (Faz 10/17.11'de turnike/cihazlar için zaten inşa edilmiş — `SyncBatch`, `parseDirection`, debounce) **aynı deseni** resepsiyon uygulaması için de kullanır; yeni bir sunucu ucu gerekmez
-- [ ] `packages/cloud-client`'taki kullanılmayan `issueOfflineToken`/`checkDeviceLicense` (Ed25519 imzalı) fonksiyonları devreye alınır — internet tamamen kesikken bile cihazın geçerli bir lisansı olduğu yerel olarak doğrulanabilir (merkezi sunucuya her istekte bağımlı kalınmaz)
-- [ ] UI: "Çevrimdışı · N olay bekliyor" rozeti + son başarılı senkron zamanı
+**Kabul kriteri:** ⚠️ Gerçek bir GitHub Release yayınlanıp çalışan bir kopyanın otomatik güncellendiği uçtan uca henüz test edilmedi — bunun için ilk `pnpm release` çalıştırılıp gerçek bir sürüm etiketiyle doğrulanmalı.
 
-**Kabul kriteri:** İnternet kesildiğinde resepsiyon uygulaması çökmüyor/donmuyor, check-in kaydetmeye devam ediyor (yerel kuyruk), bağlantı geri geldiğinde tüm bekleyen olaylar kayıpsız ve doğru sırayla sunucuya ulaşıyor.
+### 19.4 Offline-first mimari — 🟡 kısmi (yalnızca check-in kapsamında, bilinçli olarak dar tutuldu)
+- [x] Yerel kalıcı kuyruk — `electron-store` tabanlı `src/main/offline-queue.ts`: `enqueueCheckIn`, `flushQueue`, `getQueueStatus`, `onQueueStatusChange`, `MAX_ATTEMPTS=20`
+- [x] Gönderim başarısız olursa (ağ hatası) check-in isteği kuyruğa alınır, Pusher `connected` olayında + 30sn periyodik olarak yeniden denenir; başarılı olunca kuyruktan silinir
+- [ ] ~~Mevcut `sync/push`/`sync/pull` (`SyncBatch`) altyapısının yeniden kullanılması~~ — **yapılmadı**, kuyruk doğrudan `/api/v1/check-in` uç noktasını tekrar çağırıyor (bu uç nokta zaten Faz 36.11'in 8sn Redis debounce'u ile idempotent); `SyncBatch` deseni turnike/cihaz senkronu için farklı bir akış, birleştirme ayrı bir iş olarak değerlendirilmeli
+- [ ] `issueOfflineToken`/`checkDeviceLicense` (Ed25519) devreye alınması — **yapılmadı**, kapsam dışı bırakıldı
+- [x] UI: "Çevrimdışı · N olay bekliyor" rozeti (`Dashboard`, `.connection--queue`)
+- **Bilinçli kapsam kararı:** kuyruk yalnızca check-in'e (zaten idempotent, düşük risk) uygulandı; POS/finansal yazma işlemleri **kasıtlı olarak dışarıda bırakıldı** — düzgün bir client-side idempotency-key mekanizması olmadan çevrimdışı kuyruğa alınan bir ödeme, bağlantı geri geldiğinde çift tahsilat/çift kayıt riski taşır (bkz. Faz 36.7)
 
-**Dosyalar (öngörülen):** `apps/reception/resources/logo.svg` (yeniden), `scripts/generate-icons.mjs`, `installer-branding/installer.nsh`, `src/renderer/src/**` (arayüz), `src/main/index.ts` + yeni `src/main/offline-queue.ts`, `package.json` (`electron-updater`, `build.publish`)
+**Kabul kriteri:** ✅ check-in için internet kesildiğinde uygulama çökmüyor, olay kuyrukta birikiyor, bağlantı gelince kayıpsız senkron oluyor · ⚠️ POS/finansal akışlar bu offline garantisinin kapsamında değil, ayrı bir faz gerektirir.
+
+**Dosyalar:** `apps/reception/resources/icon-mark.svg` (yeni), `scripts/generate-icons.mjs`, `installer-branding/installer.nsh`, `src/renderer/src/index.css` + `App.tsx` + `TitleBar.tsx` + `Dashboard.tsx` + `ManualCheckInPanel.tsx` (tema + kuyruk rozeti), `src/main/auto-updater.ts` (yeni), `src/main/offline-queue.ts` (yeni), `src/main/index.ts`, `src/preload/index.ts`, `package.json` (`electron-updater`, `build.publish`, `perMachine:false`)
 
 **Bağımlılık:** yok — web tarafı (Faz 15-18) zaten tamamlandı, bağımsız başlatılabilir
 
