@@ -54,8 +54,8 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 16 | CiciByte Cloud Ticari Entegrasyonu (Ödeme, Referans/Komisyon, Release) | 🔄 Devam ediyor | ~90% (Platform Ödeme Ayarları paneli — iyzico/PayTR/EFT — 2026-07-19'da eklendi; gerçek anahtarlar bekleniyor) |
 | 17 | Üyelik Senaryoları & Ders/Sınıf Yönetimi | ✅ Tamamlandı | 100% (17.0–17.7 — Lead, dondurma/devir, grup üyelik, ders/yoklama/QR, kupon, POS stok, Guest Pass — 2026-07-19) |
 | 18 | Uyumluluk & Sağlamlaştırma (2FA, GDPR, E2E, Invoice) | ✅ Tamamlandı | 100% (GDPR self-servis, sağlık rızası, Invoice, 18.1 sözleşme PDF; 2FA+E2E önceden — 2026-07-19) |
-| 19 | SGMS Masaüstü — Genişletme | 🔲 Gelecek Vizyon | 0% |
-| 20 | SGMS Mobil Uygulama | 🔲 Gelecek Vizyon | 0% |
+| 19 | SGMS Masaüstü Yeniden Yapılandırma | 🔄 Devam ediyor | 0% (ikon/arayüz/otomatik güncelleme/offline — 2026-07-19 başlandı) |
+| 20 | SGMS Mobil Uygulama (React Native) | 🔄 Devam ediyor | 0% (Cursor'da başlıyor — 2026-07-19) |
 | 21 | PT Performans, Komisyon & Prim Yönetimi | ✅ Tamamlandı | 100% (CSV export ve POS entegrasyonu v2'ye ertelendi) |
 | 22 | Personel Yönetimi / HR | ✅ Tamamlandı | 100% (izin, vardiya, performans, disiplin, maaş CSV, /dashboard/hr — 2026-07-19) |
 | 23 | Ekipman Yönetimi & Bakım Planları | ✅ Tamamlandı | 100% (envanter, servis, bakım rozetleri, QR — 2026-07-19) |
@@ -715,30 +715,81 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ---
 
-## 🔲 Faz 19 — SGMS Masaüstü — Genişletme (Öncelik: P2, gelecek vizyon)
+## 🔄 Faz 19 — SGMS Masaüstü Yeniden Yapılandırma (Öncelik: P1) — yeni, 2026-07-19 eklendi
 
-> Mevcut SGMS Resepsiyon (Electron, v0.5.0) temel check-in/POS akışını karşılıyor. Bu faz, web tarafı (Faz 15-18) tamamlandıktan **sonra** ele alınacak — kullanıcının notu: *"hem mobil hem de desktop uygulamalarını da yazacağımız için bunları da sıraya ekle"*.
+> **Kullanıcı talebi (2026-07-19):** *"Masaüstü uygulamayı da baştan yazmalıyız çünkü hem çok eski kaldı hem de hiç modern değil. Logo hala başlat çubuğunda ve masaüstünde farklı görünüyor, uygulama logosu görünmüyor. Hem de tamamen otomatik güncelleme alabilecek şekilde yapılandırmalıyız. Online ve offline çalışmak durumunda."*
+>
+> **Karar (kullanıcı onaylı):** Electron + React + Vite iskeleti korunuyor (2026 itibarıyla güncel bir stack — tepsi simgesi, bildirimler, IPC katmanı zaten sağlam çalışıyor); asıl sorun çerçeve değil, arayüzün Faz 34'teki web paneli modernizasyonundan **önceki** eski tasarımda kalmış olması. Tauri'ye tam geçiş (tüm native katmanın Rust'ta yeniden yazılması) değerlendirildi ve daha yüksek risk/süre nedeniyle ertelendi.
+>
+> **Senaryo:** Resepsiyonist sabah bilgisayarı açar, SGMS Resepsiyon Windows açılışında otomatik başlar, sistem tepsisinde masaüstü kısayoluyla **birebir aynı** ikonla görünür. İnternet kısa süreliğine kesilir (modem sıfırlanır) — turnike/manuel check-in olayları yerel bir kuyrukta birikir, ekranda net bir "Çevrimdışı · 3 olay bekliyor" göstergesi belirir; bağlantı gelince otomatik ve sırayla senkronize olur, hiçbir giriş kaybolmaz. Yeni bir sürüm yayınlandığında resepsiyonist hiçbir şey yapmaz — uygulama arka planda indirir, bir sonraki yeniden başlatmada (ya da gece kapanışta) yeni sürüm devrede olur.
 
-- [ ] Resepsiyon uygulamasına offline lisans/grace-period desteği (`packages/cloud-client`'ta zaten hazır bekleyen `issueOfflineToken`/`checkDeviceLicense` — Ed25519 imzalı, internet kesintisinde bile cihaz doğrulaması)
-- [ ] Otomatik güncelleme (Electron auto-updater), Cloud'un release API'sinden (Faz 16.4) versiyon kontrolü
-- [ ] PT/antrenör için ayrı bir masaüstü modülü (program takibi, ölçüm girişi) — ihtiyaç netleşince kapsam belirlenecek
+### 19.1 İkon/marka kimliği kök neden düzeltmesi
+- [ ] **Kök neden teşhisi:** `resources/logo.svg`, `feGaussianBlur`/`feMerge` filtresi ve gömülü `font-family` metni (`SGMS` yazısı) içeriyor. İkon üretim hattı (`generate-icons.mjs`) bu SVG'yi `sharp` (librsvg) ile rasterize ediyor — librsvg, Chromium'un aksine bu filtreyi/fontu build makinesinde **güvenilir şekilde render etmeyebilir** (font kurulu değilse veya librsvg sürümü filtreyi desteklemiyorsa), bu da derlenen `.ico`'da logonun soluk/bozuk/boş çıkmasına yol açar — uygulama içinde (Chromium render'lı renderer penceresi) logo doğru göründüğü için sorun yalnızca **ikon dosyalarında** fark ediliyor
+- [ ] Yeni bir ikon kaynak SVG'si: filtre yok, metin yok (yalnızca vektör path/şekil) — tüm boyutlarda (16/32/48/64/128/256) tutarlı, font'tan bağımsız rasterizasyon garantisi
+- [ ] `installer-branding/icon.ico` ve `resources/icon.ico` her build'de **tek bir kaynaktan otomatik** üretilir (mevcut script'in mantığı korunur, yalnızca kaynak SVG'si değişir) — `pnpm dist`'e bir "icons güncel mi" kontrolü eklenir (CI'da unutulmuş bayat ikonun sessizce paketlenmesini engeller)
+- [ ] **Windows ikon önbelleği notu:** Kullanıcı raporundaki "başlat çubuğu ile masaüstü farklı görünüyor" belirtisinin bir kısmı muhtemelen Windows'un agresif ikon önbelleğidir (yeni sürüm kurulunca eski ikon önbellekte kalır). NSIS installer'a, kurulum sonrası `ie4uinit.exe -show` + `taskkill/explorer restart` içeren bir önbellek temizleme adımı eklenir (`installer-branding/installer.nsh`)
 
-**Bağımlılık:** Faz 15-18 (web tarafının olgunlaşması) · Faz 16.4 (release API)
+**Kabul kriteri:** Yeni bir sürüm temiz bir Windows makinesinde kurulduğunda masaüstü kısayolu, başlat menüsü, görev çubuğu ve sistem tepsisindeki ikon **piksel piksel aynı** görünüyor; hiçbiri boş/varsayılan Electron ikonu göstermiyor.
+
+### 19.2 Arayüz modernizasyonu
+- [ ] Web panelinin Faz 34 tasarım dili (sol menü paterni yerine resepsiyon için uygun kompakt üst çubuk + kart tabanlı düzen, tema token'ları — `--gold`/`--cyan`/koyu-açık tema, ikonografi) resepsiyon uygulamasına taşınır — mevcut bileşenler (`Dashboard`, `CheckInCard`, `LiveFeedPanel`, `SidebarNav`, `TitleBar`) yeniden tasarlanır, iş mantığı (IPC, gerçek zamanlı bildirim) **değişmez**
+- [ ] Karanlık/aydınlık tema desteği (web panelindeki `ThemeToggle` deseniyle tutarlı)
+- [ ] Bağlantı durumu göstergesi (çevrimiçi/çevrimdışı/kuyruktaki olay sayısı) her ekranda görünür bir rozet olarak
+
+### 19.3 Otomatik güncelleme
+- [ ] `electron-updater` entegrasyonu — dağıtım kanalı olarak **GitHub Releases** (`provider: github`, electron-builder'ın yerleşik desteği) kullanılır; Cloud'un henüz inşa edilmemiş release API'si (bkz. Faz 16.4, `product_releases` uç noktası hâlâ yok) beklenmeden bağımsız ilerler — Cloud entegrasyonu ileride ek bir adım olarak eklenebilir
+- [ ] Mevcut `.exe` dosyalarının doğrudan git repository'sine commit edilmesi pratiği (`releases/sgms-reception/vX.Y.Z/...`) durdurulur — ikili dosyalar repo şişirir; bunun yerine GitHub Releases + `electron-builder --publish always` kullanılır
+- [ ] Sessiz arka plan indirme, kullanıcıya rahatsızlık vermeden bildirim ("Yeni sürüm hazır, bir sonraki başlatmada yüklenecek"), yeniden başlatmada otomatik kurulum
+- [ ] Web sitesindeki "Windows İndir" linki artık sabit bir sürüm yerine GitHub Releases'in `latest` uç noktasına işaret eder
+
+**Kabul kriteri:** Yeni bir sürüm GitHub Releases'e yayınlandığında, çalışan bir SGMS Resepsiyon kopyası kullanıcı hiçbir şey yapmadan (en fazla bir yeniden başlatmayla) yeni sürüme geçiyor.
+
+### 19.4 Offline-first mimari
+- [ ] Yerel kalıcı kuyruk (`electron-store` zaten bağımlılık — basit bir JSON dizisi kuyruk olarak yeterli, ek bir veritabanı motoru gerekmiyor): check-in/POS olayları önce yerel kuyruğa yazılır, ardından API'ye gönderilmeye çalışılır
+- [ ] Gönderim başarısız olursa (ağ hatası/5xx) olay kuyrukta kalır, üstel geri çekilmeyle (exponential backoff) yeniden denenir; başarılı olunca kuyruktan silinir
+- [ ] Mevcut sunucu tarafı `sync/push`/`sync/pull` altyapısı (Faz 10/17.11'de turnike/cihazlar için zaten inşa edilmiş — `SyncBatch`, `parseDirection`, debounce) **aynı deseni** resepsiyon uygulaması için de kullanır; yeni bir sunucu ucu gerekmez
+- [ ] `packages/cloud-client`'taki kullanılmayan `issueOfflineToken`/`checkDeviceLicense` (Ed25519 imzalı) fonksiyonları devreye alınır — internet tamamen kesikken bile cihazın geçerli bir lisansı olduğu yerel olarak doğrulanabilir (merkezi sunucuya her istekte bağımlı kalınmaz)
+- [ ] UI: "Çevrimdışı · N olay bekliyor" rozeti + son başarılı senkron zamanı
+
+**Kabul kriteri:** İnternet kesildiğinde resepsiyon uygulaması çökmüyor/donmuyor, check-in kaydetmeye devam ediyor (yerel kuyruk), bağlantı geri geldiğinde tüm bekleyen olaylar kayıpsız ve doğru sırayla sunucuya ulaşıyor.
+
+**Dosyalar (öngörülen):** `apps/reception/resources/logo.svg` (yeniden), `scripts/generate-icons.mjs`, `installer-branding/installer.nsh`, `src/renderer/src/**` (arayüz), `src/main/index.ts` + yeni `src/main/offline-queue.ts`, `package.json` (`electron-updater`, `build.publish`)
+
+**Bağımlılık:** yok — web tarafı (Faz 15-18) zaten tamamlandı, bağımsız başlatılabilir
 
 ---
 
-## 🔲 Faz 20 — SGMS Mobil Uygulama (Öncelik: P3, gelecek vizyon)
+## 🔄 Faz 20 — SGMS Mobil Uygulama (React Native) (Öncelik: P1) — yeni, 2026-07-19 eklendi
 
-> Sporcu portalının (`/athlete`, mevcut responsive web) yerini alacak/tamamlayacak native veya hibrit mobil uygulama.
+> **Kullanıcı talebi (2026-07-19):** *"Mobil uygulama hiç yazmadık ama şu süreçte imzasız apk dosyası yazabiliriz ve sitemiz içerisinden direk indirme linki koyabiliriz."*
+>
+> **Karar (kullanıcı onaylı):** React Native ile sıfırdan native bir uygulama — Capacitor/WebView sarmalama yerine gerçek native bileşenler (kamera QR tarayıcı, push bildirim, gelecekte widget) için. İlk sürüm **yalnızca Android**, **imzasız APK** olarak `sgms.cicibyte.com` üzerinden doğrudan indirme linkiyle dağıtılır — henüz Play Store süreci yok. Backend zaten hazır: API v1, Bearer token + OpenAPI 3.1 ile (Faz 7) — mobil için hiçbir yeni sunucu ucu gerekmiyor.
+>
+> **Senaryo:** Bir sporcu, salon sahibinin WhatsApp'tan gönderdiği indirme linkine tıklar, "bilinmeyen kaynaklardan yükleme"yi onaylar, APK'yı kurar. E-posta/parolasıyla giriş yapar, telefonunun kilit ekranından QR kodunu turnikeye okutup salona girer, PT'sinden gelen mesajı okur, bugünkü antrenman programını ve geçmiş ölçümlerini görüntüler.
 
-- [ ] Platform kararı: React Native / Flutter / native (Swift+Kotlin) — API v1 zaten Bearer token + OpenAPI 3.1 ile hazır (Faz 7), mobil için ek backend işi gerekmiyor
-- [ ] Push notification altyapısı (üyelik/ödeme hatırlatmaları, PT mesajları)
-- [ ] QR check-in kartı, ölçüm/program görüntüleme, mesajlaşma — `/athlete` web portalının mobil karşılığı
-- [ ] App Store / Play Store release süreci, Cloud'un release API'sine (Faz 16.4) entegrasyon
+### 20.1 Proje iskeleti ve kimlik doğrulama
+- [ ] `apps/mobile` — Expo (managed workflow, EAS Build ile yerel Android SDK kurulumu gerekmeden bulut üzerinden APK üretimi) veya bare React Native CLI kararı verilir; imzasız APK hedefi için **Expo + EAS Build (yerel/development profili)** önerilir — Android Studio/SDK kurulum yükü olmadan hızlı iterasyon sağlar
+- [ ] API v1 Bearer token girişi (`POST /api/v1/auth/login`, mevcut resepsiyon uygulamasındaki `api-client.ts` deseniyle tutarlı), token güvenli depoda (`expo-secure-store`) saklanır
+- [ ] Çoklu dil desteği (mevcut 6 dilin mobil karşılığı — aynı `messages/*.json` çevirilerinden faydalanılabilir)
 
-**Kabul kriteri:** Bir sporcu telefonundan QR ile check-in yapabiliyor, ölçümlerini görebiliyor, PT'siyle mesajlaşabiliyor
+### 20.2 Temel sporcu akışları — `/athlete` web portalının native karşılığı
+- [ ] QR check-in ekranı — mevcut check-in QR token formatıyla (Faz 10, HMAC imzalı, Faz 36.11'de tek-kullanımlık hale getirildi) uyumlu, kamera izni + QR üretimi (statik/döner kod, sunucu tarafı mantık değişmez)
+- [ ] Antrenman/beslenme programları görüntüleme (salt okunur, mevcut `TrainingProgram` API'si)
+- [ ] Ölçüm geçmişi görüntüleme + yeni ölçüm ekleme
+- [ ] PT ile mesajlaşma (mevcut `DirectMessage` API'si, gerçek zamanlı için Soketi/polling — resepsiyon uygulamasındaki `pusher-client.ts` deseni mobile taşınır)
 
-**Bağımlılık:** Faz 15-19 (web + masaüstü olgunluğu) · API v1 zaten hazır (Faz 7) — bu faz büyük ölçüde bağımsız başlatılabilir
+### 20.3 İmzasız APK dağıtım hattı
+- [ ] EAS Build (ya da yerel Gradle) ile her sürümde imzasız/debug-signed bir `.apk` üretimi
+- [ ] `sgms.cicibyte.com` üzerinde bir indirme sayfası/linki (mevcut resepsiyon `.exe` indirme linkiyle aynı desen — GitHub Releases'e yüklenip web sitesinden bağlanır, bkz. Faz 19.3)
+- [ ] Kurulum sonrası "bilinmeyen kaynak" uyarısını azaltmak için web sayfasında kısa bir kurulum rehberi (ekran görüntülü)
+
+**Kabul kriteri:** Bir sporcu web sitesinden APK'yı indirip kurabiliyor, giriş yapabiliyor, QR ile check-in yapabiliyor, ölçümlerini görebiliyor, PT'siyle mesajlaşabiliyor.
+
+**Ertelendi (v2 — Play Store süreci netleşince):** Push bildirim altyapısı (imzasız/yayınlanmamış bir uygulamada push için Firebase/APNs sertifikasyon riski yüksek — bu, gerçek bir Play Store/imzalı release'e kadar bekletiliyor), widget, iOS sürümü.
+
+**Dosyalar (öngörülen):** yeni `apps/mobile/` (Expo projesi), root `package.json`'a `mobile:dev`/`mobile:build` script'leri
+
+**Bağımlılık:** yok — API v1 zaten hazır (Faz 7), bu faz web/masaüstünden tamamen bağımsız başlatılabilir
 
 ---
 
@@ -1496,6 +1547,12 @@ gerçekten çalıştırıldı ve bu süreçte **iki kritik, canlıda aktif hata*
 `components/two-factor-setup-panel.tsx`, `playwright.config.ts`, `e2e/check-in.spec.ts`,
 `e2e/cash-register.spec.ts`, `e2e/helpers/register-org.ts`, `.gitignore`
 
+Şu anda paralel çalışılıyor (2026-07-19, iki tamamen ayrı uygulama — dosya bazında sıfır çakışma):
+  Faz 19   SGMS Masaüstü yeniden yapılandırma (Electron)  ← bu oturum (Claude) — ikon kök neden
+           düzeltmesi, arayüz modernizasyonu, electron-updater, offline kuyruk
+  Faz 20   SGMS Mobil Uygulama (React Native, apps/mobile) ← Cursor'da — proje iskeleti,
+           QR check-in, imzasız APK dağıtım hattı
+
 Sıradaki (Faz 36 sonrası — profesyonel değerlendirme, P0 en önce):
   Faz 32     Ticarileştirme: paket + ek kapasite satışı          ← P0, gelir modeli (kullanıcı onayı gerekli)
   [Repo]     Git contributors düzenlemesi (cursoragent kaldırma) ← P0, ⚠️ onay gerekli (destructive, force-push)
@@ -1510,8 +1567,6 @@ Sıradaki (Faz 36 sonrası — profesyonel değerlendirme, P0 en önce):
   Faz 29     Yapay Zeka öngörüleri                                ← P2, Faz 28 verisine dayanır
   Faz 31     Entegrasyon Pazaryeri + 31.0 donanım API v2/RFID     ← P2, Faz 27 soyutlamasına dayanır
   Faz 24     Temizlik yönetimi                                    ← P3
-  Faz 19     SGMS Masaüstü — genişletme                          ← P2, web tamamlanınca
-  Faz 20     SGMS Mobil Uygulama                                  ← P3, web+masaüstü tamamlanınca
 
 Not: Fazlar bağımsız modüller olarak paralel de ilerletilebilir — Faz 21 (PT) hariç
 hiçbiri bir öncekinin bitmesini şart koşmaz. Sıralama, en yüksek iş değeri /
