@@ -46,7 +46,12 @@
     "more": "Plus",
     "collapseSidebar": "Réduire le menu",
     "expandSidebar": "Développer le menu",
-    "groups": "Groupes",
+    "groups": {
+      "dailyOps": "Opérations quotidiennes",
+      "management": "Gestion",
+      "analytics": "Analyse"
+    },
+    "membershipGroups": "Groupes",
     "paymentPlans": "Plans de paiement",
     "twoFactor": "Sécurité du compte (2FA)",
     "help": "Aide",

@@ -46,7 +46,12 @@
     "more": "Ещё",
     "collapseSidebar": "Свернуть меню",
     "expandSidebar": "Развернуть меню",
-    "groups": "Группы",
+    "groups": {
+      "dailyOps": "Ежедневные операции",
+      "management": "Управление",
+      "analytics": "Аналитика"
+    },
+    "membershipGroups": "Группы",
     "paymentPlans": "Планы платежей",
     "twoFactor": "Безопасность аккаунта (2FA)",
     "help": "Справка",

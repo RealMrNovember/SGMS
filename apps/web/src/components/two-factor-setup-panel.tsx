@@ -6,6 +6,7 @@ import {
   regenerateBackupCodes,
   verifyAndEnableTwoFactor,
 } from '@/actions/two-factor';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import QRCode from 'react-qr-code';
@@ -22,6 +23,7 @@ type SetupState =
 
 export function TwoFactorSetupPanel({ twoFactorEnabled, mandatory }: Props) {
   const router = useRouter();
+  const { update } = useSession();
   const [enabled, setEnabled] = useState(twoFactorEnabled);
   const [state, setState] = useState<SetupState>({ stage: 'idle' });
   const [code, setCode] = useState('');
@@ -52,6 +54,7 @@ export function TwoFactorSetupPanel({ twoFactorEnabled, mandatory }: Props) {
       return;
     }
 
+    await update({ twoFactorEnabled: true });
     setEnabled(true);
     setState({ stage: 'backup-codes', codes: result.backupCodes });
     setCode('');
@@ -89,6 +92,7 @@ export function TwoFactorSetupPanel({ twoFactorEnabled, mandatory }: Props) {
       setError(result.error);
       return;
     }
+    await update({ twoFactorEnabled: false });
     setEnabled(false);
     setState({ stage: 'idle' });
     setShowDisableForm(false);

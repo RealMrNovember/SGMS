@@ -46,7 +46,12 @@
     "more": "Daha çox",
     "collapseSidebar": "Menyunu daralt",
     "expandSidebar": "Menyunu genişlət",
-    "groups": "Qruplar",
+    "groups": {
+      "dailyOps": "Gündəlik əməliyyatlar",
+      "management": "İdarəetmə",
+      "analytics": "Analitika"
+    },
+    "membershipGroups": "Qruplar",
     "paymentPlans": "Ödəniş Planları",
     "twoFactor": "Hesab Təhlükəsizliyi (2FA)",
     "help": "Təlimat",

@@ -1462,6 +1462,40 @@ Tamamlanan paralel çalışma (2026-07-19, çakışmayı önlemek için dosya ba
   Faz 23         Ekipman Yönetimi & Bakım                            ✅ 2026-07-19 (Cursor) — QR, servis, bakım rozetleri
   Faz 25         Kasa Yönetimi (X/Z)                                 ✅ 2026-07-19 (Cursor) — CashRegisterShift, POS kilidi
 
+E2E doğrulama turu (2026-07-19, Claude) — tek günde çok fazla yeni yüzey canlıya çıktığı için
+Playwright suite'i (daha önce CI'da hiç çalıştırılmamıştı) izole bir test veritabanına karşı
+gerçekten çalıştırıldı ve bu süreçte **iki kritik, canlıda aktif hata** bulunup düzeltildi:
+
+- 🐛 **`nav.groups` çakışması** — Cursor'ın Faz 17 partisi, `nav` mesaj nesnesine yeni bir düz
+  metin `"groups": "Gruplar"` anahtarı eklerken, ZATEN var olan iç içe `nav.groups.{dailyOps,
+  management,analytics}` nesnesiyle (sidebar bölüm başlıkları) aynı adı kullandı — JSON'da
+  aynı isimli iki anahtardan sonuncusu kazanır, bu da 6 dilin TAMAMINDA sidebar bölüm
+  başlıklarını kırdı (`MISSING_MESSAGE`/`INSUFFICIENT_PATH` hatası, `/dashboard` render'ı
+  yavaşlayıp bazı durumlarda bozuk render). **Düzeltme:** yeni anahtar `nav.membershipGroups`
+  olarak yeniden adlandırıldı (6 dilde), `dashboard/layout.tsx`'teki tek kullanım noktası
+  güncellendi. es/fr/ru/az'de nesnenin kendisi de (birleştirme sürecinde) tamamen kaybolmuştu —
+  4 dilde yeniden eklendi.
+- 🐛 **2FA kurulumundan sonra sonsuz yönlendirme döngüsü** — OWNER/ADMIN için zorunlu 2FA
+  (Faz 3) kurulumu tamamlandığında yalnızca veritabanı güncelleniyordu; JWT session'daki
+  `twoFactorEnabled` bayrağı hiçbir zaman yenilenmiyordu (NextAuth JWT'leri yalnızca girişte
+  veya açık bir `update()` tetikleyicisiyle değişir). Sonuç: **yeni kaydolan her OWNER,
+  zorunlu 2FA kurulumunu tamamladıktan sonra çıkış yapıp tekrar girene kadar
+  `/dashboard/account/security` sayfasına sonsuza dek geri yönlendiriliyordu** — paneli hiç
+  kullanamıyordu. Canlı tarayıcıda birebir yeniden üretildi ve doğrulandı. **Düzeltme:**
+  `TwoFactorSetupPanel` artık `useSession().update({ twoFactorEnabled })` çağırıyor,
+  `auth.config.ts`'nin `jwt` callback'i bu tetikleyiciyi işleyip token'ı anında yeniliyor.
+- Playwright altyapısı da düzeltildi: `locale: 'tr-TR'` (varsayılan `en-US` Türkçe metin
+  arayan testleri kırıyordu), `baseURL` `localhost` (`AUTH_URL` ile eşleşmesi için,
+  `127.0.0.1` farklı origin sayılıyordu), yerelde `workers: 1` (`next dev` paralel isteklerde
+  tutarsız derleniyor — CI'da `next start` kullanıldığından paralellik güvenli).
+- Yeni `e2e/cash-register.spec.ts` + `e2e/helpers/register-org.ts` — gerçek `/trial` kaydı +
+  zorunlu 2FA kurulumu (otplib ile) + kasa vardiyası aç/X raporu/kapat akışının uçtan uca
+  otomatik testi.
+
+**Dosyalar:** `messages/*.json` (6 dil), `dashboard/layout.tsx`, `lib/auth.config.ts`,
+`components/two-factor-setup-panel.tsx`, `playwright.config.ts`, `e2e/check-in.spec.ts`,
+`e2e/cash-register.spec.ts`, `e2e/helpers/register-org.ts`, `.gitignore`
+
 Sıradaki (Faz 36 sonrası — profesyonel değerlendirme, P0 en önce):
   Faz 32     Ticarileştirme: paket + ek kapasite satışı          ← P0, gelir modeli (kullanıcı onayı gerekli)
   [Repo]     Git contributors düzenlemesi (cursoragent kaldırma) ← P0, ⚠️ onay gerekli (destructive, force-push)

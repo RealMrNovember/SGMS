@@ -87,6 +87,15 @@ export const authConfig = {
         }
       }
 
+      // 2FA kurulumu/kaldırımı `verifyAndEnableTwoFactor`/`disableTwoFactor` server action'ları
+      // içinde zaten TOTP koduyla doğrulanmış olarak DB'ye yazılıyor — burada yalnızca o
+      // değişikliği JWT'ye yansıtıyoruz. Bu olmadan token.twoFactorEnabled bir sonraki girişe
+      // kadar bayat kalır ve kullanıcı kurulumu tamamladıktan sonra bile /dashboard/account/security
+      // sayfasına geri yönlendirilmeye devam eder (bkz. roadmap.md — canlıda doğrulanan hata).
+      if (trigger === 'update' && session && typeof session.twoFactorEnabled === 'boolean') {
+        token.twoFactorEnabled = session.twoFactorEnabled;
+      }
+
       return token;
     },
     session: async ({ session, token }) => {

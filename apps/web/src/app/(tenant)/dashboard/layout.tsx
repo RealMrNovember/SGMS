@@ -131,7 +131,7 @@ export default async function TenantDashboardLayout({ children }: { children: Re
             ...(canManageFaz17
               ? [
                   { href: '/dashboard/classes', label: t('classes'), icon: <CalendarDays /> },
-                  { href: '/dashboard/groups', label: t('groups'), icon: <UsersRound /> },
+                  { href: '/dashboard/groups', label: t('membershipGroups'), icon: <UsersRound /> },
                   { href: '/dashboard/discounts', label: t('discounts'), icon: <Ticket /> },
                   { href: '/dashboard/guest-passes', label: t('guestPasses'), icon: <IdCard /> },
                   { href: '/dashboard/equipment', label: t('equipment'), icon: <Wrench /> },

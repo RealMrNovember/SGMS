@@ -13,6 +13,6 @@ test.describe('Salon girişi (check-in)', () => {
     await page.goto('/dashboard/check-in');
 
     await expect(page.getByRole('heading', { name: /salon girişi/i })).toBeVisible();
-    await expect(page.getByText(/bugün giriş/i)).toBeVisible();
+    await expect(page.getByText(/bugün giriş/i).first()).toBeVisible();
   });
 });
