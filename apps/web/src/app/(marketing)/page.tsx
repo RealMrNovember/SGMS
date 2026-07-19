@@ -109,9 +109,18 @@ export default async function ShowcaseHomePage() {
         </MarketingStagger>
       </section>
 
-      <ReceptionDownloadPromo variant="marketing" />
-
-      <MobileDownloadPromo variant="marketing" />
+      <section id="app-downloads" className="mx-auto max-w-6xl px-4 py-12 sm:px-5 sm:py-16 lg:px-8">
+        <MarketingReveal variant="scale-in">
+          <div className="text-center">
+            <p className="marketing-kicker">{t('appsSection.kicker')}</p>
+            <h2 className="mt-4 text-2xl font-semibold tracking-tight sm:text-3xl">{t('appsSection.title')}</h2>
+          </div>
+          <div className="mt-8 grid gap-5 sm:grid-cols-2">
+            <ReceptionDownloadPromo variant="duo" />
+            <MobileDownloadPromo variant="duo" />
+          </div>
+        </MarketingReveal>
+      </section>
 
       <section id="why-sgms" className="mx-auto max-w-6xl px-4 py-6 sm:px-5 sm:py-8 lg:px-8">
         <MarketingReveal variant="scale-in">

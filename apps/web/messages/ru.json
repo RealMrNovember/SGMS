@@ -701,7 +701,12 @@
       "loginShort": "Login",
       "trialShort": "14 Days",
       "receptionDesktop": "Приложение ресепшена",
-      "mobileAthlete": "Приложение спортсмена"
+      "mobileAthlete": "Приложение спортсмена",
+      "apps": "Приложения"
+    },
+    "appsSection": {
+      "kicker": "Десктоп и мобильные",
+      "title": "Скачайте наши приложения для вашего зала"
     },
     "hero": {
       "kicker": "Digital Gym Operating System",

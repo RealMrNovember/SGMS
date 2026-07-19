@@ -732,7 +732,12 @@
       "loginShort": "Giriş",
       "trialShort": "14 Gün",
       "receptionDesktop": "Resepsiyon Uygulaması",
-      "mobileAthlete": "Sporcu Uygulaması"
+      "mobileAthlete": "Sporcu Uygulaması",
+      "apps": "Uygulamalar"
+    },
+    "appsSection": {
+      "kicker": "Masaüstü ve Mobil",
+      "title": "Salonunuz için uygulamalarımızı indirin"
     },
     "hero": {
       "kicker": "Dijital Spor Salonu İşletim Sistemi",

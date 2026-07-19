@@ -25,11 +25,8 @@ export async function MarketingHeader() {
           <a href="#roadmap" className="marketing-nav-link">
             {t('roadmap')}
           </a>
-          <a href="#reception-desktop" className="marketing-nav-link">
-            {t('receptionDesktop')}
-          </a>
-          <a href="#mobile-athlete" className="marketing-nav-link">
-            {t('mobileAthlete')}
+          <a href="#app-downloads" className="marketing-nav-link">
+            {t('apps')}
           </a>
           <a href="#contact" className="marketing-nav-link">
             {t('contact')}

@@ -1,8 +1,9 @@
 import { getMobileAthleteDownloadUrl, mobileAthleteRelease } from '@/lib/mobile-app';
+import { resolveLatestReleaseVersion } from '@/lib/github-releases';
 import { MarketingReveal } from '@/components/marketing/marketing-motion';
 import { getTranslations } from 'next-intl/server';
 
-type Variant = 'marketing' | 'card' | 'compact';
+type Variant = 'marketing' | 'card' | 'compact' | 'duo';
 
 type Props = {
   variant: Variant;
@@ -11,7 +12,7 @@ type Props = {
 export async function MobileDownloadPromo({ variant }: Props) {
   const t = await getTranslations('mobileAthlete');
   const downloadUrl = getMobileAthleteDownloadUrl();
-  const version = mobileAthleteRelease.version;
+  const version = (await resolveLatestReleaseVersion('mobile-v', '.apk')) ?? mobileAthleteRelease.version;
   const size = mobileAthleteRelease.sizeLabel;
   const platform = mobileAthleteRelease.platform;
 
@@ -83,6 +84,35 @@ export async function MobileDownloadPromo({ variant }: Props) {
           </div>
         </div>
       </section>
+    );
+  }
+
+  if (variant === 'duo') {
+    return (
+      <div className="app-duo-card card flex h-full flex-col p-6">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="badge border-[rgba(56,189,248,0.35)] bg-[rgba(56,189,248,0.12)] text-[#7dd3fc]">
+            {t('badge')}
+          </span>
+          <span className="muted text-xs">v{version}</span>
+        </div>
+        <h3 className="mt-3 text-lg font-semibold">{t('title')}</h3>
+        <p className="muted mt-2 text-sm leading-6">{t('checkInHint')}</p>
+        <ul className="reception-promo-features mt-4 text-sm">
+          <li>{t('features.qr')}</li>
+          <li>{t('features.fast')}</li>
+        </ul>
+        <a
+          href={downloadUrl}
+          className="button button-gold app-duo-download mt-auto self-start px-5 py-3 text-sm"
+          download={mobileAthleteRelease.fileName}
+          rel="noopener noreferrer"
+        >
+          {downloadLabel}
+        </a>
+        <p className="muted mt-2 text-xs">{metaLabel}</p>
+        <p className="muted mt-1 text-xs">{t('unsignedNotice')}</p>
+      </div>
     );
   }
 

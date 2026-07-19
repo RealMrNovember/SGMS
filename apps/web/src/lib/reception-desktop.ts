@@ -1,13 +1,11 @@
 export const receptionDesktopRelease = {
   version: '0.6.0',
-  fileName: 'SGMS-Resepsiyon-0.6.0-Setup.exe',
+  fileName: 'SGMS-Resepsiyon-Setup.exe',
   sizeLabel: '80 MB',
   platforms: 'Windows 10/11',
-  repoOwner: 'RealMrNovember',
-  repoName: 'SGMS',
 } as const;
 
+/** Sabit link — /dl/desktop her zaman GitHub Releases'teki en güncel `v*` sürümüne yönlendirir. */
 export function getReceptionDesktopDownloadUrl(): string {
-  const { repoOwner, repoName, version, fileName } = receptionDesktopRelease;
-  return `https://github.com/${repoOwner}/${repoName}/releases/download/v${version}/${fileName}`;
+  return '/dl/desktop';
 }

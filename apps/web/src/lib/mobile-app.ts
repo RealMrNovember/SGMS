@@ -1,14 +1,11 @@
 export const mobileAthleteRelease = {
   version: '0.2.0',
-  fileName: 'SGMS-Sporcu-0.2.0.apk',
+  fileName: 'SGMS-Sporcu.apk',
   sizeLabel: '72 MB',
   platform: 'Android 8+',
-  repoOwner: 'RealMrNovember',
-  repoName: 'SGMS',
-  tag: 'mobile-v0.2.0',
 } as const;
 
+/** Sabit link — /dl/mobile her zaman GitHub Releases'teki en güncel `mobile-v*` sürümüne yönlendirir. */
 export function getMobileAthleteDownloadUrl(): string {
-  const { repoOwner, repoName, tag, fileName } = mobileAthleteRelease;
-  return `https://github.com/${repoOwner}/${repoName}/releases/download/${tag}/${fileName}`;
+  return '/dl/mobile';
 }

@@ -2,13 +2,16 @@ import { SgmsLogo } from '@/components/brand/sgms-logo';
 import { MarketingReveal } from '@/components/marketing/marketing-motion';
 import { siteConfig } from '@/lib/site-config';
 import { getReceptionDesktopDownloadUrl, receptionDesktopRelease } from '@/lib/reception-desktop';
+import { getMobileAthleteDownloadUrl, mobileAthleteRelease } from '@/lib/mobile-app';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 
 export async function MarketingFooter() {
   const t = await getTranslations('marketing.footer');
   const tDesktop = await getTranslations('receptionDesktop');
+  const tMobile = await getTranslations('mobileAthlete');
   const downloadUrl = getReceptionDesktopDownloadUrl();
+  const mobileDownloadUrl = getMobileAthleteDownloadUrl();
 
   return (
     <footer id="contact" className="marketing-footer mt-20">
@@ -41,6 +44,15 @@ export async function MarketingFooter() {
                   rel="noopener noreferrer"
                 >
                   {tDesktop('footerLink')}
+                </a>
+              </li>
+              <li>
+                <a
+                  href={mobileDownloadUrl}
+                  download={mobileAthleteRelease.fileName}
+                  rel="noopener noreferrer"
+                >
+                  {tMobile('footerLink')}
                 </a>
               </li>
             </ul>

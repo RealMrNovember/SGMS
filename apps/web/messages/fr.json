@@ -701,7 +701,12 @@
       "loginShort": "Login",
       "trialShort": "14 Days",
       "receptionDesktop": "Application Réception",
-      "mobileAthlete": "Application Sportif"
+      "mobileAthlete": "Application Sportif",
+      "apps": "Applications"
+    },
+    "appsSection": {
+      "kicker": "Bureau et Mobile",
+      "title": "Téléchargez nos applications pour votre salle"
     },
     "hero": {
       "kicker": "Digital Gym Operating System",

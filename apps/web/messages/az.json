@@ -701,7 +701,12 @@
       "loginShort": "Login",
       "trialShort": "14 Days",
       "receptionDesktop": "Resepşn Tətbiqi",
-      "mobileAthlete": "İdmançı Tətbiqi"
+      "mobileAthlete": "İdmançı Tətbiqi",
+      "apps": "Tətbiqlər"
+    },
+    "appsSection": {
+      "kicker": "Masaüstü və Mobil",
+      "title": "Salonunuz üçün tətbiqlərimizi yükləyin"
     },
     "hero": {
       "kicker": "Digital Gym Operating System",

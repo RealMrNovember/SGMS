@@ -732,7 +732,12 @@
       "loginShort": "Login",
       "trialShort": "14 Days",
       "receptionDesktop": "Reception App",
-      "mobileAthlete": "Athlete App"
+      "mobileAthlete": "Athlete App",
+      "apps": "Apps"
+    },
+    "appsSection": {
+      "kicker": "Desktop and Mobile",
+      "title": "Download our apps for your gym"
     },
     "hero": {
       "kicker": "Digital Gym Operating System",

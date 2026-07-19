@@ -2,10 +2,11 @@ import {
   getReceptionDesktopDownloadUrl,
   receptionDesktopRelease,
 } from '@/lib/reception-desktop';
+import { resolveLatestReleaseVersion } from '@/lib/github-releases';
 import { MarketingReveal } from '@/components/marketing/marketing-motion';
 import { getTranslations } from 'next-intl/server';
 
-type Variant = 'marketing' | 'card' | 'compact';
+type Variant = 'marketing' | 'card' | 'compact' | 'duo';
 
 type Props = {
   variant: Variant;
@@ -14,7 +15,7 @@ type Props = {
 export async function ReceptionDownloadPromo({ variant }: Props) {
   const t = await getTranslations('receptionDesktop');
   const downloadUrl = getReceptionDesktopDownloadUrl();
-  const version = receptionDesktopRelease.version;
+  const version = (await resolveLatestReleaseVersion('v', '.exe')) ?? receptionDesktopRelease.version;
   const size = receptionDesktopRelease.sizeLabel;
   const platforms = receptionDesktopRelease.platforms;
 
@@ -85,6 +86,34 @@ export async function ReceptionDownloadPromo({ variant }: Props) {
           </div>
         </div>
       </section>
+    );
+  }
+
+  if (variant === 'duo') {
+    return (
+      <div className="app-duo-card card flex h-full flex-col p-6">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="badge border-[rgba(201,169,98,0.35)] bg-[rgba(201,169,98,0.12)] text-[#e8d5a3]">
+            {t('badge')}
+          </span>
+          <span className="muted text-xs">v{version}</span>
+        </div>
+        <h3 className="mt-3 text-lg font-semibold">{t('title')}</h3>
+        <p className="muted mt-2 text-sm leading-6">{t('checkInHint')}</p>
+        <ul className="reception-promo-features mt-4 text-sm">
+          <li>{t('features.notify')}</li>
+          <li>{t('features.tray')}</li>
+        </ul>
+        <a
+          href={downloadUrl}
+          className="button button-gold app-duo-download mt-auto self-start px-5 py-3 text-sm"
+          download={receptionDesktopRelease.fileName}
+          rel="noopener noreferrer"
+        >
+          {downloadLabel}
+        </a>
+        <p className="muted mt-2 text-xs">{metaLabel}</p>
+      </div>
     );
   }
 
