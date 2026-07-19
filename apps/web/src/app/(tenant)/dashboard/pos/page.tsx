@@ -1,4 +1,5 @@
 import { ExpenseCategoryManager } from '@/components/expense-category-manager';
+import { ContextualHelpButton } from '@/components/help/contextual-help-button';
 import { PosTerminal } from '@/components/pos-terminal';
 import { auth } from '@/lib/auth';
 import { intlLocaleFor } from '@/lib/format-locale';
@@ -72,7 +73,10 @@ export default async function PosPage() {
         <Link href="/dashboard" className="muted text-sm hover:text-white">
           {t('backToOverview')}
         </Link>
-        <h2 className="mt-4 text-2xl font-semibold">{t('title')}</h2>
+        <div className="mt-4 flex items-center gap-3">
+          <h2 className="text-2xl font-semibold">{t('title')}</h2>
+          <ContextualHelpButton topic="topic-pos" />
+        </div>
         <p className="muted mt-2 text-sm">{t('subtitle')}</p>
       </div>
 

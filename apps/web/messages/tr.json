@@ -53,6 +53,7 @@
     },
     "paymentPlans": "Ödeme Planları",
     "twoFactor": "Hesap Güvenliği (2FA)",
+    "help": "Kılavuz",
     "leads": "Adaylar"
   },
   "auth": {
@@ -412,56 +413,6 @@
       "saving": "Kaydediliyor…",
       "submit": "Plan Oluştur"
     }
-  },
-  "leads": {
-    "backToOverview": "← Özet",
-    "title": "Potansiyel Müşteriler",
-    "subtitle": "Salonu gezip kayıt olmayan adayları takip edin, geri dönüş planlayın ve tek tıkla üyeye dönüştürün.",
-    "noPermission": "Aday takibi için OWNER, ADMIN veya STAFF yetkisi gerekir.",
-    "addTitle": "Yeni Aday",
-    "name": "Ad Soyad",
-    "phone": "Telefon",
-    "email": "E-posta",
-    "source": "Kaynak",
-    "interestedPlan": "İlgilendiği Paket",
-    "notes": "Not",
-    "submit": "Aday Ekle",
-    "saving": "Ekleniyor…",
-    "sources": {
-      "WALK_IN": "Yürüyerek geldi",
-      "REFERRAL": "Referans",
-      "SOCIAL_MEDIA": "Sosyal Medya",
-      "WEBSITE": "Web Sitesi",
-      "OTHER": "Diğer"
-    },
-    "columns": {
-      "NEW": "Yeni",
-      "CONTACTED": "İletişime Geçildi",
-      "FOLLOW_UP_SCHEDULED": "Takip Planlandı",
-      "CLOSED": "Üye Oldu / Kayıp"
-    },
-    "empty": "Bu aşamada aday yok.",
-    "markContacted": "İletişime geçildi",
-    "markLost": "Kayıp işaretle",
-    "convert": "Üyeye dönüştür",
-    "converting": "Dönüştürülüyor…",
-    "scheduleFollowUp": "Takip planla",
-    "followUpScheduledAt": "Planlanan tarih",
-    "followUpMethod": "Yöntem",
-    "methods": {
-      "CALL": "Arama",
-      "MESSAGE": "Mesaj",
-      "EMAIL": "E-posta"
-    },
-    "followUpNotes": "Not",
-    "scheduleSubmit": "Planla",
-    "scheduling": "Planlanıyor…",
-    "completeFollowUp": "Tamamlandı",
-    "overdue": "Gecikmiş",
-    "dueToday": "Bugün",
-    "convertedBadge": "Üye oldu",
-    "lostBadge": "Kayıp",
-    "cancel": "Vazgeç"
   },
   "programs": {
     "backToOverview": "← Özet",
@@ -1005,11 +956,67 @@
     "plansTitle": "SaaS Paket Yönetimi",
     "plansSubtitle": "Deneme ve ücretli abonelik fiyatlarını, limitleri ve görünürlüğü buradan düzenleyin.",
     "billingRequestsTitle": "Ödeme talepleri",
-    "noBillingRequests": "Bekleyen ödeme talebi yok."
+    "noBillingRequests": "Bekleyen ödeme talebi yok.",
+    "helpNav": "Kılavuz içerikleri"
   },
   "settings": {
-    "title": "Salon ayarları",
-    "subtitle": "{name} için dil ve opsiyonel özellik tercihleri."
+    "title": "Ayarlar",
+    "subtitle": "{name} — role göre filtrelenen profesyonel ayar merkezi.",
+    "save": "Ayarları kaydet",
+    "on": "Açık",
+    "off": "Kapalı",
+    "openHelp": "Kılavuzu aç",
+    "noAccess": "Bu hesap için görüntülenecek ayar bölümü yok.",
+    "tabs": {
+      "general": "Genel",
+      "team": "Ekip & Roller",
+      "notifications": "Bildirimler",
+      "billing": "Fatura",
+      "integrations": "Entegrasyonlar",
+      "security": "Güvenlik"
+    },
+    "general": {
+      "defaultLocale": "Varsayılan dil",
+      "defaultLocaleHint": "Yeni personel ve dil seçimi olmayan kullanıcılar için geçerlidir."
+    },
+    "notifications": {
+      "typingIndicator": "Yazıyor göstergesi",
+      "messageReports": "Mesaj şikayeti",
+      "signedAvatarUrls": "İmzalı avatar URL (R2)",
+      "signedOff": "Kapalı (public CDN)",
+      "signedOn": "Açık (signed URL)",
+      "tokenRevokeRedisCache": "Token revoke Redis önbelleği"
+    },
+    "sections": {
+      "general": {
+        "subtitle": "Salon dili ve temel tercihler."
+      },
+      "team": {
+        "subtitle": "Personel daveti, roller ve çıkarma işlemleri.",
+        "body": "Ekip yönetimi ayrı bir ekranda tutulur; davet, bekleyen davetler ve personel çıkarma oradan yapılır.",
+        "cta": "Personel ekranına git"
+      },
+      "notifications": {
+        "subtitle": "Mesajlaşma ve opsiyonel bildirim özellikleri."
+      },
+      "billing": {
+        "subtitle": "SGMS aboneliği ve ödeme talepleri.",
+        "body": "Paket seçimi, ödeme ve turnike nezaket durumu faturalandırma ekranındadır.",
+        "cta": "Faturalandırmaya git"
+      },
+      "integrations": {
+        "subtitle": "Ödeme sağlayıcıları ve donanım anahtarları.",
+        "prepTitle": "Hazırlık alanı",
+        "body": "Salon bazlı API anahtarları yalnızca sunucuda saklanacak; tarayıcıya asla gönderilmeyecek.",
+        "itemPayment": "Iyzico / PayTR (salon sahibi anahtarları)",
+        "itemHardware": "RFID / turnike donanım entegrasyonları"
+      },
+      "security": {
+        "subtitle": "İki faktörlü doğrulama ve hesap güvenliği.",
+        "body": "Authenticator 2FA, yedek kodlar ve kurtarma seçenekleri güvenlik sayfasındadır.",
+        "cta": "Güvenlik ayarlarına git"
+      }
+    }
   },
   "billing": {
     "nav": "Abonelik & Ödeme",
@@ -1431,5 +1438,79 @@
       "status": "Durum",
       "action": "İşlem"
     }
+  },
+  "help": {
+    "title": "Kullanım Kılavuzu",
+    "subtitle": "Rolünüze özel rehberler, arama ve bağlamsal yardım.",
+    "backHome": "← Panele dön",
+    "backToHub": "← Kılavuz merkezi",
+    "search": "Ara",
+    "searchPlaceholder": "Kılavuzlarda ara…",
+    "onboardingTitle": "Başlangıç rehberleri",
+    "onboardingBadge": "Başlangıç",
+    "empty": "Bu rol için henüz kılavuz yok veya arama eşleşmedi.",
+    "contextualTitle": "Bu sayfa için yardım",
+    "categories": {
+      "onboarding": "Başlangıç",
+      "checkin": "Check-in",
+      "pos": "POS / Kasa",
+      "members": "Üyeler",
+      "programs": "Programlar",
+      "settings": "Ayarlar",
+      "billing": "Faturalandırma",
+      "security": "Güvenlik",
+      "integrations": "Entegrasyonlar",
+      "general": "Genel"
+    }
+  },
+  "leads": {
+    "backToOverview": "← Özet",
+    "title": "Potansiyel Müşteriler",
+    "subtitle": "Salonu gezip kayıt olmayan adayları takip edin, geri dönüş planlayın ve tek tıkla üyeye dönüştürün.",
+    "noPermission": "Aday takibi için OWNER, ADMIN veya STAFF yetkisi gerekir.",
+    "addTitle": "Yeni Aday",
+    "name": "Ad Soyad",
+    "phone": "Telefon",
+    "email": "E-posta",
+    "source": "Kaynak",
+    "interestedPlan": "İlgilendiği Paket",
+    "notes": "Not",
+    "submit": "Aday Ekle",
+    "saving": "Ekleniyor…",
+    "sources": {
+      "WALK_IN": "Yürüyerek geldi",
+      "REFERRAL": "Referans",
+      "SOCIAL_MEDIA": "Sosyal Medya",
+      "WEBSITE": "Web Sitesi",
+      "OTHER": "Diğer"
+    },
+    "columns": {
+      "NEW": "Yeni",
+      "CONTACTED": "İletişime Geçildi",
+      "FOLLOW_UP_SCHEDULED": "Takip Planlandı",
+      "CLOSED": "Üye Oldu / Kayıp"
+    },
+    "empty": "Bu aşamada aday yok.",
+    "markContacted": "İletişime geçildi",
+    "markLost": "Kayıp işaretle",
+    "convert": "Üyeye dönüştür",
+    "converting": "Dönüştürülüyor…",
+    "scheduleFollowUp": "Takip planla",
+    "followUpScheduledAt": "Planlanan tarih",
+    "followUpMethod": "Yöntem",
+    "methods": {
+      "CALL": "Arama",
+      "MESSAGE": "Mesaj",
+      "EMAIL": "E-posta"
+    },
+    "followUpNotes": "Not",
+    "scheduleSubmit": "Planla",
+    "scheduling": "Planlanıyor…",
+    "completeFollowUp": "Tamamlandı",
+    "overdue": "Gecikmiş",
+    "dueToday": "Bugün",
+    "convertedBadge": "Üye oldu",
+    "lostBadge": "Kayıp",
+    "cancel": "Vazgeç"
   }
 }

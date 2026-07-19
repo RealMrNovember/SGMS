@@ -1,21 +1,27 @@
-import { OrganizationSettingsPanel } from '@/components/organization-settings-panel';
+import { SettingsWorkspace } from '@/components/settings/settings-workspace';
 import { auth } from '@/lib/auth';
 import { parseOrganizationSettings } from '@/lib/admin/org-settings';
 import { prisma } from '@/lib/prisma';
-import { getTranslations } from 'next-intl/server';
+import type { OrganizationRole } from '@sgms/database';
 import { redirect } from 'next/navigation';
+
+const SETTINGS_ROLES = new Set<OrganizationRole>([
+  'OWNER',
+  'ADMIN',
+  'STAFF',
+  'TRAINER',
+  'VIEWER',
+]);
 
 export default async function DashboardSettingsPage() {
   const session = await auth();
-  if (!session?.user?.organizationId) {
+  if (!session?.user?.organizationId || !session.user.role) {
     redirect('/login');
   }
 
-  if (!session.user.role || !['OWNER', 'ADMIN'].includes(session.user.role)) {
+  if (!SETTINGS_ROLES.has(session.user.role)) {
     redirect('/dashboard');
   }
-
-  const t = await getTranslations('settings');
 
   const org = await prisma.organization.findUnique({
     where: { id: session.user.organizationId },
@@ -29,13 +35,8 @@ export default async function DashboardSettingsPage() {
   const settings = parseOrganizationSettings(org.settings);
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
-      <section>
-        <h2 className="text-2xl font-semibold tracking-tight">{t('title')}</h2>
-        <p className="muted mt-2 text-sm">{t('subtitle', { name: org.name })}</p>
-      </section>
-
-      <OrganizationSettingsPanel settings={settings} />
+    <div className="mx-auto max-w-5xl space-y-6">
+      <SettingsWorkspace role={session.user.role} orgName={org.name} settings={settings} />
     </div>
   );
 }

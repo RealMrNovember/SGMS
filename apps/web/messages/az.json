@@ -53,6 +53,7 @@
     },
     "paymentPlans": "Ödəniş Planları",
     "twoFactor": "Hesab Təhlükəsizliyi (2FA)",
+    "help": "Təlimat",
     "leads": "Namizədlər"
   },
   "auth": {
@@ -412,56 +413,6 @@
       "saving": "Saxlanılır…",
       "submit": "Plan yarat"
     }
-  },
-  "leads": {
-    "backToOverview": "← İcmal",
-    "title": "Namizədlər",
-    "subtitle": "Salonu gəzib qeydiyyatdan keçməyən namizədləri izləyin, geri dönüş planlaşdırın və bir kliklə üzvə çevirin.",
-    "noPermission": "Namizəd izləmə üçün OWNER, ADMIN və ya STAFF rolu lazımdır.",
-    "addTitle": "Yeni namizəd",
-    "name": "Ad Soyad",
-    "phone": "Telefon",
-    "email": "E-poçt",
-    "source": "Mənbə",
-    "interestedPlan": "Maraqlandığı paket",
-    "notes": "Qeyd",
-    "submit": "Namizəd əlavə et",
-    "saving": "Əlavə edilir…",
-    "sources": {
-      "WALK_IN": "Özü gəldi",
-      "REFERRAL": "Tövsiyə",
-      "SOCIAL_MEDIA": "Sosial media",
-      "WEBSITE": "Veb sayt",
-      "OTHER": "Digər"
-    },
-    "columns": {
-      "NEW": "Yeni",
-      "CONTACTED": "Əlaqə saxlanıldı",
-      "FOLLOW_UP_SCHEDULED": "Təqib planlaşdırıldı",
-      "CLOSED": "Üzv oldu / İtirildi"
-    },
-    "empty": "Bu mərhələdə namizəd yoxdur.",
-    "markContacted": "Əlaqə saxlanıldı işarələ",
-    "markLost": "İtirildi işarələ",
-    "convert": "Üzvə çevir",
-    "converting": "Çevrilir…",
-    "scheduleFollowUp": "Təqib planla",
-    "followUpScheduledAt": "Planlaşdırılan tarix",
-    "followUpMethod": "Üsul",
-    "methods": {
-      "CALL": "Zəng",
-      "MESSAGE": "Mesaj",
-      "EMAIL": "E-poçt"
-    },
-    "followUpNotes": "Qeyd",
-    "scheduleSubmit": "Planla",
-    "scheduling": "Planlaşdırılır…",
-    "completeFollowUp": "Tamamlandı işarələ",
-    "overdue": "Gecikmiş",
-    "dueToday": "Bu gün",
-    "convertedBadge": "Üzv oldu",
-    "lostBadge": "İtirildi",
-    "cancel": "İmtina"
   },
   "programs": {
     "backToOverview": "← İcmal",
@@ -1002,11 +953,67 @@
     "plansTitle": "SaaS Plan İdarəetməsi",
     "plansSubtitle": "Sınaq və ödənişli abunəliklərin qiymət, limit və görünürlüyünü redaktə edin.",
     "billingRequestsTitle": "Ödəniş sorğuları",
-    "noBillingRequests": "Ödəniş sorğusu yoxdur."
+    "noBillingRequests": "Ödəniş sorğusu yoxdur.",
+    "helpNav": "Təlimat məzmunu"
   },
   "settings": {
-    "title": "Zal parametrləri",
-    "subtitle": "{name} üçün dil və əlavə funksiya seçimləri."
+    "title": "Ayarlar",
+    "subtitle": "{name} — a role-filtered professional settings hub.",
+    "save": "Yadda saxla",
+    "on": "On",
+    "off": "Off",
+    "openHelp": "Təlimatı aç",
+    "noAccess": "No settings sections are available for this account.",
+    "tabs": {
+      "general": "General",
+      "team": "Team & Roles",
+      "notifications": "Notifications",
+      "billing": "Billing",
+      "integrations": "Integrations",
+      "security": "Security"
+    },
+    "general": {
+      "defaultLocale": "Default language",
+      "defaultLocaleHint": "Applies to new staff and users without a locale cookie."
+    },
+    "notifications": {
+      "typingIndicator": "Typing indicator",
+      "messageReports": "Message reports",
+      "signedAvatarUrls": "Signed avatar URLs (R2)",
+      "signedOff": "Off (public CDN)",
+      "signedOn": "On (signed URL)",
+      "tokenRevokeRedisCache": "Token revoke Redis cache"
+    },
+    "sections": {
+      "general": {
+        "subtitle": "Gym language and basic preferences."
+      },
+      "team": {
+        "subtitle": "Staff invites, roles, and removals.",
+        "body": "Team management lives on a dedicated screen for invites and removals.",
+        "cta": "Open team screen"
+      },
+      "notifications": {
+        "subtitle": "Messaging and optional notification features."
+      },
+      "billing": {
+        "subtitle": "SGMS subscription and payment requests.",
+        "body": "Plan selection, payments, and turnstile grace status are on Billing.",
+        "cta": "Go to billing"
+      },
+      "integrations": {
+        "subtitle": "Payment providers and hardware keys.",
+        "prepTitle": "Prep area",
+        "body": "Tenant API keys will stay server-side only and never be sent to the browser.",
+        "itemPayment": "Iyzico / PayTR (owner keys)",
+        "itemHardware": "RFID / turnstile hardware integrations"
+      },
+      "security": {
+        "subtitle": "Two-factor authentication and account security.",
+        "body": "Authenticator 2FA, backup codes, and recovery live on the security page.",
+        "cta": "Open security settings"
+      }
+    }
   },
   "billing": {
     "nav": "Ödəniş & Abunəlik",
@@ -1428,5 +1435,79 @@
       "status": "Status",
       "action": "Əməliyyat"
     }
+  },
+  "help": {
+    "title": "İstifadə təlimatı",
+    "subtitle": "Rolunuza uyğun bələdçilər, axtarış və kontekstli kömək.",
+    "backHome": "← Panelə qayıt",
+    "backToHub": "← Təlimat mərkəzi",
+    "search": "Axtar",
+    "searchPlaceholder": "Təlimatlarda axtar…",
+    "onboardingTitle": "Başlanğıc bələdçiləri",
+    "onboardingBadge": "Başlanğıc",
+    "empty": "Bu rol üçün təlimat yoxdur və ya axtarış uyğun gəlmədi.",
+    "contextualTitle": "Bu səhifə üçün kömək",
+    "categories": {
+      "onboarding": "Başlanğıc",
+      "checkin": "Check-in",
+      "pos": "POS / Kassa",
+      "members": "Üzvlər",
+      "programs": "Proqramlar",
+      "settings": "Ayarlar",
+      "billing": "Faturalandırma",
+      "security": "Təhlükəsizlik",
+      "integrations": "İnteqrasiyalar",
+      "general": "Ümumi"
+    }
+  },
+  "leads": {
+    "backToOverview": "← İcmal",
+    "title": "Namizədlər",
+    "subtitle": "Salonu gəzib qeydiyyatdan keçməyən namizədləri izləyin, geri dönüş planlaşdırın və bir kliklə üzvə çevirin.",
+    "noPermission": "Namizəd izləmə üçün OWNER, ADMIN və ya STAFF rolu lazımdır.",
+    "addTitle": "Yeni namizəd",
+    "name": "Ad Soyad",
+    "phone": "Telefon",
+    "email": "E-poçt",
+    "source": "Mənbə",
+    "interestedPlan": "Maraqlandığı paket",
+    "notes": "Qeyd",
+    "submit": "Namizəd əlavə et",
+    "saving": "Əlavə edilir…",
+    "sources": {
+      "WALK_IN": "Özü gəldi",
+      "REFERRAL": "Tövsiyə",
+      "SOCIAL_MEDIA": "Sosial media",
+      "WEBSITE": "Veb sayt",
+      "OTHER": "Digər"
+    },
+    "columns": {
+      "NEW": "Yeni",
+      "CONTACTED": "Əlaqə saxlanıldı",
+      "FOLLOW_UP_SCHEDULED": "Təqib planlaşdırıldı",
+      "CLOSED": "Üzv oldu / İtirildi"
+    },
+    "empty": "Bu mərhələdə namizəd yoxdur.",
+    "markContacted": "Əlaqə saxlanıldı işarələ",
+    "markLost": "İtirildi işarələ",
+    "convert": "Üzvə çevir",
+    "converting": "Çevrilir…",
+    "scheduleFollowUp": "Təqib planla",
+    "followUpScheduledAt": "Planlaşdırılan tarix",
+    "followUpMethod": "Üsul",
+    "methods": {
+      "CALL": "Zəng",
+      "MESSAGE": "Mesaj",
+      "EMAIL": "E-poçt"
+    },
+    "followUpNotes": "Qeyd",
+    "scheduleSubmit": "Planla",
+    "scheduling": "Planlaşdırılır…",
+    "completeFollowUp": "Tamamlandı işarələ",
+    "overdue": "Gecikmiş",
+    "dueToday": "Bu gün",
+    "convertedBadge": "Üzv oldu",
+    "lostBadge": "İtirildi",
+    "cancel": "İmtina"
   }
 }

@@ -9,6 +9,7 @@ import { auth } from '@/lib/auth';
 import { resolveSubscriptionAccess } from '@/lib/billing/subscription-gate';
 import { prisma } from '@/lib/prisma';
 import { getTranslations } from 'next-intl/server';
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 export default async function AthleteLayout({ children }: { children: React.ReactNode }) {
@@ -26,6 +27,7 @@ export default async function AthleteLayout({ children }: { children: React.Reac
   const tAuth = await getTranslations('auth');
   const tCommon = await getTranslations('common');
   const tBilling = await getTranslations('billing');
+  const tNav = await getTranslations('nav');
 
   if (access.mode === 'billing_only') {
     return (
@@ -73,6 +75,9 @@ export default async function AthleteLayout({ children }: { children: React.Reac
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Link href="/help" className="button px-3 py-2 text-xs">
+              {tNav('help')}
+            </Link>
             <ThemeToggle />
             <PushNotificationToggle />
             <LocaleSwitcher />
