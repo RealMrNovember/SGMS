@@ -41,21 +41,31 @@ export async function POST(request: NextRequest) {
   const paymentSuccessful = result.status === 'success' && result.paymentStatus === 'SUCCESS';
 
   if (orderId) {
-    const session = await prisma.gatewayCheckoutSession.findUnique({ where: { id: orderId } });
-    if (session && session.status === 'pending') {
-      if (paymentSuccessful) {
-        const activation = await activateSubscriptionFromRequest(
-          session.organizationId,
-          session.billingRequestId,
-          'gateway:iyzico',
-          null,
-        );
-        await prisma.gatewayCheckoutSession.update({
-          where: { id: orderId },
-          data: { status: activation.ok ? 'completed' : 'failed' },
-        });
-      } else {
-        await prisma.gatewayCheckoutSession.update({ where: { id: orderId }, data: { status: 'failed' } });
+    // Atomik "claim" — aynı webhook iki kez tetiklenirse (iyzico retry) yalnızca ilk
+    // çağrı `count: 1` alır ve devam eder; ikincisi hiçbir şeye dokunmadan çıkar.
+    // Bkz. roadmap.md Faz 36.7.
+    const claim = await prisma.gatewayCheckoutSession.updateMany({
+      where: { id: orderId, status: 'pending' },
+      data: { status: 'processing' },
+    });
+
+    if (claim.count > 0) {
+      const session = await prisma.gatewayCheckoutSession.findUnique({ where: { id: orderId } });
+      if (session) {
+        if (paymentSuccessful) {
+          const activation = await activateSubscriptionFromRequest(
+            session.organizationId,
+            session.billingRequestId,
+            'gateway:iyzico',
+            null,
+          );
+          await prisma.gatewayCheckoutSession.update({
+            where: { id: orderId },
+            data: { status: activation.ok ? 'completed' : 'failed' },
+          });
+        } else {
+          await prisma.gatewayCheckoutSession.update({ where: { id: orderId }, data: { status: 'failed' } });
+        }
       }
     }
   }

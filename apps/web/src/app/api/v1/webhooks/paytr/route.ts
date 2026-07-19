@@ -30,22 +30,30 @@ export async function POST(request: NextRequest) {
     return new NextResponse('OK');
   }
 
-  const session = await prisma.gatewayCheckoutSession.findUnique({ where: { id: merchantOid } });
+  // Atomik "claim" — PayTR aynı bildirimi "OK" alana kadar tekrar tekrar gönderir;
+  // yalnızca ilk çağrı `count: 1` alır ve devam eder. Bkz. roadmap.md Faz 36.7.
+  const claim = await prisma.gatewayCheckoutSession.updateMany({
+    where: { id: merchantOid, status: 'pending' },
+    data: { status: 'processing' },
+  });
 
-  if (session && session.status === 'pending') {
-    if (status === 'success') {
-      const activation = await activateSubscriptionFromRequest(
-        session.organizationId,
-        session.billingRequestId,
-        'gateway:paytr',
-        null,
-      );
-      await prisma.gatewayCheckoutSession.update({
-        where: { id: merchantOid },
-        data: { status: activation.ok ? 'completed' : 'failed' },
-      });
-    } else {
-      await prisma.gatewayCheckoutSession.update({ where: { id: merchantOid }, data: { status: 'failed' } });
+  if (claim.count > 0) {
+    const session = await prisma.gatewayCheckoutSession.findUnique({ where: { id: merchantOid } });
+    if (session) {
+      if (status === 'success') {
+        const activation = await activateSubscriptionFromRequest(
+          session.organizationId,
+          session.billingRequestId,
+          'gateway:paytr',
+          null,
+        );
+        await prisma.gatewayCheckoutSession.update({
+          where: { id: merchantOid },
+          data: { status: activation.ok ? 'completed' : 'failed' },
+        });
+      } else {
+        await prisma.gatewayCheckoutSession.update({ where: { id: merchantOid }, data: { status: 'failed' } });
+      }
     }
   }
 

@@ -4,15 +4,25 @@ import {
   findLatestProformaForRequest,
   markProformaEmailResult,
 } from '@/lib/billing/proforma';
+import { withOrgBillingLock } from '@/lib/billing/lock';
 import { prisma } from '@/lib/prisma';
 import { siteConfig } from '@/lib/site-config';
 import type { Prisma } from '@sgms/database';
-import { parseBillingSettings, updateBillingRequestStatus } from './settings';
+import { parseBillingSettings, updateBillingRequestStatus, type BillingRequest } from './settings';
+
+type ActivationResult =
+  | { ok: false; error: string }
+  | { ok: true; request: BillingRequest };
 
 /**
  * Bekleyen bir billingRequest'i onaylayıp aboneliği aktifleştirir. Master Admin'in
  * manuel onayı (approveBillingRequest) ve gateway webhook'ları (iyzico/PayTR ödeme
  * başarılı bildirimi) aynı bu fonksiyonu kullanır.
+ *
+ * Tüm oku-kontrol-et-yaz kritik bölümü `withOrgBillingLock` ile aynı organizasyon
+ * için serileştirilir — eşzamanlı iki çağrı (çift tıklama, kart ödemesiyle yarışan
+ * manuel onay, tekrarlanan webhook) asla ikisi de "pending" görüp ikisi de
+ * aktivasyon yapamaz. Bkz. roadmap.md Faz 36.7.
  */
 export async function activateSubscriptionFromRequest(
   organizationId: string,
@@ -20,39 +30,39 @@ export async function activateSubscriptionFromRequest(
   resolvedBy: string,
   actorId: string | null,
 ) {
-  const org = await prisma.organization.findUnique({
-    where: { id: organizationId },
-    select: { settings: true },
-  });
+  const result = await withOrgBillingLock<ActivationResult>(organizationId, async (tx) => {
+    const org = await tx.organization.findUnique({
+      where: { id: organizationId },
+      select: { settings: true },
+    });
 
-  if (!org) {
-    return { ok: false as const, error: 'Organizasyon bulunamadı.' };
-  }
+    if (!org) {
+      return { ok: false, error: 'Organizasyon bulunamadı.' };
+    }
 
-  const settings = parseBillingSettings(org.settings);
-  const request = (settings.billingRequests ?? []).find((r) => r.id === requestId);
+    const settings = parseBillingSettings(org.settings);
+    const request = (settings.billingRequests ?? []).find((r) => r.id === requestId);
 
-  if (!request || request.status !== 'pending') {
-    return { ok: false as const, error: 'Bekleyen talep bulunamadı.' };
-  }
+    if (!request || request.status !== 'pending') {
+      return { ok: false, error: 'Bekleyen talep bulunamadı.' };
+    }
 
-  const subscription = await prisma.subscription.findFirst({
-    where: { organizationId },
-    orderBy: { createdAt: 'desc' },
-  });
+    const subscription = await tx.subscription.findFirst({
+      where: { organizationId },
+      orderBy: { createdAt: 'desc' },
+    });
 
-  if (!subscription) {
-    return { ok: false as const, error: 'Abonelik kaydı yok.' };
-  }
+    if (!subscription) {
+      return { ok: false, error: 'Abonelik kaydı yok.' };
+    }
 
-  const periodEnd = new Date(
-    Date.now() + (request.billingCycle === 'YEARLY' ? 365 : 30) * 24 * 60 * 60 * 1000,
-  );
+    const periodEnd = new Date(
+      Date.now() + (request.billingCycle === 'YEARLY' ? 365 : 30) * 24 * 60 * 60 * 1000,
+    );
 
-  const nextSettings = updateBillingRequestStatus(settings, requestId, 'approved', resolvedBy);
+    const nextSettings = updateBillingRequestStatus(settings, requestId, 'approved', resolvedBy);
 
-  await prisma.$transaction([
-    prisma.subscription.update({
+    await tx.subscription.update({
       where: { id: subscription.id },
       data: {
         planId: request.planId,
@@ -62,8 +72,8 @@ export async function activateSubscriptionFromRequest(
         currentPeriodStart: new Date(),
         currentPeriodEnd: periodEnd,
       },
-    }),
-    prisma.organization.update({
+    });
+    await tx.organization.update({
       where: { id: organizationId },
       data: {
         status: 'ACTIVE',
@@ -71,8 +81,8 @@ export async function activateSubscriptionFromRequest(
         licenseExpiresAt: periodEnd,
         settings: nextSettings as Prisma.InputJsonValue,
       },
-    }),
-    prisma.auditLog.create({
+    });
+    await tx.auditLog.create({
       data: {
         actorId,
         organizationId,
@@ -86,8 +96,14 @@ export async function activateSubscriptionFromRequest(
           approvedBy: resolvedBy,
         },
       },
-    }),
-  ]);
+    });
+
+    return { ok: true, request };
+  });
+
+  if (!result.ok) {
+    return result;
+  }
 
   await syncOrganizationToCloud(organizationId);
 
@@ -96,7 +112,7 @@ export async function activateSubscriptionFromRequest(
     console.error('[billing] proforma e-postası gönderilemedi:', mail.error);
   }
 
-  return { ok: true as const, request, proformaEmail: mail };
+  return { ok: true as const, request: result.request, proformaEmail: mail };
 }
 
 export async function sendProformaInvoiceEmail(

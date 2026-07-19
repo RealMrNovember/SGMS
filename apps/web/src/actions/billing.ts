@@ -7,6 +7,7 @@ import {
   getPendingBillingRequest,
   parseBillingSettings,
 } from '@/lib/billing/settings';
+import { withOrgBillingLock } from '@/lib/billing/lock';
 import { resolveSubscriptionAccess } from '@/lib/billing/subscription-gate';
 import { getCloudClient } from '@/lib/cloud-sync';
 import { getPlatformPaymentSettings, initiateIyzicoCheckout, initiatePaytrCheckout } from '@/lib/payments/gateway';
@@ -79,32 +80,33 @@ export async function submitBillingRequest(
       return { error: 'Aktif aboneliğiniz mevcut. Paket değişikliği için destek ile iletişime geçin.' };
     }
 
-    const settings = parseBillingSettings(org.settings);
-    if (getPendingBillingRequest(settings)) {
-      return { error: 'Bekleyen bir ödeme talebiniz var. Onay sonrası panel otomatik açılacaktır.' };
-    }
-
     const amount =
       parsed.data.billingCycle === 'YEARLY'
         ? Number(plan.priceYearly)
         : Number(plan.priceMonthly);
 
-    const nextSettings = appendBillingRequest(settings, {
-      planId: plan.id,
-      planCode: plan.code,
-      planName: plan.name,
-      billingCycle: parsed.data.billingCycle,
-      amount,
-      currency: plan.currency,
-      notes: parsed.data.notes?.trim() || undefined,
-    });
+    const lockResult = await withOrgBillingLock(orgId, async (tx) => {
+      const freshOrg = await tx.organization.findUnique({ where: { id: orgId }, select: { settings: true } });
+      const settings = parseBillingSettings(freshOrg?.settings);
+      if (getPendingBillingRequest(settings)) {
+        return { error: 'Bekleyen bir ödeme talebiniz var. Onay sonrası panel otomatik açılacaktır.' } as const;
+      }
 
-    await prisma.$transaction([
-      prisma.organization.update({
+      const nextSettings = appendBillingRequest(settings, {
+        planId: plan.id,
+        planCode: plan.code,
+        planName: plan.name,
+        billingCycle: parsed.data.billingCycle,
+        amount,
+        currency: plan.currency,
+        notes: parsed.data.notes?.trim() || undefined,
+      });
+
+      await tx.organization.update({
         where: { id: orgId },
         data: { settings: nextSettings as Prisma.InputJsonValue },
-      }),
-      prisma.auditLog.create({
+      });
+      await tx.auditLog.create({
         data: {
           actorId: session.user.id,
           organizationId: orgId,
@@ -117,8 +119,14 @@ export async function submitBillingRequest(
             amount,
           },
         },
-      }),
-    ]);
+      });
+
+      return { error: undefined } as const;
+    });
+
+    if (lockResult.error) {
+      return { error: lockResult.error };
+    }
 
     revalidatePath('/dashboard/billing');
     return {
@@ -179,40 +187,49 @@ export async function startCardCheckout(
       parsed.data.billingCycle === 'YEARLY' ? Number(plan.priceYearly) : Number(plan.priceMonthly);
 
     if (gatewaySettings.activeGateway !== 'NONE') {
-      const orgSettingsRow = await prisma.organization.findUnique({
-        where: { id: orgId },
-        select: { settings: true },
-      });
-      const billingSettings = parseBillingSettings(orgSettingsRow?.settings);
-      if (getPendingBillingRequest(billingSettings)) {
-        return { error: 'Bekleyen bir ödeme talebiniz var. Onay sonrası panel otomatik açılacaktır.' };
-      }
+      const lockResult = await withOrgBillingLock<{ error?: string; billingRequestId?: string }>(
+        orgId,
+        async (tx) => {
+        const orgSettingsRow = await tx.organization.findUnique({
+          where: { id: orgId },
+          select: { settings: true },
+        });
+        const billingSettings = parseBillingSettings(orgSettingsRow?.settings);
+        if (getPendingBillingRequest(billingSettings)) {
+          return { error: 'Bekleyen bir ödeme talebiniz var. Onay sonrası panel otomatik açılacaktır.' };
+        }
 
-      const nextSettings = appendBillingRequest(billingSettings, {
-        planId: plan.id,
-        planCode: plan.code,
-        planName: plan.name,
-        billingCycle: parsed.data.billingCycle,
-        amount,
-        currency: plan.currency,
-      });
-      const billingRequestId = nextSettings.billingRequests![0].id;
+        const nextSettings = appendBillingRequest(billingSettings, {
+          planId: plan.id,
+          planCode: plan.code,
+          planName: plan.name,
+          billingCycle: parsed.data.billingCycle,
+          amount,
+          currency: plan.currency,
+        });
+        const billingRequestId = nextSettings.billingRequests![0].id;
 
-      await prisma.$transaction([
-        prisma.organization.update({
+        await tx.organization.update({
           where: { id: orgId },
           data: { settings: nextSettings as Prisma.InputJsonValue },
-        }),
-        prisma.gatewayCheckoutSession.create({
+        });
+        await tx.gatewayCheckoutSession.create({
           data: {
             id: billingRequestId,
             organizationId: orgId,
             billingRequestId,
             gateway: gatewaySettings.activeGateway,
           },
-        }),
-      ]);
+        });
 
+        return { error: undefined, billingRequestId } as const;
+      });
+
+      if (lockResult.error || !lockResult.billingRequestId) {
+        return { error: lockResult.error ?? 'Ödeme talebi oluşturulamadı.' };
+      }
+
+      const billingRequestId = lockResult.billingRequestId;
       const ctx = await getRequestAuditContext();
       const buyer = {
         id: session.user.id,

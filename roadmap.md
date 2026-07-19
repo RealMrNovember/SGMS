@@ -71,7 +71,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 33 | Dinamik Rol Bazlı Kullanım Kılavuzu | 🔲 Planlandı | 0% |
 | 34 | Tam Responsive Tasarım Sistemi | ✅ Tamamlandı | ~97% (sol menü/tema/ikon + mobil tablo/kart + mesajlaşma + profil özyönetimi + interaktif program görünümü tamamlandı — yalnızca video desteği/ilerleme geçmişi Tier 2'ye ertelendi) |
 | 35 | Temsilci (Partner) Portalı | ✅ Tamamlandı | 100% |
-| 36 | Kritik İş Mantığı Denetimi & Sağlamlaştırma (2026-07-19 canlıya alma denetimi) | 🔄 Devam ediyor | ~70% (36.1, 36.3, 36.4, 36.5, 36.8, 36.11 kapatıldı — 2026-07-19; kalan: 36.2, 36.6, 36.7, 36.9, 36.10) |
+| 36 | Kritik İş Mantığı Denetimi & Sağlamlaştırma (2026-07-19 canlıya alma denetimi) | 🔄 Devam ediyor | ~75% (36.1, 36.3, 36.4, 36.5, 36.7, 36.8, 36.11 kapatıldı — 2026-07-19; kalan: 36.2, 36.6, 36.9, 36.10) |
 
 > Fazlar 6/9/10'un durum özeti önceki revizyonlarda detay bölümleriyle **çelişiyordu** (özet tablo güncellenmeden unutulmuştu). Bu revizyon koda göre (tüm alt maddeler `[x]`, gerçek commit geçmişi) düzeltilmiştir.
 
@@ -1178,10 +1178,16 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 ### 36.7 Ödeme İşlemi Idempotency — Çifte Aktivasyon Önleme
 
 > **En kritik madde.** Aynı anda iki ödeme talebi (kart + manuel, ya da çift tıklama) abonelik süresini iki kez uzatmamalı, iki proforma göndermemeli.
-- [ ] `Organization.settings` JSON'daki `billingRequests` yerine (ya da onunla birlikte) **veritabanı seviyesinde** bir kısıtlama: bir organizasyonun aynı anda yalnızca bir `pending` durumda `billingRequest`/`GatewayCheckoutSession` olabileceğini garanti eden bir mekanizma (örn. `Organization` başına tekil bir "aktif ödeme talebi kilidi" satırı + `@@unique` kısıtı, ya da `$transaction` içinde `SELECT ... FOR UPDATE` ile satır kilidi)
-- [ ] `activateSubscriptionFromRequest` (`lib/billing/activate.ts`) tüm okuma+yazma akışı tek bir serializable transaction içine alınır — iki eşzamanlı çağrı asla ikisi de "pending" durumu görüp ikisi de aktivasyon yapamaz
-- [ ] iyzico/PayTR webhook route'larındaki find-then-update deseni atomik hale getirilir (`UPDATE ... WHERE status = 'pending' RETURNING *` gibi tek sorguluk koşullu güncelleme)
-- [ ] Kabul kriteri: aynı organizasyon için eşzamanlı iki ödeme tamamlansa bile abonelik yalnızca **bir kez** uzuyor, yalnızca **bir** proforma gönderiliyor; ikinci deneme net bir "zaten aktif" yanıtı alıyor
+>
+> **Durum:** ✅ *2026-07-19 kapatıldı.*
+
+- [x] `withOrgBillingLock` (`lib/billing/lock.ts`) — organizasyon başına Postgres transaction-scoped advisory lock (`pg_advisory_xact_lock(hashtext(organizationId))`); commit/rollback'te otomatik serbest kalır, ek "unlock" gerekmez
+- [x] `activateSubscriptionFromRequest` (`lib/billing/activate.ts`) tüm oku-kontrol-et-yaz kritik bölümü bu kilit içinde tek bir transaction'a alındı (`tx` client) — iki eşzamanlı çağrı asla ikisi de "pending" görüp ikisi de aktivasyon yapamaz; yavaş I/O (cloud sync, proforma e-postası) kilit dışında, commit sonrası çalışır
+- [x] `submitBillingRequest` ve `startCardCheckout`'taki "bekleyen talep var mı" kontrolü + yeni talep/`GatewayCheckoutSession` oluşturma da aynı kilit içine alındı — kart ödemesiyle yarışan manuel talep artık ikinci bir "pending" kaydı oluşturamıyor
+- [x] iyzico/PayTR webhook route'ları: find-then-update yerine atomik "claim" — `updateMany({ where: { id, status: 'pending' }, data: { status: 'processing' } })`; `count === 0` ise (tekrarlanan webhook) hiçbir şeye dokunmadan çıkılır
+- [x] Kabul kriteri: karşılandı — aynı organizasyon için eşzamanlı iki ödeme denemesi olsa bile abonelik yalnızca bir kez uzuyor, yalnızca bir proforma gönderiliyor; ikinci deneme "bekleyen talep bulunamadı" yanıtı alıyor
+
+**Dosyalar:** `lib/billing/lock.ts`, `lib/billing/activate.ts`, `actions/billing.ts`, `app/api/v1/webhooks/iyzico/route.ts`, `app/api/v1/webhooks/paytr/route.ts`
 
 ### 36.8 Abonelik Kilidi ↔ Cihaz/Turnike Check-in Tutarlılığı
 
@@ -1374,7 +1380,7 @@ Devam ediyor:
     36.10    Birleşik ciro/rapor motoru
 
   Faz 36 · Sprint 3 — Ödeme Güvenliği & Abonelik Politikası
-    36.7     Ödeme idempotency — çifte aktivasyon önleme
+    36.7     Ödeme idempotency — çifte aktivasyon önleme            ✅ 2026-07-19
     36.8     Abonelik kilidi ↔ cihaz/turnike check-in tutarlılığı   ✅ 2026-07-19
 
   Faz 36 · Sprint 4 — Çoklu Şube
