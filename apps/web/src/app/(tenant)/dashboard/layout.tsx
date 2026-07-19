@@ -4,6 +4,7 @@ import { AppSidebarNav, type AppNavGroup } from '@/components/app-sidebar-nav';
 import { LicenseStatusBanner } from '@/components/license-status-banner';
 import { LocaleSwitcher } from '@/components/locale-switcher';
 import { MessageLiveRefresh } from '@/components/message-live-refresh';
+import { OrgSwitcher } from '@/components/org-switcher';
 import { PushNotificationToggle } from '@/components/push-notification-toggle';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { auth } from '@/lib/auth';
@@ -161,9 +162,7 @@ export default async function TenantDashboardLayout({ children }: { children: Re
         <div className="app-sidebar-brand">
           <span aria-hidden="true">🏋️</span>
           <span className="app-sidebar-brand-text min-w-0">
-            <span className="block truncate text-sm font-semibold">
-              {session.user.organizationName ?? tAuth('noOrganization')}
-            </span>
+            <OrgSwitcher className="block truncate text-sm font-semibold" />
             <span className="badge mt-1 inline-flex text-[10px]">{tCommon('appName')}</span>
           </span>
         </div>
@@ -190,9 +189,7 @@ export default async function TenantDashboardLayout({ children }: { children: Re
 
       <div className="min-h-screen">
         <div className="app-topbar items-center justify-between gap-3 px-4 py-3">
-          <p className="min-w-0 truncate text-sm font-semibold">
-            {session.user.organizationName ?? tAuth('noOrganization')}
-          </p>
+          <OrgSwitcher className="min-w-0 truncate text-sm font-semibold" />
           <div className="flex shrink-0 items-center gap-2">
             <ThemeToggle />
             <LocaleSwitcher />

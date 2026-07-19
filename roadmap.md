@@ -71,7 +71,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 33 | Dinamik Rol Bazlı Kullanım Kılavuzu | 🔲 Planlandı | 0% |
 | 34 | Tam Responsive Tasarım Sistemi | ✅ Tamamlandı | ~97% (sol menü/tema/ikon + mobil tablo/kart + mesajlaşma + profil özyönetimi + interaktif program görünümü tamamlandı — yalnızca video desteği/ilerleme geçmişi Tier 2'ye ertelendi) |
 | 35 | Temsilci (Partner) Portalı | ✅ Tamamlandı | 100% |
-| 36 | Kritik İş Mantığı Denetimi & Sağlamlaştırma (2026-07-19 canlıya alma denetimi) | 🔄 Devam ediyor | ~75% (36.1, 36.3, 36.4, 36.5, 36.7, 36.8, 36.11 kapatıldı — 2026-07-19; kalan: 36.2, 36.6, 36.9, 36.10) |
+| 36 | Kritik İş Mantığı Denetimi & Sağlamlaştırma (2026-07-19 canlıya alma denetimi) | 🔄 Devam ediyor | ~80% (36.1, 36.3, 36.4, 36.5, 36.6, 36.7, 36.8, 36.11 kapatıldı — 2026-07-19; kalan: 36.2, 36.9, 36.10) |
 
 > Fazlar 6/9/10'un durum özeti önceki revizyonlarda detay bölümleriyle **çelişiyordu** (özet tablo güncellenmeden unutulmuştu). Bu revizyon koda göre (tüm alt maddeler `[x]`, gerçek commit geçmişi) düzeltilmiştir.
 
@@ -1170,10 +1170,17 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 ### 36.6 Çoklu Şube Personel Desteği & Organizasyon Switcher
 
 > **Senaryo:** Aynı kişi (örneğin bir bölge müdürü ya da birden fazla şubede çalışan bir PT) hem Gym A'da hem Gym B'de personel olabilmeli ve panelde şubeler arasında geçiş yapıp her birinin kendi müşterileriyle ayrı ayrı ilgilenebilmeli.
-- [ ] Aynı e-posta birden fazla organizasyonda personel olarak davet edilebilir hale getirilir — `inviteTeamMember`'daki "zaten kayıtlı" kontrolü yalnızca hedef organizasyon için mi bakıyor doğrulanır ve sessiz no-op yerine ya gerçekten davet gönderilir ya da net bir hata döner
-- [ ] Session/JWT tek bir `organizationId`'ye kilitlenmek yerine, kullanıcının aktif üyeliklerinin listesini taşır; **profesyonel bir organizasyon switcher** (dashboard header'da, mevcut şubeler arasında tek tıkla geçiş — sayfa yenilemeden, benzer SaaS ürünlerindeki "workspace switcher" deseni) eklenir
-- [ ] Aktif organizasyon seçimi JWT'de güncellenir (`update()` session callback ile) ve tüm sorgular her zaman o an aktif olan `organizationId`'ye göre scoped kalır — bir şubenin verisi asla diğerinde sızmaz
-- [ ] Kabul kriteri: aynı e-posta Gym A ve Gym B'de ayrı ayrı personel olabiliyor; kullanıcı panelde tek tıkla şube değiştirebiliyor; her şubede yalnızca o şubenin üyeleri/verileri görünüyor
+>
+> **Durum:** ✅ *2026-07-19 kapatıldı.*
+
+- [x] Aynı e-posta birden fazla organizasyonda personel olabiliyor — mevcut hesap sahibi başka bir salona eklendiğinde `inviteTeamMember` artık sessizce no-op yapmıyor: yeni üyelik oluşturulup kullanıcıya "mevcut hesabınla giriş yapabilirsin" bildirimi e-postayla gönderiliyor (`actions/team.ts`)
+- [x] Login'de (`lib/auth.ts` `authorize()`) artık `take: 1` ile tek üyelik değil, kullanıcının **tüm aktif üyelikleri** (`availableMemberships: { organizationId, organizationName, role }[]`) JWT'ye taşınıyor
+- [x] Dashboard header/topbar'da **profesyonel bir organizasyon switcher** (`components/org-switcher.tsx`) — tek üyelik varsa sade metin, birden fazlaysa tıkla-aç dropdown; şube değişimi `useSession().update({ organizationId })` ile sayfa yenilenmeden JWT'yi günceller, ardından `router.refresh()` ile sunucu verisi tazelenir
+- [x] Aktif organizasyon geçişi sunucu tarafında doğrulanıyor — `auth.config.ts` jwt callback'i istemciden gelen `organizationId`'yi doğrudan güvenmiyor, yalnızca token'daki `availableMemberships` listesinde (login anında DB'den doğrulanmış) gerçekten yer alan bir org'a geçişe izin veriyor; sahte/yetkisiz bir `organizationId` enjekte edilemez
+- [x] Tüm sorgular hâlâ o an aktif olan tek bir `session.user.organizationId`'ye göre scoped kalıyor (switcher yalnızca hangi org'un aktif olduğunu değiştiriyor, hiçbir sorgu birden fazla org'u aynı anda karıştırmıyor) — bir şubenin verisi asla diğerinde sızmıyor
+- [x] Kabul kriteri: aynı e-posta Gym A ve Gym B'de ayrı ayrı personel olabiliyor; kullanıcı panelde tek tıkla şube değiştirebiliyor; her şubede yalnızca o şubenin üyeleri/verileri görünüyor
+
+**Dosyalar:** `lib/auth.ts`, `lib/auth.config.ts`, `components/org-switcher.tsx`, `app/(tenant)/dashboard/layout.tsx`, `actions/team.ts`
 
 ### 36.7 Ödeme İşlemi Idempotency — Çifte Aktivasyon Önleme
 
@@ -1383,8 +1390,8 @@ Devam ediyor:
     36.7     Ödeme idempotency — çifte aktivasyon önleme            ✅ 2026-07-19
     36.8     Abonelik kilidi ↔ cihaz/turnike check-in tutarlılığı   ✅ 2026-07-19
 
-  Faz 36 · Sprint 4 — Çoklu Şube
-    36.6     Çoklu şube personel desteği & organizasyon switcher     ← en büyük kapsam, session/JWT yeniden tasarımı
+  Faz 36 · Sprint 4 — Çoklu Şube                                              ✅ 2026-07-19
+    36.6     Çoklu şube personel desteği & organizasyon switcher     ✅ 2026-07-19
 
   Faz 36 · Sprint 5 — İkincil sağlamlaştırma (36.11)                          ✅ 2026-07-19
     QR tek kullanımlık · offline sync direction · cihaz DRAINING ·

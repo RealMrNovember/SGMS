@@ -1,6 +1,12 @@
 import type { OrganizationRole } from '@sgms/database';
 import type { NextAuthConfig } from 'next-auth';
 
+export type MembershipOption = {
+  organizationId: string;
+  organizationName: string;
+  role: OrganizationRole;
+};
+
 declare module 'next-auth' {
   interface Session {
     user: {
@@ -19,6 +25,8 @@ declare module 'next-auth' {
       gymMemberId: string | null;
       twoFactorEnabled: boolean;
       needsTwoFactorSetup: boolean;
+      /** Faz 36.6 — aynı kişi birden fazla salonda personel olabilir. */
+      availableMemberships: MembershipOption[];
     };
   }
 
@@ -34,6 +42,7 @@ declare module 'next-auth' {
     locale?: string;
     gymMemberId?: string | null;
     twoFactorEnabled?: boolean;
+    availableMemberships?: MembershipOption[];
   }
 }
 
@@ -47,7 +56,7 @@ export const authConfig = {
   },
   providers: [],
   callbacks: {
-    jwt: async ({ token, user }) => {
+    jwt: async ({ token, user, trigger, session }) => {
       if (user) {
         token.sub = user.id;
         token.isSuperAdmin = user.isSuperAdmin ?? false;
@@ -61,6 +70,21 @@ export const authConfig = {
         token.locale = user.locale ?? 'tr';
         token.gymMemberId = user.gymMemberId ?? null;
         token.twoFactorEnabled = user.twoFactorEnabled ?? false;
+        token.availableMemberships = user.availableMemberships ?? [];
+      }
+
+      // Faz 36.6 — organizasyon switcher `session.update({ organizationId })` çağırır;
+      // yalnızca kullanıcının gerçekten üye olduğu bir org'a geçişe izin verilir (token'daki
+      // availableMemberships listesi istemciden gelen değeri değil, giriş anında DB'den
+      // gelen listeyi doğrular — sahte bir organizationId enjekte edilemez).
+      if (trigger === 'update' && session && typeof session.organizationId === 'string') {
+        const options = (token.availableMemberships as MembershipOption[] | undefined) ?? [];
+        const target = options.find((m) => m.organizationId === session.organizationId);
+        if (target) {
+          token.organizationId = target.organizationId;
+          token.organizationName = target.organizationName;
+          token.role = target.role;
+        }
       }
 
       return token;
@@ -79,6 +103,7 @@ export const authConfig = {
         session.user.locale = (token.locale as string | undefined) ?? 'tr';
         session.user.gymMemberId = (token.gymMemberId as string | null | undefined) ?? null;
         session.user.twoFactorEnabled = Boolean(token.twoFactorEnabled);
+        session.user.availableMemberships = (token.availableMemberships as MembershipOption[] | undefined) ?? [];
 
         const privilegedRole =
           session.user.isSuperAdmin || session.user.role === 'OWNER' || session.user.role === 'ADMIN';

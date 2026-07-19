@@ -213,6 +213,31 @@ export async function inviteTeamMember(
     return { success: `${data.name} eklendi. Parolasını belirlemesi için davet e-postası gönderildi.` };
   }
 
+  // Faz 36.6 — kullanıcının zaten başka bir salonda hesabı var; mevcut parolasıyla giriş
+  // yapıp panelde şube değiştirebilir. Kimse habersiz bir organizasyona eklenmesin diye
+  // bilgilendirme e-postası gönderilir (passwordMode bu durumda uygulanmaz).
+  if (existingUser) {
+    const orgName = context.session.user.organizationName ?? 'yeni bir salon';
+    const html = `
+      <p>Merhaba ${existingUser.name},</p>
+      <p>Mevcut SGMS hesabınız <strong>${orgName}</strong> salonuna <strong>${data.role}</strong> rolüyle eklendi.</p>
+      <p>Her zamanki e-posta ve parolanızla giriş yapıp panelin üst kısmındaki şube seçiciden bu salona geçiş yapabilirsiniz.</p>
+    `.trim();
+
+    const mailResult = await getCloudClient().sendMail({
+      to: email,
+      subject: 'SGMS — yeni bir salona eklendiniz',
+      html,
+      category: 'transactional',
+    });
+
+    if (!mailResult.ok) {
+      console.error('[team] mevcut kullanıcıya yeni salon bildirimi gönderilemedi:', existingUser.id, mailResult.message);
+    }
+
+    return { success: `${data.name}, bu salona personel olarak eklendi (mevcut hesabıyla giriş yapabilir).` };
+  }
+
   return { success: `${data.name} personel olarak eklendi.` };
 }
 

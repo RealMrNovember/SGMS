@@ -101,7 +101,6 @@ export const { handlers, auth: baseAuth, signIn, signOut } = NextAuth({
                 },
               },
               orderBy: { createdAt: 'asc' },
-              take: 1,
             },
             gymMemberProfile: {
               select: {
@@ -231,6 +230,15 @@ export const { handlers, auth: baseAuth, signIn, signOut } = NextAuth({
         const activePartnerProfile =
           user.isPartner && user.partnerProfile?.isActive ? user.partnerProfile : null;
 
+        // Faz 36.6 — aynı kişi birden fazla salonda personel olabilir; tüm aktif
+        // üyelikler token'a taşınır ki dashboard'daki organizasyon switcher'ı
+        // sayfa yenilemeden şubeler arasında geçiş yapabilsin.
+        const availableMemberships = user.memberships.map((m) => ({
+          organizationId: m.organizationId,
+          organizationName: m.organization.name,
+          role: m.role,
+        }));
+
         return {
           id: user.id,
           email: user.email,
@@ -247,6 +255,7 @@ export const { handlers, auth: baseAuth, signIn, signOut } = NextAuth({
           locale: user.locale,
           gymMemberId: gymMember?.id ?? null,
           twoFactorEnabled: Boolean(user.twoFactorEnabledAt),
+          availableMemberships,
         };
       },
     }),
