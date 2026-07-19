@@ -168,6 +168,7 @@ export async function getOrganizationAdminDetail(id: string) {
               status: true,
               lastLoginAt: true,
               createdAt: true,
+              twoFactorEnabledAt: true,
             },
           },
         },

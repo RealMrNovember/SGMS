@@ -11,6 +11,7 @@ import {
 import { syncOrganizationToCloud } from '@/lib/cloud-sync';
 import { prisma } from '@/lib/prisma';
 import { consumeLoginRateLimit } from '@/lib/rate-limit';
+import { isStaffDeactivatedCache } from '@/lib/api/staff-revoke-cache';
 import { matchBackupCode, verifyTotpToken } from '@/lib/two-factor';
 
 const credentialsSchema = z.object({
@@ -19,7 +20,7 @@ const credentialsSchema = z.object({
   totp: z.string().optional(),
 });
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+export const { handlers, auth: baseAuth, signIn, signOut } = NextAuth({
   ...authConfig,
   events: {
     signOut: async (message) => {
@@ -251,3 +252,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
 });
+
+/**
+ * `baseAuth()` yalnızca giriş anındaki JWT'yi çözer — bir personel sonradan
+ * çıkarılsa/devre dışı bırakılsa bile mevcut oturum kendiliğinden geçersiz olmaz.
+ * Bu sarmalayıcı, her `auth()` çağrısında (yalnızca Node.js çalışma zamanında —
+ * middleware.ts kendi hafif Edge NextAuth örneğini kullanır, bunu değil)
+ * Redis'teki "devre dışı bırakıldı" işaretini kontrol eder (bkz. roadmap.md Faz 36.4).
+ */
+export async function auth() {
+  const session = await baseAuth();
+
+  if (session?.user && !session.user.isSuperAdmin && session.user.organizationId) {
+    const deactivated = await isStaffDeactivatedCache(session.user.organizationId, session.user.id);
+    if (deactivated) {
+      return null;
+    }
+  }
+
+  return session;
+}

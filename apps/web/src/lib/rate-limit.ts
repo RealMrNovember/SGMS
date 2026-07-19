@@ -76,3 +76,12 @@ export async function consumePasswordResetRateLimit(email: string, ipAddress: st
   if (!byIp.allowed) return byIp;
   return byEmail;
 }
+
+export async function consumeTwoFactorRecoveryRateLimit(email: string, ipAddress: string) {
+  const byEmail = await consumeRateLimit(`rl:2farecover:email:${email.toLowerCase()}`, 3, 900);
+  const byIp = await consumeRateLimit(`rl:2farecover:ip:${ipAddress}`, 10, 900);
+
+  if (!byEmail.allowed) return byEmail;
+  if (!byIp.allowed) return byIp;
+  return byEmail;
+}

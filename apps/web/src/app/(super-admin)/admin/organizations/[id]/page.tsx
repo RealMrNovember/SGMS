@@ -258,6 +258,7 @@ export default async function AdminOrganizationDetailPage({
             rfidTag: member.rfidTag,
             joinedAt: member.joinedAt,
             user: member.user,
+            twoFactorEnabledAt: member.user.twoFactorEnabledAt,
           }))}
         />
       </section>

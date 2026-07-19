@@ -2,6 +2,7 @@
 
 import {
   adminResetMemberPassword,
+  adminResetTwoFactor,
   adminToggleMemberActive,
   adminUpdateMemberRole,
   adminUpdateStaffRfid,
@@ -21,6 +22,7 @@ type MemberRow = {
     email: string;
     lastLoginAt: Date | null;
   };
+  twoFactorEnabledAt: Date | null;
 };
 
 export function OrganizationTeamMemberRow({
@@ -44,6 +46,10 @@ export function OrganizationTeamMemberRow({
   const [, rfidAction] = useActionState(wrap(adminUpdateStaffRfid), {} as AdminTeamState);
   const [, toggleAction] = useActionState(wrap(adminToggleMemberActive), {} as AdminTeamState);
   const [, resetAction, resetPending] = useActionState(wrap(adminResetMemberPassword), {} as AdminTeamState);
+  const [, resetTwoFactorAction, resetTwoFactorPending] = useActionState(
+    wrap(adminResetTwoFactor),
+    {} as AdminTeamState,
+  );
 
   return (
     <tr className="border-b border-[var(--border)] align-top last:border-none">
@@ -105,6 +111,19 @@ export function OrganizationTeamMemberRow({
               Parola sıfırla
             </button>
           </form>
+          {member.twoFactorEnabledAt ? (
+            <form action={resetTwoFactorAction}>
+              <input type="hidden" name="organizationId" value={organizationId} />
+              <input type="hidden" name="membershipId" value={member.id} />
+              <button
+                type="submit"
+                className="button px-3 py-2 text-xs min-h-[2.75rem]"
+                disabled={resetTwoFactorPending}
+              >
+                2FA sıfırla
+              </button>
+            </form>
+          ) : null}
         </div>
       </td>
     </tr>

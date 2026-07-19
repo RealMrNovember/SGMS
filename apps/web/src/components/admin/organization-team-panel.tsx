@@ -16,6 +16,7 @@ type MemberRow = {
     email: string;
     lastLoginAt: Date | null;
   };
+  twoFactorEnabledAt: Date | null;
 };
 
 export function OrganizationTeamPanel({

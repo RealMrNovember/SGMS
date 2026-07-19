@@ -2,6 +2,8 @@
 
 import { requireSuperAdmin } from '@/lib/admin/guards';
 import { writeAdminAuditLog } from '@/lib/admin/audit-write';
+import { markStaffDeactivated } from '@/lib/api/staff-revoke-cache';
+import { getCloudClient } from '@/lib/cloud-sync';
 import { prisma } from '@/lib/prisma';
 import type { OrganizationRole } from '@sgms/database';
 import { hash } from 'bcryptjs';
@@ -236,8 +238,15 @@ export async function adminToggleMemberActive(
     await prisma.$transaction(async (tx) => {
       await tx.organizationMember.update({
         where: { id: membershipId },
-        data: { isActive: nextActive },
+        data: { isActive: nextActive, rfidTag: nextActive ? undefined : null },
       });
+
+      if (!nextActive) {
+        await tx.staffInviteToken.updateMany({
+          where: { userId: membership.userId, usedAt: null },
+          data: { usedAt: new Date() },
+        });
+      }
 
       await writeAdminAuditLog({
         actorId: session.user.id!,
@@ -248,6 +257,10 @@ export async function adminToggleMemberActive(
         metadata: { isActive: nextActive, role: membership.role, updatedBy: 'master_admin' },
       });
     });
+
+    if (!nextActive) {
+      await markStaffDeactivated(organizationId, membership.userId);
+    }
 
     revalidateOrg(organizationId);
     return { success: nextActive ? 'Personel yeniden aktifleştirildi.' : 'Personel devre dışı bırakıldı.' };
@@ -384,5 +397,76 @@ export async function adminResetMemberPassword(
     };
   } catch (error) {
     return { error: error instanceof Error ? error.message : 'Parola sıfırlanamadı.' };
+  }
+}
+
+/**
+ * Master Admin, telefonunu ve yedek kodlarını kaybedip e-posta kurtarmasına da
+ * erişemeyen bir OWNER/ADMIN için destek yoluyla 2FA'yı sıfırlar. Bkz. roadmap.md Faz 36.3.
+ */
+export async function adminResetTwoFactor(
+  _prev: AdminTeamState,
+  formData: FormData,
+): Promise<AdminTeamState> {
+  const parsed = resetSchema.safeParse({
+    organizationId: formData.get('organizationId'),
+    membershipId: formData.get('membershipId'),
+  });
+
+  if (!parsed.success) {
+    return { error: 'Geçersiz istek.' };
+  }
+
+  try {
+    const session = await requireSuperAdmin();
+    const { organizationId, membershipId } = parsed.data;
+
+    const membership = await prisma.organizationMember.findFirst({
+      where: { id: membershipId, organizationId },
+      include: { user: { select: { id: true, email: true, name: true, twoFactorEnabledAt: true } } },
+    });
+
+    if (!membership) {
+      return { error: 'Personel kaydı bulunamadı.' };
+    }
+
+    if (!membership.user.twoFactorEnabledAt) {
+      return { error: 'Bu kullanıcıda 2FA zaten etkin değil.' };
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: membership.userId },
+        data: { totpSecret: null, twoFactorEnabledAt: null },
+      });
+      await tx.twoFactorBackupCode.deleteMany({ where: { userId: membership.userId } });
+
+      await writeAdminAuditLog({
+        actorId: session.user.id!,
+        organizationId,
+        action: 'TWO_FACTOR_DISABLED',
+        entityType: 'user',
+        entityId: membership.userId,
+        metadata: { email: membership.user.email, resetBy: 'master_admin' },
+      });
+    });
+
+    const notifyHtml = `
+      <p>Merhaba ${membership.user.name},</p>
+      <p>SGMS hesabınızın iki faktörlü doğrulaması (2FA), destek talebiniz üzerine Master Admin
+      tarafından az önce sıfırlandı. Bir sonraki girişinizde 2FA'yı yeniden kurmanız istenecek.</p>
+      <p>Bu talebi siz yapmadıysanız, lütfen derhal bizimle iletişime geçin.</p>
+    `.trim();
+    await getCloudClient().sendMail({
+      to: membership.user.email,
+      subject: 'SGMS — 2FA hesabınız sıfırlandı',
+      html: notifyHtml,
+      category: 'transactional',
+    });
+
+    revalidateOrg(organizationId);
+    return { success: `${membership.user.email} için 2FA sıfırlandı.` };
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : '2FA sıfırlanamadı.' };
   }
 }

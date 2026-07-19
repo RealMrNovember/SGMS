@@ -1,4 +1,5 @@
 import { InviteTeamForm } from '@/components/invite-team-form';
+import { RemoveStaffButton } from '@/components/remove-staff-button';
 import { StaffRfidField } from '@/components/staff-rfid-field';
 import { UserAvatar } from '@/components/user-avatar';
 import { auth } from '@/lib/auth';
@@ -85,6 +86,11 @@ export default async function TeamPage() {
                   <span className="data-card-label">{t('columns.rfid')}</span>
                 </div>
                 <StaffRfidField membershipId={member.id} currentRfid={member.rfidTag} canManage={canInvite} />
+                {canInvite && member.userId !== session.user.id ? (
+                  <div className="mt-2">
+                    <RemoveStaffButton membershipId={member.id} name={member.user.name} />
+                  </div>
+                ) : null}
               </div>
             </div>
           ))}
@@ -99,6 +105,7 @@ export default async function TeamPage() {
                 <th className="px-6 py-3 font-medium">{t('columns.role')}</th>
                 <th className="px-6 py-3 font-medium">{t('columns.rfid')}</th>
                 <th className="px-6 py-3 font-medium">{t('columns.joined')}</th>
+                {canInvite ? <th className="px-6 py-3 font-medium"></th> : null}
               </tr>
             </thead>
             <tbody>
@@ -130,6 +137,13 @@ export default async function TeamPage() {
                       dateLocale,
                     )}
                   </td>
+                  {canInvite ? (
+                    <td className="px-6 py-4">
+                      {member.userId !== session.user.id ? (
+                        <RemoveStaffButton membershipId={member.id} name={member.user.name} />
+                      ) : null}
+                    </td>
+                  ) : null}
                 </tr>
               ))}
             </tbody>

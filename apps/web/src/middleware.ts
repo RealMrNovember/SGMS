@@ -57,6 +57,8 @@ export default auth((request) => {
     pathname.startsWith('/forgot-password') ||
     pathname.startsWith('/reset-password') ||
     pathname.startsWith('/staff-invite') ||
+    pathname.startsWith('/forgot-2fa') ||
+    pathname.startsWith('/reset-2fa') ||
     pathname.startsWith('/privacy') ||
     pathname.startsWith('/terms') ||
     pathname.startsWith('/api/auth') ||

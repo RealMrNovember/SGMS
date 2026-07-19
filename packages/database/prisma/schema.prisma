@@ -320,30 +320,31 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  twoFactorBackupCodes TwoFactorBackupCode[]
-  staffInviteTokens    StaffInviteToken[]
-  memberships          OrganizationMember[]
-  auditLogs            AuditLog[]            @relation("AuditLogActor")
-  gymMemberProfile     GymMember?            @relation("GymMemberAccount")
-  assignedAthletes     GymMember[]           @relation("GymMemberTrainer")
-  trainingPrograms     TrainingProgram[]     @relation("TrainingProgramTrainer")
-  sentMessages         DirectMessage[]       @relation("DirectMessageSender")
-  receivedMessages     DirectMessage[]       @relation("DirectMessageReceiver")
-  messageReports       MessageReport[]       @relation("MessageReportReporter")
-  reviewedReports      MessageReport[]       @relation("MessageReportReviewer")
-  apiTokens            ApiToken[]
-  expensesCreated      Expense[]             @relation("ExpenseCreatedBy")
-  transactionsCreated  Transaction[]         @relation("TransactionCreatedBy")
-  paymentPlansCreated  PaymentPlan[]         @relation("PaymentPlanCreatedBy")
-  staffCheckIns        CheckIn[]             @relation("StaffCheckIn")
-  passwordResetTokens  PasswordResetToken[]
-  partnerProfile       Partner?
-  pushSubscriptions    PushSubscription[]
-  trainerProfiles      TrainerProfile[]
-  ptSessionsAsTrainer  PtSession[]           @relation("PtSessionTrainer")
-  ptSessionsCreated    PtSession[]           @relation("PtSessionCreatedBy")
-  hierarchyMemberships HierarchyMember[]
-  notifications        Notification[]
+  twoFactorBackupCodes    TwoFactorBackupCode[]
+  staffInviteTokens       StaffInviteToken[]
+  twoFactorRecoveryTokens TwoFactorRecoveryToken[]
+  memberships             OrganizationMember[]
+  auditLogs               AuditLog[]               @relation("AuditLogActor")
+  gymMemberProfile        GymMember?               @relation("GymMemberAccount")
+  assignedAthletes        GymMember[]              @relation("GymMemberTrainer")
+  trainingPrograms        TrainingProgram[]        @relation("TrainingProgramTrainer")
+  sentMessages            DirectMessage[]          @relation("DirectMessageSender")
+  receivedMessages        DirectMessage[]          @relation("DirectMessageReceiver")
+  messageReports          MessageReport[]          @relation("MessageReportReporter")
+  reviewedReports         MessageReport[]          @relation("MessageReportReviewer")
+  apiTokens               ApiToken[]
+  expensesCreated         Expense[]                @relation("ExpenseCreatedBy")
+  transactionsCreated     Transaction[]            @relation("TransactionCreatedBy")
+  paymentPlansCreated     PaymentPlan[]            @relation("PaymentPlanCreatedBy")
+  staffCheckIns           CheckIn[]                @relation("StaffCheckIn")
+  passwordResetTokens     PasswordResetToken[]
+  partnerProfile          Partner?
+  pushSubscriptions       PushSubscription[]
+  trainerProfiles         TrainerProfile[]
+  ptSessionsAsTrainer     PtSession[]              @relation("PtSessionTrainer")
+  ptSessionsCreated       PtSession[]              @relation("PtSessionCreatedBy")
+  hierarchyMemberships    HierarchyMember[]
+  notifications           Notification[]
 
   @@index([status])
   @@index([isSuperAdmin])
@@ -497,6 +498,29 @@ model PasswordResetToken {
   @@index([userId])
   @@index([expiresAt])
   @@map("password_reset_tokens")
+}
+
+// ---------------------------------------------------------------------------
+// TwoFactorRecoveryToken — telefonunu ve yedek kodlarını kaybeden bir kullanıcı
+// için e-posta ile 2FA sıfırlama linki (PasswordResetToken ile aynı desen).
+// Bkz. roadmap.md Faz 36.3.
+// ---------------------------------------------------------------------------
+
+model TwoFactorRecoveryToken {
+  id        String    @id @default(cuid())
+  userId    String    @map("user_id")
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  ipAddress String?   @map("ip_address")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("two_factor_recovery_tokens")
 }
 
 // ---------------------------------------------------------------------------

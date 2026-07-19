@@ -4,8 +4,10 @@ import { compare } from 'bcryptjs';
 import { z } from 'zod';
 import { auth } from '@/lib/auth';
 import { getRequestAuditContext, writeAuditLog } from '@/lib/audit/logger';
+import { getCloudClient } from '@/lib/cloud-sync';
 import { prisma } from '@/lib/prisma';
-import { consumeLoginRateLimit } from '@/lib/rate-limit';
+import { consumeLoginRateLimit, consumeTwoFactorRecoveryRateLimit } from '@/lib/rate-limit';
+import { siteConfig } from '@/lib/site-config';
 import {
   buildOtpauthUrl,
   generateBackupCodes,
@@ -13,6 +15,11 @@ import {
   matchBackupCode,
   verifyTotpToken,
 } from '@/lib/two-factor';
+import {
+  consumeTwoFactorRecoveryToken,
+  createTwoFactorRecoveryToken,
+  verifyTwoFactorRecoveryToken,
+} from '@/lib/two-factor-recovery';
 
 async function requireSession() {
   const session = await auth();
@@ -200,4 +207,149 @@ export async function regenerateBackupCodes(
   });
 
   return { backupCodes: plain } as const;
+}
+
+// ---------------------------------------------------------------------------
+// E-posta ile 2FA kurtarma — telefonunu ve yedek kodlarını kaybeden bir OWNER/
+// ADMIN kendi hesabına kalıcı olarak kilitlenmesin diye. Bkz. roadmap.md Faz 36.3.
+// ---------------------------------------------------------------------------
+
+export type TwoFactorRecoveryRequestState = { error?: string; success?: string };
+
+const GENERIC_RECOVERY_SUCCESS =
+  'Bu e-posta adresine kayıtlı ve 2FA etkin bir hesap varsa, kurtarma bağlantısı gönderildi. Gelen kutunuzu (ve spam klasörünü) kontrol edin.';
+
+const recoveryRequestSchema = z.object({ email: z.string().email() });
+
+export async function requestTwoFactorRecovery(
+  _prev: TwoFactorRecoveryRequestState,
+  formData: FormData,
+): Promise<TwoFactorRecoveryRequestState> {
+  const parsed = recoveryRequestSchema.safeParse({ email: formData.get('email') });
+  if (!parsed.success) {
+    return { error: 'Lütfen geçerli bir e-posta adresi girin.' };
+  }
+
+  const email = parsed.data.email.toLowerCase();
+  const ctx = await getRequestAuditContext();
+
+  const limit = await consumeTwoFactorRecoveryRateLimit(email, ctx.ipAddress ?? 'unknown');
+  if (!limit.allowed) {
+    return { error: 'Çok fazla deneme yapıldı. Lütfen bir süre sonra tekrar deneyin.' };
+  }
+
+  // Kullanıcı var mı, 2FA etkin mi — her durumda aynı cevap (e-posta numaralandırma saldırısına karşı).
+  const user = await prisma.user.findUnique({ where: { email } });
+
+  if (user && user.status === 'ACTIVE' && user.twoFactorEnabledAt) {
+    const { token } = await createTwoFactorRecoveryToken(user.id, ctx.ipAddress);
+    const recoveryUrl = `${siteConfig.url}/reset-2fa?token=${token}`;
+
+    const html = `
+      <p>Merhaba ${user.name},</p>
+      <p>SGMS hesabınız için bir 2FA (iki faktörlü doğrulama) sıfırlama talebi aldık. Aşağıdaki
+      bağlantıya tıklayarak 2FA'nızı sıfırlayıp yeniden kurabilirsiniz:</p>
+      <p><a href="${recoveryUrl}">${recoveryUrl}</a></p>
+      <p>Bu bağlantı 60 dakika içinde geçerliliğini yitirecektir.</p>
+      <p>Bu talebi siz yapmadıysanız, bu e-postayı yok sayabilirsiniz — hesabınızda herhangi bir
+      değişiklik yapılmayacaktır.</p>
+    `.trim();
+
+    const mailResult = await getCloudClient().sendMail({
+      to: user.email,
+      subject: 'SGMS — 2FA sıfırlama talebi',
+      html,
+      category: 'password_reset',
+    });
+
+    if (!mailResult.ok) {
+      console.error('[two-factor-recovery] mail relay failed:', user.id, mailResult.message);
+    }
+
+    await writeAuditLog({
+      actorId: user.id,
+      organizationId: null,
+      action: 'TWO_FACTOR_DISABLED',
+      entityType: 'user',
+      entityId: user.id,
+      metadata: { stage: 'requested', emailSent: mailResult.ok },
+      ipAddress: ctx.ipAddress,
+      userAgent: ctx.userAgent,
+    });
+  }
+
+  return { success: GENERIC_RECOVERY_SUCCESS };
+}
+
+export type CompleteTwoFactorRecoveryState = { error?: string; success?: string };
+
+const completeRecoverySchema = z.object({ token: z.string().min(10) });
+
+export async function completeTwoFactorRecovery(
+  _prev: CompleteTwoFactorRecoveryState,
+  formData: FormData,
+): Promise<CompleteTwoFactorRecoveryState> {
+  const parsed = completeRecoverySchema.safeParse({ token: formData.get('token') });
+  if (!parsed.success) {
+    return { error: 'Geçersiz bağlantı.' };
+  }
+
+  const check = await verifyTwoFactorRecoveryToken(parsed.data.token);
+  if (!check.valid) {
+    const message =
+      check.reason === 'expired'
+        ? 'Bu bağlantının süresi dolmuş. Lütfen yeni bir kurtarma talebi oluşturun.'
+        : check.reason === 'used'
+          ? 'Bu bağlantı zaten kullanılmış. Lütfen yeni bir kurtarma talebi oluşturun.'
+          : 'Geçersiz bağlantı. Lütfen yeni bir kurtarma talebi oluşturun.';
+    return { error: message };
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: check.userId },
+    select: { id: true, email: true, name: true },
+  });
+
+  if (!user) {
+    return { error: 'Hesap bulunamadı.' };
+  }
+
+  await prisma.$transaction([
+    prisma.user.update({
+      where: { id: user.id },
+      data: { totpSecret: null, twoFactorEnabledAt: null },
+    }),
+    prisma.twoFactorBackupCode.deleteMany({ where: { userId: user.id } }),
+  ]);
+
+  await consumeTwoFactorRecoveryToken(check.tokenId);
+
+  const ctx = await getRequestAuditContext();
+  await writeAuditLog({
+    actorId: user.id,
+    organizationId: null,
+    action: 'TWO_FACTOR_DISABLED',
+    entityType: 'user',
+    entityId: user.id,
+    metadata: { stage: 'completed', recovery: true },
+    ipAddress: ctx.ipAddress,
+    userAgent: ctx.userAgent,
+  });
+
+  // Hesap sahibi habersiz kalmasın — kimse onun bilgisi dışında 2FA'sını sıfırlayamasın diye bildirim.
+  const notifyHtml = `
+    <p>Merhaba ${user.name},</p>
+    <p>SGMS hesabınızın iki faktörlü doğrulaması (2FA), e-posta ile kurtarma bağlantısı
+    kullanılarak az önce sıfırlandı. Bir sonraki girişinizde 2FA'yı yeniden kurmanız istenecek.</p>
+    <p>Bu işlemi siz yapmadıysanız, lütfen derhal bizimle iletişime geçin.</p>
+  `.trim();
+
+  await getCloudClient().sendMail({
+    to: user.email,
+    subject: 'SGMS — 2FA hesabınız sıfırlandı',
+    html: notifyHtml,
+    category: 'transactional',
+  });
+
+  return { success: '2FA sıfırlandı. Şimdi giriş yapıp yeniden kurabilirsiniz.' };
 }

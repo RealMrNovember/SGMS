@@ -163,17 +163,22 @@ export function LoginForm() {
               value={totp}
               onChange={(event) => setTotp(event.target.value)}
             />
-            <button
-              type="button"
-              className="muted text-xs hover:text-white"
-              onClick={() => {
-                setNeedsTotp(false);
-                setTotp('');
-                setError(null);
-              }}
-            >
-              {tLogin('backToCredentials')}
-            </button>
+            <div className="flex items-center justify-between">
+              <button
+                type="button"
+                className="muted text-xs hover:text-white"
+                onClick={() => {
+                  setNeedsTotp(false);
+                  setTotp('');
+                  setError(null);
+                }}
+              >
+                {tLogin('backToCredentials')}
+              </button>
+              <Link href="/forgot-2fa" className="muted text-xs hover:text-white">
+                2FA&apos;ya erişimim yok
+              </Link>
+            </div>
           </div>
         ) : null}
 

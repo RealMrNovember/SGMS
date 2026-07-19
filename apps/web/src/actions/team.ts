@@ -6,6 +6,7 @@ import { getCloudClient } from '@/lib/cloud-sync';
 import { createStaffInviteToken } from '@/lib/staff-invite';
 import { prisma } from '@/lib/prisma';
 import { siteConfig } from '@/lib/site-config';
+import { markStaffDeactivated } from '@/lib/api/staff-revoke-cache';
 import { assertWithinStaffLimit, getTenantWriteBlockReason } from '@/lib/tenant-access';
 import type { OrganizationRole } from '@sgms/database';
 import { hash } from 'bcryptjs';
@@ -265,4 +266,73 @@ export async function updateStaffRfid(
   revalidatePath('/dashboard/check-in');
 
   return { success: rfidTag ? 'Personel kartı kaydedildi.' : 'Personel kartı kaldırıldı.' };
+}
+
+export type RemoveStaffMemberState = { error?: string; success?: string };
+
+/**
+ * Bir personeli salon adına çıkarır/devre dışı bırakır (OWNER/ADMIN). Master Admin
+ * tarafındaki eşdeğeri: adminToggleMemberActive (actions/admin-team.ts).
+ * Bkz. roadmap.md Faz 36.4.
+ */
+export async function removeStaffMember(
+  _prev: RemoveStaffMemberState,
+  formData: FormData,
+): Promise<RemoveStaffMemberState> {
+  const context = await getTenantContext();
+  if ('error' in context) {
+    return { error: context.error };
+  }
+
+  const membershipId = String(formData.get('membershipId') ?? '');
+  if (!membershipId) {
+    return { error: 'Geçersiz istek.' };
+  }
+
+  const membership = await prisma.organizationMember.findFirst({
+    where: { id: membershipId, organizationId: context.organizationId },
+  });
+
+  if (!membership) {
+    return { error: 'Personel kaydı bulunamadı.' };
+  }
+
+  if (membership.role === 'OWNER') {
+    const ownerCount = await prisma.organizationMember.count({
+      where: { organizationId: context.organizationId, role: 'OWNER', isActive: true },
+    });
+    if (ownerCount <= 1) {
+      return { error: 'Son OWNER çıkarılamaz.' };
+    }
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.organizationMember.update({
+      where: { id: membershipId },
+      data: { isActive: false, rfidTag: null },
+    });
+
+    await tx.staffInviteToken.updateMany({
+      where: { userId: membership.userId, usedAt: null },
+      data: { usedAt: new Date() },
+    });
+
+    await tx.auditLog.create({
+      data: {
+        actorId: context.actorId,
+        organizationId: context.organizationId,
+        action: 'MEMBER_REMOVED',
+        entityType: 'organization_member',
+        entityId: membershipId,
+        metadata: { role: membership.role },
+      },
+    });
+  });
+
+  await markStaffDeactivated(context.organizationId, membership.userId);
+
+  revalidatePath('/dashboard/team');
+  revalidatePath('/dashboard/check-in');
+
+  return { success: 'Personel çıkarıldı.' };
 }

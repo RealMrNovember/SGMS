@@ -39,7 +39,9 @@ declare module 'next-auth' {
 
 export const authConfig = {
   trustHost: true,
-  session: { strategy: 'jwt' },
+  // maxAge: personel çıkarıldığında oturumun en fazla bu kadar geçerli kalması için üst
+  // sınır (bkz. lib/auth.ts'teki Redis tabanlı anlık iptal ile birlikte çalışır — Faz 36.4).
+  session: { strategy: 'jwt', maxAge: 60 * 60 * 24 },
   pages: {
     signIn: '/login',
   },
