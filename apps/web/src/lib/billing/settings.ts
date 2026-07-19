@@ -35,7 +35,13 @@ export function appendBillingRequest(
     ...settings,
     billingRequests: [
       {
-        id: randomUUID(),
+        // Tire (-) kasıtlı olarak yok: bu id aynı zamanda GatewayCheckoutSession.id ve
+        // PayTR'a giden orderId olarak kullanılıyor. `initiatePaytrCheckout` PayTR'a
+        // göndermeden önce merchant_oid'den alfanümerik olmayan karakterleri (tire dahil)
+        // siliyor — id baştan tiresiz üretilmezse PayTR'ın webhook'ta geri gönderdiği
+        // merchant_oid, DB'de tireli saklanan id ile hiçbir zaman eşleşmiyordu ve
+        // ödemesi başarılı PayTR checkout'ları abonelik aktivasyonunu hiç tetiklemiyordu.
+        id: randomUUID().replace(/-/g, ''),
         status: 'pending' as const,
         createdAt: new Date().toISOString(),
         ...request,
