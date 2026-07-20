@@ -1,10 +1,24 @@
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import QRCode from 'react-native-qrcode-svg';
-import { fetchCheckInQr, fetchMe, fetchMeasurements } from '../lib/api';
-import { colors } from '../lib/theme';
+import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { CheckInQrModal } from '../components/CheckInQrModal';
+import { Avatar } from '../components/ui/Avatar';
+import { Badge } from '../components/ui/Badge';
+import { Button } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
+import { PressableScale } from '../components/ui/PressableScale';
+import { fetchMe, fetchMeasurements } from '../lib/api';
+import { colors, gradients, radius, shadow, spacing, typography } from '../lib/theme';
 import type { AthleteSession, HealthMeasurement, MeResponse } from '../lib/types';
 import type { TabKey } from '../components/TabBar';
+
+const STATUS_LABEL: Record<string, string> = {
+  ACTIVE: 'Aktif Üye',
+  FROZEN: 'Dondurulmuş',
+  INACTIVE: 'Pasif',
+  SUSPENDED: 'Askıda',
+};
 
 export function HomeScreen({
   session,
@@ -15,9 +29,8 @@ export function HomeScreen({
 }) {
   const [me, setMe] = useState<MeResponse | null>(null);
   const [latestMeasurement, setLatestMeasurement] = useState<HealthMeasurement | null>(null);
-  const [qrToken, setQrToken] = useState<string | null>(null);
-  const [qrError, setQrError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [qrVisible, setQrVisible] = useState(false);
 
   const loadAll = useCallback(async () => {
     try {
@@ -32,158 +45,212 @@ export function HomeScreen({
     }
   }, [session.accessToken]);
 
-  const loadQr = useCallback(async () => {
-    setQrError(null);
-    try {
-      const data = await fetchCheckInQr(session.accessToken);
-      setQrToken(data.token);
-    } catch (err) {
-      setQrError(err instanceof Error ? err.message : 'QR kod alınamadı');
-    }
-  }, [session.accessToken]);
-
   useEffect(() => {
     void loadAll();
-    void loadQr();
-    const interval = setInterval(() => void loadQr(), 4 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, [loadAll, loadQr]);
+  }, [loadAll]);
 
   async function handleRefresh() {
     setRefreshing(true);
-    await Promise.all([loadAll(), loadQr()]);
+    await loadAll();
     setRefreshing(false);
   }
 
   const fullName = me ? `${me.gymMember.firstName} ${me.gymMember.lastName}` : session.user.name;
+  const statusTone = me?.gymMember.status === 'ACTIVE' ? 'success' : 'neutral';
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.content}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.gold} />}
-    >
-      <View style={styles.card}>
-        <Text style={styles.name}>{fullName}</Text>
-        {me ? (
-          <Text style={styles.muted}>
-            {me.gymMember.plan?.name ?? '—'} · {me.gymMember.status}
-          </Text>
-        ) : (
-          <ActivityIndicator color={colors.gold} style={{ marginTop: 8 }} />
-        )}
-        {me?.gymMember.membershipEndsAt ? (
-          <Text style={styles.faint}>
-            Üyelik bitiş: {new Date(me.gymMember.membershipEndsAt).toLocaleDateString('tr-TR')}
-          </Text>
-        ) : null}
-      </View>
-
-      <View style={styles.statsRow}>
-        <TouchableOpacity style={styles.statCard} onPress={() => onNavigate('programs')}>
-          <Text style={styles.statValue}>{me?.stats.activePrograms ?? '—'}</Text>
-          <Text style={styles.statLabel}>Programlar</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.statCard} onPress={() => onNavigate('measurements')}>
-          <Text style={styles.statValue}>
-            {latestMeasurement?.weight != null ? String(latestMeasurement.weight) : '—'}
-          </Text>
-          <Text style={styles.statLabel}>Kilo (kg)</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.statCard} onPress={() => onNavigate('messages')}>
-          <Text style={styles.statValue}>{me?.stats.unreadMessages ?? '—'}</Text>
-          <Text style={styles.statLabel}>Mesaj</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.qrCard}>
-        <Text style={styles.qrTitle}>Salon Girişi</Text>
-        {qrToken ? (
-          <View style={styles.qrWhite}>
-            <QRCode value={qrToken} size={190} />
-          </View>
-        ) : (
-          <Text style={styles.muted}>{qrError ?? 'QR kod hazırlanıyor…'}</Text>
-        )}
-        <Text style={styles.faint}>Kodu turnikeye okutun · her 4 dakikada bir yenilenir</Text>
-      </View>
-
-      {latestMeasurement ? (
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Son Ölçüm</Text>
-          <View style={styles.measurementGrid}>
-            <View style={styles.measurementItem}>
-              <Text style={styles.faint}>Kilo</Text>
-              <Text style={styles.measurementValue}>
-                {latestMeasurement.weight != null ? `${latestMeasurement.weight} kg` : '—'}
-              </Text>
-            </View>
-            <View style={styles.measurementItem}>
-              <Text style={styles.faint}>Yağ Oranı</Text>
-              <Text style={styles.measurementValue}>
-                {latestMeasurement.bodyFatPercentage != null
-                  ? `${latestMeasurement.bodyFatPercentage}%`
-                  : '—'}
-              </Text>
-            </View>
-            <View style={styles.measurementItem}>
-              <Text style={styles.faint}>Kas Kütlesi</Text>
-              <Text style={styles.measurementValue}>
-                {latestMeasurement.muscleMass != null ? `${latestMeasurement.muscleMass} kg` : '—'}
-              </Text>
-            </View>
+    <>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.content}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.gold} />}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.header}>
+          <Avatar name={fullName} uri={me?.gymMember.avatarUrl} size={54} />
+          <View style={styles.headerText}>
+            <Text style={styles.greeting}>Hoş geldin</Text>
+            <Text style={styles.name} numberOfLines={1}>
+              {fullName}
+            </Text>
           </View>
         </View>
-      ) : null}
 
-      <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Antrenörünüz</Text>
-        <Text style={styles.muted}>
-          {me?.gymMember.trainer?.name ?? me?.gymMember.trainer?.email ?? 'Atanmış antrenör yok'}
-        </Text>
+        {me ? (
+          <View style={styles.metaRow}>
+            <Badge label={STATUS_LABEL[me.gymMember.status] ?? me.gymMember.status} tone={statusTone} />
+            {me.gymMember.plan ? <Badge label={me.gymMember.plan.name} tone="gold" /> : null}
+          </View>
+        ) : (
+          <ActivityIndicator color={colors.gold} style={{ marginTop: spacing.md }} />
+        )}
+
+        <PressableScale onPress={() => setQrVisible(true)} haptic style={styles.qrCtaWrap}>
+          <LinearGradient
+            colors={gradients.hero}
+            style={[styles.qrCta, shadow.card]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <View style={styles.qrCtaIcon}>
+              <Ionicons name="qr-code-outline" size={26} color={colors.gold} />
+            </View>
+            <View style={styles.qrCtaTextWrap}>
+              <Text style={styles.qrCtaTitle}>Salona Giriş Yap</Text>
+              <Text style={styles.qrCtaSubtitle}>QR kodunu göstermek için dokun</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={colors.faint} />
+          </LinearGradient>
+        </PressableScale>
+
+        <View style={styles.statsRow}>
+          <StatCard
+            icon="barbell-outline"
+            value={me?.stats.activePrograms ?? '—'}
+            label="Programlar"
+            onPress={() => onNavigate('programs')}
+          />
+          <StatCard
+            icon="scale-outline"
+            value={latestMeasurement?.weight != null ? String(latestMeasurement.weight) : '—'}
+            label="Kilo (kg)"
+            onPress={() => onNavigate('measurements')}
+          />
+          <StatCard
+            icon="chatbubble-ellipses-outline"
+            value={me?.stats.unreadMessages ?? '—'}
+            label="Mesaj"
+            onPress={() => onNavigate('messages')}
+          />
+        </View>
+
+        {latestMeasurement ? (
+          <Card>
+            <SectionTitle icon="pulse-outline" label="Son Ölçüm" />
+            <View style={styles.measurementGrid}>
+              <MeasurementItem label="Kilo" value={latestMeasurement.weight != null ? `${latestMeasurement.weight} kg` : '—'} />
+              <MeasurementItem
+                label="Yağ Oranı"
+                value={latestMeasurement.bodyFatPercentage != null ? `${latestMeasurement.bodyFatPercentage}%` : '—'}
+              />
+              <MeasurementItem
+                label="Kas Kütlesi"
+                value={latestMeasurement.muscleMass != null ? `${latestMeasurement.muscleMass} kg` : '—'}
+              />
+            </View>
+          </Card>
+        ) : null}
+
+        <Card>
+          <SectionTitle icon="person-outline" label="Antrenörünüz" />
+          <Text style={styles.trainerName}>
+            {me?.gymMember.trainer?.name ?? me?.gymMember.trainer?.email ?? 'Atanmış antrenör yok'}
+          </Text>
+          {me?.gymMember.trainer ? (
+            <View style={{ marginTop: spacing.md }}>
+              <Button
+                label="Mesaj Gönder"
+                variant="secondary"
+                icon="chatbubble-outline"
+                onPress={() => onNavigate('messages')}
+              />
+            </View>
+          ) : null}
+        </Card>
+      </ScrollView>
+
+      <CheckInQrModal visible={qrVisible} accessToken={session.accessToken} onClose={() => setQrVisible(false)} />
+    </>
+  );
+}
+
+function StatCard({
+  icon,
+  value,
+  label,
+  onPress,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  value: string | number;
+  label: string;
+  onPress: () => void;
+}) {
+  return (
+    <PressableScale onPress={onPress} haptic style={styles.statCardWrap}>
+      <View style={styles.statCard}>
+        <Ionicons name={icon} size={18} color={colors.gold} />
+        <Text style={styles.statValue}>{value}</Text>
+        <Text style={styles.statLabel}>{label}</Text>
       </View>
-    </ScrollView>
+    </PressableScale>
+  );
+}
+
+function SectionTitle({ icon, label }: { icon: keyof typeof Ionicons.glyphMap; label: string }) {
+  return (
+    <View style={styles.sectionTitleRow}>
+      <Ionicons name={icon} size={16} color={colors.gold} />
+      <Text style={styles.sectionTitle}>{label}</Text>
+    </View>
+  );
+}
+
+function MeasurementItem({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={styles.measurementItem}>
+      <Text style={styles.faint}>{label}</Text>
+      <Text style={styles.measurementValue}>{value}</Text>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
-  content: { padding: 16, gap: 12, paddingBottom: 32 },
-  card: {
-    backgroundColor: colors.card,
-    borderRadius: 16,
+  content: { padding: spacing.lg, gap: spacing.md, paddingBottom: 32 },
+  header: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  headerText: { flex: 1 },
+  greeting: { ...typography.caption, color: colors.faint },
+  name: { ...typography.title, color: colors.text, marginTop: 2 },
+  metaRow: { flexDirection: 'row', gap: spacing.sm },
+  qrCtaWrap: { marginTop: spacing.xs },
+  qrCta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    borderRadius: radius.lg,
+    padding: spacing.lg,
     borderWidth: 1,
-    borderColor: colors.border,
-    padding: 16,
+    borderColor: colors.goldBorder,
   },
-  name: { color: colors.text, fontSize: 20, fontWeight: '700' },
-  muted: { color: colors.muted, fontSize: 13, marginTop: 6 },
-  faint: { color: colors.faint, fontSize: 12, marginTop: 8 },
-  statsRow: { flexDirection: 'row', gap: 10 },
+  qrCtaIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: radius.md,
+    backgroundColor: colors.goldSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  qrCtaTextWrap: { flex: 1 },
+  qrCtaTitle: { ...typography.heading, color: colors.text },
+  qrCtaSubtitle: { ...typography.caption, color: colors.muted, marginTop: 2 },
+  statsRow: { flexDirection: 'row', gap: spacing.sm },
+  statCardWrap: { flex: 1 },
   statCard: {
-    flex: 1,
     backgroundColor: colors.card,
-    borderRadius: 14,
+    borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors.border,
-    paddingVertical: 14,
+    paddingVertical: spacing.md,
     alignItems: 'center',
+    gap: 4,
   },
-  statValue: { color: colors.gold, fontSize: 20, fontWeight: '700' },
-  statLabel: { color: colors.faint, fontSize: 11, marginTop: 4 },
-  qrCard: {
-    backgroundColor: colors.card,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: 20,
-    alignItems: 'center',
-    gap: 10,
-  },
-  qrTitle: { color: colors.text, fontSize: 15, fontWeight: '600' },
-  qrWhite: { backgroundColor: '#fff', borderRadius: 16, padding: 16 },
-  sectionTitle: { color: colors.text, fontSize: 15, fontWeight: '600', marginBottom: 10 },
+  statValue: { ...typography.heading, color: colors.text },
+  statLabel: { ...typography.tiny, color: colors.faint },
+  sectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: spacing.sm },
+  sectionTitle: { ...typography.subheading, color: colors.text },
+  trainerName: { ...typography.body, color: colors.muted },
   measurementGrid: { flexDirection: 'row', justifyContent: 'space-between' },
   measurementItem: { alignItems: 'center', flex: 1 },
-  measurementValue: { color: colors.text, fontSize: 14, fontWeight: '600', marginTop: 4 },
+  faint: { ...typography.caption, color: colors.faint },
+  measurementValue: { ...typography.subheading, color: colors.text, marginTop: 4 },
 });

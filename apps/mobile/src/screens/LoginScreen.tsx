@@ -1,6 +1,8 @@
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
 import {
-  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -9,18 +11,25 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Button } from '../components/ui/Button';
 import { login } from '../lib/api';
+import { colors, gradients, radius, spacing, typography } from '../lib/theme';
 import type { AthleteSession } from '../lib/types';
 
 export function LoginScreen({ onSuccess }: { onSuccess: (session: AthleteSession) => void }) {
+  const insets = useSafeAreaInsets();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [focusedField, setFocusedField] = useState<'email' | 'password' | null>(null);
 
   async function handleSubmit() {
     if (!email || !password) {
       setError('E-posta ve parola gerekli');
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
       return;
     }
     setLoading(true);
@@ -30,111 +39,113 @@ export function LoginScreen({ onSuccess }: { onSuccess: (session: AthleteSession
       onSuccess(session);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Giriş başarısız');
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <Text style={styles.brand}>SGMS</Text>
-      <Text style={styles.subtitle}>Sporcu Girişi</Text>
+    <LinearGradient colors={gradients.hero} style={styles.container}>
+      <KeyboardAvoidingView
+        style={[styles.flex, { paddingTop: insets.top + spacing.xxl, paddingBottom: insets.bottom + spacing.lg }]}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <View style={styles.brandWrap}>
+          <LinearGradient colors={gradients.gold} style={styles.logo}>
+            <Ionicons name="barbell" size={30} color="#241a08" />
+          </LinearGradient>
+          <Text style={styles.brand}>SGMS Sporcu</Text>
+          <Text style={styles.subtitle}>Salon üyeliğinizi tek dokunuşla yönetin</Text>
+        </View>
 
-      <View style={styles.form}>
-        <TextInput
-          style={styles.input}
-          placeholder="E-posta"
-          placeholderTextColor="#64748b"
-          autoCapitalize="none"
-          autoComplete="email"
-          keyboardType="email-address"
-          value={email}
-          onChangeText={setEmail}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Parola"
-          placeholderTextColor="#64748b"
-          secureTextEntry
-          autoCapitalize="none"
-          value={password}
-          onChangeText={setPassword}
-        />
+        <View style={styles.form}>
+          <View style={[styles.inputWrap, focusedField === 'email' && styles.inputWrapFocused]}>
+            <Ionicons name="mail-outline" size={18} color={colors.faint} style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="E-posta"
+              placeholderTextColor={colors.faint}
+              autoCapitalize="none"
+              autoComplete="email"
+              keyboardType="email-address"
+              value={email}
+              onChangeText={setEmail}
+              onFocus={() => setFocusedField('email')}
+              onBlur={() => setFocusedField(null)}
+            />
+          </View>
 
-        {error ? <Text style={styles.error}>{error}</Text> : null}
+          <View style={[styles.inputWrap, focusedField === 'password' && styles.inputWrapFocused]}>
+            <Ionicons name="lock-closed-outline" size={18} color={colors.faint} style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Parola"
+              placeholderTextColor={colors.faint}
+              secureTextEntry={!showPassword}
+              autoCapitalize="none"
+              value={password}
+              onChangeText={setPassword}
+              onFocus={() => setFocusedField('password')}
+              onBlur={() => setFocusedField(null)}
+            />
+            <TouchableOpacity onPress={() => setShowPassword((v) => !v)} hitSlop={10}>
+              <Ionicons
+                name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                size={18}
+                color={colors.faint}
+              />
+            </TouchableOpacity>
+          </View>
 
-        <TouchableOpacity
-          style={[styles.button, loading && styles.buttonDisabled]}
-          onPress={handleSubmit}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#0b1220" />
-          ) : (
-            <Text style={styles.buttonText}>Giriş Yap</Text>
-          )}
-        </TouchableOpacity>
-      </View>
-    </KeyboardAvoidingView>
+          {error ? (
+            <View style={styles.errorRow}>
+              <Ionicons name="alert-circle" size={15} color={colors.danger} />
+              <Text style={styles.error}>{error}</Text>
+            </View>
+          ) : null}
+
+          <View style={{ marginTop: spacing.sm }}>
+            <Button label="Giriş Yap" onPress={handleSubmit} loading={loading} icon="log-in-outline" />
+          </View>
+        </View>
+      </KeyboardAvoidingView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0b1220',
+  container: { flex: 1 },
+  flex: { flex: 1, justifyContent: 'center', paddingHorizontal: spacing.xxl },
+  brandWrap: { alignItems: 'center', marginBottom: spacing.xxl * 1.4 },
+  logo: {
+    width: 68,
+    height: 68,
+    borderRadius: radius.lg,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 28,
+    marginBottom: spacing.lg,
   },
-  brand: {
-    fontSize: 34,
-    fontWeight: '700',
-    color: '#c9a962',
-    letterSpacing: 2,
+  brand: { ...typography.title, fontSize: 26, color: colors.text, letterSpacing: 0.5 },
+  subtitle: { ...typography.body, color: colors.muted, marginTop: spacing.xs, textAlign: 'center' },
+  form: { gap: spacing.md },
+  inputWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: radius.md,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    backgroundColor: colors.card,
+    paddingHorizontal: spacing.md,
   },
-  subtitle: {
-    fontSize: 15,
-    color: '#94a3b8',
-    marginTop: 4,
-    marginBottom: 36,
-  },
-  form: {
-    width: '100%',
-    gap: 12,
-  },
+  inputWrapFocused: { borderColor: colors.goldBorder },
+  inputIcon: { marginRight: spacing.sm },
   input: {
-    width: '100%',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#1e293b',
-    backgroundColor: '#111a2b',
-    color: '#e2e8f0',
-    paddingHorizontal: 16,
+    flex: 1,
+    color: colors.text,
     paddingVertical: 14,
     fontSize: 15,
   },
-  button: {
-    marginTop: 8,
-    borderRadius: 12,
-    backgroundColor: '#c9a962',
-    paddingVertical: 15,
-    alignItems: 'center',
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: '#0b1220',
-    fontWeight: '700',
-    fontSize: 15,
-  },
-  error: {
-    color: '#f87171',
-    fontSize: 13,
-    textAlign: 'center',
-  },
+  errorRow: { flexDirection: 'row', alignItems: 'center', gap: 6, justifyContent: 'center' },
+  error: { ...typography.caption, color: colors.danger },
 });

@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -7,11 +8,13 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
 } from 'react-native';
+import { Avatar } from '../components/ui/Avatar';
+import { EmptyState } from '../components/ui/EmptyState';
+import { PressableScale } from '../components/ui/PressableScale';
 import { fetchMe, fetchMessages, sendMessage } from '../lib/api';
-import { colors } from '../lib/theme';
+import { colors, radius, spacing, typography } from '../lib/theme';
 import type { AthleteSession, DirectMessage } from '../lib/types';
 
 export function MessagesScreen({ session }: { session: AthleteSession }) {
@@ -92,7 +95,11 @@ export function MessagesScreen({ session }: { session: AthleteSession }) {
   if (!trainer) {
     return (
       <View style={styles.centered}>
-        <Text style={styles.muted}>Henüz atanmış bir antrenörünüz yok.</Text>
+        <EmptyState
+          icon="chatbubble-ellipses-outline"
+          title="Henüz antrenörünüz yok"
+          subtitle="Bir antrenör atandığında burada mesajlaşabilirsiniz."
+        />
       </View>
     );
   }
@@ -104,8 +111,11 @@ export function MessagesScreen({ session }: { session: AthleteSession }) {
       keyboardVerticalOffset={80}
     >
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>{trainer.name}</Text>
-        <Text style={styles.faint}>Antrenörünüz</Text>
+        <Avatar name={trainer.name} size={40} />
+        <View style={{ flex: 1 }}>
+          <Text style={styles.headerTitle}>{trainer.name}</Text>
+          <Text style={styles.faint}>Antrenörünüz</Text>
+        </View>
       </View>
 
       <FlatList
@@ -114,7 +124,9 @@ export function MessagesScreen({ session }: { session: AthleteSession }) {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
         onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
-        ListEmptyComponent={<Text style={styles.muted}>Henüz mesaj yok. İlk mesajı siz gönderin.</Text>}
+        ListEmptyComponent={
+          <EmptyState icon="chatbubbles-outline" title="Henüz mesaj yok" subtitle="İlk mesajı siz gönderin." />
+        }
         renderItem={({ item }) => {
           const isMine = item.senderId === session.user.id;
           return (
@@ -141,9 +153,18 @@ export function MessagesScreen({ session }: { session: AthleteSession }) {
           onChangeText={setDraft}
           multiline
         />
-        <TouchableOpacity style={styles.sendButton} onPress={handleSend} disabled={sending || !draft.trim()}>
-          {sending ? <ActivityIndicator color="#0b1220" /> : <Text style={styles.sendButtonText}>Gönder</Text>}
-        </TouchableOpacity>
+        <PressableScale
+          onPress={handleSend}
+          disabled={sending || !draft.trim()}
+          haptic
+          style={styles.sendButton}
+        >
+          {sending ? (
+            <ActivityIndicator color="#241a08" />
+          ) : (
+            <Ionicons name="send" size={17} color="#241a08" />
+          )}
+        </PressableScale>
       </View>
     </KeyboardAvoidingView>
   );
@@ -152,25 +173,35 @@ export function MessagesScreen({ session }: { session: AthleteSession }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   centered: { flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center', padding: 20 },
-  header: { padding: 16, borderBottomWidth: 1, borderBottomColor: colors.border },
-  headerTitle: { color: colors.text, fontSize: 16, fontWeight: '700' },
-  faint: { color: colors.faint, fontSize: 12, marginTop: 2 },
-  muted: { color: colors.muted, fontSize: 13, textAlign: 'center', marginTop: 24 },
-  list: { padding: 16, gap: 8, flexGrow: 1 },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  headerTitle: { ...typography.subheading, color: colors.text },
+  faint: { ...typography.caption, color: colors.faint, marginTop: 1 },
+  list: { padding: spacing.lg, gap: spacing.sm, flexGrow: 1 },
   bubbleRow: { flexDirection: 'row' },
   bubbleRowMine: { justifyContent: 'flex-end' },
   bubbleRowTheirs: { justifyContent: 'flex-start' },
-  bubble: { maxWidth: '78%', borderRadius: 14, paddingHorizontal: 12, paddingVertical: 8 },
+  bubble: { maxWidth: '78%', borderRadius: radius.md, paddingHorizontal: 12, paddingVertical: 9 },
   bubbleMine: { backgroundColor: colors.gold, borderBottomRightRadius: 4 },
   bubbleTheirs: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, borderBottomLeftRadius: 4 },
-  bubbleText: { color: colors.text, fontSize: 14 },
-  bubbleTextMine: { color: '#0b1220' },
+  bubbleText: { color: colors.text, fontSize: 14, lineHeight: 19 },
+  bubbleTextMine: { color: '#241a08' },
   bubbleTime: { color: colors.faint, fontSize: 10, marginTop: 4, textAlign: 'right' },
   error: { color: colors.danger, fontSize: 12, textAlign: 'center', paddingBottom: 4 },
   composer: {
     flexDirection: 'row',
-    gap: 8,
-    padding: 12,
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.md,
     borderTopWidth: 1,
     borderTopColor: colors.border,
     alignItems: 'flex-end',
@@ -181,16 +212,17 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     backgroundColor: colors.card,
     color: colors.text,
-    borderRadius: 12,
+    borderRadius: radius.md,
     paddingHorizontal: 14,
     paddingVertical: 10,
     maxHeight: 100,
   },
   sendButton: {
+    width: 44,
+    height: 44,
+    borderRadius: radius.md,
     backgroundColor: colors.gold,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  sendButtonText: { color: '#0b1220', fontWeight: '700', fontSize: 13 },
 });

@@ -1,7 +1,11 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Badge } from '../components/ui/Badge';
+import { Card } from '../components/ui/Card';
+import { EmptyState } from '../components/ui/EmptyState';
 import { fetchPrograms } from '../lib/api';
-import { colors } from '../lib/theme';
+import { colors, spacing, typography } from '../lib/theme';
 import type { AthleteSession, TrainingProgram } from '../lib/types';
 
 function summarizeContent(content: unknown): string | null {
@@ -46,6 +50,7 @@ export function ProgramsScreen({ session }: { session: AthleteSession }) {
       style={styles.container}
       contentContainerStyle={styles.content}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.gold} />}
+      showsVerticalScrollIndicator={false}
     >
       <Text style={styles.title}>Programlarım</Text>
 
@@ -53,20 +58,29 @@ export function ProgramsScreen({ session }: { session: AthleteSession }) {
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
       {programs && programs.length === 0 ? (
-        <View style={styles.card}>
-          <Text style={styles.muted}>Henüz atanmış bir programınız yok.</Text>
-        </View>
+        <Card>
+          <EmptyState
+            icon="barbell-outline"
+            title="Henüz program atanmamış"
+            subtitle="Antrenörünüz size bir program tanımladığında burada görünecek."
+          />
+        </Card>
       ) : null}
 
       {programs?.map((program) => {
         const summary = summarizeContent(program.content);
         return (
-          <View key={program.id} style={styles.card}>
+          <Card key={program.id}>
             <View style={styles.rowBetween}>
-              <Text style={styles.programTitle}>{program.title}</Text>
-              <View style={[styles.badge, !program.isActive && styles.badgeInactive]}>
-                <Text style={styles.badgeText}>{program.isActive ? 'Aktif' : 'Pasif'}</Text>
+              <View style={styles.titleRow}>
+                <Ionicons
+                  name={program.type === 'WORKOUT' ? 'barbell-outline' : 'nutrition-outline'}
+                  size={16}
+                  color={colors.gold}
+                />
+                <Text style={styles.programTitle}>{program.title}</Text>
               </View>
+              <Badge label={program.isActive ? 'Aktif' : 'Pasif'} tone={program.isActive ? 'success' : 'neutral'} />
             </View>
             <Text style={styles.muted}>
               {program.type === 'WORKOUT' ? 'Antrenman' : 'Beslenme'} ·{' '}
@@ -77,7 +91,7 @@ export function ProgramsScreen({ session }: { session: AthleteSession }) {
               Antrenör: {program.trainer?.name ?? program.trainer?.email ?? 'Belirtilmemiş'}
             </Text>
             {summary ? <Text style={styles.summary}>{summary}</Text> : null}
-          </View>
+          </Card>
         );
       })}
     </ScrollView>
@@ -86,29 +100,13 @@ export function ProgramsScreen({ session }: { session: AthleteSession }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
-  content: { padding: 16, gap: 12, paddingBottom: 32 },
-  title: { color: colors.text, fontSize: 20, fontWeight: '700', marginBottom: 4 },
-  card: {
-    backgroundColor: colors.card,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: 16,
-  },
+  content: { padding: spacing.lg, gap: spacing.md, paddingBottom: 32 },
+  title: { ...typography.title, color: colors.text, marginBottom: 4 },
   rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 },
-  programTitle: { color: colors.text, fontSize: 15, fontWeight: '600', flexShrink: 1 },
-  muted: { color: colors.muted, fontSize: 13, marginTop: 6 },
-  faint: { color: colors.faint, fontSize: 12, marginTop: 4 },
-  summary: { color: colors.text, fontSize: 13, marginTop: 10, lineHeight: 19 },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexShrink: 1 },
+  programTitle: { ...typography.subheading, color: colors.text, flexShrink: 1 },
+  muted: { ...typography.body, color: colors.muted, marginTop: 8 },
+  faint: { ...typography.caption, color: colors.faint, marginTop: 4 },
+  summary: { ...typography.body, color: colors.text, marginTop: 10, lineHeight: 19 },
   error: { color: colors.danger, fontSize: 13, textAlign: 'center', marginTop: 16 },
-  badge: {
-    borderWidth: 1,
-    borderColor: 'rgba(201,169,98,0.4)',
-    backgroundColor: 'rgba(201,169,98,0.12)',
-    borderRadius: 999,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-  },
-  badgeInactive: { opacity: 0.5 },
-  badgeText: { color: colors.gold, fontSize: 10, fontWeight: '600' },
 });

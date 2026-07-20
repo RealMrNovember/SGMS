@@ -1,8 +1,13 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Avatar } from '../components/ui/Avatar';
+import { Badge } from '../components/ui/Badge';
+import { Button } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
 import { fetchMe, fetchStatement, logout } from '../lib/api';
 import { clearSession } from '../lib/storage';
-import { colors } from '../lib/theme';
+import { colors, spacing, typography } from '../lib/theme';
 import { getCurrentVersion } from '../lib/update-check';
 import type { AthleteSession, MeResponse, MemberStatement } from '../lib/types';
 
@@ -53,48 +58,54 @@ export function AccountScreen({ session, onLogout }: { session: AthleteSession; 
   }
 
   const balanceEntries = statement ? Object.entries(statement.balancesByCurrency).filter(([, v]) => v > 0) : [];
+  const fullName = me ? `${me.gymMember.firstName} ${me.gymMember.lastName}` : session.user.name;
 
   return (
     <ScrollView
       style={styles.container}
       contentContainerStyle={styles.content}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.gold} />}
+      showsVerticalScrollIndicator={false}
     >
       <Text style={styles.title}>Hesabım</Text>
 
-      {!me && !error ? <ActivityIndicator color={colors.gold} style={{ marginTop: 24 }} /> : null}
-      {error ? <Text style={styles.error}>{error}</Text> : null}
-
       {me ? (
-        <View style={styles.card}>
-          <Text style={styles.name}>
-            {me.gymMember.firstName} {me.gymMember.lastName}
-          </Text>
-          <Text style={styles.muted}>{me.user.email}</Text>
-          {me.gymMember.phone ? <Text style={styles.muted}>{me.gymMember.phone}</Text> : null}
-          <View style={styles.rowBetween}>
-            <Text style={styles.faint}>Üyelik Planı</Text>
-            <Text style={styles.value}>{me.gymMember.plan?.name ?? '—'}</Text>
-          </View>
-          <View style={styles.rowBetween}>
-            <Text style={styles.faint}>Durum</Text>
-            <Text style={styles.value}>{me.gymMember.status}</Text>
-          </View>
-          {me.gymMember.membershipEndsAt ? (
-            <View style={styles.rowBetween}>
-              <Text style={styles.faint}>Üyelik Bitiş</Text>
-              <Text style={styles.value}>
-                {new Date(me.gymMember.membershipEndsAt).toLocaleDateString('tr-TR')}
-              </Text>
+        <Card>
+          <View style={styles.profileRow}>
+            <Avatar name={fullName} uri={me.gymMember.avatarUrl} size={56} />
+            <View style={{ flex: 1 }}>
+              <Text style={styles.name}>{fullName}</Text>
+              <Text style={styles.muted}>{me.user.email}</Text>
+              {me.gymMember.phone ? <Text style={styles.faint}>{me.gymMember.phone}</Text> : null}
             </View>
-          ) : null}
-        </View>
-      ) : null}
+          </View>
 
-      <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Bakiye</Text>
+          <View style={styles.divider} />
+
+          <InfoRow icon="ribbon-outline" label="Üyelik Planı" value={me.gymMember.plan?.name ?? '—'} />
+          <InfoRow icon="pulse-outline" label="Durum" value={<Badge label={me.gymMember.status} tone="gold" />} />
+          {me.gymMember.membershipEndsAt ? (
+            <InfoRow
+              icon="calendar-outline"
+              label="Üyelik Bitiş"
+              value={new Date(me.gymMember.membershipEndsAt).toLocaleDateString('tr-TR')}
+            />
+          ) : null}
+        </Card>
+      ) : (
+        <ActivityIndicator color={colors.gold} style={{ marginTop: 24 }} />
+      )}
+
+      <Card>
+        <View style={styles.balanceHeader}>
+          <Ionicons name="wallet-outline" size={18} color={colors.gold} />
+          <Text style={styles.sectionTitle}>Bakiye</Text>
+        </View>
         {balanceEntries.length === 0 ? (
-          <Text style={styles.balancePositive}>Borcunuz yok</Text>
+          <View style={styles.balancePositiveWrap}>
+            <Ionicons name="checkmark-circle" size={20} color={colors.success} />
+            <Text style={styles.balancePositive}>Borcunuz yok</Text>
+          </View>
         ) : (
           balanceEntries.map(([code, amount]) => (
             <Text key={code} style={styles.balanceNegative}>
@@ -103,11 +114,14 @@ export function AccountScreen({ session, onLogout }: { session: AthleteSession; 
           ))
         )}
         {balanceEntries.length > 0 ? <Text style={styles.faint}>Ödemenizi resepsiyonda yapabilirsiniz</Text> : null}
-      </View>
+      </Card>
 
       {statement && statement.paymentPlans.length > 0 ? (
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Ödeme Planı</Text>
+        <Card>
+          <View style={styles.balanceHeader}>
+            <Ionicons name="calendar-number-outline" size={18} color={colors.gold} />
+            <Text style={styles.sectionTitle}>Ödeme Planı</Text>
+          </View>
           {statement.paymentPlans.map((plan) => (
             <View key={plan.id} style={styles.planBlock}>
               <Text style={styles.faint}>{plan.installmentCount} taksit</Text>
@@ -124,77 +138,77 @@ export function AccountScreen({ session, onLogout }: { session: AthleteSession; 
               ))}
             </View>
           ))}
-        </View>
+        </Card>
       ) : null}
 
       {statement && statement.recentTransactions.length > 0 ? (
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Son Ödemeler</Text>
+        <Card>
+          <View style={styles.balanceHeader}>
+            <Ionicons name="swap-horizontal-outline" size={18} color={colors.gold} />
+            <Text style={styles.sectionTitle}>Son Ödemeler</Text>
+          </View>
           {statement.recentTransactions.slice(0, 10).map((tx) => (
             <View key={tx.id} style={styles.rowBetween}>
               <Text style={styles.muted}>
                 {tx.type} · {new Date(tx.createdAt).toLocaleDateString('tr-TR')}
               </Text>
-              <Text style={styles.balancePositive}>{money(tx.amount, tx.currency)}</Text>
+              <Text style={styles.balancePositiveInline}>{money(tx.amount, tx.currency)}</Text>
             </View>
           ))}
-        </View>
+        </Card>
       ) : null}
 
-      {statement && statement.recentExpenses.length > 0 ? (
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Son İşlemler</Text>
-          {statement.recentExpenses.slice(0, 10).map((expense) => (
-            <View key={expense.id} style={styles.rowBetween}>
-              <Text style={styles.muted}>
-                {expense.description ?? expense.category ?? '—'} ·{' '}
-                {new Date(expense.createdAt).toLocaleDateString('tr-TR')}
-              </Text>
-              <Text style={styles.value}>{money(expense.amount, expense.currency)}</Text>
-            </View>
-          ))}
-        </View>
-      ) : null}
-
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} disabled={loggingOut}>
-        {loggingOut ? <ActivityIndicator color={colors.danger} /> : <Text style={styles.logoutText}>Çıkış Yap</Text>}
-      </TouchableOpacity>
+      <Button label="Çıkış Yap" onPress={handleLogout} loading={loggingOut} variant="ghost" icon="log-out-outline" />
 
       <Text style={styles.versionText}>SGMS Sporcu v{getCurrentVersion()}</Text>
     </ScrollView>
   );
 }
 
+function InfoRow({
+  icon,
+  label,
+  value,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  value: React.ReactNode;
+}) {
+  return (
+    <View style={styles.infoRow}>
+      <View style={styles.infoLabelRow}>
+        <Ionicons name={icon} size={15} color={colors.faint} />
+        <Text style={styles.faint}>{label}</Text>
+      </View>
+      {typeof value === 'string' ? <Text style={styles.value}>{value}</Text> : value}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
-  content: { padding: 16, gap: 12, paddingBottom: 40 },
-  title: { color: colors.text, fontSize: 20, fontWeight: '700' },
-  card: {
-    backgroundColor: colors.card,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: 16,
-    gap: 8,
-  },
-  name: { color: colors.text, fontSize: 17, fontWeight: '700' },
-  muted: { color: colors.muted, fontSize: 13 },
-  faint: { color: colors.faint, fontSize: 12 },
-  value: { color: colors.text, fontSize: 13, fontWeight: '600' },
-  sectionTitle: { color: colors.text, fontSize: 14, fontWeight: '600', marginBottom: 4 },
-  rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 },
-  balancePositive: { color: colors.success, fontSize: 16, fontWeight: '700' },
-  balanceNegative: { color: '#fbbf24', fontSize: 18, fontWeight: '700' },
-  planBlock: { gap: 6, marginBottom: 8 },
-  error: { color: colors.danger, fontSize: 13, textAlign: 'center', marginTop: 16 },
-  logoutButton: {
-    marginTop: 8,
-    borderWidth: 1,
-    borderColor: colors.danger,
-    borderRadius: 12,
-    paddingVertical: 12,
+  content: { padding: spacing.lg, gap: spacing.md, paddingBottom: 40 },
+  title: { ...typography.title, color: colors.text },
+  profileRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  name: { ...typography.heading, color: colors.text },
+  muted: { ...typography.body, color: colors.muted, marginTop: 3 },
+  faint: { ...typography.caption, color: colors.faint, marginTop: 2 },
+  divider: { height: 1, backgroundColor: colors.border, marginVertical: spacing.md },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    paddingVertical: 6,
   },
-  logoutText: { color: colors.danger, fontWeight: '600', fontSize: 14 },
-  versionText: { color: colors.faint, fontSize: 11, textAlign: 'center', marginTop: 4 },
+  infoLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  value: { ...typography.subheading, color: colors.text },
+  balanceHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: spacing.sm },
+  sectionTitle: { ...typography.subheading, color: colors.text },
+  balancePositiveWrap: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  balancePositive: { color: colors.success, fontSize: 16, fontWeight: '700' },
+  balancePositiveInline: { color: colors.success, fontSize: 13, fontWeight: '700' },
+  balanceNegative: { color: '#fbbf24', fontSize: 20, fontWeight: '700' },
+  planBlock: { gap: 6, marginBottom: spacing.sm },
+  rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8, paddingVertical: 4 },
+  versionText: { ...typography.tiny, color: colors.faint, textAlign: 'center', marginTop: spacing.xs },
 });

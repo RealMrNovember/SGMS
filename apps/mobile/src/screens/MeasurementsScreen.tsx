@@ -1,16 +1,12 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Button } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
+import { EmptyState } from '../components/ui/EmptyState';
+import { PressableScale } from '../components/ui/PressableScale';
 import { addMeasurement, fetchMeasurements } from '../lib/api';
-import { colors } from '../lib/theme';
+import { colors, radius, spacing, typography } from '../lib/theme';
 import type { AthleteSession, HealthMeasurement } from '../lib/types';
 
 export function MeasurementsScreen({ session }: { session: AthleteSession }) {
@@ -73,64 +69,49 @@ export function MeasurementsScreen({ session }: { session: AthleteSession }) {
       style={styles.container}
       contentContainerStyle={styles.content}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.gold} />}
+      showsVerticalScrollIndicator={false}
     >
       <View style={styles.rowBetween}>
         <Text style={styles.title}>Ölçümlerim</Text>
-        <TouchableOpacity style={styles.addButton} onPress={() => setFormOpen((v) => !v)}>
-          <Text style={styles.addButtonText}>{formOpen ? 'Vazgeç' : '+ Ekle'}</Text>
-        </TouchableOpacity>
+        <PressableScale onPress={() => setFormOpen((v) => !v)} haptic style={styles.addButton}>
+          <Ionicons name={formOpen ? 'close' : 'add'} size={16} color={colors.gold} />
+          <Text style={styles.addButtonText}>{formOpen ? 'Vazgeç' : 'Ekle'}</Text>
+        </PressableScale>
       </View>
 
       {formOpen ? (
-        <View style={styles.card}>
-          <TextInput
-            style={styles.input}
-            placeholder="Kilo (kg)"
-            placeholderTextColor={colors.faint}
-            keyboardType="decimal-pad"
-            value={weight}
-            onChangeText={setWeight}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Yağ oranı (%)"
-            placeholderTextColor={colors.faint}
-            keyboardType="decimal-pad"
-            value={bodyFat}
-            onChangeText={setBodyFat}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Kas kütlesi (kg)"
-            placeholderTextColor={colors.faint}
-            keyboardType="decimal-pad"
-            value={muscle}
-            onChangeText={setMuscle}
-          />
-          <TextInput
-            style={styles.input}
+        <Card>
+          <LabeledInput icon="scale-outline" placeholder="Kilo (kg)" value={weight} onChangeText={setWeight} />
+          <LabeledInput icon="water-outline" placeholder="Yağ oranı (%)" value={bodyFat} onChangeText={setBodyFat} />
+          <LabeledInput icon="fitness-outline" placeholder="Kas kütlesi (kg)" value={muscle} onChangeText={setMuscle} />
+          <LabeledInput
+            icon="document-text-outline"
             placeholder="Not (opsiyonel)"
-            placeholderTextColor={colors.faint}
             value={notes}
             onChangeText={setNotes}
+            keyboardType="default"
           />
           {saveError ? <Text style={styles.error}>{saveError}</Text> : null}
-          <TouchableOpacity style={styles.saveButton} onPress={handleSave} disabled={saving}>
-            {saving ? <ActivityIndicator color="#0b1220" /> : <Text style={styles.saveButtonText}>Kaydet</Text>}
-          </TouchableOpacity>
-        </View>
+          <View style={{ marginTop: spacing.xs }}>
+            <Button label="Kaydet" onPress={handleSave} loading={saving} icon="checkmark-circle-outline" />
+          </View>
+        </Card>
       ) : null}
 
       {measurements === null && !error ? <ActivityIndicator color={colors.gold} style={{ marginTop: 24 }} /> : null}
       {error ? <Text style={styles.error}>{error}</Text> : null}
       {measurements && measurements.length === 0 ? (
-        <View style={styles.card}>
-          <Text style={styles.muted}>Henüz kayıtlı ölçümünüz yok.</Text>
-        </View>
+        <Card>
+          <EmptyState
+            icon="pulse-outline"
+            title="Henüz ölçüm kaydınız yok"
+            subtitle="Yukarıdaki 'Ekle' butonuyla ilk ölçümünüzü kaydedin."
+          />
+        </Card>
       ) : null}
 
       {measurements?.map((m) => (
-        <View key={m.id} style={styles.card}>
+        <Card key={m.id}>
           <Text style={styles.dateText}>
             {new Date(m.measuredAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}
           </Text>
@@ -149,51 +130,74 @@ export function MeasurementsScreen({ session }: { session: AthleteSession }) {
             </View>
           </View>
           {m.notes ? <Text style={styles.notes}>{m.notes}</Text> : null}
-        </View>
+        </Card>
       ))}
     </ScrollView>
   );
 }
 
+function LabeledInput({
+  icon,
+  placeholder,
+  value,
+  onChangeText,
+  keyboardType = 'decimal-pad',
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  placeholder: string;
+  value: string;
+  onChangeText: (v: string) => void;
+  keyboardType?: 'decimal-pad' | 'default';
+}) {
+  return (
+    <View style={styles.inputWrap}>
+      <Ionicons name={icon} size={16} color={colors.faint} style={styles.inputIcon} />
+      <TextInput
+        style={styles.input}
+        placeholder={placeholder}
+        placeholderTextColor={colors.faint}
+        keyboardType={keyboardType}
+        value={value}
+        onChangeText={onChangeText}
+      />
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
-  content: { padding: 16, gap: 12, paddingBottom: 32 },
+  content: { padding: spacing.lg, gap: spacing.md, paddingBottom: 32 },
   rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  title: { color: colors.text, fontSize: 20, fontWeight: '700' },
+  title: { ...typography.title, color: colors.text },
   addButton: {
-    borderWidth: 1,
-    borderColor: colors.gold,
-    borderRadius: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    borderWidth: 1.5,
+    borderColor: colors.goldBorder,
+    backgroundColor: colors.goldSoft,
+    borderRadius: radius.sm,
     paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingVertical: 7,
   },
-  addButtonText: { color: colors.gold, fontSize: 13, fontWeight: '600' },
-  card: {
-    backgroundColor: colors.card,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: 16,
-    gap: 10,
-  },
-  input: {
+  addButtonText: { ...typography.caption, color: colors.gold, fontWeight: '700' },
+  inputWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.bg,
-    color: colors.text,
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 11,
-    fontSize: 14,
+    borderRadius: radius.sm,
+    paddingHorizontal: 12,
+    marginBottom: spacing.sm,
   },
-  saveButton: { backgroundColor: colors.gold, borderRadius: 10, paddingVertical: 12, alignItems: 'center' },
-  saveButtonText: { color: '#0b1220', fontWeight: '700', fontSize: 14 },
-  muted: { color: colors.muted, fontSize: 13 },
-  faint: { color: colors.faint, fontSize: 11 },
+  inputIcon: { marginRight: spacing.sm },
+  input: { flex: 1, color: colors.text, paddingVertical: 11, fontSize: 14 },
   error: { color: colors.danger, fontSize: 13, textAlign: 'center' },
-  dateText: { color: colors.text, fontSize: 14, fontWeight: '600' },
-  grid: { flexDirection: 'row', justifyContent: 'space-between' },
+  dateText: { ...typography.subheading, color: colors.text },
+  grid: { flexDirection: 'row', justifyContent: 'space-between', marginTop: spacing.sm },
   gridItem: { alignItems: 'center', flex: 1 },
-  value: { color: colors.text, fontSize: 14, fontWeight: '600', marginTop: 2 },
-  notes: { color: colors.muted, fontSize: 12, fontStyle: 'italic' },
+  faint: { ...typography.caption, color: colors.faint },
+  value: { ...typography.subheading, color: colors.text, marginTop: 2 },
+  notes: { ...typography.caption, color: colors.muted, fontStyle: 'italic', marginTop: spacing.sm },
 });

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { TabBar, type TabKey } from './src/components/TabBar';
 import { UpdateBanner } from './src/components/UpdateBanner';
@@ -16,7 +17,8 @@ import { checkForUpdate } from './src/lib/update-check';
 import type { AthleteSession } from './src/lib/types';
 import type { UpdateInfo } from './src/lib/types';
 
-export default function App() {
+function AppShell() {
+  const insets = useSafeAreaInsets();
   const [session, setSession] = useState<AthleteSession | null>(null);
   const [checking, setChecking] = useState(true);
   const [activeTab, setActiveTab] = useState<TabKey>('home');
@@ -74,10 +76,15 @@ export default function App() {
     );
   }
 
+  // Ekranlar kendi üst dolgusunu eklemez — üstteki güncelleme bandı gösterildiğinde
+  // çift boşluk oluşmasın diye tek bir yerden (burada) yönetiliyor. Alt boşluk ise
+  // TabBar kendi güvenli alan payını zaten ayırdığı için ekranlara eklenmiyor.
+  const screenTopInset = update ? 0 : insets.top;
+
   return (
     <View style={styles.app}>
       {update ? <UpdateBanner update={update} /> : null}
-      <View style={styles.screen}>
+      <View style={[styles.screen, { paddingTop: screenTopInset }]}>
         {activeTab === 'home' ? <HomeScreen session={session} onNavigate={setActiveTab} /> : null}
         {activeTab === 'programs' ? <ProgramsScreen session={session} /> : null}
         {activeTab === 'measurements' ? <MeasurementsScreen session={session} /> : null}
@@ -87,6 +94,14 @@ export default function App() {
       <TabBar active={activeTab} onChange={setActiveTab} badges={{ messages: unreadMessages }} />
       <StatusBar style="light" />
     </View>
+  );
+}
+
+export default function App() {
+  return (
+    <SafeAreaProvider>
+      <AppShell />
+    </SafeAreaProvider>
   );
 }
 

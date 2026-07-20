@@ -1,14 +1,22 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { colors } from '../lib/theme';
+import { Ionicons } from '@expo/vector-icons';
+import { StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { colors, radius, spacing, typography } from '../lib/theme';
+import { PressableScale } from './ui/PressableScale';
 
 export type TabKey = 'home' | 'programs' | 'measurements' | 'messages' | 'account';
 
-const TABS: Array<{ key: TabKey; label: string; icon: string }> = [
-  { key: 'home', label: 'Ana Sayfa', icon: '⌂' },
-  { key: 'programs', label: 'Program', icon: '▤' },
-  { key: 'measurements', label: 'Ölçüm', icon: '◐' },
-  { key: 'messages', label: 'Mesaj', icon: '✉' },
-  { key: 'account', label: 'Hesabım', icon: '◉' },
+const TABS: Array<{
+  key: TabKey;
+  label: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  iconActive: keyof typeof Ionicons.glyphMap;
+}> = [
+  { key: 'home', label: 'Ana Sayfa', icon: 'home-outline', iconActive: 'home' },
+  { key: 'programs', label: 'Program', icon: 'barbell-outline', iconActive: 'barbell' },
+  { key: 'measurements', label: 'Ölçüm', icon: 'pulse-outline', iconActive: 'pulse' },
+  { key: 'messages', label: 'Mesaj', icon: 'chatbubble-ellipses-outline', iconActive: 'chatbubble-ellipses' },
+  { key: 'account', label: 'Hesabım', icon: 'person-outline', iconActive: 'person' },
 ];
 
 export function TabBar({
@@ -20,15 +28,17 @@ export function TabBar({
   onChange: (tab: TabKey) => void;
   badges?: Partial<Record<TabKey, number>>;
 }) {
+  const insets = useSafeAreaInsets();
+
   return (
-    <View style={styles.bar}>
+    <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, spacing.sm) }]}>
       {TABS.map((tab) => {
         const isActive = tab.key === active;
         const badge = badges?.[tab.key];
         return (
-          <TouchableOpacity key={tab.key} style={styles.tab} onPress={() => onChange(tab.key)}>
-            <View>
-              <Text style={[styles.icon, isActive && styles.iconActive]}>{tab.icon}</Text>
+          <PressableScale key={tab.key} onPress={() => onChange(tab.key)} style={styles.tab}>
+            <View style={[styles.iconWrap, isActive && styles.iconWrapActive]}>
+              <Ionicons name={isActive ? tab.iconActive : tab.icon} size={20} color={isActive ? colors.gold : colors.faint} />
               {badge ? (
                 <View style={styles.badge}>
                   <Text style={styles.badgeText}>{badge > 9 ? '9+' : badge}</Text>
@@ -36,7 +46,7 @@ export function TabBar({
               ) : null}
             </View>
             <Text style={[styles.label, isActive && styles.labelActive]}>{tab.label}</Text>
-          </TouchableOpacity>
+          </PressableScale>
         );
       })}
     </View>
@@ -46,21 +56,26 @@ export function TabBar({
 const styles = StyleSheet.create({
   bar: {
     flexDirection: 'row',
-    backgroundColor: colors.card,
+    backgroundColor: colors.bgElevated,
     borderTopWidth: 1,
     borderTopColor: colors.border,
-    paddingBottom: 6,
-    paddingTop: 8,
+    paddingTop: spacing.sm,
   },
-  tab: { flex: 1, alignItems: 'center', gap: 2 },
-  icon: { fontSize: 20, color: colors.faint },
-  iconActive: { color: colors.gold },
-  label: { fontSize: 10, color: colors.faint },
-  labelActive: { color: colors.gold, fontWeight: '600' },
+  tab: { flex: 1, alignItems: 'center', gap: 3 },
+  iconWrap: {
+    width: 40,
+    height: 30,
+    borderRadius: radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconWrapActive: { backgroundColor: colors.goldSoft },
+  label: { ...typography.tiny, color: colors.faint },
+  labelActive: { color: colors.gold },
   badge: {
     position: 'absolute',
     top: -4,
-    right: -10,
+    right: -2,
     backgroundColor: colors.danger,
     borderRadius: 8,
     minWidth: 16,
@@ -68,6 +83,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 3,
+    borderWidth: 1.5,
+    borderColor: colors.bgElevated,
   },
-  badgeText: { color: '#0b1220', fontSize: 9, fontWeight: '700' },
+  badgeText: { color: '#fff', fontSize: 9, fontWeight: '700' },
 });
