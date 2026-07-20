@@ -62,6 +62,7 @@ export default auth((request) => {
     pathname.startsWith('/privacy') ||
     pathname.startsWith('/terms') ||
     pathname.startsWith('/api/auth') ||
+    pathname.startsWith('/dl/') ||
     pathname === '/';
 
   const isApiV1 = pathname.startsWith('/api/v1');
