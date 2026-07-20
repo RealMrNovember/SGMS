@@ -200,6 +200,7 @@
       "foreignMember": "Yabancı üye",
       "nationality": "Ülke",
       "nationalityPlaceholder": "Ülke seçin",
+      "nationalityEmpty": "Sonuç bulunamadı",
       "passportNumber": "Pasaport numarası",
       "passportPlaceholder": "Pasaport / kimlik belgesi no",
       "phone": "Telefon",
@@ -1103,6 +1104,18 @@
       "bankNotePlaceholder": "Açıklama kısmına üye adını yazmasını isteyebilirsiniz.",
       "placeholderNewValue": "Değiştirmek için yeni değeri girin",
       "save": "Ayarları kaydet",
+      "saving": "Kaydediliyor…"
+    },
+    "location": {
+      "title": "Lokasyon",
+      "subtitle": "Salonunuzun ülke/şehir/ilçe bilgisi — bölgesel raporlama için kullanılır.",
+      "countryPlaceholder": "Ülke ara",
+      "cityPlaceholder": "Şehir ara",
+      "districtPlaceholder": "İlçe ara",
+      "emptyCountry": "Sonuç bulunamadı",
+      "emptyCity": "Sonuç bulunamadı",
+      "emptyDistrict": "Sonuç bulunamadı",
+      "save": "Lokasyonu kaydet",
       "saving": "Kaydediliyor…"
     },
     "privacy": {

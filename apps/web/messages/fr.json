@@ -169,6 +169,7 @@
       "foreignMember": "Membre étranger",
       "nationality": "Pays",
       "nationalityPlaceholder": "Choisir un pays",
+      "nationalityEmpty": "Aucun résultat trouvé",
       "passportNumber": "Numéro de passeport",
       "passportPlaceholder": "N° passeport / document",
       "phone": "Téléphone",
@@ -1066,6 +1067,18 @@
       "bankNotePlaceholder": "Vous pouvez demander aux membres d'indiquer leur nom dans la description.",
       "placeholderNewValue": "Saisissez une nouvelle valeur pour la modifier",
       "save": "Enregistrer les paramètres",
+      "saving": "Enregistrement…"
+    },
+    "location": {
+      "title": "Localisation",
+      "subtitle": "Pays/ville/arrondissement de votre salle — utilisé pour les rapports régionaux.",
+      "countryPlaceholder": "Rechercher un pays",
+      "cityPlaceholder": "Rechercher une ville",
+      "districtPlaceholder": "Rechercher un arrondissement",
+      "emptyCountry": "Aucun résultat trouvé",
+      "emptyCity": "Aucun résultat trouvé",
+      "emptyDistrict": "Aucun résultat trouvé",
+      "save": "Enregistrer la localisation",
       "saving": "Enregistrement…"
     },
     "privacy": {

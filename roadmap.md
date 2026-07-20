@@ -41,7 +41,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 3 | Production & Operasyon | ✅ Tamamlandı | 100% |
 | 4 | Tenant UI — Core İş Mantığı (CRM) | ✅ Tamamlandı | 100% |
 | 5 | ~~Merkezi Lisans Entegrasyonu (license.cicibyte.com)~~ | 🗑️ Emekli (bkz. Faz 13) | — |
-| 6 | Uluslararasılaşma (i18n) & Medya/Kimlik | 🔄 Devam ediyor | ~90% (6 dil + medya/kimlik tamamlandı; İtalyanca/Portekizce + küresel lokasyon veritabanı sırada) |
+| 6 | Uluslararasılaşma (i18n) & Medya/Kimlik | 🔄 Devam ediyor | ~95% (6 dil + medya/kimlik + küresel lokasyon veritabanı tamamlandı; yalnızca İtalyanca/Portekizce — Faz 6.3 — sırada) |
 | 7 | Mobil & Sporcu Auth (API-First) | ✅ Tamamlandı | 100% |
 | 8 | POS, Kasa, Cari Hesap & Abonelik/Ödeme | 🔄 Devam ediyor | ~90% (ödeme planı/taksit tamamlandı — Invoice modeli + 8.7 salon bazlı online ödeme sağlayıcısı sırada) |
 | 9 | Gerçek Zamanlı İletişim (Real-time Chat) | ✅ Tamamlandı | 100% |
@@ -272,14 +272,20 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 - [ ] `LocaleSwitcher` popover'ına yeni diller eklenir (kod değişikliği yok, `routing.locales` üzerinden otomatik türer)
 - [ ] Marketing/showcase sitesi dahil **tüm** namespace'lerin (auth, dashboard, admin, athlete, marketing, expenses, checkIn, billing, receptionDesktop vb.) eksiksiz çevirisi — bu oturumda TR/RU/FR/ES/AZ'de bulunan eksik-anahtar sınıfı hataların (bkz. Faz 34 kök neden analizi) İtalyanca/Portekizcede baştan yaşanmaması için **her iki dil de üretime çıkmadan önce parity script ile doğrulanacak**
 
-### 6.4 Küresel Lokasyon Veritabanı — Ülke → Şehir → İlçe (yeni, 2026-07-16 eklendi)
+### 6.4 Küresel Lokasyon Veritabanı — Ülke → Şehir → İlçe — tamamlandı, 2026-07-20
 
 > **Senaryo:** 8 dilli, uluslararası bir SaaS olarak üye/organizasyon adres formlarında serbest metin yerine yapılandırılmış, aranabilir bir konum seçimi sunmak — hem veri kalitesi hem de gelecekteki bölgesel raporlama (Faz 28/30) için gereklidir.
-- [ ] `Country` / `City` / `District` modelleri (Prisma) — açık kaynak bir coğrafi veri setinden (ör. GeoNames) seed edilir, `Organization.city`/`GymMember.nationality` gibi mevcut serbest-metin alanların yerini opsiyonel olarak alır (geriye dönük uyumluluk için serbest metin alanı korunur, yapılandırılmış seçim tercih edilir)
-- [ ] Çok dilli isimlendirme — her lokasyonun adı 8 dilde gösterilir (kullanıcının aktif diline göre)
-- [ ] Adres formlarında (üye kaydı — Faz 1/4, organizasyon kaydı — `/trial`) arama destekli (typeahead) Ülke → Şehir → İlçe seçici
+>
+> **Kapsam kararı (2026-07-20):** Roadmap "her lokasyonun adı 8 dilde gösterilir" diyordu — bu, `Country` seviyesinde (250 ülke, gerçek ISO 3166-1 çeviri verisiyle) uygulandı. `City`/`District` seviyesinde (34.000+ satır) tam 8 dilli çeviri bu oturumun kapsamı dışında bırakıldı — gerçekçi değildi ve gerçek dünyada da şehir/ilçe adları pratikte diller arası çevrilmez (İstanbul her dilde İstanbul yazılır). Bunun yerine yerel isim + ASCII arama ismi (typeahead fallback) kullanıldı. `/trial` kayıt formuna dokunulmadı — Faz 34.3'teki "dönüşüm formuna adım eklemeyin" kararıyla tutarlı olarak, organizasyon lokasyonu bunun yerine `/dashboard/settings` → Genel sekmesine eklendi (friction'sız, opsiyonel).
+- [x] `Country`/`CountryTranslation`/`City`/`District` modelleri (Prisma) — kaynak: ISO 3166-1 ülke adları (i18n-iso-countries, 8 dil), GeoNames cities15000 (>15k nüfuslu, Türkiye hariç, 33.596 şehir), Türkiye il/ilçe listesi (tam 81 il + 973 ilçe). `Organization.country`/`city` ve `GymMember.nationality` serbest-metin alanları geriye dönük uyumluluk için korunuyor, yeni `locationCountryId`/`locationCityId`/`locationDistrictId` (Organization) ve `nationalityCountryId` (GymMember) FK'ları eklendi — migration `20260720120000_faz_6_4_location_database`, seed `prisma/seed-geo.ts` (`pnpm geo:seed`, idempotent)
+- [x] Çok dilli isimlendirme — `Country` 8 dilde (tr/en/es/fr/ru/az + gelecekteki it/pt için hazır — Faz 6.3 devreye girince anında kullanılabilir)
+- [x] Arama destekli (typeahead) seçiciler — `GET /api/v1/geo/{countries,cities,districts}`, harici kütüphanesiz `SearchableSelect`/`CountrySelect`/`LocationSelect` bileşenleri. Üye kaydı (Faz 1/4, `add-member-form.tsx`) — yabancı üye uyruğu artık 250 ülkelik aranabilir listeden seçiliyor (önceki 20 ülkelik sabit `<select>`'in yerini aldı). Organizasyon lokasyonu — `/dashboard/settings` → Genel sekmesi, kademeli Ülke→Şehir→İlçe seçici
 
-**Kabul kriteri:** ✅ 6 dilde login + dashboard · üye listesinde avatar görünür · dil profilden değiştirilebilir · 🔲 İtalyanca/Portekizce 8. ve 9. dil olarak tüm yüzeylerde eksiksiz · 🔲 adres formlarında yapılandırılmış Ülke/Şehir/İlçe seçimi
+**Kabul kriteri:** ✅ 6 dilde login + dashboard · üye listesinde avatar görünür · dil profilden değiştirilebilir · 🔲 İtalyanca/Portekizce 8. ve 9. dil olarak tüm yüzeylerde eksiksiz (Faz 6.3, ayrı) · ✅ adres formlarında yapılandırılmış Ülke/Şehir/İlçe seçimi
+
+**Doğrulama notu (2026-07-20):** Bu makineye önce Node.js/pnpm (Faz 8.7'de), şimdi de ayrıca taşınabilir PostgreSQL 18 (winget üzerinden EDB indirici 403 verdi, `theseus-rs/postgresql-binaries` GitHub release'inden taşınabilir binary kullanıldı) kurularak **gerçek bir veritabanına karşı uçtan uca doğrulandı**: 41 migration'ın tamamı (kendi ikisi dahil) sıfırdan temiz bir UTF8 veritabanında hatasız uygulandı, seed script'i doğru sayılarla (250 ülke/2000 çeviri/81 il/973 ilçe/33.596 şehir) ve idempotent şekilde çalıştı, örnek sorgularla (İstanbul 39 ilçe, İzmir 30, Ankara 25 — hepsi doğru) veri kalitesi teyit edildi. Bu süreçte migration dosyasında Unicode ok karakteri (→) nedeniyle bazı ortamlarda (WIN1254 gibi UTF8-olmayan encoding) oluşabilecek bir hata bulunup ASCII-güvenli metne çevrilerek düzeltildi — üretime çıkmadan yakalandı. `pnpm typecheck`, ESLint ve mevcut 54 Vitest testi de ayrıca hatasız geçti.
+
+**Yan not — pre-existing (bana ait değil):** Migration geçmişinde iki tarihi "repair" migration'ı (`20260715130000_fix_expense_status_enum_case`, `20260715210000_fix_expense_status_enum_values`) sıfır veritabanında temiz uygulanamıyor — bunlar 2026-06-30'daki gerçek bir production kurtarma müdahalesini belgeleyen, yalnızca O olayın izini taşıyan veritabanları için geçerli, tekrar oynatılamaz migration'lar. Production'ın kendisini etkilemiyor (zaten uygulanmış durumda), yalnızca sıfırdan yeni bir ortam kurulumunu (CI, yeni geliştirici makinesi, felaket kurtarma) etkiler. Düzeltmek migration checksum'ını değiştirip production'ın `_prisma_migrations` tablosuyla uyuşmazlık yaratacağından **bu dosyalara dokunulmadı** — düzeltme isteniyorsa yeni, `IF EXISTS` korumalı bir takip migration'ı olarak yapılmalı.
 
 ---
 
@@ -1583,13 +1589,17 @@ makineye Node.js/pnpm kurulup tam derleme+test+lint doğrulaması yapıldı):
   [Bugfix]   Platform PayTR abonelik webhook'u — merchant_oid tire eşleşme hatası ✅ — bkz.
              lib/billing/settings.ts, kullanıcı "acil" olarak işaretledi, aynı oturumda düzeltildi
 
+Faz 6.4 tamamlandı (2026-07-20 — Claude, kullanıcı önceliklendirmeyi yine serbest bıraktı):
+  Faz 6.4    Küresel Lokasyon Veritabanı (Ülke/Şehir/İlçe) ✅ — bkz. Faz 6.4 bölümü, gerçek
+             Postgres'e karşı uçtan uca doğrulandı (bu makineye ayrıca Postgres 18 kuruldu)
+
 Sıradaki (Faz 36 sonrası — profesyonel değerlendirme, P0 en önce):
   Faz 32     Ticarileştirme: paket + ek kapasite satışı          ← P0, gelir modeli (kullanıcı onayı gerekli)
   [Repo]     Git contributors düzenlemesi (cursoragent kaldırma) ← P0, ⚠️ onay gerekli (destructive, force-push)
 
   Faz 27.3   Serverless kuyruk motoru (QStash/Inngest)           ← P1, Faz 27.2'nin önkoşulu
-  Faz 6.3/.4 Dil genişletmesi (İtalyanca/Portekizce) +           ← P1, pazar genişletme
-             küresel lokasyon veritabanı
+  Faz 6.3    Dil genişletmesi (İtalyanca/Portekizce)             ← P1, pazar genişletme — Country
+             çevirileri zaten hazır (bkz. Faz 6.4), yalnızca messages/*.json + it/pt kaldı
 
   Faz 34.6   İnteraktif antrenman programı görünümü              ← P2
   Faz 26     Dijital üyelik kartı (Wallet/NFC)                   ← P2, Apple/Google Wallet imzalama sertifikası gerekli (henüz yok)

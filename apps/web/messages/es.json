@@ -169,6 +169,7 @@
       "foreignMember": "Miembro extranjero",
       "nationality": "País",
       "nationalityPlaceholder": "Seleccionar país",
+      "nationalityEmpty": "No se encontraron resultados",
       "passportNumber": "Número de pasaporte",
       "passportPlaceholder": "N° pasaporte / documento",
       "phone": "Teléfono",
@@ -1066,6 +1067,18 @@
       "bankNotePlaceholder": "Puedes pedir a los miembros que escriban su nombre en la descripción.",
       "placeholderNewValue": "Ingresa un nuevo valor para cambiarlo",
       "save": "Guardar ajustes",
+      "saving": "Guardando…"
+    },
+    "location": {
+      "title": "Ubicación",
+      "subtitle": "País/ciudad/distrito de tu gimnasio — se usa para informes regionales.",
+      "countryPlaceholder": "Buscar país",
+      "cityPlaceholder": "Buscar ciudad",
+      "districtPlaceholder": "Buscar distrito",
+      "emptyCountry": "No se encontraron resultados",
+      "emptyCity": "No se encontraron resultados",
+      "emptyDistrict": "No se encontraron resultados",
+      "save": "Guardar ubicación",
       "saving": "Guardando…"
     },
     "privacy": {

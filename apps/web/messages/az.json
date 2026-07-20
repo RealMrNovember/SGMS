@@ -169,6 +169,7 @@
       "foreignMember": "Xarici üzv",
       "nationality": "Ölkə",
       "nationalityPlaceholder": "Ölkə seçin",
+      "nationalityEmpty": "Nəticə tapılmadı",
       "passportNumber": "Pasport nömrəsi",
       "passportPlaceholder": "Pasport / sənəd nömrəsi",
       "phone": "Telefon",
@@ -1066,6 +1067,18 @@
       "bankNotePlaceholder": "Üzvlərdən açıqlamada adlarını yazmalarını istəyə bilərsiniz.",
       "placeholderNewValue": "Dəyişmək üçün yeni dəyər daxil edin",
       "save": "Ayarları yadda saxla",
+      "saving": "Yadda saxlanılır…"
+    },
+    "location": {
+      "title": "Lokasiya",
+      "subtitle": "Salonunuzun ölkə/şəhər/rayon məlumatı — regional hesabatlıq üçün istifadə olunur.",
+      "countryPlaceholder": "Ölkə axtar",
+      "cityPlaceholder": "Şəhər axtar",
+      "districtPlaceholder": "Rayon axtar",
+      "emptyCountry": "Nəticə tapılmadı",
+      "emptyCity": "Nəticə tapılmadı",
+      "emptyDistrict": "Nəticə tapılmadı",
+      "save": "Lokasiyanı yadda saxla",
       "saving": "Yadda saxlanılır…"
     },
     "privacy": {

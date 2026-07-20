@@ -1,9 +1,9 @@
 'use client';
 
 import { addGymMember, type AddGymMemberState } from '@/actions/members';
+import { CountrySelect } from '@/components/geo/country-select';
 import { FormWizard } from '@/components/form-wizard';
-import { memberCountryOptions } from '@/lib/member-countries';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useActionState, useState } from 'react';
 
 const initialState: AddGymMemberState = {};
@@ -24,6 +24,7 @@ export function AddMemberForm({
 }) {
   const t = useTranslations('members.add');
   const tCommon = useTranslations('common');
+  const locale = useLocale();
   const [state, formAction, pending] = useActionState(addGymMember, initialState);
   const [isForeignMember, setIsForeignMember] = useState(false);
 
@@ -121,19 +122,14 @@ export function AddMemberForm({
                   ) : (
                     <>
                       <div className="space-y-2">
-                        <label htmlFor="nationality" className="muted text-sm">
-                          {t('nationality')}
-                        </label>
-                        <select id="nationality" name="nationality" className="input" required defaultValue="">
-                          <option value="" disabled>
-                            {t('nationalityPlaceholder')}
-                          </option>
-                          {memberCountryOptions.map((country) => (
-                            <option key={country.code} value={country.code}>
-                              {country.label}
-                            </option>
-                          ))}
-                        </select>
+                        <label className="muted text-sm">{t('nationality')}</label>
+                        <CountrySelect
+                          name="nationality"
+                          locale={locale}
+                          required
+                          placeholder={t('nationalityPlaceholder')}
+                          emptyMessage={t('nationalityEmpty')}
+                        />
                         {state.fieldErrors?.nationality ? (
                           <p className="text-xs text-rose-400">{state.fieldErrors.nationality}</p>
                         ) : null}

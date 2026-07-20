@@ -1,5 +1,6 @@
 import { SettingsWorkspace } from '@/components/settings/settings-workspace';
 import { getDefaultContractTemplate } from '@/actions/contracts';
+import { fetchOrganizationLocation } from '@/actions/organization-location';
 import { fetchTenantPaymentSettings } from '@/actions/tenant-payment-gateway';
 import { auth } from '@/lib/auth';
 import { parseOrganizationSettings } from '@/lib/admin/org-settings';
@@ -38,9 +39,10 @@ export default async function DashboardSettingsPage() {
 
   const isOrgAdmin = session.user.role === 'OWNER' || session.user.role === 'ADMIN';
 
-  const [contractTemplate, paymentGatewaySettings] = await Promise.all([
+  const [contractTemplate, paymentGatewaySettings, locationDefaults] = await Promise.all([
     isOrgAdmin ? getDefaultContractTemplate(session.user.organizationId) : Promise.resolve(null),
     isOrgAdmin ? fetchTenantPaymentSettings() : Promise.resolve(null),
+    isOrgAdmin ? fetchOrganizationLocation() : Promise.resolve(null),
   ]);
 
   return (
@@ -52,6 +54,7 @@ export default async function DashboardSettingsPage() {
         contractTemplateName={contractTemplate?.name}
         contractTemplateBody={contractTemplate?.bodyText}
         paymentGatewaySettings={paymentGatewaySettings}
+        locationDefaults={locationDefaults}
       />
     </div>
   );

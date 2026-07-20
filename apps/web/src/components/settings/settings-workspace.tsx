@@ -9,6 +9,10 @@ import {
   TenantPaymentGatewayPanel,
   type TenantPaymentSettingsProps,
 } from '@/components/settings/tenant-payment-gateway-panel';
+import {
+  OrganizationLocationPanel,
+  type OrganizationLocationDefaults,
+} from '@/components/organization-location-panel';
 import { ContextualHelpButton } from '@/components/help/contextual-help-button';
 import type { OrganizationSettings } from '@/lib/admin/org-settings';
 import type { OrganizationRole } from '@sgms/database';
@@ -93,6 +97,7 @@ export function SettingsWorkspace({
   contractTemplateName,
   contractTemplateBody,
   paymentGatewaySettings,
+  locationDefaults,
 }: {
   role: OrganizationRole;
   orgName: string;
@@ -100,6 +105,7 @@ export function SettingsWorkspace({
   contractTemplateName?: string;
   contractTemplateBody?: string;
   paymentGatewaySettings?: TenantPaymentSettingsProps | null;
+  locationDefaults?: OrganizationLocationDefaults | null;
 }) {
   const t = useTranslations('settings');
   const visibleTabs = useMemo(
@@ -160,7 +166,12 @@ export function SettingsWorkspace({
             </div>
           </div>
 
-          {current.id === 'general' ? <OrganizationSettingsPanel settings={settings} /> : null}
+          {current.id === 'general' ? (
+            <div className="space-y-5">
+              <OrganizationSettingsPanel settings={settings} />
+              {locationDefaults ? <OrganizationLocationPanel defaults={locationDefaults} /> : null}
+            </div>
+          ) : null}
 
           {current.id === 'team' ? (
             <div className="space-y-3">

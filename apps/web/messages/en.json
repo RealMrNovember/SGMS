@@ -200,6 +200,7 @@
       "foreignMember": "Foreign member",
       "nationality": "Country",
       "nationalityPlaceholder": "Select country",
+      "nationalityEmpty": "No results found",
       "passportNumber": "Passport number",
       "passportPlaceholder": "Passport / ID document no",
       "phone": "Phone",
@@ -1100,6 +1101,18 @@
       "bankNotePlaceholder": "You can ask members to write their name in the description.",
       "placeholderNewValue": "Enter a new value to change it",
       "save": "Save settings",
+      "saving": "Saving…"
+    },
+    "location": {
+      "title": "Location",
+      "subtitle": "Your gym's country/city/district — used for regional reporting.",
+      "countryPlaceholder": "Search country",
+      "cityPlaceholder": "Search city",
+      "districtPlaceholder": "Search district",
+      "emptyCountry": "No results found",
+      "emptyCity": "No results found",
+      "emptyDistrict": "No results found",
+      "save": "Save location",
       "saving": "Saving…"
     },
     "privacy": {

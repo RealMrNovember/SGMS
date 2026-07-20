@@ -169,6 +169,7 @@
       "foreignMember": "Иностранный участник",
       "nationality": "Страна",
       "nationalityPlaceholder": "Выберите страну",
+      "nationalityEmpty": "Ничего не найдено",
       "passportNumber": "Номер паспорта",
       "passportPlaceholder": "№ паспорта / документа",
       "phone": "Телефон",
@@ -1066,6 +1067,18 @@
       "bankNotePlaceholder": "Вы можете попросить участников указывать своё имя в описании платежа.",
       "placeholderNewValue": "Введите новое значение, чтобы изменить",
       "save": "Сохранить настройки",
+      "saving": "Сохранение…"
+    },
+    "location": {
+      "title": "Местоположение",
+      "subtitle": "Страна/город/район вашего зала — используется для региональной отчётности.",
+      "countryPlaceholder": "Поиск страны",
+      "cityPlaceholder": "Поиск города",
+      "districtPlaceholder": "Поиск района",
+      "emptyCountry": "Ничего не найдено",
+      "emptyCity": "Ничего не найдено",
+      "emptyDistrict": "Ничего не найдено",
+      "save": "Сохранить местоположение",
       "saving": "Сохранение…"
     },
     "privacy": {

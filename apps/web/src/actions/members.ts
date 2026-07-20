@@ -138,7 +138,7 @@ export async function addGymMember(
   const birthDate = parseOptionalDate(data.birthDate || undefined);
   const membershipStartsAt = parseOptionalDate(data.membershipStartsAt || undefined) ?? new Date();
 
-  const [plan, nationalIdTaken, passportTaken] = await Promise.all([
+  const [plan, nationalIdTaken, passportTaken, nationalityCountry] = await Promise.all([
     data.planId
       ? prisma.gymMembershipPlan.findFirst({
           where: {
@@ -168,6 +168,8 @@ export async function addGymMember(
           },
         })
       : Promise.resolve(null),
+    // Faz 6.4 — yapılandırılmış uyruk (nationality ISO koduyla eşleşen Country satırı, varsa)
+    nationality ? prisma.country.findUnique({ where: { isoCode: nationality } }) : Promise.resolve(null),
   ]);
 
   if (nationalIdTaken) {
@@ -203,6 +205,7 @@ export async function addGymMember(
         nationalId,
         isForeignMember: data.isForeignMember,
         nationality,
+        nationalityCountryId: nationalityCountry?.id ?? null,
         passportNumber,
         phone,
         email,

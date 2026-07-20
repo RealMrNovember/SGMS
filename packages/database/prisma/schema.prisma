@@ -755,12 +755,22 @@ model Organization {
   // "tip" alanı gerektirmeden.
   parentOrganizationId String? @map("parent_organization_id")
 
+  // Yapılandırılmış lokasyon (Faz 6.4) — yukarıdaki serbest-metin `country`/`city`
+  // alanlarının opsiyonel, aranabilir eşleniği. Geriye dönük uyumluluk için ikisi de
+  // korunur; yeni kayıtlar (ör. /trial) her ikisini birden doldurur.
+  locationCountryId  String? @map("location_country_id")
+  locationCityId     String? @map("location_city_id")
+  locationDistrictId String? @map("location_district_id")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   partner                 Partner?                 @relation(fields: [partnerId], references: [id], onDelete: SetNull)
   parentOrganization      Organization?            @relation("OrganizationHierarchy", fields: [parentOrganizationId], references: [id], onDelete: SetNull)
   childOrganizations      Organization[]           @relation("OrganizationHierarchy")
+  locationCountry         Country?                 @relation(fields: [locationCountryId], references: [id], onDelete: SetNull)
+  locationCity            City?                    @relation(fields: [locationCityId], references: [id], onDelete: SetNull)
+  locationDistrict        District?                @relation(fields: [locationDistrictId], references: [id], onDelete: SetNull)
   hierarchyMembers        HierarchyMember[]
   members                 OrganizationMember[]
   subscriptions           Subscription[]
@@ -820,7 +830,83 @@ model Organization {
   @@index([centralLicenseStatus])
   @@index([partnerId])
   @@index([parentOrganizationId])
+  @@index([locationCountryId])
+  @@index([locationCityId])
   @@map("organizations")
+}
+
+// ---------------------------------------------------------------------------
+// Küresel Lokasyon Veritabanı (Faz 6.4) — Ülke → Şehir → İlçe. Organization/
+// GymMember'daki mevcut serbest-metin alanlar (country/city/nationality) geriye
+// dönük uyumluluk için korunur; bu modeller yapılandırılmış, aranabilir bir
+// alternatif sağlar (bkz. organizations/gymMembers ilişkileri).
+//
+// Kaynak: ISO 3166-1 ülke adları (i18n-iso-countries, 8 dilde), GeoNames
+// cities15000 (>15k nüfuslu şehirler, Türkiye hariç — Türkiye ayrı ve tam bir
+// kaynaktan geliyor), Türkiye il/ilçe listesi (81 il + 973 ilçe, tam).
+//
+// Kasıtlı kapsam kararı: yalnızca Country seviyesinde tam 8 dilli çeviri var
+// (CountryTranslation) — City/District `name` yerel isimle (İstanbul, Aladağ vb.)
+// tüm dillerde aynı gösterilir. 34.000+ şehir × 8 dil çevirisi bu oturumun makul
+// kapsamının dışında (gerçek dünyada da şehir/ilçe adları pratikte diller arası
+// çevrilmez — bkz. roadmap.md Faz 6.4 notu).
+// ---------------------------------------------------------------------------
+
+model Country {
+  id           String  @id @default(cuid())
+  isoCode      String  @unique @map("iso_code")
+  callingCode  String? @map("calling_code")
+  hasDistricts Boolean @default(false) @map("has_districts")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  translations  CountryTranslation[]
+  cities        City[]
+  organizations Organization[]
+  gymMembers    GymMember[]
+
+  @@map("countries")
+}
+
+model CountryTranslation {
+  id        String @id @default(cuid())
+  countryId String @map("country_id")
+  locale    String
+  name      String
+
+  country Country @relation(fields: [countryId], references: [id], onDelete: Cascade)
+
+  @@unique([countryId, locale])
+  @@index([locale])
+  @@map("country_translations")
+}
+
+model City {
+  id         String @id @default(cuid())
+  countryId  String @map("country_id")
+  name       String
+  asciiName  String @map("ascii_name")
+  population Int    @default(0)
+
+  country       Country        @relation(fields: [countryId], references: [id], onDelete: Cascade)
+  districts     District[]
+  organizations Organization[]
+
+  @@index([countryId, name])
+  @@index([asciiName])
+  @@map("cities")
+}
+
+model District {
+  id     String @id @default(cuid())
+  cityId String @map("city_id")
+  name   String
+
+  city          City           @relation(fields: [cityId], references: [id], onDelete: Cascade)
+  organizations Organization[]
+
+  @@index([cityId, name])
+  @@map("districts")
 }
 
 // ---------------------------------------------------------------------------
@@ -993,6 +1079,9 @@ model GymMember {
   nationalId         String?         @map("national_id")
   isForeignMember    Boolean         @default(false) @map("is_foreign_member")
   nationality        String?
+  /// Yapılandırılmış uyruk (Faz 6.4) — yukarıdaki serbest-metin `nationality`'nin
+  /// opsiyonel, aranabilir eşleniği.
+  nationalityCountryId String?       @map("nationality_country_id")
   passportNumber     String?         @map("passport_number")
   phone              String?
   email              String?
@@ -1024,6 +1113,7 @@ model GymMember {
   trainer             User?               @relation("GymMemberTrainer", fields: [trainerId], references: [id], onDelete: SetNull)
   healthConsentBy     User?               @relation("GymMemberHealthConsentBy", fields: [healthConsentAcceptedById], references: [id], onDelete: SetNull)
   membershipGroup     MembershipGroup?    @relation(fields: [membershipGroupId], references: [id], onDelete: SetNull)
+  nationalityCountry  Country?            @relation(fields: [nationalityCountryId], references: [id], onDelete: SetNull)
   healthMeasurements  HealthMeasurement[]
   trainingPrograms    TrainingProgram[]
   exerciseSetLogs     ExerciseSetLog[]
@@ -1058,6 +1148,7 @@ model GymMember {
   @@index([membershipGroupId])
   @@index([phone])
   @@index([email])
+  @@index([nationalityCountryId])
   @@map("gym_members")
 }
 
