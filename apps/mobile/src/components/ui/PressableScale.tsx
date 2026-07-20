@@ -34,6 +34,12 @@ export function PressableScale({
   return (
     <Pressable
       disabled={disabled}
+      // `style` (flex/width/vb. — layout'u belirleyen özellikler) dış Pressable'a
+      // uygulanmalı; yalnızca iç Animated.View'e verilirse (önceki hata) Pressable
+      // kendi boyutunu içeriğe göre belirler ve flex:1 gibi stiller hiçbir işe
+      // yaramaz — ör. TabBar'daki 5 sekme eşit genişlikte dağılmak yerine
+      // içeriklerine göre sıkışıp sola yığılıyordu.
+      style={style}
       onPressIn={(event) => {
         animateTo(scaleTo);
         rest.onPressIn?.(event);
@@ -48,7 +54,7 @@ export function PressableScale({
       }}
       {...rest}
     >
-      <Animated.View style={[style, { transform: [{ scale }], opacity: disabled ? 0.5 : 1 }]}>
+      <Animated.View style={{ transform: [{ scale }], opacity: disabled ? 0.5 : 1 }}>
         {children}
       </Animated.View>
     </Pressable>
