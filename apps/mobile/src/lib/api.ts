@@ -98,3 +98,25 @@ export async function startMembershipRenewal(accessToken: string): Promise<Membe
     headers: authHeaders(accessToken),
   });
 }
+
+export async function updateProfile(
+  accessToken: string,
+  input: { name?: string; phone?: string; email?: string; birthDate?: string },
+): Promise<{ message: string }> {
+  return apiFetch('/api/v1/me/profile', {
+    method: 'PATCH',
+    headers: authHeaders(accessToken),
+    body: JSON.stringify(input),
+  });
+}
+
+export async function changePassword(
+  accessToken: string,
+  input: { currentPassword: string; newPassword: string; newPasswordConfirmation: string },
+): Promise<{ message: string }> {
+  return apiFetch('/api/v1/me/password', {
+    method: 'POST',
+    headers: authHeaders(accessToken),
+    body: JSON.stringify(input),
+  });
+}

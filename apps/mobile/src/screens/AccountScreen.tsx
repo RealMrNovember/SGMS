@@ -1,11 +1,19 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Linking, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Avatar } from '../components/ui/Avatar';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
-import { fetchMe, fetchStatement, logout, startMembershipRenewal } from '../lib/api';
+import { TextField } from '../components/ui/TextField';
+import {
+  changePassword,
+  fetchMe,
+  fetchStatement,
+  logout,
+  startMembershipRenewal,
+  updateProfile,
+} from '../lib/api';
 import { clearSession } from '../lib/storage';
 import { colors, spacing, typography } from '../lib/theme';
 import { getCurrentVersion } from '../lib/update-check';
@@ -28,6 +36,21 @@ export function AccountScreen({ session, onLogout }: { session: AthleteSession; 
   const [renewing, setRenewing] = useState(false);
   const [renewError, setRenewError] = useState<string | null>(null);
 
+  const seededRef = useRef(false);
+  const [editName, setEditName] = useState('');
+  const [editPhone, setEditPhone] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileError, setProfileError] = useState<string | null>(null);
+  const [profileSuccess, setProfileSuccess] = useState<string | null>(null);
+
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [newPasswordConfirmation, setNewPasswordConfirmation] = useState('');
+  const [passwordSaving, setPasswordSaving] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
+
   const load = useCallback(async () => {
     try {
       const [meData, statementData] = await Promise.all([
@@ -37,6 +60,12 @@ export function AccountScreen({ session, onLogout }: { session: AthleteSession; 
       setMe(meData);
       setStatement(statementData);
       setError(null);
+      if (!seededRef.current) {
+        seededRef.current = true;
+        setEditName(meData.user.name ?? '');
+        setEditPhone(meData.gymMember.phone ?? '');
+        setEditEmail(meData.user.email ?? '');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Hesap bilgileri alınamadı');
     }
@@ -74,6 +103,50 @@ export function AccountScreen({ session, onLogout }: { session: AthleteSession; 
       setRenewError(err instanceof Error ? err.message : 'Yenileme başlatılamadı');
     } finally {
       setRenewing(false);
+    }
+  }
+
+  async function handleSaveProfile() {
+    setProfileSaving(true);
+    setProfileError(null);
+    setProfileSuccess(null);
+    try {
+      await updateProfile(session.accessToken, {
+        name: editName.trim(),
+        phone: editPhone.trim(),
+        email: editEmail.trim(),
+      });
+      setProfileSuccess('Bilgileriniz güncellendi.');
+      await load();
+    } catch (err) {
+      setProfileError(err instanceof Error ? err.message : 'Güncellenemedi');
+    } finally {
+      setProfileSaving(false);
+    }
+  }
+
+  async function handleChangePassword() {
+    if (newPassword !== newPasswordConfirmation) {
+      setPasswordError('Yeni parolalar eşleşmiyor.');
+      return;
+    }
+    setPasswordSaving(true);
+    setPasswordError(null);
+    setPasswordSuccess(null);
+    try {
+      await changePassword(session.accessToken, {
+        currentPassword,
+        newPassword,
+        newPasswordConfirmation,
+      });
+      setPasswordSuccess('Parolanız güncellendi.');
+      setCurrentPassword('');
+      setNewPassword('');
+      setNewPasswordConfirmation('');
+    } catch (err) {
+      setPasswordError(err instanceof Error ? err.message : 'Parola güncellenemedi');
+    } finally {
+      setPasswordSaving(false);
     }
   }
 
@@ -128,6 +201,83 @@ export function AccountScreen({ session, onLogout }: { session: AthleteSession; 
       ) : (
         <ActivityIndicator color={colors.gold} style={{ marginTop: 24 }} />
       )}
+
+      <Card>
+        <View style={styles.balanceHeader}>
+          <Ionicons name="person-circle-outline" size={18} color={colors.gold} />
+          <Text style={styles.sectionTitle}>Profili Düzenle</Text>
+        </View>
+        <View style={styles.formGap}>
+          <TextField icon="person-outline" label="Ad Soyad" value={editName} onChangeText={setEditName} />
+          <TextField
+            icon="call-outline"
+            label="Telefon"
+            value={editPhone}
+            onChangeText={setEditPhone}
+            keyboardType="phone-pad"
+          />
+          <TextField
+            icon="mail-outline"
+            label="E-posta"
+            value={editEmail}
+            onChangeText={setEditEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
+          {profileError ? <Text style={styles.renewError}>{profileError}</Text> : null}
+          {profileSuccess ? <Text style={styles.successText}>{profileSuccess}</Text> : null}
+          <Button
+            label="Bilgileri Kaydet"
+            onPress={handleSaveProfile}
+            loading={profileSaving}
+            variant="secondary"
+            icon="save-outline"
+          />
+        </View>
+      </Card>
+
+      <Card>
+        <View style={styles.balanceHeader}>
+          <Ionicons name="lock-closed-outline" size={18} color={colors.gold} />
+          <Text style={styles.sectionTitle}>Parola Değiştir</Text>
+        </View>
+        <View style={styles.formGap}>
+          <TextField
+            icon="key-outline"
+            label="Mevcut Parola"
+            value={currentPassword}
+            onChangeText={setCurrentPassword}
+            secureToggle
+            autoCapitalize="none"
+          />
+          <TextField
+            icon="lock-closed-outline"
+            label="Yeni Parola"
+            value={newPassword}
+            onChangeText={setNewPassword}
+            secureToggle
+            autoCapitalize="none"
+          />
+          <TextField
+            icon="lock-closed-outline"
+            label="Yeni Parola (Tekrar)"
+            value={newPasswordConfirmation}
+            onChangeText={setNewPasswordConfirmation}
+            secureToggle
+            autoCapitalize="none"
+          />
+          {passwordError ? <Text style={styles.renewError}>{passwordError}</Text> : null}
+          {passwordSuccess ? <Text style={styles.successText}>{passwordSuccess}</Text> : null}
+          <Button
+            label="Parolayı Değiştir"
+            onPress={handleChangePassword}
+            loading={passwordSaving}
+            variant="secondary"
+            icon="checkmark-circle-outline"
+            disabled={!currentPassword || !newPassword || !newPasswordConfirmation}
+          />
+        </View>
+      </Card>
 
       <Card>
         <View style={styles.balanceHeader}>
@@ -229,6 +379,8 @@ const styles = StyleSheet.create({
   divider: { height: 1, backgroundColor: colors.border, marginVertical: spacing.md },
   renewBlock: { marginTop: spacing.md, gap: spacing.xs },
   renewError: { ...typography.caption, color: colors.danger, textAlign: 'center' },
+  successText: { ...typography.caption, color: colors.success, textAlign: 'center' },
+  formGap: { gap: spacing.sm },
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',

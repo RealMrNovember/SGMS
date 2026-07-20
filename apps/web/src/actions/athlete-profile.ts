@@ -1,6 +1,6 @@
 'use server';
 
-import { auth } from '@/lib/auth';
+import { isAthleteContext, resolveApiContext } from '@/lib/api/auth-context';
 import { getRequestAuditContext, writeAuditLog } from '@/lib/audit/logger';
 import { prisma } from '@/lib/prisma';
 import { getTenantWriteBlockReason } from '@/lib/tenant-access';
@@ -13,16 +13,22 @@ export type AthleteProfileActionState = {
   success?: string;
 };
 
-async function getAthleteProfileContext() {
-  const session = await auth();
-  if (!session?.user?.gymMemberId || !session.user.organizationId) {
+/**
+ * `request` verilirse (mobil API route'ları) Bearer token da kabul edilir;
+ * verilmezse (web server action) yalnızca çerez tabanlı oturuma bakılır —
+ * `resolveApiContext` ikisini de tek yerden çözer (bkz. lib/api/auth-context.ts).
+ * Bu sayede aynı iş mantığı hem web hem mobil için tek kaynaktan çalışır.
+ */
+async function getAthleteProfileContext(request?: Request) {
+  const result = await resolveApiContext(request);
+  if ('response' in result || !isAthleteContext(result.context)) {
     return { error: 'Bu işlem için sporcu oturumu gerekir.' as const };
   }
 
   return {
-    userId: session.user.id,
-    gymMemberId: session.user.gymMemberId,
-    organizationId: session.user.organizationId,
+    userId: result.context.userId,
+    gymMemberId: result.context.gymMemberId,
+    organizationId: result.context.organizationId,
   };
 }
 
@@ -33,8 +39,9 @@ const displayNameSchema = z.object({
 export async function updateOwnDisplayName(
   _prev: AthleteProfileActionState,
   formData: FormData,
+  request?: Request,
 ): Promise<AthleteProfileActionState> {
-  const context = await getAthleteProfileContext();
+  const context = await getAthleteProfileContext(request);
   if ('error' in context) {
     return { error: context.error };
   }
@@ -80,8 +87,9 @@ const contactInfoSchema = z.object({
 export async function updateOwnContactInfo(
   _prev: AthleteProfileActionState,
   formData: FormData,
+  request?: Request,
 ): Promise<AthleteProfileActionState> {
-  const context = await getAthleteProfileContext();
+  const context = await getAthleteProfileContext(request);
   if ('error' in context) {
     return { error: context.error };
   }
@@ -146,8 +154,9 @@ const changePasswordSchema = z
 export async function changeOwnPassword(
   _prev: AthleteProfileActionState,
   formData: FormData,
+  request?: Request,
 ): Promise<AthleteProfileActionState> {
-  const context = await getAthleteProfileContext();
+  const context = await getAthleteProfileContext(request);
   if ('error' in context) {
     return { error: context.error };
   }

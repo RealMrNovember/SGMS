@@ -73,7 +73,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 35 | Temsilci (Partner) Portalı | ✅ Tamamlandı | 100% |
 | 36 | Kritik İş Mantığı Denetimi & Sağlamlaştırma (2026-07-19 canlıya alma denetimi) | ✅ Tamamlandı | 100% (36.1–36.11 tamamı kapatıldı — 2026-07-19) |
 | 37 | Gelişmiş Vücut Ölçümleri & İlerleme Takibi | 🔲 Planlandı | 0% (2026-07-20'de tasarlandı) |
-| 38 | Mobil Hesap Yönetimi (Self-Servis Profil) | 🔲 Planlandı | 0% (2026-07-20'de tasarlandı — web'de zaten var, yalnızca mobil API katmanı kaldı) |
+| 38 | Mobil Hesap Yönetimi (Self-Servis Profil) | ✅ Tamamlandı | 100% (2026-07-20) |
 | 39 | Hedef Takip & Motivasyon Sistemi | 🔲 Planlandı | 0% (2026-07-20'de tasarlandı) |
 | 40 | Sporcu Self-Servis Mağaza (Mobil Alışveriş) | 🔲 Planlandı | 0% (2026-07-20'de tasarlandı) |
 | 41 | Beslenme & Kalori Takibi | 🔲 Planlandı | 0% (2026-07-20'de tasarlandı) |
@@ -1529,20 +1529,26 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ---
 
-## 🔲 Faz 38 — Mobil Hesap Yönetimi (Self-Servis Profil) (Öncelik: P1)
+## ✅ Faz 38 — Mobil Hesap Yönetimi (Self-Servis Profil) — tamamlandı, 2026-07-20 (Öncelik: P1)
 
 > **Kullanıcı talebi (2026-07-20):** *"Mobil uygulama üzerinden sporcu kendi hesap bilgilerini düzenleyebilmeli. Parola gibi eposta, telefon no gibi."*
 >
-> **Senaryo:** Sporcu telefon numarasını değiştirdiğinde ya da e-posta adresini güncellemek istediğinde resepsiyona gitmek zorunda kalmamalı. **Önemli tespit:** Bu özellik web sporcu portalında (`AthleteProfileForm` + `AthletePasswordForm`, `actions/athlete-profile.ts` — `updateOwnContactInfo`/`updateOwnDisplayName`) **zaten mevcut** — eksik olan yalnızca mobil tarafın buna erişimi. Bu, sıfırdan iş mantığı yazmaktan çok, var olan, zaten test edilmiş action'ları mobil için ince bir REST API katmanıyla açmak demek — düşük riskli, hızlı kazanım.
+> **Senaryo:** Sporcu telefon numarasını değiştirdiğinde ya da e-posta adresini güncellemek istediğinde resepsiyona gitmek zorunda kalmamalı. **Önemli tespit:** Bu özellik web sporcu portalında (`AthleteProfileForm` + `AthletePasswordForm`, `actions/athlete-profile.ts` — `updateOwnContactInfo`/`updateOwnDisplayName`) **zaten mevcuttu** — eksik olan yalnızca mobil tarafın buna erişimiydi.
 
-- [ ] `PATCH /api/v1/me/profile` — `updateOwnContactInfo`/`updateOwnDisplayName` ile aynı iş mantığını çağıran API route (web action'ı tekrar yazmadan sarar)
-- [ ] `POST /api/v1/me/password` — mevcut parola değiştirme mantığını (`AthletePasswordForm`'un kullandığı action) mobile açar; mevcut parola doğrulaması zorunlu kalır
-- [ ] Mobil `AccountScreen`: "Profili Düzenle" bölümü (ad, telefon, doğum tarihi) + ayrı "Parola Değiştir" formu — web'deki iki-form deseniyle birebir (karışıklığı önlemek için aynı UX)
-- [ ] **Kapsam kararı:** E-posta değişikliği v1'de **anında** uygulanır (web'deki mevcut davranışla birebir parite) — yeni e-postaya doğrulama linki gönderme akışı bir sonraki iterasyona bırakılır (bu, web tarafında da zaten yok; mobilde daha katı bir kural uygulamak tutarsızlık yaratır)
+- [x] `actions/athlete-profile.ts` genişletildi — üç action da artık opsiyonel bir `request?: Request` parametresi alıyor, `getAthleteProfileContext` `auth()` yerine `resolveApiContext` kullanıyor. Bu sayede **aynı fonksiyon** hem web'de (çerez, request yok) hem mobilde (Bearer token, request var) çalışıyor — kod ikiye bölünmedi
+- [x] `PATCH /api/v1/me/profile` — `updateOwnContactInfo`/`updateOwnDisplayName`'i senkronize eden ince bir API route (kod tekrarı yok)
+- [x] `POST /api/v1/me/password` — `changeOwnPassword`'ü açar, mevcut parola doğrulaması aynen korunur
+- [x] Mobil `AccountScreen`: "Profili Düzenle" (ad/telefon/e-posta — yeni paylaşılan `components/ui/TextField.tsx`) + ayrı "Parola Değiştir" formu — web'deki iki-form deseniyle tutarlı
+- [x] **Kapsam kararı:** doğum tarihi mobilde düzenlenemiyor — `/api/v1/me` yanıtı bu alanı hiç döndürmüyor, kapsamı büyütmemek için mobil v1'de yalnızca ad/telefon/e-posta ile sınırlı tutuldu (web'de zaten var)
+- [x] E-posta değişikliği v1'de **anında** uygulanır (web'deki mevcut davranışla birebir parite) — doğrulama linki akışı v2'ye ertelendi
 
-**Kabul kriteri:** 🔲 Sporcu mobil uygulamadan e-posta/telefon/ad bilgisini güncelleyebiliyor · 🔲 mevcut parolasını doğrulayarak yeni parola belirleyebiliyor · 🔲 web ile aynı validasyon kuralları geçerli (kod tekrarı yok)
+**Kabul kriteri:** ✅ Sporcu mobil uygulamadan e-posta/telefon/ad bilgisini güncelleyebiliyor · ✅ mevcut parolasını doğrulayarak yeni parola belirleyebiliyor · ✅ web ile aynı validasyon kuralları geçerli (kod tekrarı yok — tek kaynak)
 
-**Bağımlılık:** `actions/athlete-profile.ts` (web, zaten var) ✅ — yalnızca API katmanı eksik
+**Doğrulama:** `pnpm typecheck` (web+mobil ayrı) + ESLint + mevcut 54 test hatasız.
+
+**Dosyalar:** `actions/athlete-profile.ts`, `app/api/v1/me/profile/route.ts`, `app/api/v1/me/password/route.ts`, `apps/mobile/src/components/ui/TextField.tsx` (yeni, yeniden kullanılabilir), `apps/mobile/src/screens/AccountScreen.tsx`, `apps/mobile/src/lib/api.ts`
+
+**Bağımlılık:** `actions/athlete-profile.ts` (web, zaten vardı) ✅ · `lib/api/auth-context.ts` (`resolveApiContext` — Faz 7) ✅
 
 ---
 
@@ -1734,11 +1740,14 @@ Faz 8.7.1 tamamlandı + repo temizliği (2026-07-20 — kullanıcı talebi üzer
   [Repo]     Git contributors düzenlemesi (Cursor/Claude trailer temizliği) ✅ — kullanıcı
              onayıyla force-push edildi, GitHub artık yalnızca RealMrNovember gösteriyor
 
+Faz 38 tamamlandı (2026-07-20 — kullanıcı talebi, düşük risk/hızlı kazanım olduğu için ilk sırada seçildi):
+  Faz 38     Mobil hesap yönetimi (self-servis profil) ✅ — bkz. Faz 38 bölümü, aynı web
+             action'ı Bearer token da kabul edecek şekilde genişletildi, kod tekrarı yok
+
 Sıradaki (Faz 36 sonrası — profesyonel değerlendirme, P0 en önce):
   Faz 32     Ticarileştirme: paket + ek kapasite satışı          ← P0, gelir modeli (kullanıcı onayı gerekli)
 
   Faz 37     Gelişmiş vücut ölçümleri & ilerleme takibi          ← P1, kullanıcı talebi (2026-07-20)
-  Faz 38     Mobil hesap yönetimi (self-servis profil)           ← P1, kullanıcı talebi — düşük risk (web'de zaten var)
   Faz 39     Hedef takip & motivasyon sistemi                    ← P1, kullanıcı talebi, Faz 37'ye bağımlı
   Faz 40     Sporcu self-servis mağaza (mobil alışveriş)         ← P1, kullanıcı talebi, Faz 8.7 üzerine kurulu
   Faz 27.3   Serverless kuyruk motoru (QStash/Inngest)           ← P1, Faz 27.2'nin önkoşulu
