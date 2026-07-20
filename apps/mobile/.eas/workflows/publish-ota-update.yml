@@ -1,0 +1,30 @@
+name: SGMS Mobil — Otomatik OTA Güncelleme
+
+on:
+  push:
+    branches: ['main']
+    paths:
+      - apps/mobile/**
+
+concurrency:
+  cancel_in_progress: true
+  group: ${{ workflow.filename }}-${{ github.ref }}
+
+jobs:
+  typecheck:
+    name: Mobil TypeScript kontrolü
+    steps:
+      - uses: eas/checkout
+      - uses: eas/install_node_modules
+      - name: tsc --noEmit
+        working_directory: apps/mobile
+        run: pnpm exec tsc --noEmit
+
+  publish_ota_update:
+    name: OTA güncelleme yayınla (production kanalı)
+    needs: [typecheck]
+    type: update
+    params:
+      channel: production
+      platform: android
+      message: ${{ github.commit_message }}
