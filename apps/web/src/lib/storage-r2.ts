@@ -5,9 +5,15 @@ import {
   S3Client,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import type { AvatarUploadInput, AvatarUploadResult } from '@/lib/storage';
+import type {
+  AvatarUploadInput,
+  AvatarUploadResult,
+  ProgressPhotoUploadInput,
+  ProgressPhotoUploadResult,
+} from '@/lib/storage';
 
 const AVATAR_PREFIX = 'avatars';
+const PROGRESS_PHOTO_PREFIX = 'progress-photos';
 
 function getR2Config() {
   const accountId = process.env.R2_ACCOUNT_ID;
@@ -139,4 +145,52 @@ function mimeExtension(mimeType: string): string {
     default:
       return 'bin';
   }
+}
+
+export function buildProgressPhotoRelativeKey(input: ProgressPhotoUploadInput): string {
+  const extension = mimeExtension(input.mimeType);
+  return `${input.organizationId}/progress-photos/${input.gymMemberId}/${input.photoId}.${extension}`;
+}
+
+export function buildProgressPhotoObjectKey(relativeKey: string): string {
+  return `${PROGRESS_PHOTO_PREFIX}/${relativeKey}`;
+}
+
+export function buildProgressPhotoPublicUrl(relativeKey: string): string {
+  const { publicBaseUrl } = getR2Config();
+  return `${publicBaseUrl}/${buildProgressPhotoObjectKey(relativeKey)}`;
+}
+
+export async function uploadProgressPhotoToR2(
+  input: ProgressPhotoUploadInput,
+): Promise<ProgressPhotoUploadResult> {
+  const { bucket } = getR2Config();
+  const client = getR2Client();
+  const relativeKey = buildProgressPhotoRelativeKey(input);
+  const objectKey = buildProgressPhotoObjectKey(relativeKey);
+
+  await client.send(
+    new PutObjectCommand({
+      Bucket: bucket,
+      Key: objectKey,
+      Body: input.buffer,
+      ContentType: input.mimeType,
+      CacheControl: 'public, max-age=31536000, immutable',
+    }),
+  );
+
+  const useSigned =
+    process.env.R2_USE_SIGNED_URLS === 'true' || process.env.R2_USE_SIGNED_URLS === '1';
+
+  if (useSigned) {
+    const ttl = Number(process.env.R2_SIGNED_URL_TTL_SECONDS ?? 3600);
+    const signedUrl = await getSignedUrl(
+      client,
+      new GetObjectCommand({ Bucket: bucket, Key: objectKey }),
+      { expiresIn: Number.isFinite(ttl) && ttl > 0 ? ttl : 3600 },
+    );
+    return { key: relativeKey, url: signedUrl };
+  }
+
+  return { key: relativeKey, url: buildProgressPhotoPublicUrl(relativeKey) };
 }

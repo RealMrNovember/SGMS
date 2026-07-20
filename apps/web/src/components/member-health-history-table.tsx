@@ -1,3 +1,4 @@
+import { computeBmi } from '@/lib/measurements/bmi';
 import { intlLocaleFor } from '@/lib/format-locale';
 import { getLocale, getTranslations } from 'next-intl/server';
 
@@ -8,11 +9,28 @@ type MeasurementRow = {
   bodyFatPercentage: { toString: () => string } | null;
   muscleMass: { toString: () => string } | null;
   height: { toString: () => string } | null;
+  waistCm: { toString: () => string } | null;
+  chestCm: { toString: () => string } | null;
+  hipCm: { toString: () => string } | null;
+  armCm: { toString: () => string } | null;
+  thighCm: { toString: () => string } | null;
+  bodyWaterPercentage: { toString: () => string } | null;
+  visceralFatRating: { toString: () => string } | null;
+  restingHeartRate: number | null;
   notes: string | null;
 };
 
 function formatDecimal(value: { toString: () => string } | null | undefined) {
   return value != null ? value.toString() : '—';
+}
+
+function formatBmi(weight: MeasurementRow['weight'], height: MeasurementRow['height']) {
+  if (weight == null || height == null) {
+    return '—';
+  }
+
+  const bmi = computeBmi(Number(weight.toString()), Number(height.toString()));
+  return bmi != null ? bmi.toFixed(1) : '—';
 }
 
 export async function MemberHealthHistoryTable({
@@ -50,12 +68,12 @@ export async function MemberHealthHistoryTable({
                   <span className="data-card-value">{formatDecimal(m.bodyFatPercentage)}</span>
                 </div>
                 <div className="data-card-row">
-                  <span className="data-card-label">{t('columns.muscle')}</span>
-                  <span className="data-card-value">{formatDecimal(m.muscleMass)}</span>
+                  <span className="data-card-label">{t('columns.waist')}</span>
+                  <span className="data-card-value">{formatDecimal(m.waistCm)}</span>
                 </div>
                 <div className="data-card-row">
-                  <span className="data-card-label">{t('columns.height')}</span>
-                  <span className="data-card-value">{formatDecimal(m.height)}</span>
+                  <span className="data-card-label">{t('columns.bmi')}</span>
+                  <span className="data-card-value">{formatBmi(m.weight, m.height)}</span>
                 </div>
                 {m.notes ? (
                   <div className="data-card-row">
@@ -70,13 +88,16 @@ export async function MemberHealthHistoryTable({
       )}
 
       <div className="hidden overflow-x-auto md:block">
-        <table className="w-full min-w-[800px] text-left text-sm">
+        <table className="w-full min-w-[1100px] text-left text-sm">
           <thead className="muted border-b border-[var(--border)] text-xs uppercase tracking-wide">
             <tr>
               <th className="px-6 py-3 font-medium">{t('columns.date')}</th>
               <th className="px-6 py-3 font-medium">{t('columns.weight')}</th>
               <th className="px-6 py-3 font-medium">{t('columns.bodyFat')}</th>
-              <th className="px-6 py-3 font-medium">{t('columns.muscle')}</th>
+              <th className="px-6 py-3 font-medium">{t('columns.waist')}</th>
+              <th className="px-6 py-3 font-medium">{t('columns.chest')}</th>
+              <th className="px-6 py-3 font-medium">{t('columns.hip')}</th>
+              <th className="px-6 py-3 font-medium">{t('columns.bmi')}</th>
               <th className="px-6 py-3 font-medium">{t('columns.height')}</th>
               <th className="px-6 py-3 font-medium">{t('columns.notes')}</th>
             </tr>
@@ -84,7 +105,7 @@ export async function MemberHealthHistoryTable({
           <tbody>
             {measurements.length === 0 ? (
               <tr>
-                <td colSpan={6} className="muted px-6 py-8 text-center">
+                <td colSpan={9} className="muted px-6 py-8 text-center">
                   {t('historyEmpty')}
                 </td>
               </tr>
@@ -94,7 +115,10 @@ export async function MemberHealthHistoryTable({
                   <td className="px-6 py-4">{m.measuredAt.toLocaleString(dateLocale)}</td>
                   <td className="px-6 py-4">{formatDecimal(m.weight)}</td>
                   <td className="px-6 py-4">{formatDecimal(m.bodyFatPercentage)}</td>
-                  <td className="px-6 py-4">{formatDecimal(m.muscleMass)}</td>
+                  <td className="px-6 py-4">{formatDecimal(m.waistCm)}</td>
+                  <td className="px-6 py-4">{formatDecimal(m.chestCm)}</td>
+                  <td className="px-6 py-4">{formatDecimal(m.hipCm)}</td>
+                  <td className="px-6 py-4">{formatBmi(m.weight, m.height)}</td>
                   <td className="px-6 py-4">{formatDecimal(m.height)}</td>
                   <td className="muted px-6 py-4">{m.notes ?? '—'}</td>
                 </tr>

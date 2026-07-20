@@ -1,9 +1,12 @@
 import { AddMeasurementForm } from '@/components/add-measurement-form';
+import { MeasurementSparkline } from '@/components/measurement-sparkline';
+import { UploadMeasurementPhotoForm } from '@/components/upload-measurement-photo-form';
 import { auth } from '@/lib/auth';
 import { intlLocaleFor } from '@/lib/format-locale';
 import { prisma } from '@/lib/prisma';
 import type { OrganizationRole } from '@sgms/database';
 import { getLocale, getTranslations } from 'next-intl/server';
+import Image from 'next/image';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
@@ -11,6 +14,19 @@ const MEASUREMENT_ROLES = new Set<OrganizationRole>(['OWNER', 'ADMIN', 'STAFF', 
 
 function formatDecimal(value: { toString: () => string } | null | undefined) {
   return value != null ? value.toString() : '—';
+}
+
+function buildSparklineSeries(
+  measurements: Array<{ measuredAt: Date; value: { toString: () => string } | null }>,
+) {
+  return [...measurements]
+    .filter((m) => m.value != null)
+    .reverse()
+    .slice(-6)
+    .map((m) => ({
+      at: m.measuredAt.toISOString(),
+      value: Number(m.value!.toString()),
+    }));
 }
 
 export default async function MemberMeasurementsPage({
@@ -48,16 +64,29 @@ export default async function MemberMeasurementsPage({
     notFound();
   }
 
-  const measurements = await prisma.healthMeasurement.findMany({
-    where: { organizationId, gymMemberId: id },
-    orderBy: { measuredAt: 'desc' },
-    take: 50,
-  });
+  const [measurements, photos] = await Promise.all([
+    prisma.healthMeasurement.findMany({
+      where: { organizationId, gymMemberId: id },
+      orderBy: { measuredAt: 'desc' },
+      take: 50,
+    }),
+    prisma.measurementPhoto.findMany({
+      where: { organizationId, gymMemberId: id },
+      orderBy: { takenAt: 'desc' },
+      take: 24,
+    }),
+  ]);
 
-  const weightSeries = [...measurements]
-    .filter((m) => m.weight != null)
-    .reverse()
-    .slice(-12);
+  const chronological = [...measurements].reverse();
+  const weightSeries = buildSparklineSeries(
+    chronological.map((m) => ({ measuredAt: m.measuredAt, value: m.weight })),
+  );
+  const bodyFatSeries = buildSparklineSeries(
+    chronological.map((m) => ({ measuredAt: m.measuredAt, value: m.bodyFatPercentage })),
+  );
+  const waistSeries = buildSparklineSeries(
+    chronological.map((m) => ({ measuredAt: m.measuredAt, value: m.waistCm })),
+  );
 
   const fullName = `${member.firstName} ${member.lastName}`;
 
@@ -73,38 +102,52 @@ export default async function MemberMeasurementsPage({
         </p>
       </div>
 
-      {weightSeries.length > 1 ? (
-        <section className="card p-6">
-          <h3 className="text-lg font-semibold">
-            {t('weightTrend', { count: weightSeries.length })}
-          </h3>
-          <div className="mt-4 flex h-32 items-end gap-2">
-            {weightSeries.map((m) => {
-              const max = Math.max(...weightSeries.map((x) => Number(x.weight)));
-              const min = Math.min(...weightSeries.map((x) => Number(x.weight)));
-              const range = max - min || 1;
-              const height = ((Number(m.weight) - min) / range) * 100;
-              return (
-                <div key={m.id} className="flex flex-1 flex-col items-center gap-1">
-                  <div
-                    className="w-full rounded-t bg-emerald-500/70"
-                    style={{ height: `${Math.max(height, 8)}%` }}
-                    title={`${m.weight} kg`}
-                  />
-                  <span className="muted text-[10px]">
-                    {m.measuredAt.toLocaleDateString(dateLocale, {
-                      day: '2-digit',
-                      month: '2-digit',
-                    })}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
+      {weightSeries.length > 1 || bodyFatSeries.length > 1 || waistSeries.length > 1 ? (
+        <section className="card grid gap-6 p-6 md:grid-cols-3">
+          {weightSeries.length > 1 ? (
+            <MeasurementSparkline label={t('sparklines.weight')} points={weightSeries} unit="kg" />
+          ) : null}
+          {bodyFatSeries.length > 1 ? (
+            <MeasurementSparkline label={t('sparklines.bodyFat')} points={bodyFatSeries} unit="%" />
+          ) : null}
+          {waistSeries.length > 1 ? (
+            <MeasurementSparkline label={t('sparklines.waist')} points={waistSeries} unit="cm" />
+          ) : null}
         </section>
       ) : null}
 
       <AddMeasurementForm gymMemberId={id} canManage={canManage} />
+
+      <UploadMeasurementPhotoForm gymMemberId={id} canManage={canManage} />
+
+      {photos.length > 0 ? (
+        <section className="card p-6">
+          <h3 className="text-lg font-semibold">{t('photoGalleryTitle')}</h3>
+          <p className="muted mt-1 text-sm">{t('photoGalleryCount', { count: photos.length })}</p>
+          <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-4">
+            {photos.map((photo) => (
+              <figure key={photo.id} className="overflow-hidden rounded-xl border border-[var(--border)]">
+                <div className="relative aspect-[3/4] bg-black/20">
+                  <Image
+                    src={photo.photoUrl}
+                    alt={t('photoAngles.' + photo.angle.toLowerCase())}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 50vw, 25vw"
+                    unoptimized
+                  />
+                </div>
+                <figcaption className="px-3 py-2 text-xs">
+                  <span className="font-medium">{t(`photoAngles.${photo.angle.toLowerCase()}`)}</span>
+                  <span className="muted block">
+                    {photo.takenAt.toLocaleDateString(dateLocale)}
+                  </span>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <section className="card overflow-hidden">
         <div className="border-b border-[var(--border)] px-6 py-4">
@@ -113,12 +156,13 @@ export default async function MemberMeasurementsPage({
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[700px] text-left text-sm">
+          <table className="w-full min-w-[900px] text-left text-sm">
             <thead className="muted border-b border-[var(--border)] text-xs uppercase tracking-wide">
               <tr>
                 <th className="px-6 py-3 font-medium">{t('columns.date')}</th>
                 <th className="px-6 py-3 font-medium">{t('columns.weight')}</th>
                 <th className="px-6 py-3 font-medium">{t('columns.bodyFat')}</th>
+                <th className="px-6 py-3 font-medium">{t('columns.waist')}</th>
                 <th className="px-6 py-3 font-medium">{t('columns.muscle')}</th>
                 <th className="px-6 py-3 font-medium">{t('columns.height')}</th>
                 <th className="px-6 py-3 font-medium">{t('columns.notes')}</th>
@@ -127,7 +171,7 @@ export default async function MemberMeasurementsPage({
             <tbody>
               {measurements.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="muted px-6 py-8 text-center">
+                  <td colSpan={7} className="muted px-6 py-8 text-center">
                     {t('emptyShort')}
                   </td>
                 </tr>
@@ -137,6 +181,7 @@ export default async function MemberMeasurementsPage({
                     <td className="px-6 py-4">{m.measuredAt.toLocaleString(dateLocale)}</td>
                     <td className="px-6 py-4">{formatDecimal(m.weight)}</td>
                     <td className="px-6 py-4">{formatDecimal(m.bodyFatPercentage)}</td>
+                    <td className="px-6 py-4">{formatDecimal(m.waistCm)}</td>
                     <td className="px-6 py-4">{formatDecimal(m.muscleMass)}</td>
                     <td className="px-6 py-4">{formatDecimal(m.height)}</td>
                     <td className="muted px-6 py-4">{m.notes ?? '—'}</td>

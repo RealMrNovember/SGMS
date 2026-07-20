@@ -4,6 +4,7 @@ import type {
   CheckInQrData,
   DirectMessage,
   HealthMeasurement,
+  MeasurementPhoto,
   MeResponse,
   MemberStatement,
   MembershipRenewalResponse,
@@ -58,15 +59,54 @@ export async function fetchMeasurements(
   return apiFetch('/api/v1/measurements', { headers: authHeaders(accessToken) });
 }
 
+export type AddMeasurementInput = {
+  weight?: number;
+  bodyFatPercentage?: number;
+  muscleMass?: number;
+  height?: number;
+  waistCm?: number;
+  chestCm?: number;
+  hipCm?: number;
+  armCm?: number;
+  thighCm?: number;
+  bodyWaterPercentage?: number;
+  visceralFatRating?: number;
+  restingHeartRate?: number;
+  notes?: string;
+  measuredAt?: string;
+};
+
 export async function addMeasurement(
   accessToken: string,
-  input: { weight?: number; bodyFatPercentage?: number; muscleMass?: number; notes?: string },
+  input: AddMeasurementInput,
 ): Promise<{ measurement: HealthMeasurement }> {
   return apiFetch('/api/v1/measurements', {
     method: 'POST',
     headers: authHeaders(accessToken),
     body: JSON.stringify(input),
   });
+}
+
+export async function fetchMeasurementPhotos(
+  accessToken: string,
+): Promise<{ photos: MeasurementPhoto[]; count: number }> {
+  return apiFetch('/api/v1/measurements/photos', { headers: authHeaders(accessToken) });
+}
+
+export async function uploadMeasurementPhoto(
+  accessToken: string,
+  formData: FormData,
+): Promise<{ photo: MeasurementPhoto }> {
+  const res = await fetch(`${SGMS_API_BASE_URL}/api/v1/measurements/photos`, {
+    method: 'POST',
+    headers: authHeaders(accessToken),
+    body: formData,
+  });
+  const json = (await res.json()) as { ok: boolean; data?: { photo: MeasurementPhoto }; error?: string };
+  if (!res.ok || !json.ok || json.data === undefined) {
+    throw new Error(json.error ?? 'Fotoğraf yüklenemedi');
+  }
+  return json.data;
 }
 
 export async function fetchMessages(

@@ -61,8 +61,25 @@ export type HealthMeasurement = {
   bodyFatPercentage: string | number | null;
   muscleMass: string | number | null;
   height: string | number | null;
+  waistCm: string | number | null;
+  chestCm: string | number | null;
+  hipCm: string | number | null;
+  armCm: string | number | null;
+  thighCm: string | number | null;
+  bodyWaterPercentage: string | number | null;
+  visceralFatRating: string | number | null;
+  restingHeartRate: number | null;
   notes: string | null;
   measuredAt: string;
+  bmi?: number | null;
+};
+
+export type MeasurementPhoto = {
+  id: string;
+  angle: 'FRONT' | 'SIDE' | 'BACK' | 'OTHER';
+  photoUrl: string;
+  takenAt: string;
+  healthMeasurementId: string | null;
 };
 
 export type DirectMessage = {

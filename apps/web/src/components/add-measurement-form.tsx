@@ -1,22 +1,44 @@
 'use client';
 
-import { addHealthMeasurement, type AddMeasurementState } from '@/actions/measurements';
+import {
+  addHealthMeasurement,
+  addOwnHealthMeasurement,
+  type AddMeasurementState,
+} from '@/actions/measurements';
 import { useTranslations } from 'next-intl';
 import { useActionState } from 'react';
 
 const initialState: AddMeasurementState = {};
 
+const optionalFieldNames = [
+  'weight',
+  'bodyFatPercentage',
+  'muscleMass',
+  'height',
+  'waistCm',
+  'chestCm',
+  'hipCm',
+  'armCm',
+  'thighCm',
+  'bodyWaterPercentage',
+  'visceralFatRating',
+  'restingHeartRate',
+] as const;
+
 export function AddMeasurementForm({
   gymMemberId,
   canManage,
+  selfService = false,
 }: {
-  gymMemberId: string;
+  gymMemberId?: string;
   canManage: boolean;
+  selfService?: boolean;
 }) {
   const t = useTranslations('measurements');
-  const [state, formAction, pending] = useActionState(addHealthMeasurement, initialState);
+  const action = selfService ? addOwnHealthMeasurement : addHealthMeasurement;
+  const [state, formAction, pending] = useActionState(action, initialState);
 
-  if (!canManage) {
+  if (!canManage && !selfService) {
     return (
       <section className="card p-6">
         <p className="muted text-sm">{t('noPermission')}</p>
@@ -27,8 +49,8 @@ export function AddMeasurementForm({
   return (
     <section className="card space-y-4 p-6">
       <div>
-        <h3 className="text-lg font-semibold">{t('title')}</h3>
-        <p className="muted mt-1 text-sm">{t('subtitle')}</p>
+        <h3 className="text-lg font-semibold">{selfService ? t('selfAddTitle') : t('title')}</h3>
+        <p className="muted mt-1 text-sm">{selfService ? t('selfAddSubtitle') : t('subtitle')}</p>
       </div>
 
       {state.error ? (
@@ -44,41 +66,22 @@ export function AddMeasurementForm({
       ) : null}
 
       <form action={formAction} className="grid gap-4 md:grid-cols-2">
-        <input type="hidden" name="gymMemberId" value={gymMemberId} />
+        {gymMemberId ? <input type="hidden" name="gymMemberId" value={gymMemberId} /> : null}
 
-        <div className="space-y-2">
-          <label htmlFor="weight" className="muted text-sm">
-            {t('weight')}
-          </label>
-          <input id="weight" name="weight" type="number" step="0.1" className="input" />
-        </div>
-
-        <div className="space-y-2">
-          <label htmlFor="bodyFatPercentage" className="muted text-sm">
-            {t('bodyFat')}
-          </label>
-          <input
-            id="bodyFatPercentage"
-            name="bodyFatPercentage"
-            type="number"
-            step="0.1"
-            className="input"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label htmlFor="muscleMass" className="muted text-sm">
-            {t('muscleMass')}
-          </label>
-          <input id="muscleMass" name="muscleMass" type="number" step="0.1" className="input" />
-        </div>
-
-        <div className="space-y-2">
-          <label htmlFor="height" className="muted text-sm">
-            {t('height')}
-          </label>
-          <input id="height" name="height" type="number" step="0.1" className="input" />
-        </div>
+        {optionalFieldNames.map((field) => (
+          <div key={field} className="space-y-2">
+            <label htmlFor={field} className="muted text-sm">
+              {t(field)}
+            </label>
+            <input
+              id={field}
+              name={field}
+              type="number"
+              step={field === 'restingHeartRate' ? '1' : '0.1'}
+              className="input"
+            />
+          </div>
+        ))}
 
         <div className="space-y-2">
           <label htmlFor="measuredAt" className="muted text-sm">

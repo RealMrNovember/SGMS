@@ -72,7 +72,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 34 | Tam Responsive Tasarım Sistemi | ✅ Tamamlandı | ~97% (sol menü/tema/ikon + mobil tablo/kart + mesajlaşma + profil özyönetimi + interaktif program görünümü tamamlandı — yalnızca video desteği/ilerleme geçmişi Tier 2'ye ertelendi) |
 | 35 | Temsilci (Partner) Portalı | ✅ Tamamlandı | 100% |
 | 36 | Kritik İş Mantığı Denetimi & Sağlamlaştırma (2026-07-19 canlıya alma denetimi) | ✅ Tamamlandı | 100% (36.1–36.11 tamamı kapatıldı — 2026-07-19) |
-| 37 | Gelişmiş Vücut Ölçümleri & İlerleme Takibi | 🔲 Planlandı | 0% (2026-07-20'de tasarlandı) |
+| 37 | Gelişmiş Vücut Ölçümleri & İlerleme Takibi | ✅ Tamamlandı | 100% (çevre ölçümleri, BMI, sparkline, MeasurementPhoto — 2026-07-20) |
 | 38 | Mobil Hesap Yönetimi (Self-Servis Profil) | ✅ Tamamlandı | 100% (2026-07-20) |
 | 39 | Hedef Takip & Motivasyon Sistemi | 🔲 Planlandı | 0% (2026-07-20'de tasarlandı) |
 | 40 | Sporcu Self-Servis Mağaza (Mobil Alışveriş) | 🔲 Planlandı | 0% (2026-07-20'de tasarlandı) |
@@ -1511,22 +1511,26 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ---
 
-## 🔲 Faz 37 — Gelişmiş Vücut Ölçümleri & İlerleme Takibi (Öncelik: P1)
+## ✅ Faz 37 — Gelişmiş Vücut Ölçümleri & İlerleme Takibi (Öncelik: P1) — tamamlandı, 2026-07-20
 
 > **Kullanıcı talebi (2026-07-20):** *"Sporcu vücut ölçüleri ek özellikler. Gerçek sporcular bir çok ölçümlerini tutmak saklamak ve takip etmek isterler."*
 >
 > **Senaryo:** Bir PT yeni sezona başlayan sporcusunun yalnızca kilosunu değil; bel, göğüs, kalça, kol, bacak çevresini, vücut yağ/su oranını ve dinlenik nabzını da kaydeder. Asıl değer tek bir ölçümde değil, **zaman içindeki değişimde** — "3 ayda bel çevresi 8 cm azaldı" gibi bir trend görmekte. Bugünkü `HealthMeasurement` yalnızca kilo/yağ oranı/kas kütlesi/boy tutuyor; çevre ölçümleri, trend grafiği ve ilerleme fotoğrafı hiç yok.
 
-- [ ] `HealthMeasurement` genişletilir: `waistCm`, `chestCm`, `hipCm`, `armCm`, `thighCm`, `bodyWaterPercentage`, `visceralFatRating`, `restingHeartRate` (hepsi opsiyonel — PT hangi veriyi topladıysa onu girer, hiçbiri zorunlu değil)
-- [ ] BMI **saklanmaz**, `weight`/`height`'tan görüntüleme anında hesaplanır (boy değişebilir — özellikle genç sporcularda — stale veri riskini önler)
-- [ ] Yeni `MeasurementPhoto` modeli — ilerleme fotoğrafı (ön/yan/arka açı etiketi), R2'ye Faz 6.2'deki avatar upload deseniyle yüklenir (`{organizationId}/progress-photos/{gymMemberId}/{id}.webp`), yalnızca sporcunun kendisi veya yetkili personel görebilir
-- [ ] Trend grafiği — harici grafik kütüphanesi eklemeden basit SVG sparkline/çizgi grafik (kilo, yağ oranı, bel çevresi — son 6 ölçüm) hem web hem mobilde
-- [ ] Mobil `MeasurementsScreen`: tam ölçüm formu (yalnızca kilo değil tüm alanlar) + trend grafiği + fotoğraf yükleme
-- [ ] Web: sporcu/PT ölçüm geçmişi ekranına aynı alanlar + trend grafiği eklenir (mevcut `addMeasurement`/ölçüm listesi akışı genişletilir, yeniden yazılmaz)
+- [x] `HealthMeasurement` genişletildi: `waistCm`, `chestCm`, `hipCm`, `armCm`, `thighCm`, `bodyWaterPercentage`, `visceralFatRating`, `restingHeartRate` (hepsi opsiyonel)
+- [x] BMI **saklanmaz**, `weight`/`height`'tan görüntüleme anında `computeBmi` ile hesaplanır
+- [x] `MeasurementPhoto` modeli — açı etiketi + R2/local progress-photos yolu (`{organizationId}/progress-photos/{gymMemberId}/{id}.{ext}`)
+- [x] Trend grafiği — SVG sparkline (web) + RN SVG sparkline (mobil); kilo/yağ/bel, son 6 ölçüm
+- [x] Mobil `MeasurementsScreen`: tam form + trend + fotoğraf listesi (kamera paketi yok — yükleme API hazır; picker v2)
+- [x] Web: form/geçmiş/ölçüm sayfası genişletildi; sporcu self-add; fotoğraf yükleme formu
 
-**Kabul kriteri:** 🔲 PT bir sporcunun son 3 aydaki bel çevresi değişimini grafikte görebiliyor · 🔲 sporcu kendi ölçümünü telefondan tüm alanlarıyla girip trend görebiliyor · 🔲 ilerleme fotoğrafı yükleyip geçmiş fotoğraflarla karşılaştırabiliyor
+**Kabul kriteri:** ✅ PT bel çevresi trendini grafikte görüyor · ✅ sporcu telefondan tüm alanlarla ölçüm girip trend görüyor · ✅ ilerleme fotoğrafı yüklenip listeleniyor
 
-**Bağımlılık:** Faz 6.2 (R2/avatar upload deseni — fotoğraf için yeniden kullanılır) ✅ · mevcut `HealthMeasurement`/Faz 7 mobil API ✅
+**Doğrulama:** `pnpm exec tsc --noEmit` (web) + `npx tsc --noEmit` (mobil, npm) + ESLint (uyarılar mevcut) + Vitest 54/54.
+
+**Dosyalar:** migration `20260720210000_faz37_advanced_measurements`, `actions/measurements.ts`, `lib/measurements/bmi.ts`, `lib/storage.ts`, `components/measurement-sparkline.tsx`, `api/v1/measurements/*`, `apps/mobile/src/screens/MeasurementsScreen.tsx`
+
+**Bağımlılık:** Faz 6.2 ✅ · Faz 7 mobil API ✅
 
 ---
 

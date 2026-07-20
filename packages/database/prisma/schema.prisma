@@ -441,6 +441,7 @@ model User {
   equipmentReported           EquipmentServiceLog[]    @relation("EquipmentServiceReportedBy")
   cashShiftsOpened            CashRegisterShift[]      @relation("CashShiftOpenedBy")
   cashShiftsClosed            CashRegisterShift[]      @relation("CashShiftClosedBy")
+  measurementPhotosUploaded   MeasurementPhoto[]       @relation("MeasurementPhotoUploadedBy")
 
   @@index([status])
   @@index([isSuperAdmin])
@@ -779,6 +780,7 @@ model Organization {
   gymMembershipPlans      GymMembershipPlan[]
   gymMembers              GymMember[]
   healthMeasurements      HealthMeasurement[]
+  measurementPhotos       MeasurementPhoto[]
   trainingPrograms        TrainingProgram[]
   exerciseSetLogs         ExerciseSetLog[]
   directMessages          DirectMessage[]
@@ -1116,6 +1118,7 @@ model GymMember {
   membershipGroup     MembershipGroup?    @relation(fields: [membershipGroupId], references: [id], onDelete: SetNull)
   nationalityCountry  Country?            @relation(fields: [nationalityCountryId], references: [id], onDelete: SetNull)
   healthMeasurements  HealthMeasurement[]
+  measurementPhotos   MeasurementPhoto[]
   trainingPrograms    TrainingProgram[]
   exerciseSetLogs     ExerciseSetLog[]
   apiTokens           ApiToken[]
@@ -1158,25 +1161,64 @@ model GymMember {
 // ---------------------------------------------------------------------------
 
 model HealthMeasurement {
-  id                String   @id @default(cuid())
-  organizationId    String   @map("organization_id")
-  gymMemberId       String   @map("gym_member_id")
-  weight            Decimal? @db.Decimal(5, 2)
-  bodyFatPercentage Decimal? @map("body_fat_percentage") @db.Decimal(5, 2)
-  muscleMass        Decimal? @map("muscle_mass") @db.Decimal(5, 2)
-  height            Decimal? @db.Decimal(5, 2)
-  notes             String?  @db.Text
-  measuredAt        DateTime @map("measured_at")
+  id                   String   @id @default(cuid())
+  organizationId       String   @map("organization_id")
+  gymMemberId          String   @map("gym_member_id")
+  weight               Decimal? @db.Decimal(5, 2)
+  bodyFatPercentage    Decimal? @map("body_fat_percentage") @db.Decimal(5, 2)
+  muscleMass           Decimal? @map("muscle_mass") @db.Decimal(5, 2)
+  height               Decimal? @db.Decimal(5, 2)
+  /// Faz 37 — çevre / ekstra ölçümler (hepsi opsiyonel)
+  waistCm              Decimal? @map("waist_cm") @db.Decimal(5, 2)
+  chestCm              Decimal? @map("chest_cm") @db.Decimal(5, 2)
+  hipCm                Decimal? @map("hip_cm") @db.Decimal(5, 2)
+  armCm                Decimal? @map("arm_cm") @db.Decimal(5, 2)
+  thighCm              Decimal? @map("thigh_cm") @db.Decimal(5, 2)
+  bodyWaterPercentage  Decimal? @map("body_water_percentage") @db.Decimal(5, 2)
+  visceralFatRating    Decimal? @map("visceral_fat_rating") @db.Decimal(5, 2)
+  restingHeartRate     Int?     @map("resting_heart_rate")
+  notes                String?  @db.Text
+  measuredAt           DateTime @map("measured_at")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  gymMember    GymMember    @relation(fields: [gymMemberId], references: [id], onDelete: Cascade)
+  organization Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  gymMember    GymMember          @relation(fields: [gymMemberId], references: [id], onDelete: Cascade)
+  photos       MeasurementPhoto[]
 
   @@index([organizationId, gymMemberId, measuredAt])
   @@index([gymMemberId, measuredAt])
   @@map("health_measurements")
+}
+
+enum MeasurementPhotoAngle {
+  FRONT
+  SIDE
+  BACK
+  OTHER
+}
+
+model MeasurementPhoto {
+  id                  String                 @id @default(cuid())
+  organizationId      String                 @map("organization_id")
+  gymMemberId         String                 @map("gym_member_id")
+  healthMeasurementId String?                @map("health_measurement_id")
+  angle               MeasurementPhotoAngle  @default(OTHER)
+  photoUrl            String                 @map("photo_url")
+  uploadedById        String                 @map("uploaded_by_id")
+  takenAt             DateTime               @default(now()) @map("taken_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  organization      Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  gymMember         GymMember          @relation(fields: [gymMemberId], references: [id], onDelete: Cascade)
+  healthMeasurement HealthMeasurement? @relation(fields: [healthMeasurementId], references: [id], onDelete: SetNull)
+  uploadedBy        User               @relation("MeasurementPhotoUploadedBy", fields: [uploadedById], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, gymMemberId, takenAt])
+  @@index([healthMeasurementId])
+  @@map("measurement_photos")
 }
 
 // ---------------------------------------------------------------------------
