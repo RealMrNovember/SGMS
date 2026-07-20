@@ -536,6 +536,18 @@
     "badge": "İdmançı portalı",
     "backHome": "← Ana səhifə",
     "viewAll": "Hamısı",
+    "renewal": {
+      "currentPlan": "Cari Paketiniz",
+      "expiresOn": "Bitmə tarixi:",
+      "expired": "Bitib:",
+      "free": "Pulsuz",
+      "days": "gün",
+      "button": "Üzvlüyümü Yenilə",
+      "buttonPending": "Yönləndirilir…",
+      "notConfigured": "Bu salon üçün onlayn yeniləmə hələ aktiv deyil. Zəhmət olmasa resepşinə müraciət edin.",
+      "successBanner": "Ödəniş alındı, üzvlüyünüz yeniləndi.",
+      "failBanner": "Ödəniş tamamlanmadı, üzvlüyünüz yenilənmədi. Zəhmət olmasa yenidən cəhd edin."
+    },
     "nav": {
       "home": "Xülasə",
       "measurements": "Ölçüm",

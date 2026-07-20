@@ -6,6 +6,7 @@ import type {
   HealthMeasurement,
   MeResponse,
   MemberStatement,
+  MembershipRenewalResponse,
   TrainingProgram,
 } from './types';
 
@@ -89,4 +90,11 @@ export async function sendMessage(
 
 export async function fetchStatement(accessToken: string): Promise<MemberStatement> {
   return apiFetch('/api/v1/me/statement', { headers: authHeaders(accessToken) });
+}
+
+export async function startMembershipRenewal(accessToken: string): Promise<MembershipRenewalResponse> {
+  return apiFetch('/api/v1/me/membership/renew', {
+    method: 'POST',
+    headers: authHeaders(accessToken),
+  });
 }

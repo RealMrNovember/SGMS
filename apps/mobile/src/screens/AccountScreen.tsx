@@ -1,11 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Avatar } from '../components/ui/Avatar';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
-import { fetchMe, fetchStatement, logout } from '../lib/api';
+import { fetchMe, fetchStatement, logout, startMembershipRenewal } from '../lib/api';
 import { clearSession } from '../lib/storage';
 import { colors, spacing, typography } from '../lib/theme';
 import { getCurrentVersion } from '../lib/update-check';
@@ -25,6 +25,8 @@ export function AccountScreen({ session, onLogout }: { session: AthleteSession; 
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [renewing, setRenewing] = useState(false);
+  const [renewError, setRenewError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -55,6 +57,24 @@ export function AccountScreen({ session, onLogout }: { session: AthleteSession; 
     await logout(session.accessToken);
     await clearSession();
     onLogout();
+  }
+
+  async function handleRenew() {
+    setRenewing(true);
+    setRenewError(null);
+    try {
+      const result = await startMembershipRenewal(session.accessToken);
+      if ('renewedImmediately' in result) {
+        Alert.alert('Üyelik yenilendi', 'Ücretsiz paketiniz uzatıldı.');
+        await load();
+      } else {
+        await Linking.openURL(result.checkoutUrl);
+      }
+    } catch (err) {
+      setRenewError(err instanceof Error ? err.message : 'Yenileme başlatılamadı');
+    } finally {
+      setRenewing(false);
+    }
   }
 
   const balanceEntries = statement ? Object.entries(statement.balancesByCurrency).filter(([, v]) => v > 0) : [];
@@ -90,6 +110,19 @@ export function AccountScreen({ session, onLogout }: { session: AthleteSession; 
               label="Üyelik Bitiş"
               value={new Date(me.gymMember.membershipEndsAt).toLocaleDateString('tr-TR')}
             />
+          ) : null}
+
+          {me.gymMember.plan ? (
+            <View style={styles.renewBlock}>
+              <Button
+                label="Üyeliğimi Yenile"
+                onPress={handleRenew}
+                loading={renewing}
+                variant="secondary"
+                icon="refresh-outline"
+              />
+              {renewError ? <Text style={styles.renewError}>{renewError}</Text> : null}
+            </View>
           ) : null}
         </Card>
       ) : (
@@ -194,6 +227,8 @@ const styles = StyleSheet.create({
   muted: { ...typography.body, color: colors.muted, marginTop: 3 },
   faint: { ...typography.caption, color: colors.faint, marginTop: 2 },
   divider: { height: 1, backgroundColor: colors.border, marginVertical: spacing.md },
+  renewBlock: { marginTop: spacing.md, gap: spacing.xs },
+  renewError: { ...typography.caption, color: colors.danger, textAlign: 'center' },
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',

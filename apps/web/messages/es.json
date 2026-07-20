@@ -536,6 +536,18 @@
     "badge": "Portal del atleta",
     "backHome": "← Inicio",
     "viewAll": "Ver todo",
+    "renewal": {
+      "currentPlan": "Tu plan actual",
+      "expiresOn": "Vence el:",
+      "expired": "Venció el:",
+      "free": "Gratis",
+      "days": "días",
+      "button": "Renovar mi membresía",
+      "buttonPending": "Redirigiendo…",
+      "notConfigured": "La renovación en línea aún no está activa para este gimnasio. Contacta con recepción.",
+      "successBanner": "Pago recibido, tu membresía ha sido renovada.",
+      "failBanner": "El pago no se pudo completar, tu membresía no se renovó. Inténtalo de nuevo."
+    },
     "nav": {
       "home": "Inicio",
       "measurements": "Medidas",

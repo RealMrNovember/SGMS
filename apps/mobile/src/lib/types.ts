@@ -112,6 +112,10 @@ export type MemberStatement = {
   }>;
 };
 
+export type MembershipRenewalResponse =
+  | { checkoutUrl: string }
+  | { renewedImmediately: true; newEndsAt: string };
+
 export type UpdateInfo = {
   available: boolean;
   version: string;

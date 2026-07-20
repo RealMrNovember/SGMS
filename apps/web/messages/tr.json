@@ -536,6 +536,18 @@
     "badge": "Sporcu Portalı",
     "backHome": "← Ana sayfa",
     "viewAll": "Tümü",
+    "renewal": {
+      "currentPlan": "Mevcut Paketiniz",
+      "expiresOn": "Bitiş tarihi:",
+      "expired": "Süresi doldu:",
+      "free": "Ücretsiz",
+      "days": "gün",
+      "button": "Üyeliğimi Yenile",
+      "buttonPending": "Yönlendiriliyor…",
+      "notConfigured": "Bu salon için online yenileme henüz aktif değil. Lütfen resepsiyona başvurun.",
+      "successBanner": "Ödemeniz alındı, üyeliğiniz yenilendi.",
+      "failBanner": "Ödeme tamamlanamadı, üyeliğiniz yenilenmedi. Lütfen tekrar deneyin."
+    },
     "nav": {
       "home": "Özet",
       "measurements": "Ölçüm",

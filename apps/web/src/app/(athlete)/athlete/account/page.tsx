@@ -2,6 +2,7 @@ import { AthletePasswordForm } from '@/components/athlete-password-form';
 import { AthleteProfileForm } from '@/components/athlete-profile-form';
 import { AvatarUpload } from '@/components/avatar-upload';
 import { TenantCardCheckoutButton } from '@/components/athlete/tenant-card-checkout-button';
+import { MembershipRenewalButton } from '@/components/athlete/membership-renewal-button';
 import { MembershipLifecyclePanel } from '@/components/membership/membership-lifecycle-panel';
 import { auth } from '@/lib/auth';
 import { intlLocaleFor } from '@/lib/format-locale';
@@ -13,11 +14,17 @@ import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
-export default async function AthleteAccountPage() {
+export default async function AthleteAccountPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ renewal?: string }>;
+}) {
   const session = await auth();
   if (!session?.user?.gymMemberId || !session.user.organizationId) {
     redirect('/login');
   }
+
+  const { renewal } = await searchParams;
 
   const t = await getTranslations('expenses');
   const tAthlete = await getTranslations('athlete');
@@ -37,7 +44,9 @@ export default async function AthleteAccountPage() {
         status: true,
         firstName: true,
         lastName: true,
+        membershipEndsAt: true,
         user: { select: { name: true } },
+        plan: { select: { name: true, price: true, currency: true, durationDays: true } },
       },
     }),
     getActiveTenantCardGateway(session.user.organizationId),
@@ -108,6 +117,43 @@ export default async function AthleteAccountPage() {
           canManage={false}
           isAthleteView
         />
+      ) : null}
+
+      {profile?.plan ? (
+        <section className="card p-5 text-center">
+          {renewal === 'ok' ? (
+            <p className="mb-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+              {tAthlete('renewal.successBanner')}
+            </p>
+          ) : null}
+          {renewal === 'fail' ? (
+            <p className="mb-4 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+              {tAthlete('renewal.failBanner')}
+            </p>
+          ) : null}
+          <p className="muted text-sm">{tAthlete('renewal.currentPlan')}</p>
+          <p className="mt-1 text-xl font-semibold">{profile.plan.name}</p>
+          {profile.membershipEndsAt ? (
+            <p className={`mt-1 text-sm ${profile.membershipEndsAt.getTime() < Date.now() ? 'text-rose-300' : 'muted'}`}>
+              {profile.membershipEndsAt.getTime() < Date.now() ? tAthlete('renewal.expired') : tAthlete('renewal.expiresOn')}{' '}
+              {profile.membershipEndsAt.toLocaleDateString(dateLocale)}
+            </p>
+          ) : null}
+          <p className="muted mt-2 text-xs">
+            {Number(profile.plan.price.toString()) > 0
+              ? money(Number(profile.plan.price.toString()), profile.plan.currency)
+              : tAthlete('renewal.free')}
+            {' · '}
+            {profile.plan.durationDays} {tAthlete('renewal.days')}
+          </p>
+          <div className="mt-4">
+            {Number(profile.plan.price.toString()) <= 0 || activeCardGateway ? (
+              <MembershipRenewalButton />
+            ) : (
+              <p className="muted text-xs">{tAthlete('renewal.notConfigured')}</p>
+            )}
+          </div>
+        </section>
       ) : null}
 
       <section className="card p-5 text-center">

@@ -536,6 +536,18 @@
     "badge": "Portail athlète",
     "backHome": "← Accueil",
     "viewAll": "Tout voir",
+    "renewal": {
+      "currentPlan": "Votre forfait actuel",
+      "expiresOn": "Expire le :",
+      "expired": "Expiré le :",
+      "free": "Gratuit",
+      "days": "jours",
+      "button": "Renouveler mon abonnement",
+      "buttonPending": "Redirection…",
+      "notConfigured": "Le renouvellement en ligne n'est pas encore actif pour cette salle. Contactez l'accueil.",
+      "successBanner": "Paiement reçu, votre abonnement a été renouvelé.",
+      "failBanner": "Le paiement n'a pas pu être finalisé, votre abonnement n'a pas été renouvelé. Veuillez réessayer."
+    },
     "nav": {
       "home": "Accueil",
       "measurements": "Mesures",

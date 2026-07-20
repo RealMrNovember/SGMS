@@ -8,10 +8,16 @@ import { prisma } from '@/lib/prisma';
  * status: pending→processing) ile aynı bildirimin iki kez işlenmesi engellenir
  * (Faz 36.7 desenini izler — bkz. gatewayCheckoutSession'daki eşleniği).
  *
- * Başarılı ödeme: Transaction (CARD) oluşturulur, açık borçlara FIFO uygulanır
- * (`applyPaymentToExpenses`, `recordPayment` server action'ıyla aynı fonksiyon),
- * fatura kesilir. `issuedById`/`actorId` olarak üyenin kendi bağlı `User.id`'si
- * kullanılır — webhook'ta işlem yapan bir personel oturumu yoktur.
+ * Başarılı ödeme: Transaction (CARD) oluşturulur, borç kapatılır
+ * (`applyPaymentToExpenses` — `expenseId` varsa önce O hedeflenir, `recordPayment`
+ * server action'ıyla aynı fonksiyon), fatura kesilir. `issuedById`/`actorId`
+ * olarak üyenin kendi bağlı `User.id`'si kullanılır — webhook'ta işlem yapan
+ * bir personel oturumu yoktur.
+ *
+ * Faz 8.7.1 — `renewalPlanId` doluysa (üyelik yenileme checkout'u), ödeme
+ * onaylandıktan SONRA `GymMember.planId`/`membershipEndsAt` de güncellenir.
+ * Bilinçli sıralama: tarih uzatma ödeme başarısından ÖNCE değil SONRA olur —
+ * aksi halde yarıda bırakılan bir online ödeme üyeliği bedavaya uzatırdı.
  */
 export async function settleTenantCheckoutSession(
   checkoutSessionId: string,
@@ -79,6 +85,7 @@ export async function settleTenantCheckoutSession(
         gymMemberId: checkoutSession.gymMemberId,
         amount,
         currency: checkoutSession.currency,
+        targetExpenseId: checkoutSession.expenseId ?? undefined,
       });
 
       const invoice = await issueInvoiceFromPayment(
@@ -115,6 +122,40 @@ export async function settleTenantCheckoutSession(
           },
         },
       });
+
+      if (checkoutSession.renewalPlanId && checkoutSession.renewalMembershipEndsAt) {
+        await tx.gymMember.update({
+          where: { id: checkoutSession.gymMemberId },
+          data: {
+            planId: checkoutSession.renewalPlanId,
+            status: 'ACTIVE',
+            ...(checkoutSession.renewalMembershipStartsAt
+              ? { membershipStartsAt: checkoutSession.renewalMembershipStartsAt }
+              : {}),
+            membershipEndsAt: checkoutSession.renewalMembershipEndsAt,
+            lastReminderSentAt: null,
+          },
+        });
+
+        await tx.auditLog.create({
+          data: {
+            actorId: member.userId!,
+            organizationId: checkoutSession.organizationId,
+            action: 'MEMBER_UPDATED',
+            entityType: 'gym_member',
+            entityId: checkoutSession.gymMemberId,
+            metadata: {
+              kind: 'membership_renewed',
+              planId: checkoutSession.renewalPlanId,
+              newEndsAt: checkoutSession.renewalMembershipEndsAt.toISOString(),
+              amount,
+              currency: checkoutSession.currency,
+              source: 'athlete_self_service_card',
+              checkoutSessionId,
+            },
+          },
+        });
+      }
     });
 
     await prisma.tenantCheckoutSession.update({

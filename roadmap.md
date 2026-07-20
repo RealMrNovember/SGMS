@@ -376,6 +376,24 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 **Doğrulama notu (2026-07-20):** Geliştirme makinesinde Node.js/pnpm kurulu olmadığı için ilk turda derlenemedi; kullanıcı onayıyla bu makineye Node.js LTS + pnpm 9.15.0 (`packageManager` alanıyla birebir) kuruldu ve ardından ✅ `prisma validate`, ✅ `prisma generate`, ✅ `pnpm build:packages` (`@sgms/database` + `@sgms/cloud-client`), ✅ `pnpm typecheck` (cloud-client + web, sıfır hata), ✅ `pnpm --filter @sgms/web test` (54/54 mevcut Vitest testi geçti, `settle-payment.test.ts` dahil), ✅ ESLint (yeni/değişen tüm dosyalarda sıfır uyarı) ile tam doğrulandı. Bu turda ayrıca platformun mevcut PayTR abonelik webhook'undaki gerçek bir hata da düzeltildi — bkz. `lib/billing/settings.ts`: `appendBillingRequest()`'teki `id` artık `randomUUID().replace(/-/g, '')` ile tiresiz üretiliyor (PayTR `merchant_oid`'de tireleri sessizce siliyordu, DB'deki `GatewayCheckoutSession.id` ile hiç eşleşmiyordu — ödemesi başarılı PayTR checkout'ları abonelik aktivasyonunu tetiklemiyordu). Kalan adım: canlıya almadan önce gerçek bir Postgres'e karşı `prisma migrate deploy` ile migration'ın uygulanması (bu makinede DB bağlantısı yok, yalnızca placeholder `DATABASE_URL` ile statik doğrulama yapıldı).
 
+### 8.7.1 Sporcunun Kendi Kartıyla Üyelik Yenilemesi — tamamlandı, 2026-07-20
+
+> **Kullanıcı sorusu (2026-07-20):** *"Sporcunun üyeliği bittikten sonra mobil uygulaması üzerinden üyelik yenilemesi yapabiliyor mu? Tamamen yapabilmesi lazım kendi kart bilgileriyle."* İnceleme sonucu: hayır — Faz 36.1'deki `renewMembership` yalnızca personel (OWNER/ADMIN/STAFF) aksiyonuydu, sporcu (`VIEWER` rolü) hiç erişemiyordu; ne mobilde ne web sporcu portalında yenileme kodu vardı. Üyelik süresi dolunca turnike girişi de otomatik reddediliyor (`lib/check-in/process.ts`) — yani sporcu hem giremiyor hem kendi kendine düzeltemiyordu.
+>
+> **Kapsam kararı:** Sporcu yalnızca **mevcut paketiyle aynısını** yeniden satın alabilir (farklı pakete geçiş/downgrade yok — kullanıcı onayıyla).
+- [x] `TenantCheckoutSession`'a `renewalPlanId`/`renewalMembershipStartsAt`/`renewalMembershipEndsAt` eklendi (migration `20260720140000_faz_8_7_1_membership_self_renewal`) — Faz 36.1'deki `computeRenewalPeriod` tarih hesabı ve Faz 8.7'nin Iyzico/PayTR checkout altyapısı hiç kod tekrarı olmadan yeniden kullanıldı (`lib/membership/renewal-checkout.ts`, ortak — hem web action hem mobil API endpoint çağırıyor)
+- [x] **Kritik güvenlik kararı:** Faz 36.1'deki personel akışı ödemeyi beklemeden üyeliği anında uzatıyor (personel zaten tahsil etmiş kabul edilir) — bu akışta ödeme uzaktan/kartla olduğundan üyelik **yalnızca webhook ödemeyi onayladıktan sonra** uzatılıyor (`settleTenantCheckoutSession`), aksi halde yarıda bırakılan bir ödeme üyeliği bedavaya uzatırdı. Gerçek Postgres'e karşı yazılan iki senaryo testiyle (başarılı → uzatılıyor + idempotent; başarısız → **hiç değişmiyor**) doğrulandı
+- [x] Ücretsiz paket (price=0) özel durumu — ödeme sağlayıcısına hiç gerek kalmadan anında uzatılıyor
+- [x] Web: `/athlete/account` → "Üyeliğimi Yenile" kartı (mevcut paket, bitiş tarihi, süresi dolmuşsa kırmızı uyarı) + `startAthleteMembershipRenewal` server action
+- [x] Mobil: `POST /api/v1/me/membership/renew` (aynı ortak kütüphaneyi JSON döndürecek şekilde sarar) + `AccountScreen`'de "Üyeliğimi Yenile" butonu (`Linking.openURL` ile sistem tarayıcısına yönlendirir — ödeme sonrası kullanıcı elle uygulamaya döner, v1 için yeterli, deep-link geri dönüşü v2)
+- [x] 6 dilin tamamına çeviri eklendi (`athlete.renewal.*`)
+
+**Kabul kriteri:** ✅ Süresi dolan/dolmak üzere olan sporcu hem mobilde hem webde kendi paketini kartla yeniden satın alabiliyor, ödeme onaylanınca üyelik anında uzuyor · ✅ ödeme yarıda kalırsa üyelik uzamıyor
+
+**Doğrulama notu (2026-07-20):** Bu makineye daha önce kurulan taşınabilir PostgreSQL 18 ile tam uçtan uca doğrulandı — 42 migration'ın tamamı (2 tanesi + bu yeni migration dahil) sıfır veritabanında hatasız uygulandı, `settleTenantCheckoutSession`'ın başarılı/başarısız ödeme senaryoları gerçek DB'ye karşı yazılan Vitest testleriyle (geçici, commit edilmedi) doğrulandı. `pnpm typecheck` (web + mobil ayrı ayrı), ESLint, mevcut 54 test — hepsi hatasız.
+
+**Dosyalar:** migration `20260720140000_faz_8_7_1_membership_self_renewal`, `lib/membership/renewal-checkout.ts`, `lib/payments/tenant-checkout-settle.ts` (genişletildi), `actions/membership-renewal.ts`, `app/api/v1/me/membership/renew/route.ts`, `components/athlete/membership-renewal-button.tsx`, `app/(athlete)/athlete/account/page.tsx`, `apps/mobile/src/lib/api.ts` + `screens/AccountScreen.tsx`, `messages/*.json` (6 dil)
+
 ---
 
 ## ✅ Faz 9 — Gerçek Zamanlı İletişim (Real-time Chat) (Tamamlandı)

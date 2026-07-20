@@ -536,6 +536,18 @@
     "badge": "Athlete Portal",
     "backHome": "← Home",
     "viewAll": "View all",
+    "renewal": {
+      "currentPlan": "Your Current Plan",
+      "expiresOn": "Expires on:",
+      "expired": "Expired on:",
+      "free": "Free",
+      "days": "days",
+      "button": "Renew My Membership",
+      "buttonPending": "Redirecting…",
+      "notConfigured": "Online renewal isn't active for this gym yet. Please contact the front desk.",
+      "successBanner": "Payment received, your membership has been renewed.",
+      "failBanner": "Payment could not be completed, your membership was not renewed. Please try again."
+    },
     "nav": {
       "home": "Home",
       "measurements": "Measures",

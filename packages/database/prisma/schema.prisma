@@ -1058,6 +1058,7 @@ model GymMembershipPlan {
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   gymMembers   GymMember[]
   transfers    MembershipTransfer[]
+  renewalCheckoutSessions TenantCheckoutSession[]
 
   @@unique([organizationId, name])
   @@index([organizationId, isActive, sortOrder])
@@ -1665,12 +1666,22 @@ model TenantCheckoutSession {
   currency       String              @default("TRY")
   status         String              @default("pending")
 
+  /// Faz 8.7.1 — bu checkout bir üyelik yenilemesiyse doldurulur. Ödeme
+  /// onaylanınca (webhook) settle fonksiyonu bu alanlara bakarak
+  /// GymMember.planId/membershipStartsAt/membershipEndsAt'i günceller.
+  /// Boş bırakılırsa (Faz 8.7'nin genel "açık bakiyeyi öde" akışı) hiçbir
+  /// üyelik alanı değişmez — yalnızca borç kapanır.
+  renewalPlanId             String?   @map("renewal_plan_id")
+  renewalMembershipStartsAt DateTime? @map("renewal_membership_starts_at")
+  renewalMembershipEndsAt   DateTime? @map("renewal_membership_ends_at")
+
   createdAt DateTime @default(now()) @map("created_at")
 
   organization Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   gymMember    GymMember            @relation(fields: [gymMemberId], references: [id], onDelete: Cascade)
   expense      Expense?             @relation(fields: [expenseId], references: [id], onDelete: SetNull)
   gateway      TenantPaymentGateway @relation(fields: [gatewayId], references: [id], onDelete: Cascade)
+  renewalPlan  GymMembershipPlan?   @relation(fields: [renewalPlanId], references: [id], onDelete: SetNull)
 
   @@index([organizationId, gymMemberId])
   @@index([gatewayId])
