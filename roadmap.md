@@ -72,6 +72,11 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 34 | Tam Responsive Tasarım Sistemi | ✅ Tamamlandı | ~97% (sol menü/tema/ikon + mobil tablo/kart + mesajlaşma + profil özyönetimi + interaktif program görünümü tamamlandı — yalnızca video desteği/ilerleme geçmişi Tier 2'ye ertelendi) |
 | 35 | Temsilci (Partner) Portalı | ✅ Tamamlandı | 100% |
 | 36 | Kritik İş Mantığı Denetimi & Sağlamlaştırma (2026-07-19 canlıya alma denetimi) | ✅ Tamamlandı | 100% (36.1–36.11 tamamı kapatıldı — 2026-07-19) |
+| 37 | Gelişmiş Vücut Ölçümleri & İlerleme Takibi | 🔲 Planlandı | 0% (2026-07-20'de tasarlandı) |
+| 38 | Mobil Hesap Yönetimi (Self-Servis Profil) | 🔲 Planlandı | 0% (2026-07-20'de tasarlandı — web'de zaten var, yalnızca mobil API katmanı kaldı) |
+| 39 | Hedef Takip & Motivasyon Sistemi | 🔲 Planlandı | 0% (2026-07-20'de tasarlandı) |
+| 40 | Sporcu Self-Servis Mağaza (Mobil Alışveriş) | 🔲 Planlandı | 0% (2026-07-20'de tasarlandı) |
+| 41 | Beslenme & Kalori Takibi | 🔲 Planlandı | 0% (2026-07-20'de tasarlandı) |
 
 > Fazlar 6/9/10'un durum özeti önceki revizyonlarda detay bölümleriyle **çelişiyordu** (özet tablo güncellenmeden unutulmuştu). Bu revizyon koda göre (tüm alt maddeler `[x]`, gerçek commit geçmişi) düzeltilmiştir.
 
@@ -1501,7 +1506,106 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | Çıkış yaptıktan sonra sayfa yenilenince tekrar giriş yapılmış görünme riski — next-auth@5 beta'nın Server Action içinden tetiklenen signOut+redirect kombinasyonunda çerez temizleme bazı reverse-proxy kurulumlarında güvenilir değil | P0 | — | ✅ savunmacı düzeltme tamamlandı — 2026-07-15: `performSignOut()` bilinen tüm NextAuth çerezlerini elle temizliyor; ayrıca nginx no-cache kuralına eksik olan `/athlete` ve `/partner` yolları eklendi (yalnızca login/dashboard/admin kapsıyordu) |
 | Konum (Cloudflare geo) + tarayıcı diline göre otomatik site dili | P2 | — | ✅ tamamlandı — 2026-07-15 |
 | PHP → Static (aaPanel) | P3 | 3 | ✅ `docs/deployment/AAPANEL-PHP-STATIC.md` |
-| **Git Contributors Düzenlemesi** — GitHub'ın "Contributors" grafiğinde `cursoragent` görünüyor çünkü 34 eski commit'te `Co-authored-by: Cursor <cursoragent@cursor.com>` trailer'ı var (bu oturumdan önceki bir geliştirme evresinden kalma). Tek gerçek sahip/geliştirici `RealMrNovember` (Mikail) olmalı. | P0 | — | 🔲 **⚠️ Dikkat — destructive işlem:** bu, mevcut 34 commit'in tarihini `git filter-repo`/`git rebase` ile yeniden yazmayı ve **force-push** yapmayı gerektirir; tüm commit hash'leri değişir. Kullanıcı onayı olmadan uygulanmayacak — yalnızca not düşüldü |
+| **Git Contributors Düzenlemesi** — GitHub'ın "Contributors" grafiğinde `cursoragent` ve `claude` görünüyordu (eski commit'lerdeki `Co-authored-by:` trailer'ları). Tek gerçek sahip/geliştirici `RealMrNovember` (Mikail). | P0 | — | ✅ tamamlandı — 2026-07-20, kullanıcı onayıyla `git filter-branch --msg-filter` ile tüm commit mesajlarındaki Cursor/Claude trailer'ları temizlendi (içerik/tree hash değişmedi, yalnızca mesajlar), force-push ile GitHub'a yansıtıldı. Bundan sonraki commit'lere böyle bir imza eklenmeyecek |
+
+---
+
+## 🔲 Faz 37 — Gelişmiş Vücut Ölçümleri & İlerleme Takibi (Öncelik: P1)
+
+> **Kullanıcı talebi (2026-07-20):** *"Sporcu vücut ölçüleri ek özellikler. Gerçek sporcular bir çok ölçümlerini tutmak saklamak ve takip etmek isterler."*
+>
+> **Senaryo:** Bir PT yeni sezona başlayan sporcusunun yalnızca kilosunu değil; bel, göğüs, kalça, kol, bacak çevresini, vücut yağ/su oranını ve dinlenik nabzını da kaydeder. Asıl değer tek bir ölçümde değil, **zaman içindeki değişimde** — "3 ayda bel çevresi 8 cm azaldı" gibi bir trend görmekte. Bugünkü `HealthMeasurement` yalnızca kilo/yağ oranı/kas kütlesi/boy tutuyor; çevre ölçümleri, trend grafiği ve ilerleme fotoğrafı hiç yok.
+
+- [ ] `HealthMeasurement` genişletilir: `waistCm`, `chestCm`, `hipCm`, `armCm`, `thighCm`, `bodyWaterPercentage`, `visceralFatRating`, `restingHeartRate` (hepsi opsiyonel — PT hangi veriyi topladıysa onu girer, hiçbiri zorunlu değil)
+- [ ] BMI **saklanmaz**, `weight`/`height`'tan görüntüleme anında hesaplanır (boy değişebilir — özellikle genç sporcularda — stale veri riskini önler)
+- [ ] Yeni `MeasurementPhoto` modeli — ilerleme fotoğrafı (ön/yan/arka açı etiketi), R2'ye Faz 6.2'deki avatar upload deseniyle yüklenir (`{organizationId}/progress-photos/{gymMemberId}/{id}.webp`), yalnızca sporcunun kendisi veya yetkili personel görebilir
+- [ ] Trend grafiği — harici grafik kütüphanesi eklemeden basit SVG sparkline/çizgi grafik (kilo, yağ oranı, bel çevresi — son 6 ölçüm) hem web hem mobilde
+- [ ] Mobil `MeasurementsScreen`: tam ölçüm formu (yalnızca kilo değil tüm alanlar) + trend grafiği + fotoğraf yükleme
+- [ ] Web: sporcu/PT ölçüm geçmişi ekranına aynı alanlar + trend grafiği eklenir (mevcut `addMeasurement`/ölçüm listesi akışı genişletilir, yeniden yazılmaz)
+
+**Kabul kriteri:** 🔲 PT bir sporcunun son 3 aydaki bel çevresi değişimini grafikte görebiliyor · 🔲 sporcu kendi ölçümünü telefondan tüm alanlarıyla girip trend görebiliyor · 🔲 ilerleme fotoğrafı yükleyip geçmiş fotoğraflarla karşılaştırabiliyor
+
+**Bağımlılık:** Faz 6.2 (R2/avatar upload deseni — fotoğraf için yeniden kullanılır) ✅ · mevcut `HealthMeasurement`/Faz 7 mobil API ✅
+
+---
+
+## 🔲 Faz 38 — Mobil Hesap Yönetimi (Self-Servis Profil) (Öncelik: P1)
+
+> **Kullanıcı talebi (2026-07-20):** *"Mobil uygulama üzerinden sporcu kendi hesap bilgilerini düzenleyebilmeli. Parola gibi eposta, telefon no gibi."*
+>
+> **Senaryo:** Sporcu telefon numarasını değiştirdiğinde ya da e-posta adresini güncellemek istediğinde resepsiyona gitmek zorunda kalmamalı. **Önemli tespit:** Bu özellik web sporcu portalında (`AthleteProfileForm` + `AthletePasswordForm`, `actions/athlete-profile.ts` — `updateOwnContactInfo`/`updateOwnDisplayName`) **zaten mevcut** — eksik olan yalnızca mobil tarafın buna erişimi. Bu, sıfırdan iş mantığı yazmaktan çok, var olan, zaten test edilmiş action'ları mobil için ince bir REST API katmanıyla açmak demek — düşük riskli, hızlı kazanım.
+
+- [ ] `PATCH /api/v1/me/profile` — `updateOwnContactInfo`/`updateOwnDisplayName` ile aynı iş mantığını çağıran API route (web action'ı tekrar yazmadan sarar)
+- [ ] `POST /api/v1/me/password` — mevcut parola değiştirme mantığını (`AthletePasswordForm`'un kullandığı action) mobile açar; mevcut parola doğrulaması zorunlu kalır
+- [ ] Mobil `AccountScreen`: "Profili Düzenle" bölümü (ad, telefon, doğum tarihi) + ayrı "Parola Değiştir" formu — web'deki iki-form deseniyle birebir (karışıklığı önlemek için aynı UX)
+- [ ] **Kapsam kararı:** E-posta değişikliği v1'de **anında** uygulanır (web'deki mevcut davranışla birebir parite) — yeni e-postaya doğrulama linki gönderme akışı bir sonraki iterasyona bırakılır (bu, web tarafında da zaten yok; mobilde daha katı bir kural uygulamak tutarsızlık yaratır)
+
+**Kabul kriteri:** 🔲 Sporcu mobil uygulamadan e-posta/telefon/ad bilgisini güncelleyebiliyor · 🔲 mevcut parolasını doğrulayarak yeni parola belirleyebiliyor · 🔲 web ile aynı validasyon kuralları geçerli (kod tekrarı yok)
+
+**Bağımlılık:** `actions/athlete-profile.ts` (web, zaten var) ✅ — yalnızca API katmanı eksik
+
+---
+
+## 🔲 Faz 39 — Hedef Takip & Motivasyon Sistemi (Öncelik: P1 — farklılaştırıcı özellik)
+
+> **Kullanıcı talebi (2026-07-20):** *"Sporcu hedef kontrol sistemi. Belirli bir hedef ya da PT'si tarafından atanacak. Aynı zamanda hedef motivasyon etkinlikleri (yürüyüş, spor etkinlikleri gibi)."*
+>
+> **Senaryo A (hedef):** PT'si sporcusuna "3 ayda 5 kilo ver" veya "haftada 3 gün antrenmana gel" gibi somut bir hedef atar; sporcu bunu telefonunda bir ilerleme çubuğu olarak görür, sistem Faz 37'deki ölçüm verisinden veya check-in geçmişinden otomatik günceller. Sporcu PT'si olmasa bile kendi hedefini de koyabilmeli.
+>
+> **Senaryo B (motivasyon etkinliği):** Salon "Cumartesi sabahı grup yürüyüşü" gibi bir etkinlik düzenler, tüm üyelere bildirim gider, katılmak isteyenler tek dokunuşla RSVP verir — bu bir "hedef" değil, salonun topluluk/bağlılık aracı.
+
+- [ ] Yeni `AthleteGoal` modeli — `gymMemberId`, `createdByType` (`SELF`/`TRAINER`), `createdById`, `targetType` (`WEIGHT_LOSS`/`WEIGHT_GAIN`/`BODY_FAT_REDUCTION`/`MEASUREMENT_CHANGE`/`WORKOUT_FREQUENCY`/`CUSTOM`), `targetValue`, `startValue` (hedef konulduğu andaki ölçüm — ilerleme yüzdesi buradan hesaplanır), `targetDate`, `status` (`ACTIVE`/`ACHIEVED`/`MISSED`/`CANCELLED`), `notes`
+- [ ] İlerleme hesaplama: ölçüm bazlı hedefler Faz 37'deki `HealthMeasurement` geçmişinden, antrenman sıklığı hedefleri `CheckIn`/`ExerciseSetLog` geçmişinden **otomatik** türetilir — sporcu ilerlemeyi elle girmez (yanlış/unutulan giriş riski olmasın diye)
+- [ ] `/dashboard/members/[id]` → "Hedef Ata" paneli (PT/OWNER/ADMIN) — mevcut `MembershipRenewalPanel` deseniyle tutarlı bir form
+- [ ] Mobil: HomeScreen'e hedef ilerleme kartı (`% XX tamamlandı` progress bar) — sporcu kendi hedefini de burada oluşturabilir
+- [ ] Yeni `GymEvent` modeli — `title`, `description`, `eventType` (`WALK`/`RUN`/`SPORT`/`OTHER`), `startsAt`, `location`, `createdById`; `GymEventRsvp` (üye + katılım durumu)
+- [ ] `/dashboard/events` — salon etkinlik oluşturma + katılımcı listesi; oluşturulunca **tüm aktif üyelere Faz 27.1 Web Push bildirimi** otomatik gider (mevcut push altyapısı yeniden kullanılır, yeni bir bildirim kanalı icat edilmez)
+- [ ] Mobil: "Etkinlikler" listesi + tek dokunuşla RSVP
+- [ ] Hedef süresine 3 gün kala veya hedefe ulaşılınca push bildirimi (Faz 27.1 altyapısı)
+
+**Kabul kriteri:** 🔲 PT bir sporcuya 3 aylık kilo hedefi atayabiliyor, sporcu telefonunda ilerlemesini otomatik hesaplanmış olarak görüyor · 🔲 sporcu kendi hedefini koyabiliyor · 🔲 salon bir yürüyüş etkinliği oluşturup tüm üyelere bildirim gönderebiliyor, üyeler RSVP verebiliyor
+
+**Bağımlılık:** Faz 37 (ölçüm bazlı ilerleme hesabı için) · Faz 27.1 (Web Push — bildirim için) ✅ · `CheckIn`/`ExerciseSetLog` (antrenman sıklığı hedefleri için) ✅
+
+---
+
+## 🔲 Faz 40 — Sporcu Self-Servis Mağaza (Mobil Alışveriş) (Öncelik: P1)
+
+> **Kullanıcı talebi (2026-07-20):** *"Mağaza içerisinde satılıyor olan su, protein tozu ya da her neyse işte, sporcu onları telefonuyla da satın alabilmeli / listeleyebilmeli / aldıklarını görebilmeli."*
+>
+> **Senaryo:** Sporcu antrenman arasında su/protein tozu almak istiyor ama resepsiyon kuyruğu var. Telefondan ürünü görüp kartla satın alabilmeli, sonra gidip teslim alabilmeli.
+>
+> **Kritik mimari karar:** Salon bugün POS'ta ürün satışını `ExpenseCategory.stockQuantity` ile yapıyor (Faz 17.6, zaten üretimde). Şemada kullanılmayan, ayrı bir `Product` modeli de var (2026-07-19'da elle eklenmiş, hiç bağlanmamış — bkz. Faz 8.7 notları). **Mağaza için `Product`'ı DEĞİL, `ExpenseCategory`'yi genişletmek doğru karar** — aksi halde stok iki ayrı, birbirinden habersiz sayaçta tutulur (resepsiyon "Su" satar, stok bir tabloda düşer; sporcu mobilden "Su" satın alır, stok BAŞKA bir tabloda düşer → gerçek stok hiçbir zaman doğru olmaz). Tek kaynak, tek stok sayacı.
+- [ ] `ExpenseCategory`'ye `imageUrl` (opsiyonel ürün fotoğrafı) ve `isStoreVisible` (varsayılan `false`) eklenir — yalnızca salon sahibinin işaretlediği kategoriler ("Su", "Protein Tozu") mobil mağazada görünür; "Ekipman hasar ücreti" gibi kategoriler görünmez
+- [ ] Mobil: yeni "Mağaza" ekranı — `isStoreVisible=true` ve `stockQuantity > 0` kategoriler listelenir, sepete eklenir
+- [ ] Ödeme: sepetteki her ürün için `quickAddCategoryExpense` (mevcut, POS'un kullandığı fonksiyon) ile `Expense` satırı açılır, toplam tutar Faz 8.7'nin kart checkout akışıyla (`TenantCheckoutSession`) **tek seferde** tahsil edilir — yeni bir ödeme altyapısı icat edilmez
+- [ ] Stok, satış anında **aynı `stockQuantity` sayacından** düşer — POS ile mobil mağaza arasında senkron garanti edilir (tek model, tek yazma yolu)
+- [ ] "Siparişlerim" — sporcu portalındaki mevcut "Son Harcamalar" listesi mağaza satın alımlarını zaten gösterir (`Expense.description`); ayrıca filtrelenip "Mağaza Siparişlerim" başlığıyla ayrı gösterilir
+- [ ] `/dashboard/pos` (veya SGMS Resepsiyon) → "Bekleyen Teslimatlar" — son N saatteki online mağaza satışları, personel "Teslim Edildi" işaretler (yeni bir durum alanı: `Expense.deliveredAt`)
+
+**Kabul kriteri:** 🔲 Sporcu telefondan ürün listesini görüp kartla satın alabiliyor · 🔲 stok POS ile mobil arasında her zaman senkron (tek sayaç) · 🔲 resepsiyon bekleyen siparişleri görüp teslim işaretleyebiliyor
+
+**Bağımlılık:** Faz 17.6 (`ExpenseCategory.stockQuantity`) ✅ · Faz 8.7 (kartla ödeme altyapısı) ✅
+
+---
+
+## 🔲 Faz 41 — Beslenme & Kalori Takibi (Öncelik: P2)
+
+> **Kullanıcı talebi (2026-07-20):** *"Sporcu kendi uygulaması içerisinden evde/dışarıda tükettiği gıdaları günlük olarak ekleyebilmeli, PT'si ve kendisi takip edebilmeli (kalori kontrol sistemi)."*
+>
+> **Senaryo:** Sporcu akşam yediği yemeği telefonundan kaydeder, PT'si haftalık beslenme programına ne kadar uyduğunu görür.
+>
+> **Kapsam kararı (gerçekçilik):** Tam bir barkod/gıda-veritabanı entegrasyonu (MyFitnessPal tarzı) 3. parti bir API (ör. Open Food Facts) gerektirir ve tek başına ayrı bir faz büyüklüğündedir — **v1 kapsamı dışı**. v1'de sporcu yemek adını serbest metin olarak girer, biliyorsa kalori/makro değerlerini kendisi yazar; gıda veritabanı entegrasyonu v2'ye not düşülür.
+- [ ] Yeni `FoodLogEntry` modeli — `gymMemberId`, `loggedAt`, `mealType` (`BREAKFAST`/`LUNCH`/`DINNER`/`SNACK`), `foodName`, `calories` (opsiyonel), `proteinG`/`carbsG`/`fatG` (opsiyonel), `notes`, `photoUrl` (opsiyonel, R2 — Faz 37'deki fotoğraf yükleme deseniyle)
+- [ ] Günlük özet: gün bazlı toplam kalori/makro (sorgu zamanında toplanır, ayrı bir "günlük özet" tablosu tutulmaz — veri tutarsızlığı riski yaratmaz)
+- [ ] `TrainingProgram`'ın zaten desteklediği `ProgramType.NUTRITION` (mevcut, kullanımda) ile ilişkilendirilir — PT'nin belirlediği hedef kalori/makro (program içeriğinde serbest JSON olarak zaten tutulabiliyor) ile sporcunun gerçekleşen `FoodLogEntry` toplamı **yan yana** gösterilir (plan vs. gerçekleşen)
+- [ ] Mobil: yeni "Beslenme" ekranı — öğün ekleme formu, günlük özet, geçmiş gün listesi
+- [ ] Web: PT/salon tarafında sporcunun beslenme günlüğü salt-okunur görünüm (`/dashboard/members/[id]`)
+- [ ] **Tasarım notu — alt menü yoğunluğu:** Mobilde şu an 5 sekme var (Ana Sayfa/Program/Ölçüm/Mesaj/Hesabım); Faz 39-41 ile birlikte "Hedef", "Mağaza", "Beslenme" eklenirse alt menü 8 sekmeye çıkar — bu, başparmakla ulaşılabilirlik açısından pratik sınırın (5-6) üzerinde. **Öneri:** Mağaza/Beslenme/Hedef ayrı sekme değil, Ana Sayfa'daki kart/kısayollar olarak sunulsun (Salon Girişi kartı gibi) — TabBar 5 sekmede sabit kalır
+
+**Kabul kriteri:** 🔲 Sporcu güne ait öğünlerini kaydedip günlük toplam kaloriyi görebiliyor · 🔲 PT sporcusunun beslenme günlüğünü görebiliyor · 🔲 `NUTRITION` programındaki hedefle karşılaştırma yapılabiliyor
+
+**Bağımlılık:** Faz 37 (fotoğraf yükleme deseni) · mevcut `TrainingProgram`/`ProgramType.NUTRITION` ✅
 
 ---
 
@@ -1624,14 +1728,24 @@ Faz 6.4 tamamlandı (2026-07-20 — Claude, kullanıcı önceliklendirmeyi yine 
   Faz 6.4    Küresel Lokasyon Veritabanı (Ülke/Şehir/İlçe) ✅ — bkz. Faz 6.4 bölümü, gerçek
              Postgres'e karşı uçtan uca doğrulandı (bu makineye ayrıca Postgres 18 kuruldu)
 
+Faz 8.7.1 tamamlandı + repo temizliği (2026-07-20 — kullanıcı talebi üzerine):
+  Faz 8.7.1  Sporcunun kendi kartıyla üyelik yenilemesi ✅ — bkz. Faz 8.7.1 bölümü, gerçek
+             Postgres'e karşı senaryo testleriyle (başarılı/başarısız ödeme) doğrulandı
+  [Repo]     Git contributors düzenlemesi (Cursor/Claude trailer temizliği) ✅ — kullanıcı
+             onayıyla force-push edildi, GitHub artık yalnızca RealMrNovember gösteriyor
+
 Sıradaki (Faz 36 sonrası — profesyonel değerlendirme, P0 en önce):
   Faz 32     Ticarileştirme: paket + ek kapasite satışı          ← P0, gelir modeli (kullanıcı onayı gerekli)
-  [Repo]     Git contributors düzenlemesi (cursoragent kaldırma) ← P0, ⚠️ onay gerekli (destructive, force-push)
 
+  Faz 37     Gelişmiş vücut ölçümleri & ilerleme takibi          ← P1, kullanıcı talebi (2026-07-20)
+  Faz 38     Mobil hesap yönetimi (self-servis profil)           ← P1, kullanıcı talebi — düşük risk (web'de zaten var)
+  Faz 39     Hedef takip & motivasyon sistemi                    ← P1, kullanıcı talebi, Faz 37'ye bağımlı
+  Faz 40     Sporcu self-servis mağaza (mobil alışveriş)         ← P1, kullanıcı talebi, Faz 8.7 üzerine kurulu
   Faz 27.3   Serverless kuyruk motoru (QStash/Inngest)           ← P1, Faz 27.2'nin önkoşulu
   Faz 6.3    Dil genişletmesi (İtalyanca/Portekizce)             ← P1, pazar genişletme — Country
              çevirileri zaten hazır (bkz. Faz 6.4), yalnızca messages/*.json + it/pt kaldı
 
+  Faz 41     Beslenme & kalori takibi                             ← P2, kullanıcı talebi, Faz 37'ye bağımlı
   Faz 34.6   İnteraktif antrenman programı görünümü              ← P2
   Faz 26     Dijital üyelik kartı (Wallet/NFC)                   ← P2, Apple/Google Wallet imzalama sertifikası gerekli (henüz yok)
   Faz 29     Yapay Zeka öngörüleri                                ← P2, Faz 28 verisine dayanır
