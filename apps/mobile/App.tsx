@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
+import * as Updates from 'expo-updates';
 import { TabBar, type TabKey } from './src/components/TabBar';
 import { UpdateBanner } from './src/components/UpdateBanner';
 import { AccountScreen } from './src/screens/AccountScreen';
@@ -30,9 +31,28 @@ function AppShell() {
       .then(setSession)
       .finally(() => setChecking(false));
 
+    // Native (APK) sürüm kontrolü — yalnızca yeni bir native değişiklik (yeni izin,
+    // native modül, Expo SDK yükseltmesi vb.) olduğunda gerçekten yeni bir APK
+    // gerekiyorsa banner gösterilir. Çoğu JS/TSX değişikliği bunun yerine aşağıdaki
+    // OTA (expo-updates) akışıyla sessizce, APK indirmeden uygulanır.
     checkForUpdate().then((info) => {
       if (info?.available) setUpdate(info);
     });
+
+    // OTA güncelleme — Faz 20.5: JS-only değişiklikler (özellik/hata düzeltmeleri)
+    // arkadaş/test cihazlarına dahil APK kurmadan otomatik ulaşsın diye. `__DEV__`
+    // sırasında (Metro ile geliştirirken) expo-updates devre dışı — yalnızca
+    // derlenmiş release build'de anlamlı.
+    if (!__DEV__) {
+      Updates.checkForUpdateAsync()
+        .then((result) => (result.isAvailable ? Updates.fetchUpdateAsync() : null))
+        .then((fetched) => {
+          if (fetched?.isNew) {
+            void Updates.reloadAsync();
+          }
+        })
+        .catch(() => undefined);
+    }
   }, []);
 
   useEffect(() => {

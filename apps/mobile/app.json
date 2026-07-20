@@ -1,8 +1,8 @@
 {
   "expo": {
     "name": "SGMS Sporcu",
-    "slug": "sgms-athlete",
-    "version": "0.4.0",
+    "slug": "sgms-sporcu",
+    "version": "0.4.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -13,7 +13,7 @@
     },
     "android": {
       "package": "com.cicibyte.sgms.athlete",
-      "versionCode": 5,
+      "versionCode": 6,
       "adaptiveIcon": {
         "backgroundColor": "#0b1220",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -28,7 +28,24 @@
     "plugins": [
       "expo-secure-store",
       "expo-image",
-      "expo-font"
-    ]
+      "expo-font",
+      "expo-updates"
+    ],
+    "runtimeVersion": {
+      "policy": "fingerprint"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/c1e0a5a1-9895-4834-a302-7a395eda6135",
+      "requestHeaders": {
+        "expo-channel-name": "production"
+      },
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0
+    },
+    "extra": {
+      "eas": {
+        "projectId": "c1e0a5a1-9895-4834-a302-7a395eda6135"
+      }
+    }
   }
 }
