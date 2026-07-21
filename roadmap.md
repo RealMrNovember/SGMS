@@ -1648,6 +1648,131 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ---
 
+## 🔄 Faz 43 — Persona Bazlı Uçtan Uca Denetim & Sağlamlaştırma (Öncelik: P1 — 2026-07-21 denetimi)
+
+> **Arka plan:** 4 paralel ajanla, sistemi gerçekten kullanan 4 farklı kişinin (Salon Sahibi, Kasiyer/Resepsiyon, PT/Antrenör, Sporcu) bir günlük/haftalık kullanımı kod üzerinden gerçek senaryolarla canlandırıldı — spekülasyon değil, her bulgu dosya:satır kanıtlı. Aşağıdaki maddelerin bir kısmı aynı gece kapatılıp canlıya alındı; kapatılmayanlar bilinçli olarak **unutulmasın diye** buraya işlendi (bazıları ürün kararı gerektiriyor, bazıları büyük kapsamlı iş — ikisi de "bu gece yapılmadı" ile "yok sayıldı" farklı şeyler).
+
+### 43.1 Deaktif PT'nin Komisyon Görünürlüğü Kaybolması
+
+> **Senaryo:** Bir PT işten ayrılır/geçici olarak `isActive:false` yapılır. Önceki ayki hak edilmiş ama henüz görülmemiş komisyonu (`PtSession.commissionAmount` veritabanında duruyor) artık kimse UI'dan göremiyordu — hem roster'dan kayboluyor hem detay sayfası 404 veriyordu. **İki ayrı denetimde (Faz 21 orijinal + bu persona denetimi) bağımsız doğrulandı.**
+>
+> **Durum:** ✅ *2026-07-21 kapatıldı.*
+
+- [x] `listTrainersWithMonthlyStats` — `isActive` filtresi kaldırıldı, pasif PT'ler "Pasif" rozetiyle listede kalır (aktifler önce sıralanır)
+- [x] `/dashboard/trainers/[id]` — membership sorgusundan `isActive` filtresi kaldırıldı, sayfa artık 404 vermiyor
+
+**Dosyalar:** `lib/trainers/queries.ts`, `dashboard/trainers/page.tsx`, `dashboard/trainers/[id]/page.tsx`
+
+### 43.2 PT Kendi İptalini İşaretleyemiyor
+
+> **Senaryo:** Emre bir seansı kendisi iptal ettiğinde (hastalık vb.) arayüzde sadece "Gelmedi" ve "Üye İptal Etti" butonları vardı; `cancelPtSession` action'ı `CANCELED_BY_TRAINER` enum'unu zaten destekliyordu ama buton yoktu — üyeye yanlış sorumluluk atfediliyordu.
+>
+> **Durum:** ✅ *2026-07-21 kapatıldı.*
+
+- [x] `PtSessionActions`'a "Ben İptal Ettim" butonu eklendi (mevcut `cancelPtSession` action'ı, yeni kod yok)
+
+**Dosyalar:** `components/trainers/pt-session-actions.tsx`, messages (6 dil)
+
+### 43.3 Mağazaya Fiyatsız Ürün Eklenebilmesi (2 giriş noktası)
+
+> **Senaryo:** Şirket sahibi/kasiyer yeni bir ürün eklerken ya da mevcut birini mağazaya açarken fiyatı boş bırakabiliyordu — mobil mağazada 0.00 ₺ görünen, ödemesi checkout anında başarısız olan bir ürün oluşuyordu. İlk düzeltme yalnızca tekil "Mağazaya Ekle" butonunu kapsamıştı; **"Yeni Kategori Ekle" formu ayrı bir action kullandığı için aynı açık ikinci kez tekrar ediyordu.**
+>
+> **Durum:** ✅ *2026-07-21 kapatıldı (Faz 40'ın hemen ardından, aynı gün).*
+
+- [x] `setExpenseCategoryStoreVisible` — fiyat yoksa engellenir (buton disabled + tooltip)
+- [x] `saveExpenseCategory` (yeni kategori formu, hem oluşturma hem düzenleme dalı) — aynı guard eklendi
+
+**Dosyalar:** `actions/expenses.ts`, `components/expense-category-manager.tsx`, messages (6 dil)
+
+### 43.4 Bekleyen Teslimatlar STAFF'e Kapalıydı
+
+> **Senaryo:** Bir üye "mağazadan su siparişim var, almaya geldim" dediğinde, resepsiyondaki kasiyer (STAFF) bunu görüp teslim işaretleyemiyordu — sayfa `canManageCategories` (OWNER/ADMIN) ile yanlış gate'lenmişti, `markStoreOrderDelivered` action'ı zaten STAFF'e izin veriyordu ama arayüz göstermiyordu.
+>
+> **Durum:** ✅ *2026-07-21 kapatıldı.*
+
+- [x] Ayrı `DELIVERY_ROLES` (OWNER/ADMIN/STAFF) ile gate edildi, action ile UI tutarlı hale geldi
+
+**Dosyalar:** `dashboard/pos/page.tsx`
+
+### 43.5 Kasiyer İçin Hızlı Stok Ekleme (yeni özellik)
+
+> **Senaryo:** Depoya yeni su/protein tozu geldiğinde, salon sahibi o an orada olmasa bile kasiyer bunu sisteme işleyebilmeli — önceden stok güncellemesi yalnızca OWNER/ADMIN'in eriştiği tam kategori yönetim formunun içindeydi.
+>
+> **Durum:** ✅ *2026-07-21 kapatıldı.*
+
+- [x] `restockExpenseCategory` — OWNER/ADMIN/STAFF erişebilir, atomik `UPDATE ... SET stock_quantity = COALESCE(stock_quantity,0) + N` (eşzamanlı satışla race condition'a girmez, stok hiç takip edilmiyorsa 0'dan başlatır)
+- [x] `/dashboard/pos`'ta "Stok Ekle" paneli — Bekleyen Teslimatlar'ın hemen altında, kategori yönetiminden ayrı, herkesin gördüğü bölgede
+
+**Dosyalar:** `actions/expenses.ts`, `components/restock-panel.tsx` (yeni), `dashboard/pos/page.tsx`, messages (6 dil)
+
+### 43.6 Üç Tenant-Güvenlik Açığı
+
+> **Senaryo:** Genel mantık denetiminde bulunan, para/yetki sızıntısı riski taşıyan üç ayrı açık.
+>
+> **Durum:** ✅ *2026-07-21 kapatıldı.*
+
+- [x] `reviewTrainerRequest` REJECT kararı da `getTenantWriteBlockReason` kontrolünden geçiyor (önceden yalnızca APPROVE kontrol ediliyordu — demo/lisanssız hesap talebi reddedebiliyordu)
+- [x] `markAttendance` / `unfreezeMembership` — eksik yazma-engeli kontrolü eklendi (demo/askıya alınmış hesap katılım işaretleyip üyelik aktive edebiliyordu)
+- [x] `generateInvoiceNumber` — aynı organizasyon+gün için eşzamanlı iki ödeme aynı fatura numarasını üretip unique constraint'i patlatabiliyordu, bu da zaten tahsil edilmiş bir ödemenin kaydını sessizce rollback ediyordu. Postgres transaction-scoped advisory lock ile serileştirildi, şema değişikliği gerekmedi
+
+**Dosyalar:** `actions/trainer-requests.ts`, `actions/classes.ts`, `actions/membership-lifecycle.ts`, `actions/invoices.ts`
+
+### 43.7 OWNER Kendi Salonunun Audit Log'unu Göremiyor
+
+> **Senaryo:** Bir personel şüpheli/hatalı bir işlem yaptığında (bir kaydı silme, bir onayı geri alma), OWNER bunu görmek istiyor. `AuditLog` verisi sistemde eksiksiz tutuluyor, ama sorgulayan kod yalnızca CiciByte süper-admin panelinde (`(super-admin)/admin/audit`) — tenant tarafında karşılığı yok. OWNER kendi salonunun denetim izini görmek için CiciByte destek ekibine rica etmek zorunda.
+>
+> **Durum:** 🔲 Backlog — orta-büyük kapsam (yeni sayfa + tenant-scoped sorgu action'ı).
+
+- [ ] `/dashboard/audit` (OWNER/ADMIN) — kendi `organizationId`'sine ait `AuditLog` kayıtlarını listeleyen, filtrelenebilir (aksiyon tipi, tarih, aktör) bir sayfa
+- [ ] Mevcut `AuditLog` modelini/yazma noktalarını değiştirmeye gerek yok — yalnızca tenant-scoped bir okuma yolu eksik
+
+**Bağımlılık:** `AuditLog` modeli ve yazma noktaları zaten var ✅ (Faz 12/14) — yalnızca tenant tarafı okuma eksik
+
+### 43.8 Mobilde Push Bildirim Altyapısı Hiç Yok
+
+> **Senaryo:** Faz 42'nin "antrenör talebi sonuçlanınca sporcuya bildirim gider" vaadi, aslında Faz 27.1'deki **tarayıcı** Web Push altyapısını (VAPID/Push API) kullanıyor — bu mobil uygulamaya hiç ulaşmıyor. `apps/mobile/package.json`'da `expo-notifications` bağımlılığı bile yok. Sporcu, talebinin sonucunu öğrenmek için uygulamayı elle açıp bakmak zorunda; kapalıyken hiçbir şey almaz.
+>
+> **Durum:** 🔲 Backlog — **büyük kapsamlı iş**, canlı cihaz testi olmadan aceleyle yapılmaması bilinçli bir tercih.
+
+- [ ] `expo-notifications` kurulumu + izin akışı (uygulama ilk açıldığında bildirim izni istenir, reddedilirse akış bozulmamalı)
+- [ ] Push token kaydı — `GymMember`/`User`'a bağlı bir `DeviceToken` (veya benzeri) modeli, mobil açılışta backend'e kaydedilir
+- [ ] Backend gönderim — Expo Push API üzerinden (FCM/APNs arkasında Expo'nun kendi servisi), Faz 42 (antrenör talebi sonucu) ve üyelik bitiş yaklaşması gibi mevcut tetikleyicilerin mobil tarafa da gitmesi
+- [ ] **Not:** Faz 27.1'deki Web Push altyapısı bu iş için yeniden kullanılamaz — farklı bir teslimat kanalı (native push vs. tarayıcı push), sıfırdan kurulmalı
+
+**Bağımlılık:** Faz 42 (bildirim tetikleyicileri zaten var, yalnızca mobil teslimat kanalı eksik) ✅
+
+### 43.9 POS / Check-in Üye Seçici 200 Kayıtla Sınırlı, Arama Yok
+
+> **Senaryo:** POS ve manuel check-in ekranlarındaki üye seçici native `<select>` ve `take: 200` ile sınırlı. 200'den fazla aktif üyesi olan bir salonda listenin sonundaki üyelere satış/check-in yapılamıyor; yoğun saatte isim yazarak süzme imkânı da yok — resepsiyon hızını doğrudan etkiliyor.
+>
+> **Durum:** 🔲 Backlog.
+
+- [ ] `PosTerminal` ve `ManualCheckInForm`'daki üye seçiciler aranabilir bir bileşene (Faz 6.4'teki `SearchableSelect` deseni yeniden kullanılabilir) geçirilir
+- [ ] `take: 200` sınırı, arama sunucu tarafına taşındığında kaldırılabilir (debounced `GET` sorgusu)
+
+**Bağımlılık:** `SearchableSelect` bileşeni (Faz 6.4) ✅ — aynı desen yeniden kullanılabilir
+
+### 43.10 Diğer Bulgular (küçük/orta, önceliklendirilmemiş)
+
+Bu maddelerin her biri kendi başına küçük ama toplamda göz ardı edilmemeli — sırayla ele alınabilir:
+
+- [ ] **Personelin rolü sonradan değiştirilemiyor** — `actions/team.ts`'te böyle bir action yok, kasiyeri PT yapmak için çıkarıp yeniden davet etmek gerekiyor (geçmiş/RFID kaybolur)
+- [ ] **PT'nin "benim sporcularım" filtresi yok** — `/dashboard/members` herkese aynı tam listeyi gösteriyor
+- [ ] **Antrenör talebi sonucu mobilde görünmüyor** — `TrainersScreen` yalnızca PENDING durumu render ediyor, APPROVED/REJECTED/CANCELLED geçmişi yok (43.8 ile birleşince sporcu sonucu hiç öğrenemeyebilir)
+- [ ] **Mesajlarda okundu bilgisi arayüze yansımıyor** — `DirectMessage.isRead` backend'de var, mobil `MessagesScreen` hiç kullanmıyor
+- [ ] **Ödeme sonrası mobil uygulamaya otomatik dönüş yok** — `app.json`'daki `sgms-athlete://` şeması tanımlı ama dinleyici yok, kullanıcı elle "aşağı çekmek" zorunda
+- [ ] **Antrenman programı mobilde interaktif değil** — sadece özet metin, Faz 34.6'daki set/tekrar/ağırlık işaretleme web'de var mobilde yok
+- [ ] **Native güncelleme kontrolü imzasız GitHub API isteği atıyor, cache yok** — aynı salon wifi'sindeki çok telefon rate limit'i hızla tüketebilir
+- [ ] **Güncelleme banner'ı kapatılamıyor** — "İndir"e basana kadar ekranın üstünü kalıcı işgal ediyor
+- [ ] **Dolu kapasiteli antrenörler tercih listesinden filtrelenmiyor**
+- [ ] **Ana dashboard "dünkü ciro" değil "bu ayki toplam" gösteriyor** — sabah rutini için ayrı bir "dün" kırılımı yok
+- [ ] **Üyelik dondurma onayı tek imzayla STAFF'e açık** — kasıtlı olabilir (patron yokken işlesin diye), ürün kararı olarak teyit edilmeli
+- [ ] **TRAINER kendi müşterisi olmayana da program yazabiliyor** — kısıtlamak meslektaş yardımlaşmasını engelleyebilir, önce ürün kararı gerekiyor
+
+**Kabul kriteri:** 🔲 43.7/43.8/43.9 kapandığında OWNER kendi audit log'unu görebiliyor, sporcu telefonuna gerçek push bildirim düşüyor, 200+ üyeli bir salonda POS/check-in aranabiliyor olacak.
+
+---
+
 ## Önerilen Build Sırası
 
 ```text
