@@ -74,10 +74,10 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 36 | Kritik İş Mantığı Denetimi & Sağlamlaştırma (2026-07-19 canlıya alma denetimi) | ✅ Tamamlandı | 100% (36.1–36.11 tamamı kapatıldı — 2026-07-19) |
 | 37 | Gelişmiş Vücut Ölçümleri & İlerleme Takibi | ✅ Tamamlandı | 100% (çevre ölçümleri, BMI, sparkline, MeasurementPhoto — 2026-07-20) |
 | 38 | Mobil Hesap Yönetimi (Self-Servis Profil) | ✅ Tamamlandı | 100% (2026-07-20) |
-| 39 | Hedef Takip & Motivasyon Sistemi | 🔲 Planlandı | 0% (2026-07-20'de tasarlandı) |
-| 40 | Sporcu Self-Servis Mağaza (Mobil Alışveriş) | 🔲 Planlandı | 0% (2026-07-20'de tasarlandı) |
+| 39 | Hedef Takip & Motivasyon Sistemi | ✅ Tamamlandı | 100% (hedef modeli, ilerleme hesaplama, web+mobil UI — 2026-07-21) |
+| 40 | Sporcu Self-Servis Mağaza (Mobil Alışveriş) | ✅ Tamamlandı | 100% (mağaza sipariş akışı, web+mobil UI — 2026-07-21) |
 | 41 | Beslenme & Kalori Takibi | 🔲 Planlandı | 0% (2026-07-20'de tasarlandı) |
-| 42 | Antrenör (PT) Atama & Değişiklik Talebi | 🔲 Planlandı | 0% (2026-07-20'de tasarlandı) |
+| 42 | Antrenör (PT) Atama & Değişiklik Talebi | ✅ Tamamlandı | 100% (2026-07-21) |
 
 > Fazlar 6/9/10'un durum özeti önceki revizyonlarda detay bölümleriyle **çelişiyordu** (özet tablo güncellenmeden unutulmuştu). Bu revizyon koda göre (tüm alt maddeler `[x]`, gerçek commit geçmişi) düzeltilmiştir.
 
@@ -1630,7 +1630,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ---
 
-## 🔲 Faz 42 — Antrenör (PT) Atama & Değişiklik Talebi (Öncelik: P1)
+## ✅ Faz 42 — Antrenör (PT) Atama & Değişiklik Talebi (Öncelik: P1) — tamamlandı, 2026-07-21
 
 > **Kullanıcı talebi (2026-07-20):** *"Mesela mobil uygulamayı açtığımda 'PT Antrenörünüz' diyor. Mesela ben başta hiçbir antrenör istemedim ama 2 ay sonra antrenör istedim. Ya da antrenörümden memnun değilim. Bu talep işlemlerini telefondan yapabilmek isterim."*
 >
@@ -1640,16 +1640,18 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 >
 > **Kritik tasarım kararı (mahremiyet):** Değişiklik talebinin gerekçesi **yalnızca OWNER/ADMIN'e görünür, mevcut PT'ye asla gösterilmez** — aksi halde sporcu şikayetini yazmaktan çekinir ve özellik işe yaramaz hale gelir. Bu, Faz 36.1'deki üyelik dondurma (`MembershipFreeze`) talep/onay deseniyle **birebir aynı iskelet** üzerine kurulur — yeni bir onay akışı icat edilmiyor, kanıtlanmış deseni tekrar kullanıyor.
 
-- [ ] `TrainerProfile` genişletilir: `bio` (opsiyonel tanıtım metni), `specialties` (`String[]` — "Kilo Verme", "Güç Antrenmanı", "Rehabilitasyon" gibi etiketler), `maxMembers` (opsiyonel kapasite — doluysa sporcu portalında "Kapasite dolu" rozeti gösterilir, **talep engellenmez**, sadece bilgilendirir; salon sahibi yine de istisna yapabilir)
-- [ ] Yeni `TrainerRequest` modeli — `gymMemberId`, `requestType` (`ASSIGN`/`CHANGE`/`REMOVE`), `preferredTrainerId` (opsiyonel — boşsa "uygun olanı siz atayın" demektir), `reason` (opsiyonel, **yalnızca OWNER/ADMIN görür**), `status` (`PENDING`/`APPROVED`/`REJECTED`/`CANCELLED`), `requestedById`, `decidedById`, `decidedAt`, `resultingTrainerId` — `MembershipFreeze` ile aynı `requestedBy`/`approvedBy`/`status` deseni
-- [ ] Sporcu tarafı — yeni "Antrenörler" listesi (mobil + web `/athlete`): aktif PT'lerin foto/bio/uzmanlık etiketleri; mevcut PT'si yoksa "Antrenör Talep Et", varsa "Değişiklik Talep Et" butonu → gerekçe (opsiyonel, serbest metin) + tercih edilen PT (opsiyonel) formu
-- [ ] Mobil `HomeScreen`'deki "Antrenörünüz" bölümüne, bekleyen bir talep varsa durum rozeti eklenir ("Talebiniz inceleniyor")
-- [ ] `/dashboard/trainer-requests` (OWNER/ADMIN) — bekleyen talepler kuyruğu, gerekçe burada görünür; onaylanınca `GymMember.trainerId` güncellenir + audit (`MEMBER_UPDATED`, `kind: trainer_changed`) + sporcuya **yalnızca sonucu bildiren** (gerekçesiz) push bildirimi ("Yeni antrenörünüz: Ahmet Y.") — Faz 27.1 altyapısı yeniden kullanılır
-- [ ] Reddedilirse sporcuya nötr bir bildirim gider ("Talebiniz için resepsiyonla görüşün") — reddetme gerekçesi sporcuya iletilmez (hassasiyet — PT'yle ilgili olumsuz bir yorum yanlışlıkla sızmasın diye)
+- [x] `TrainerProfile` genişletilir: `bio` (opsiyonel tanıtım metni), `specialties` (`String[]`), `maxMembers` (opsiyonel kapasite — doluysa sporcu portalında "Kapasite dolu" rozeti gösterilir, **talep engellenmez**, sadece bilgilendirir)
+- [x] Yeni `TrainerRequest` modeli — `gymMemberId`, `requestType` (`ASSIGN`/`CHANGE`/`REMOVE`), `preferredTrainerId` (opsiyonel), `reason` (opsiyonel, **yalnızca OWNER/ADMIN görür**), `status` (`PENDING`/`APPROVED`/`REJECTED`/`CANCELLED`), `requestedById`, `decidedById`, `decidedAt`, `resultingTrainerId` — `MembershipFreeze` ile aynı `requestedBy`/`approvedBy`/`status` deseni
+- [x] Sporcu tarafı — "Antrenörler" listesi (mobil `TrainersScreen` + web `/athlete/trainers`): aktif PT'lerin bio/uzmanlık etiketleri; mevcut PT'si yoksa "Antrenör Talep Et", varsa "Değişiklik Talep Et" butonu → gerekçe (opsiyonel) + tercih edilen PT (opsiyonel) formu (`trainer-request-form.tsx`)
+- [x] Mobil `HomeScreen`'deki "Antrenörünüz" bölümüne, bekleyen bir talep varsa durum rozeti eklenir
+- [x] `/dashboard/trainer-requests` (OWNER/ADMIN, `trainer-request-queue.tsx`) — bekleyen talepler kuyruğu, gerekçe burada görünür; onaylanınca `GymMember.trainerId` güncellenir + audit (`auditLog`) + sporcuya **yalnızca sonucu bildiren** (gerekçesiz) push bildirimi (`sendPushToUser`) — Faz 27.1 altyapısı yeniden kullanıldı
+- [x] Reddedilirse sporcuya nötr bir bildirim gider — reddetme gerekçesi sporcuya iletilmez
 
-**Kabul kriteri:** 🔲 PT'si olmayan sporcu mobilden antrenör talep edebiliyor · 🔲 PT'sinden memnun olmayan sporcu, gerekçesi yalnızca yönetime görünecek şekilde değişiklik talep edebiliyor · 🔲 OWNER/ADMIN talebi onaylayıp reddedebiliyor, onaylanınca atama anında güncelleniyor ve sporcuya bildirim gidiyor
+**Kabul kriteri:** ✅ PT'si olmayan sporcu mobilden antrenör talep edebiliyor · ✅ PT'sinden memnun olmayan sporcu, gerekçesi yalnızca yönetime görünecek şekilde değişiklik talep edebiliyor · ✅ OWNER/ADMIN talebi onaylayıp reddedebiliyor, onaylanınca atama anında güncelleniyor ve sporcuya bildirim gidiyor
 
-**Bağımlılık:** `MembershipFreeze` talep/onay deseni (Faz 17.1) ✅ — aynı iskelet yeniden kullanılıyor · Faz 27.1 (push bildirim) ✅ · Faz 21 (`TrainerProfile`, PT komisyon altyapısı) ✅
+**Dosyalar:** `actions/trainer-requests.ts`, `api/v1/trainer{s,-requests}/**`, `api/v1/trainer-requests/[id]/{review,cancel}/route.ts`, `components/trainers/{trainer-request-form,trainer-request-queue,trainer-profile-bio-form}.tsx`, `app/(athlete)/athlete/trainers/page.tsx`, `app/(tenant)/dashboard/trainer-requests/page.tsx`, `lib/trainers/profiles.ts`, `apps/mobile/src/screens/TrainersScreen.tsx` (commit `d622c0a`)
+
+**Bağımlılık:** `MembershipFreeze` talep/onay deseni (Faz 17.1) ✅ — aynı iskelet yeniden kullanıldı · Faz 27.1 (push bildirim) ✅ · Faz 21 (`TrainerProfile`, PT komisyon altyapısı) ✅
 
 ---
 
