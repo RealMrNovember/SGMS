@@ -636,6 +636,10 @@ export async function saveExpenseCategory(
   const { categoryId, name, defaultAmount, sortOrder, stockQuantity, lowStockThreshold, isStoreVisible } =
     parsed.data;
 
+  if (isStoreVisible && defaultAmount == null) {
+    return { error: 'Mağazaya eklemeden önce bir fiyat belirleyin.' };
+  }
+
   const stockData = {
     stockQuantity: stockQuantity ?? null,
     lowStockThreshold: lowStockThreshold ?? null,
