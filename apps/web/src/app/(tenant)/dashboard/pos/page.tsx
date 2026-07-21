@@ -15,6 +15,11 @@ import { redirect } from 'next/navigation';
 const POS_ROLES = new Set(['OWNER', 'ADMIN', 'STAFF']);
 const SUMMARY_ROLES = new Set(['OWNER', 'ADMIN']);
 const CATEGORY_ROLES = new Set(['OWNER', 'ADMIN']);
+// Teslimat işaretleme fiziksel bir POS işlemidir (kategori fiyatlama/mağaza
+// görünürlüğü gibi idari bir karar değil) — resepsiyondaki STAFF de görüp
+// teslim edebilmeli, aksi halde bir üye "su siparişim var" dediğinde
+// resepsiyonist bunu bulamaz, yönetici çağırmak zorunda kalır.
+const DELIVERY_ROLES = new Set(['OWNER', 'ADMIN', 'STAFF']);
 
 export default async function PosPage() {
   const session = await auth();
@@ -30,6 +35,7 @@ export default async function PosPage() {
   const organizationId = session.user.organizationId;
   const canViewSummary = SUMMARY_ROLES.has(role);
   const canManageCategories = CATEGORY_ROLES.has(role);
+  const canDeliverOrders = DELIVERY_ROLES.has(role);
 
   const t = await getTranslations('pos');
   const locale = await getLocale();
@@ -174,7 +180,7 @@ export default async function PosPage() {
         currency={currency}
       />
 
-      {canManageCategories ? (
+      {canDeliverOrders ? (
         <PendingStoreDeliveries
           currency={currency}
           orders={pendingDeliveries.map((e) => ({
