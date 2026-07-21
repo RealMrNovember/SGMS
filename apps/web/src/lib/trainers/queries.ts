@@ -63,14 +63,21 @@ export async function getTrainerMonthlyStats(
   };
 }
 
-/** Salon içindeki tüm aktif TRAINER'ların listesi + o ayki performans özeti (roster ekranı). */
+/**
+ * Salon içindeki TÜM TRAINER'ların (aktif + pasif) listesi + o ayki performans
+ * özeti (roster ekranı). Önceden yalnızca `isActive: true` çekiliyordu — bir
+ * PT işten çıkarılınca (`isActive: false`) rosterdan tamamen kaybolup, o ayki
+ * hak edilmiş ama henüz görülmemiş komisyonu OWNER/ADMIN için erişilemez hale
+ * geliyordu. Artık pasif PT'ler de listede kalır (UI'da "Pasif" rozetiyle
+ * ayırt edilir), böylece geçmiş komisyon her zaman görülebilir.
+ */
 export async function listTrainersWithMonthlyStats(organizationId: string, reference: Date = new Date()) {
   const trainerMemberships = await prisma.organizationMember.findMany({
-    where: { organizationId, role: 'TRAINER', isActive: true },
+    where: { organizationId, role: 'TRAINER' },
     include: {
       user: { select: { id: true, name: true, email: true, avatarUrl: true } },
     },
-    orderBy: { user: { name: 'asc' } },
+    orderBy: [{ isActive: 'desc' }, { user: { name: 'asc' } }],
   });
 
   const profiles = await prisma.trainerProfile.findMany({
@@ -81,6 +88,7 @@ export async function listTrainersWithMonthlyStats(organizationId: string, refer
   const rows = await Promise.all(
     trainerMemberships.map(async (membership) => ({
       user: membership.user,
+      isActive: membership.isActive,
       profile: profileByUserId.get(membership.userId) ?? null,
       stats: await getTrainerMonthlyStats(organizationId, membership.userId, reference),
     })),

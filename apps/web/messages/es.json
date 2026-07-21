@@ -1432,6 +1432,7 @@
     "title": "Rendimiento de Entrenadores",
     "subtitle": "{month} — sesiones, horas trabajadas, ingresos y comisión de cada entrenador, en una pantalla.",
     "noProfile": "Sin comisión definida",
+    "inactiveBadge": "Inactivo",
     "noProfileHint": "Aún no se ha definido un modelo de comisión para este entrenador — un OWNER o ADMIN puede definirlo.",
     "empty": {
       "title": "Aún no hay entrenadores",
@@ -1473,6 +1474,7 @@
       "complete": "Completar",
       "noShow": "No asistió",
       "cancelByMember": "Cancelado por el Miembro",
+      "cancelByTrainer": "Cancelé yo",
       "amountPlaceholder": "Monto",
       "confirm": "Confirmar",
       "cancel": "Cancelar",

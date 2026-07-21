@@ -39,8 +39,10 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
   const canSchedule = role ? (['OWNER', 'ADMIN', 'STAFF', 'TRAINER'] as OrganizationRole[]).includes(role) : false;
 
   const [membership, profile, stats, sessions, gymMembersForForm] = await Promise.all([
+    // isActive filtresi bilinçli olarak yok: pasif (işten ayrılmış) bir PT'nin
+    // sayfası 404 vermemeli — OWNER/ADMIN geçmiş komisyonunu görebilmeli.
     prisma.organizationMember.findFirst({
-      where: { organizationId, userId: id, role: 'TRAINER', isActive: true },
+      where: { organizationId, userId: id, role: 'TRAINER' },
       include: { user: { select: { id: true, name: true, email: true } } },
     }),
     prisma.trainerProfile.findUnique({

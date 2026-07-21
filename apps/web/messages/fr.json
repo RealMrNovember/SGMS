@@ -1432,6 +1432,7 @@
     "title": "Performance des Coachs",
     "subtitle": "{month} — nombre de séances, heures travaillées, chiffre d'affaires et commission de chaque coach, sur un écran.",
     "noProfile": "Aucune commission définie",
+    "inactiveBadge": "Inactif",
     "noProfileHint": "Aucun modèle de commission n'a encore été défini pour ce coach — un OWNER ou ADMIN peut en définir un.",
     "empty": {
       "title": "Aucun coach pour l'instant",
@@ -1473,6 +1474,7 @@
       "complete": "Terminer",
       "noShow": "Absence",
       "cancelByMember": "Annulé par le Membre",
+      "cancelByTrainer": "J'ai annulé",
       "amountPlaceholder": "Montant",
       "confirm": "Confirmer",
       "cancel": "Annuler",

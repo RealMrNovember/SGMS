@@ -39,15 +39,18 @@ export default async function TrainersPage() {
         </div>
       ) : (
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {rows.map(({ user, profile, stats }) => (
+          {rows.map(({ user, profile, stats, isActive }) => (
             <Link
               key={user.id}
               href={`/dashboard/trainers/${user.id}`}
-              className="card block p-5 transition hover:border-[#c9a962]/40"
+              className={`card block p-5 transition hover:border-[#c9a962]/40${!isActive ? ' opacity-60' : ''}`}
             >
               <div className="flex items-center justify-between gap-2">
                 <p className="font-semibold">{user.name}</p>
-                {!profile ? <span className="badge text-[10px]">{t('noProfile')}</span> : null}
+                <div className="flex items-center gap-1.5">
+                  {!isActive ? <span className="badge text-[10px]">{t('inactiveBadge')}</span> : null}
+                  {!profile ? <span className="badge text-[10px]">{t('noProfile')}</span> : null}
+                </div>
               </div>
               <p className="muted text-xs">{user.email}</p>
               <div className="mt-4 grid grid-cols-2 gap-3 text-sm">

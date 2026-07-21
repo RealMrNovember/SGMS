@@ -1467,6 +1467,7 @@
     "title": "PT Performansı",
     "subtitle": "{month} — antrenörlerinizin seans sayısı, çalıştığı saat, cirosu ve hak ettiği prim tek ekranda.",
     "noProfile": "Komisyon tanımlanmadı",
+    "inactiveBadge": "Pasif",
     "noProfileHint": "Bu PT için henüz bir komisyon modeli tanımlanmadı — OWNER veya ADMIN tanımlayabilir.",
     "empty": {
       "title": "Henüz PT kaydı yok",
@@ -1508,6 +1509,7 @@
       "complete": "Tamamla",
       "noShow": "No-show",
       "cancelByMember": "Üye İptal Etti",
+      "cancelByTrainer": "Ben İptal Ettim",
       "amountPlaceholder": "Tutar ₺",
       "confirm": "Onayla",
       "cancel": "Vazgeç",

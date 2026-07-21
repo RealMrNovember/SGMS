@@ -1432,6 +1432,7 @@
     "title": "PT Performansı",
     "subtitle": "{month} — hər məşqçinin seans sayı, işlədiyi saat, gəliri və haqq etdiyi prim bir ekranda.",
     "noProfile": "Komissiya təyin edilməyib",
+    "inactiveBadge": "Passiv",
     "noProfileHint": "Bu məşqçi üçün hələ komissiya modeli təyin edilməyib — OWNER və ya ADMIN təyin edə bilər.",
     "empty": {
       "title": "Hələ məşqçi yoxdur",
@@ -1473,6 +1474,7 @@
       "complete": "Tamamla",
       "noShow": "Gəlmədi",
       "cancelByMember": "Üzv Ləğv Etdi",
+      "cancelByTrainer": "Mən Ləğv Etdim",
       "amountPlaceholder": "Məbləğ",
       "confirm": "Təsdiqlə",
       "cancel": "İmtina",

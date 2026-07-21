@@ -64,6 +64,13 @@ export function PtSessionActions({ sessionId }: { sessionId: string }) {
           {t('cancelByMember')}
         </button>
       </form>
+      <form action={cancelAction}>
+        <input type="hidden" name="sessionId" value={sessionId} />
+        <input type="hidden" name="reason" value="CANCELED_BY_TRAINER" />
+        <button type="submit" disabled={cancelPending} className="button px-3 py-1.5 text-xs">
+          {t('cancelByTrainer')}
+        </button>
+      </form>
       {cancelState.error ? <p className="text-xs text-rose-300">{cancelState.error}</p> : null}
     </div>
   );
