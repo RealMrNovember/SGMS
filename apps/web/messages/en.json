@@ -778,6 +778,7 @@
     "store": {
       "showInStore": "Show in mobile store",
       "addToStore": "Add to Store",
+      "addToStoreNeedsPrice": "Set a price before adding this to the store.",
       "removeFromStore": "Remove from Store",
       "inStoreBadge": "In Store",
       "changePhoto": "Change",

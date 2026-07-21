@@ -778,6 +778,7 @@
     "store": {
       "showInStore": "Mobil mağazada göster",
       "addToStore": "Mağazaya Ekle",
+      "addToStoreNeedsPrice": "Mağazaya eklemeden önce bir fiyat belirleyin.",
       "removeFromStore": "Mağazadan Kaldır",
       "inStoreBadge": "Mağazada",
       "changePhoto": "Değiştir",

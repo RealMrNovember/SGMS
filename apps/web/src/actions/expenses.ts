@@ -689,6 +689,16 @@ export async function setExpenseCategoryStoreVisible(
     return { error: 'Kategori yönetimi için OWNER veya ADMIN yetkisi gerekir.' };
   }
 
+  if (isStoreVisible) {
+    const category = await prisma.expenseCategory.findFirst({
+      where: { id: categoryId, organizationId: session.user.organizationId },
+      select: { defaultAmount: true },
+    });
+    if (category?.defaultAmount == null) {
+      return { error: 'Mağazaya eklemeden önce bir fiyat belirleyin.' };
+    }
+  }
+
   await prisma.expenseCategory.updateMany({
     where: { id: categoryId, organizationId: session.user.organizationId },
     data: { isStoreVisible },

@@ -747,6 +747,7 @@
     "store": {
       "showInStore": "Показывать в мобильном магазине",
       "addToStore": "Добавить в магазин",
+      "addToStoreNeedsPrice": "Перед добавлением в магазин укажите цену.",
       "removeFromStore": "Убрать из магазина",
       "inStoreBadge": "В магазине",
       "changePhoto": "Изменить",

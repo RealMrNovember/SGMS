@@ -747,6 +747,7 @@
     "store": {
       "showInStore": "Mostrar en la tienda móvil",
       "addToStore": "Añadir a la tienda",
+      "addToStoreNeedsPrice": "Defina un precio antes de añadirlo a la tienda.",
       "removeFromStore": "Quitar de la tienda",
       "inStoreBadge": "En la tienda",
       "changePhoto": "Cambiar",

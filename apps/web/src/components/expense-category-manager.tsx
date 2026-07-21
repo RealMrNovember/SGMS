@@ -138,7 +138,12 @@ export function ExpenseCategoryManager({
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  disabled={togglePending}
+                  disabled={togglePending || (!category.isStoreVisible && category.defaultAmount == null)}
+                  title={
+                    !category.isStoreVisible && category.defaultAmount == null
+                      ? t('store.addToStoreNeedsPrice')
+                      : undefined
+                  }
                   className="button px-3 py-1.5 text-xs"
                   onClick={() => {
                     startToggle(async () => {
