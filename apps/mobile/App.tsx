@@ -11,6 +11,7 @@ import { LoginScreen } from './src/screens/LoginScreen';
 import { MeasurementsScreen } from './src/screens/MeasurementsScreen';
 import { MessagesScreen } from './src/screens/MessagesScreen';
 import { ProgramsScreen } from './src/screens/ProgramsScreen';
+import { StoreScreen } from './src/screens/StoreScreen';
 import { TrainersScreen } from './src/screens/TrainersScreen';
 import { fetchMe } from './src/lib/api';
 import { loadSession, saveSession } from './src/lib/storage';
@@ -25,6 +26,7 @@ function AppShell() {
   const [checking, setChecking] = useState(true);
   const [activeTab, setActiveTab] = useState<TabKey>('home');
   const [trainersOpen, setTrainersOpen] = useState(false);
+  const [storeOpen, setStoreOpen] = useState(false);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [update, setUpdate] = useState<UpdateInfo | null>(null);
 
@@ -110,15 +112,23 @@ function AppShell() {
         {trainersOpen ? (
           <TrainersScreen session={session} onBack={() => setTrainersOpen(false)} />
         ) : null}
-        {!trainersOpen && activeTab === 'home' ? (
-          <HomeScreen session={session} onNavigate={setActiveTab} onOpenTrainers={() => setTrainersOpen(true)} />
+        {storeOpen ? <StoreScreen session={session} onBack={() => setStoreOpen(false)} /> : null}
+        {!trainersOpen && !storeOpen && activeTab === 'home' ? (
+          <HomeScreen
+            session={session}
+            onNavigate={setActiveTab}
+            onOpenTrainers={() => setTrainersOpen(true)}
+            onOpenStore={() => setStoreOpen(true)}
+          />
         ) : null}
-        {!trainersOpen && activeTab === 'programs' ? <ProgramsScreen session={session} /> : null}
-        {!trainersOpen && activeTab === 'measurements' ? <MeasurementsScreen session={session} /> : null}
-        {!trainersOpen && activeTab === 'messages' ? <MessagesScreen session={session} /> : null}
-        {!trainersOpen && activeTab === 'account' ? <AccountScreen session={session} onLogout={handleLogout} /> : null}
+        {!trainersOpen && !storeOpen && activeTab === 'programs' ? <ProgramsScreen session={session} /> : null}
+        {!trainersOpen && !storeOpen && activeTab === 'measurements' ? <MeasurementsScreen session={session} /> : null}
+        {!trainersOpen && !storeOpen && activeTab === 'messages' ? <MessagesScreen session={session} /> : null}
+        {!trainersOpen && !storeOpen && activeTab === 'account' ? (
+          <AccountScreen session={session} onLogout={handleLogout} />
+        ) : null}
       </View>
-      {!trainersOpen ? (
+      {!trainersOpen && !storeOpen ? (
         <TabBar active={activeTab} onChange={setActiveTab} badges={{ messages: unreadMessages }} />
       ) : null}
       <StatusBar style="light" />

@@ -1,5 +1,5 @@
 import { issueInvoiceFromPayment } from '@/actions/invoices';
-import { applyPaymentToExpenses } from '@/lib/billing/settle-payment';
+import { applyPaymentToExpenses, applyPaymentToSpecificExpenses } from '@/lib/billing/settle-payment';
 import { decimalToNumber } from '@/lib/member-balance';
 import { prisma } from '@/lib/prisma';
 
@@ -80,13 +80,25 @@ export async function settleTenantCheckoutSession(
         },
       });
 
-      await applyPaymentToExpenses(tx, {
-        organizationId: checkoutSession.organizationId,
-        gymMemberId: checkoutSession.gymMemberId,
-        amount,
-        currency: checkoutSession.currency,
-        targetExpenseId: checkoutSession.expenseId ?? undefined,
-      });
+      if (checkoutSession.storeExpenseIds.length > 0) {
+        // Faz 40 — mağaza sepeti: yalnızca bu checkout'un açtığı Expense
+        // satırlarını kapat, sporcunun ilgisiz başka açık borcuna dokunma.
+        await applyPaymentToSpecificExpenses(tx, {
+          organizationId: checkoutSession.organizationId,
+          gymMemberId: checkoutSession.gymMemberId,
+          amount,
+          currency: checkoutSession.currency,
+          expenseIds: checkoutSession.storeExpenseIds,
+        });
+      } else {
+        await applyPaymentToExpenses(tx, {
+          organizationId: checkoutSession.organizationId,
+          gymMemberId: checkoutSession.gymMemberId,
+          amount,
+          currency: checkoutSession.currency,
+          targetExpenseId: checkoutSession.expenseId ?? undefined,
+        });
+      }
 
       const invoice = await issueInvoiceFromPayment(
         {
@@ -95,7 +107,8 @@ export async function settleTenantCheckoutSession(
           amount,
           currency: checkoutSession.currency,
           issuedById: member.userId!,
-          description: 'Kartla ödeme (online)',
+          description:
+            checkoutSession.storeExpenseIds.length > 0 ? 'Mağaza siparişi (online)' : 'Kartla ödeme (online)',
         },
         tx,
       );
@@ -116,9 +129,12 @@ export async function settleTenantCheckoutSession(
             gymMemberId: checkoutSession.gymMemberId,
             amount,
             currency: checkoutSession.currency,
-            source: 'tenant_card_checkout',
+            source: checkoutSession.storeExpenseIds.length > 0 ? 'tenant_store_checkout' : 'tenant_card_checkout',
             provider: checkoutSession.provider,
             checkoutSessionId,
+            ...(checkoutSession.storeExpenseIds.length > 0
+              ? { storeExpenseIds: checkoutSession.storeExpenseIds }
+              : {}),
           },
         },
       });

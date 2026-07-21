@@ -774,6 +774,22 @@
         "CARD": "Card",
         "TRANSFER": "Transfer"
       }
+    },
+    "store": {
+      "showInStore": "Show in mobile store",
+      "addToStore": "Add to Store",
+      "removeFromStore": "Remove from Store",
+      "inStoreBadge": "In Store",
+      "changePhoto": "Change",
+      "addPhoto": "Add photo",
+      "uploading": "…",
+      "uploadError": "Photo upload failed.",
+      "pendingDeliveriesTitle": "Pending Deliveries",
+      "pendingDeliveriesSubtitle": "Products ordered from the mobile store that haven't been handed over at the front desk yet.",
+      "markDelivered": "Mark as Delivered",
+      "paid": "Paid",
+      "paymentPending": "Payment pending",
+      "preparing": "Preparing"
     }
   },
   "marketing": {

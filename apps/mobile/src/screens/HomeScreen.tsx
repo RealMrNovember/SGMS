@@ -24,10 +24,12 @@ export function HomeScreen({
   session,
   onNavigate,
   onOpenTrainers,
+  onOpenStore,
 }: {
   session: AthleteSession;
   onNavigate: (tab: TabKey) => void;
   onOpenTrainers: () => void;
+  onOpenStore: () => void;
 }) {
   const [me, setMe] = useState<MeResponse | null>(null);
   const [latestMeasurement, setLatestMeasurement] = useState<HealthMeasurement | null>(null);
@@ -127,6 +129,7 @@ export function HomeScreen({
             label="Mesaj"
             onPress={() => onNavigate('messages')}
           />
+          <StatCard icon="bag-outline" value="Aç" label="Mağaza" onPress={onOpenStore} />
         </View>
 
         {latestMeasurement ? (

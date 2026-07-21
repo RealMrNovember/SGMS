@@ -743,7 +743,23 @@
     "overdueInstallmentBadge": "Gecikmiş taksit",
     "categoryStock": "Stok sayı",
     "categoryLowStock": "Aşağı stok həddi",
-    "stockLabel": "Stok: {count}"
+    "stockLabel": "Stok: {count}",
+    "store": {
+      "showInStore": "Mobil mağazada göstər",
+      "addToStore": "Mağazaya əlavə et",
+      "removeFromStore": "Mağazadan sil",
+      "inStoreBadge": "Mağazada",
+      "changePhoto": "Dəyiş",
+      "addPhoto": "Şəkil əlavə et",
+      "uploading": "…",
+      "uploadError": "Şəkil yüklənmədi.",
+      "pendingDeliveriesTitle": "Gözləyən Çatdırılmalar",
+      "pendingDeliveriesSubtitle": "Mobil mağazadan sifariş edilmiş, hələ resepsiyonda əldən təhvil verilməmiş məhsullar.",
+      "markDelivered": "Təhvil verildi",
+      "paid": "Ödənildi",
+      "paymentPending": "Ödəniş gözlənilir",
+      "preparing": "Hazırlanır"
+    }
   },
   "marketing": {
     "nav": {

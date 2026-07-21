@@ -1,5 +1,6 @@
 import { CashShiftPanel } from '@/components/cash-shift-panel';
 import { ExpenseCategoryManager } from '@/components/expense-category-manager';
+import { PendingStoreDeliveries } from '@/components/pending-store-deliveries';
 import { ContextualHelpButton } from '@/components/help/contextual-help-button';
 import { PosTerminal } from '@/components/pos-terminal';
 import { getOpenCashShift } from '@/actions/cash-register';
@@ -34,7 +35,7 @@ export default async function PosPage() {
   const locale = await getLocale();
   const dateLocale = intlLocaleFor(locale);
 
-  const [members, categories, allCategories, summary, openShift] = await Promise.all([
+  const [members, categories, allCategories, summary, openShift, pendingDeliveries] = await Promise.all([
     prisma.gymMember.findMany({
       where: { organizationId, status: 'ACTIVE' },
       orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
@@ -58,11 +59,31 @@ export default async function PosPage() {
             isActive: true,
             stockQuantity: true,
             lowStockThreshold: true,
+            isStoreVisible: true,
+            imageUrl: true,
           },
         })
       : Promise.resolve([]),
     canViewSummary ? getDailyPosSummary(organizationId) : Promise.resolve(null),
     getOpenCashShift(organizationId),
+    // Faz 40 — mobil mağazadan alınmış, resepsiyonda henüz elden teslim
+    // edilmemiş siparişler ("Bekleyen Teslimatlar"). POS'tan yapılan satışlar
+    // anında teslim edilmiş sayıldığı için (`deliveredAt` hemen doldurulur) bu
+    // listede asla görünmezler.
+    prisma.expense.findMany({
+      where: { organizationId, status: { not: 'VOID' }, deliveredAt: null, categoryId: { not: null } },
+      orderBy: { createdAt: 'asc' },
+      take: 100,
+      select: {
+        id: true,
+        description: true,
+        amount: true,
+        status: true,
+        createdAt: true,
+        gymMember: { select: { firstName: true, lastName: true } },
+        category: { select: { name: true, imageUrl: true } },
+      },
+    }),
   ]);
 
   const currency = 'TRY';
@@ -154,6 +175,22 @@ export default async function PosPage() {
       />
 
       {canManageCategories ? (
+        <PendingStoreDeliveries
+          currency={currency}
+          orders={pendingDeliveries.map((e) => ({
+            id: e.id,
+            description: e.description,
+            categoryName: e.category?.name ?? null,
+            categoryImageUrl: e.category?.imageUrl ?? null,
+            amount: e.amount.toString(),
+            status: e.status,
+            createdAt: e.createdAt.toISOString(),
+            memberName: `${e.gymMember.firstName} ${e.gymMember.lastName}`,
+          }))}
+        />
+      ) : null}
+
+      {canManageCategories ? (
         <ExpenseCategoryManager
           currency={currency}
           categories={allCategories.map((c) => ({
@@ -164,6 +201,8 @@ export default async function PosPage() {
             isActive: c.isActive,
             stockQuantity: c.stockQuantity,
             lowStockThreshold: c.lowStockThreshold,
+            isStoreVisible: c.isStoreVisible,
+            imageUrl: c.imageUrl,
           }))}
         />
       ) : null}

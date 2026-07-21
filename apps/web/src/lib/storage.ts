@@ -8,7 +8,7 @@ import {
   uploadProgressPhotoToR2,
 } from '@/lib/storage-r2';
 
-export type AvatarEntityType = 'user' | 'gym_member';
+export type AvatarEntityType = 'user' | 'gym_member' | 'expense_category';
 
 export type AvatarUploadInput = {
   organizationId: string;

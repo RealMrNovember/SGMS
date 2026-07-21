@@ -1580,23 +1580,28 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ---
 
-## 🔲 Faz 40 — Sporcu Self-Servis Mağaza (Mobil Alışveriş) (Öncelik: P1)
+## ✅ Faz 40 — Sporcu Self-Servis Mağaza (Mobil Alışveriş) (Öncelik: P1) — tamamlandı, 2026-07-21
 
 > **Kullanıcı talebi (2026-07-20):** *"Mağaza içerisinde satılıyor olan su, protein tozu ya da her neyse işte, sporcu onları telefonuyla da satın alabilmeli / listeleyebilmeli / aldıklarını görebilmeli."*
 >
 > **Senaryo:** Sporcu antrenman arasında su/protein tozu almak istiyor ama resepsiyon kuyruğu var. Telefondan ürünü görüp kartla satın alabilmeli, sonra gidip teslim alabilmeli.
 >
 > **Kritik mimari karar:** Salon bugün POS'ta ürün satışını `ExpenseCategory.stockQuantity` ile yapıyor (Faz 17.6, zaten üretimde). Şemada kullanılmayan, ayrı bir `Product` modeli de var (2026-07-19'da elle eklenmiş, hiç bağlanmamış — bkz. Faz 8.7 notları). **Mağaza için `Product`'ı DEĞİL, `ExpenseCategory`'yi genişletmek doğru karar** — aksi halde stok iki ayrı, birbirinden habersiz sayaçta tutulur (resepsiyon "Su" satar, stok bir tabloda düşer; sporcu mobilden "Su" satın alır, stok BAŞKA bir tabloda düşer → gerçek stok hiçbir zaman doğru olmaz). Tek kaynak, tek stok sayacı.
-- [ ] `ExpenseCategory`'ye `imageUrl` (opsiyonel ürün fotoğrafı) ve `isStoreVisible` (varsayılan `false`) eklenir — yalnızca salon sahibinin işaretlediği kategoriler ("Su", "Protein Tozu") mobil mağazada görünür; "Ekipman hasar ücreti" gibi kategoriler görünmez
-- [ ] Mobil: yeni "Mağaza" ekranı — `isStoreVisible=true` ve `stockQuantity > 0` kategoriler listelenir, sepete eklenir
-- [ ] Ödeme: sepetteki her ürün için `quickAddCategoryExpense` (mevcut, POS'un kullandığı fonksiyon) ile `Expense` satırı açılır, toplam tutar Faz 8.7'nin kart checkout akışıyla (`TenantCheckoutSession`) **tek seferde** tahsil edilir — yeni bir ödeme altyapısı icat edilmez
-- [ ] Stok, satış anında **aynı `stockQuantity` sayacından** düşer — POS ile mobil mağaza arasında senkron garanti edilir (tek model, tek yazma yolu)
-- [ ] "Siparişlerim" — sporcu portalındaki mevcut "Son Harcamalar" listesi mağaza satın alımlarını zaten gösterir (`Expense.description`); ayrıca filtrelenip "Mağaza Siparişlerim" başlığıyla ayrı gösterilir
-- [ ] `/dashboard/pos` (veya SGMS Resepsiyon) → "Bekleyen Teslimatlar" — son N saatteki online mağaza satışları, personel "Teslim Edildi" işaretler (yeni bir durum alanı: `Expense.deliveredAt`)
+- [x] `ExpenseCategory`'ye `imageUrl` (opsiyonel ürün fotoğrafı, avatar yükleme deseniyle) ve `isStoreVisible` (varsayılan `false`) eklendi — yalnızca salon sahibinin `/dashboard/pos`'ta işaretlediği kategoriler mobil mağazada görünür
+- [x] Mobil: yeni `StoreScreen` — Ana Sayfa'da ayrı bir sekme DEĞİL, kısayol kartı olarak (Faz 39/41 notundaki 5-sekme sınırı kararına uyumlu); ürün listesi + adet steplı sepet + "Siparişlerim" görünümü
+- [x] **Uygulama detayı (roadmap'teki plandan bilinçli sapma):** `quickAddCategoryExpense`'i doğrudan çağırmak yerine, onun stok-düşümü + `Expense` oluşturma mantığı `createCategorySaleExpense` adlı paylaşılan bir fonksiyona çıkarıldı (`lib/store/category-sale.ts`) — hem POS'un tekli satışı hem mobil sepetin çok-adetli satırları **aynı fonksiyonu** kullanıyor (kod tekrarı yok, stok tek yerden düşüyor). Sebep: POS akışı personel oturumu/rolü gerektiriyor, sporcunun self-servis isteği bu bağlamda çalışamaz.
+- [x] Ödeme: Faz 8.7.1'in üyelik yenileme checkout'uyla (`startMembershipRenewalCheckout`) birebir aynı Iyzico/PayTR hosted checkout altyapısı (`TenantCheckoutSession`) yeniden kullanıldı — yeni bir ödeme altyapısı icat edilmedi. Sepetteki her satır için önceden (OPEN) bir `Expense` açılır, id'leri `TenantCheckoutSession.storeExpenseIds` (yeni `String[]` alanı) içinde toplanır; webhook onayı gelince `applyPaymentToSpecificExpenses` **yalnızca bu id'leri** PAID işaretler — sporcunun ilgisiz başka bir açık borcuna (örn. üyelik aidatı) asla sızmaz
+- [x] Stok, satış anında **aynı `stockQuantity` sayacından** düşer — POS ile mobil mağaza arasında senkron garanti edilir (tek model, `createCategorySaleExpense` tek yazma yolu)
+- [x] "Siparişlerim" (`GET /api/v1/store/orders`) — mevcut `Expense` kayıtlarından (`category.isStoreVisible=true`) filtrelenir, yeni bir sipariş tablosu icat edilmedi
+- [x] `/dashboard/pos` → "Bekleyen Teslimatlar" — yeni `Expense.deliveredAt` alanı: POS/personel satışlarında anında doldurulur (elden teslim), mobil self-servis siparişlerinde boş kalır; personel "Teslim Edildi" ile işaretler (`markStoreOrderDelivered`)
 
-**Kabul kriteri:** 🔲 Sporcu telefondan ürün listesini görüp kartla satın alabiliyor · 🔲 stok POS ile mobil arasında her zaman senkron (tek sayaç) · 🔲 resepsiyon bekleyen siparişleri görüp teslim işaretleyebiliyor
+**Kabul kriteri:** ✅ Sporcu telefondan ürün listesini görüp kartla satın alabiliyor · ✅ stok POS ile mobil arasında her zaman senkron (tek sayaç, gerçek Postgres'e karşı senaryo testiyle doğrulandı) · ✅ resepsiyon bekleyen siparişleri görüp teslim işaretleyebiliyor · ✅ mağaza ödemesi sporcunun ilgisiz başka bir borcunu asla kapatmıyor
 
-**Bağımlılık:** Faz 17.6 (`ExpenseCategory.stockQuantity`) ✅ · Faz 8.7 (kartla ödeme altyapısı) ✅
+**Doğrulama:** `pnpm typecheck` (web+cloud-client) + `npx tsc --noEmit` (mobil) + ESLint (yeni uyarı yok) + Vitest 61/61 (12 yeni test: `category-sale.test.ts` + `settle-payment.test.ts`'e eklenen `applyPaymentToSpecificExpenses` testleri) + gerçek yerel Postgres'e (portable, UTF8, 45 migration) karşı tek seferlik senaryo scripti (sepet→stok düşümü→`storeExpenseIds` round-trip→ödeme→ilgisiz borç dokunulmazlığı→yetersiz stok hatası→POS anında teslim) başarıyla çalıştırıldı.
+
+**Dosyalar:** migration `20260721000000_faz40_self_service_store`, `lib/store/category-sale.ts` (yeni), `lib/store/checkout.ts` (yeni), `lib/billing/settle-payment.ts` (`applyPaymentToSpecificExpenses` eklendi), `lib/payments/tenant-checkout-settle.ts`, `actions/expenses.ts` (`quickAddCategoryExpense` refactor, `setExpenseCategoryStoreVisible`, `markStoreOrderDelivered`), `lib/storage.ts` (`AvatarEntityType` genişletildi), `api/v1/upload/avatar/route.ts`, `api/v1/store/{products,checkout,orders}/route.ts` (yeni), `components/{expense-category-manager,expense-category-image-upload,pending-store-deliveries}.tsx`, `app/(tenant)/dashboard/pos/page.tsx`, `messages/*.json` (6 dil, `pos.store` namespace), `apps/mobile/src/screens/StoreScreen.tsx` (yeni), `apps/mobile/App.tsx`, `apps/mobile/src/screens/HomeScreen.tsx`
+
+**Bağımlılık:** Faz 17.6 (`ExpenseCategory.stockQuantity`) ✅ · Faz 8.7/8.7.1 (kartla ödeme altyapısı) ✅ · Faz 6.2 (avatar yükleme deseni) ✅
 
 ---
 

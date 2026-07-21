@@ -8,6 +8,9 @@ import type {
   MeResponse,
   MemberStatement,
   MembershipRenewalResponse,
+  StoreCheckoutResponse,
+  StoreOrder,
+  StoreProduct,
   TrainerProfile,
   TrainerRequest,
   TrainingProgram,
@@ -197,5 +200,26 @@ export async function cancelTrainerRequest(
   return apiFetch(`/api/v1/trainer-requests/${requestId}/cancel`, {
     method: 'POST',
     headers: authHeaders(accessToken),
+  });
+}
+
+export async function fetchStoreProducts(
+  accessToken: string,
+): Promise<{ products: StoreProduct[] }> {
+  return apiFetch('/api/v1/store/products', { headers: authHeaders(accessToken) });
+}
+
+export async function fetchStoreOrders(accessToken: string): Promise<{ orders: StoreOrder[] }> {
+  return apiFetch('/api/v1/store/orders', { headers: authHeaders(accessToken) });
+}
+
+export async function startStoreCheckout(
+  accessToken: string,
+  items: Array<{ categoryId: string; quantity: number }>,
+): Promise<StoreCheckoutResponse> {
+  return apiFetch('/api/v1/store/checkout', {
+    method: 'POST',
+    headers: authHeaders(accessToken),
+    body: JSON.stringify({ items }),
   });
 }

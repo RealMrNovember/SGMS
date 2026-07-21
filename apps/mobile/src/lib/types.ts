@@ -161,3 +161,24 @@ export type TrainerRequest = {
   gymMember?: { trainerId: string | null };
   preferredTrainer?: { name: string } | null;
 };
+
+export type StoreProduct = {
+  id: string;
+  name: string;
+  description: string | null;
+  price: string;
+  imageUrl: string | null;
+  stockQuantity: number | null;
+};
+
+export type StoreOrder = {
+  id: string;
+  productName: string;
+  imageUrl: string | null;
+  amount: string;
+  status: string;
+  delivered: boolean;
+  createdAt: string;
+};
+
+export type StoreCheckoutResponse = { checkoutUrl: string };

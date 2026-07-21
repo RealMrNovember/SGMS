@@ -743,7 +743,23 @@
     "overdueInstallmentBadge": "Cuota vencida",
     "categoryStock": "Cantidad en stock",
     "categoryLowStock": "Umbral de stock bajo",
-    "stockLabel": "Stock: {count}"
+    "stockLabel": "Stock: {count}",
+    "store": {
+      "showInStore": "Mostrar en la tienda móvil",
+      "addToStore": "Añadir a la tienda",
+      "removeFromStore": "Quitar de la tienda",
+      "inStoreBadge": "En la tienda",
+      "changePhoto": "Cambiar",
+      "addPhoto": "Añadir foto",
+      "uploading": "…",
+      "uploadError": "No se pudo subir la foto.",
+      "pendingDeliveriesTitle": "Entregas pendientes",
+      "pendingDeliveriesSubtitle": "Productos pedidos desde la tienda móvil que aún no se han entregado en recepción.",
+      "markDelivered": "Marcar como entregado",
+      "paid": "Pagado",
+      "paymentPending": "Pago pendiente",
+      "preparing": "Preparando"
+    }
   },
   "marketing": {
     "nav": {

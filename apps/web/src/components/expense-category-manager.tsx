@@ -3,8 +3,10 @@
 import {
   saveExpenseCategory,
   setExpenseCategoryActive,
+  setExpenseCategoryStoreVisible,
   type ExpenseActionState,
 } from '@/actions/expenses';
+import { ExpenseCategoryImageUpload } from '@/components/expense-category-image-upload';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useActionState, useTransition } from 'react';
@@ -17,6 +19,8 @@ type CategoryRow = {
   isActive: boolean;
   stockQuantity: number | null;
   lowStockThreshold: number | null;
+  isStoreVisible: boolean;
+  imageUrl: string | null;
 };
 
 const initialState: ExpenseActionState = {};
@@ -90,6 +94,10 @@ export function ExpenseCategoryManager({
           placeholder={t('categoryLowStock')}
           className="input"
         />
+        <label className="muted flex items-center gap-2 text-sm md:col-span-2">
+          <input name="isStoreVisible" type="checkbox" className="h-4 w-4" />
+          {t('store.showInStore')}
+        </label>
         <button type="submit" disabled={pending} className="button px-4 py-2 text-sm md:col-span-4">
           {pending ? tCommon('ellipsis') : t('addCategory')}
         </button>
@@ -104,36 +112,57 @@ export function ExpenseCategoryManager({
               key={category.id}
               className="flex flex-wrap items-center justify-between gap-3 px-4 py-3"
             >
-              <div>
-                <p className="font-medium">
-                  {category.name}{' '}
-                  {!category.isActive ? (
-                    <span className="badge text-[10px] opacity-70">{t('inactive')}</span>
-                  ) : null}
-                </p>
-                <p className="muted text-xs">
-                  {category.defaultAmount != null
-                    ? formatter.format(Number(category.defaultAmount))
-                    : t('noDefaultAmount')}{' '}
-                  · #{category.sortOrder}
-                  {category.stockQuantity != null
-                    ? ` · ${t('stockLabel', { count: category.stockQuantity })}`
-                    : ''}
-                </p>
+              <div className="flex items-center gap-3">
+                <ExpenseCategoryImageUpload categoryId={category.id} currentUrl={category.imageUrl} />
+                <div>
+                  <p className="font-medium">
+                    {category.name}{' '}
+                    {!category.isActive ? (
+                      <span className="badge text-[10px] opacity-70">{t('inactive')}</span>
+                    ) : null}
+                    {category.isStoreVisible ? (
+                      <span className="badge text-[10px] opacity-70">{t('store.inStoreBadge')}</span>
+                    ) : null}
+                  </p>
+                  <p className="muted text-xs">
+                    {category.defaultAmount != null
+                      ? formatter.format(Number(category.defaultAmount))
+                      : t('noDefaultAmount')}{' '}
+                    · #{category.sortOrder}
+                    {category.stockQuantity != null
+                      ? ` · ${t('stockLabel', { count: category.stockQuantity })}`
+                      : ''}
+                  </p>
+                </div>
               </div>
-              <button
-                type="button"
-                disabled={togglePending}
-                className="button px-3 py-1.5 text-xs"
-                onClick={() => {
-                  startToggle(async () => {
-                    await setExpenseCategoryActive(category.id, !category.isActive);
-                    router.refresh();
-                  });
-                }}
-              >
-                {category.isActive ? t('deactivate') : t('activate')}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  disabled={togglePending}
+                  className="button px-3 py-1.5 text-xs"
+                  onClick={() => {
+                    startToggle(async () => {
+                      await setExpenseCategoryStoreVisible(category.id, !category.isStoreVisible);
+                      router.refresh();
+                    });
+                  }}
+                >
+                  {category.isStoreVisible ? t('store.removeFromStore') : t('store.addToStore')}
+                </button>
+                <button
+                  type="button"
+                  disabled={togglePending}
+                  className="button px-3 py-1.5 text-xs"
+                  onClick={() => {
+                    startToggle(async () => {
+                      await setExpenseCategoryActive(category.id, !category.isActive);
+                      router.refresh();
+                    });
+                  }}
+                >
+                  {category.isActive ? t('deactivate') : t('activate')}
+                </button>
+              </div>
             </div>
           ))
         )}

@@ -743,7 +743,23 @@
     "overdueInstallmentBadge": "Échéance en retard",
     "categoryStock": "Quantité en stock",
     "categoryLowStock": "Seuil stock bas",
-    "stockLabel": "Stock : {count}"
+    "stockLabel": "Stock : {count}",
+    "store": {
+      "showInStore": "Afficher dans la boutique mobile",
+      "addToStore": "Ajouter à la boutique",
+      "removeFromStore": "Retirer de la boutique",
+      "inStoreBadge": "En boutique",
+      "changePhoto": "Changer",
+      "addPhoto": "Ajouter une photo",
+      "uploading": "…",
+      "uploadError": "Échec du téléchargement de la photo.",
+      "pendingDeliveriesTitle": "Livraisons en attente",
+      "pendingDeliveriesSubtitle": "Produits commandés depuis la boutique mobile qui n'ont pas encore été remis à la réception.",
+      "markDelivered": "Marquer comme livré",
+      "paid": "Payé",
+      "paymentPending": "Paiement en attente",
+      "preparing": "En préparation"
+    }
   },
   "marketing": {
     "nav": {

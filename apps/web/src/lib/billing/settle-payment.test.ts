@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { applyPaymentToExpenses, applyRefundToExpenses } from './settle-payment';
+import { applyPaymentToExpenses, applyPaymentToSpecificExpenses, applyRefundToExpenses } from './settle-payment';
 
 type FakeExpense = {
   id: string;
@@ -42,6 +42,9 @@ function createFakeTx(expenses: FakeExpense[]) {
       },
       async findMany({ where }: { where: Record<string, unknown> }) {
         let result = expenses.filter((e) => {
+          if (where.id && typeof where.id === 'object' && 'in' in where.id) {
+            if (!(where.id as { in: string[] }).in.includes(e.id)) return false;
+          }
           if (e.organizationId !== where.organizationId) return false;
           if (e.gymMemberId !== where.gymMemberId) return false;
           if (where.currency && e.currency !== where.currency) return false;
@@ -168,6 +171,47 @@ describe('applyPaymentToExpenses', () => {
     expect(remaining).toBe(0);
     expect(expenses[0].status).toBe('OPEN');
     expect(expenses[0].paidAmount).toBe(40);
+  });
+});
+
+describe('applyPaymentToSpecificExpenses', () => {
+  it('pays exactly the requested expense ids and leaves an unrelated open debt untouched', async () => {
+    const expenses = [
+      makeExpense({ id: 'store1', amount: 50 }),
+      makeExpense({ id: 'store2', amount: 30 }),
+      makeExpense({ id: 'unrelated', amount: 200 }),
+    ];
+    const tx = createFakeTx(expenses);
+
+    const { remaining } = await applyPaymentToSpecificExpenses(tx, {
+      organizationId: 'org1',
+      gymMemberId: 'member1',
+      amount: 80,
+      currency: 'TRY',
+      expenseIds: ['store1', 'store2'],
+    });
+
+    expect(remaining).toBe(0);
+    expect(expenses.find((e) => e.id === 'store1')!.status).toBe('PAID');
+    expect(expenses.find((e) => e.id === 'store2')!.status).toBe('PAID');
+    expect(expenses.find((e) => e.id === 'unrelated')!.status).toBe('OPEN');
+    expect(expenses.find((e) => e.id === 'unrelated')!.paidAmount).toBe(0);
+  });
+
+  it('returns an empty result when expenseIds is empty', async () => {
+    const expenses = [makeExpense({ id: 'e1', amount: 100 })];
+    const tx = createFakeTx(expenses);
+
+    const { remaining } = await applyPaymentToSpecificExpenses(tx, {
+      organizationId: 'org1',
+      gymMemberId: 'member1',
+      amount: 100,
+      currency: 'TRY',
+      expenseIds: [],
+    });
+
+    expect(remaining).toBe(100);
+    expect(expenses[0].status).toBe('OPEN');
   });
 });
 

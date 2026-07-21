@@ -743,7 +743,23 @@
     "overdueInstallmentBadge": "Просроченный платёж",
     "categoryStock": "Кол-во на складе",
     "categoryLowStock": "Порог низкого запаса",
-    "stockLabel": "Склад: {count}"
+    "stockLabel": "Склад: {count}",
+    "store": {
+      "showInStore": "Показывать в мобильном магазине",
+      "addToStore": "Добавить в магазин",
+      "removeFromStore": "Убрать из магазина",
+      "inStoreBadge": "В магазине",
+      "changePhoto": "Изменить",
+      "addPhoto": "Добавить фото",
+      "uploading": "…",
+      "uploadError": "Не удалось загрузить фото.",
+      "pendingDeliveriesTitle": "Ожидающие доставки",
+      "pendingDeliveriesSubtitle": "Товары, заказанные через мобильный магазин, которые ещё не выданы на ресепшене.",
+      "markDelivered": "Отметить как выдано",
+      "paid": "Оплачено",
+      "paymentPending": "Ожидает оплаты",
+      "preparing": "Готовится"
+    }
   },
   "marketing": {
     "nav": {

@@ -95,6 +95,60 @@ export async function applyPaymentToExpenses(
   return { remaining };
 }
 
+/**
+ * Faz 40 — mobil mağaza checkout'u FIFO borç kapama akışına (`applyPaymentToExpenses`)
+ * karışmaz: sepetteki ürünler için önceden açılmış TAM OLARAK `expenseIds`
+ * kümesini kapatır. Sporcunun ilgisiz başka bir açık borcu (örn. üyelik aidatı)
+ * bu ödemeyle yanlışlıkla kapanmaz.
+ */
+export async function applyPaymentToSpecificExpenses(
+  tx: Prisma.TransactionClient,
+  params: { organizationId: string; gymMemberId: string; amount: number; currency: string; expenseIds: string[] },
+): Promise<{ remaining: number }> {
+  const { organizationId, gymMemberId, amount, currency, expenseIds } = params;
+  const normalizedCurrency = currency.toUpperCase();
+  let remaining = amount;
+
+  if (expenseIds.length === 0) {
+    return { remaining };
+  }
+
+  const targets = await tx.expense.findMany({
+    where: {
+      id: { in: expenseIds },
+      organizationId,
+      gymMemberId,
+      status: 'OPEN',
+      currency: normalizedCurrency,
+    },
+    orderBy: { createdAt: 'asc' },
+  });
+
+  for (const expense of targets) {
+    if (remaining <= 0) break;
+
+    const expenseAmount = Number(expense.amount.toString());
+    const expensePaid = Number(expense.paidAmount.toString());
+    const outstanding = expenseAmount - expensePaid;
+    if (outstanding <= 0) continue;
+
+    const pay = Math.min(remaining, outstanding);
+    const newPaidAmount = expensePaid + pay;
+
+    await tx.expense.update({
+      where: { id: expense.id },
+      data: {
+        paidAmount: newPaidAmount,
+        ...(newPaidAmount >= expenseAmount ? { status: 'PAID', paidAt: new Date() } : {}),
+      },
+    });
+
+    remaining -= pay;
+  }
+
+  return { remaining };
+}
+
 type RefundExpenseParams = {
   organizationId: string;
   gymMemberId: string;

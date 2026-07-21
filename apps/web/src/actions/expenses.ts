@@ -15,6 +15,7 @@ import {
   getMemberOpenBalancesByCurrency,
   getMemberOpenCurrencyCodes,
 } from '@/lib/member-balance';
+import { createCategorySaleExpense } from '@/lib/store/category-sale';
 
 export type ExpenseActionState = {
   error?: string;
@@ -143,6 +144,9 @@ export async function addMemberExpense(
         description,
         status: 'OPEN',
         createdById: context.userId,
+        // Faz 40 — personel elden eklediği bir kategori satırı fiziksel olarak
+        // anında teslim edilmiş sayılır (Bekleyen Teslimatlar kuyruğuna girmez).
+        deliveredAt: parsed.data.categoryId ? new Date() : null,
       },
     });
 
@@ -218,36 +222,20 @@ export async function quickAddCategoryExpense(
     };
   }
 
-  const expense = await prisma.$transaction(async (tx) => {
-    if (category.stockQuantity != null) {
-      const updated = await tx.expenseCategory.updateMany({
-        where: {
-          id: category.id,
-          organizationId: context.organizationId,
-          stockQuantity: { gte: 1 },
-        },
-        data: { stockQuantity: { decrement: 1 } },
-      });
-      if (updated.count === 0) {
-        throw new Error(`"${category.name}" stokta yok.`);
-      }
-    }
-
-    return tx.expense.create({
-      data: {
+  const expense = await prisma
+    .$transaction((tx) =>
+      createCategorySaleExpense(tx, {
         organizationId: context.organizationId,
         gymMemberId,
-        categoryId: category.id,
-        amount: category.defaultAmount!,
-        currency,
-        description: category.name,
-        status: 'OPEN',
+        category,
         createdById: context.userId,
-      },
+        quantity: 1,
+        channel: 'pos',
+      }),
+    )
+    .catch((error: unknown) => {
+      return { error: error instanceof Error ? error.message : 'Satış kaydı oluşturulamadı.' } as const;
     });
-  }).catch((error: unknown) => {
-    return { error: error instanceof Error ? error.message : 'Satış kaydı oluşturulamadı.' } as const;
-  });
 
   if (expense && 'error' in expense) {
     return { error: expense.error };
@@ -608,6 +596,7 @@ const categorySchema = z.object({
   sortOrder: z.coerce.number().int().min(0).max(999).optional(),
   stockQuantity: z.coerce.number().int().min(0).max(1_000_000).optional(),
   lowStockThreshold: z.coerce.number().int().min(0).max(1_000_000).optional(),
+  isStoreVisible: z.boolean().optional(),
 });
 
 export async function saveExpenseCategory(
@@ -637,13 +626,14 @@ export async function saveExpenseCategory(
       formData.get('lowStockThreshold') === '' || formData.get('lowStockThreshold') == null
         ? undefined
         : formData.get('lowStockThreshold'),
+    isStoreVisible: formData.get('isStoreVisible') === 'on',
   });
 
   if (!parsed.success) {
     return { error: 'Geçersiz kategori verisi.' };
   }
 
-  const { categoryId, name, defaultAmount, sortOrder, stockQuantity, lowStockThreshold } =
+  const { categoryId, name, defaultAmount, sortOrder, stockQuantity, lowStockThreshold, isStoreVisible } =
     parsed.data;
 
   const stockData = {
@@ -664,6 +654,7 @@ export async function saveExpenseCategory(
         name,
         defaultAmount: defaultAmount ?? null,
         sortOrder: sortOrder ?? 0,
+        isStoreVisible: isStoreVisible ?? false,
         ...stockData,
       },
     });
@@ -674,6 +665,7 @@ export async function saveExpenseCategory(
         name,
         defaultAmount: defaultAmount ?? null,
         sortOrder: sortOrder ?? 0,
+        isStoreVisible: isStoreVisible ?? false,
         ...stockData,
       },
     });
@@ -681,6 +673,31 @@ export async function saveExpenseCategory(
 
   revalidatePath('/dashboard/pos');
   return { success: 'Kategori kaydedildi.' };
+}
+
+export async function setExpenseCategoryStoreVisible(
+  categoryId: string,
+  isStoreVisible: boolean,
+): Promise<ExpenseActionState> {
+  const session = await auth();
+  if (!session?.user?.organizationId) {
+    return { error: 'Yetkisiz.' };
+  }
+
+  const role = session.user.role;
+  if (!role || !new Set<OrganizationRole>(['OWNER', 'ADMIN']).has(role)) {
+    return { error: 'Kategori yönetimi için OWNER veya ADMIN yetkisi gerekir.' };
+  }
+
+  await prisma.expenseCategory.updateMany({
+    where: { id: categoryId, organizationId: session.user.organizationId },
+    data: { isStoreVisible },
+  });
+
+  revalidatePath('/dashboard/pos');
+  return {
+    success: isStoreVisible ? 'Kategori mağazada gösterilecek.' : 'Kategori mağazadan kaldırıldı.',
+  };
 }
 
 export async function setExpenseCategoryActive(
@@ -704,6 +721,45 @@ export async function setExpenseCategoryActive(
 
   revalidatePath('/dashboard/pos');
   return { success: isActive ? 'Kategori etkinleştirildi.' : 'Kategori devre dışı bırakıldı.' };
+}
+
+/**
+ * Faz 40 — resepsiyon, mobil mağazadan sipariş verilmiş bir ürünü sporcuya
+ * elden teslim ettiğinde çağrılır. `deliveredAt` doldurulunca sipariş
+ * "Bekleyen Teslimatlar" kuyruğundan çıkar.
+ */
+export async function markStoreOrderDelivered(expenseId: string): Promise<ExpenseActionState> {
+  const context = await getExpenseContext();
+  if ('error' in context) {
+    return { error: context.error };
+  }
+
+  const expense = await prisma.expense.findFirst({
+    where: { id: expenseId, organizationId: context.organizationId, deliveredAt: null },
+  });
+
+  if (!expense) {
+    return { error: 'Sipariş bulunamadı veya zaten teslim edilmiş.' };
+  }
+
+  await prisma.expense.update({
+    where: { id: expense.id },
+    data: { deliveredAt: new Date() },
+  });
+
+  await prisma.auditLog.create({
+    data: {
+      actorId: context.userId,
+      organizationId: context.organizationId,
+      action: 'EXPENSE_ADDED',
+      entityType: 'expense',
+      entityId: expense.id,
+      metadata: { kind: 'store_order_delivered', gymMemberId: expense.gymMemberId },
+    },
+  });
+
+  revalidatePath('/dashboard/pos');
+  return { success: 'Sipariş teslim edildi olarak işaretlendi.' };
 }
 
 export async function getMemberPosSnapshot(gymMemberId: string) {

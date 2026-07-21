@@ -32,6 +32,39 @@ async function resolveUserAvatarTarget(userId: string, organizationId: string | 
   };
 }
 
+async function resolveExpenseCategoryImageTarget(
+  categoryId: string,
+  organizationId: string,
+  role: OrganizationRole | null,
+  request?: Request,
+) {
+  if (!role || !new Set<OrganizationRole>(['OWNER', 'ADMIN']).has(role)) {
+    return { error: apiErrorI18n('avatarUpdateForbidden', 403, request) } as const;
+  }
+
+  const category = await prisma.expenseCategory.findFirst({
+    where: { id: categoryId, organizationId },
+    select: { id: true, imageUrl: true },
+  });
+
+  if (!category) {
+    return { error: apiErrorI18n('memberRecordNotFound', 404, request) } as const;
+  }
+
+  return {
+    entityType: 'expense_category' as const,
+    entityId: category.id,
+    organizationId,
+    previousUrl: category.imageUrl,
+    update: async (url: string) => {
+      await prisma.expenseCategory.update({
+        where: { id: category.id },
+        data: { imageUrl: url },
+      });
+    },
+  };
+}
+
 async function resolveGymMemberAvatarTarget(
   gymMemberId: string,
   organizationId: string,
@@ -98,10 +131,11 @@ export async function POST(request: Request) {
   const targetType = formData.get('targetType');
   const gymMemberId = formData.get('gymMemberId');
   const requestedUserId = formData.get('userId');
+  const categoryId = formData.get('categoryId');
 
   let target:
     | {
-        entityType: 'user' | 'gym_member';
+        entityType: 'user' | 'gym_member' | 'expense_category';
         entityId: string;
         organizationId: string;
         previousUrl: string | null;
@@ -109,7 +143,23 @@ export async function POST(request: Request) {
       }
     | { error: ReturnType<typeof apiError> };
 
-  if (targetType === 'gym_member') {
+  if (targetType === 'expense_category') {
+    if (typeof categoryId !== 'string' || !categoryId) {
+      return apiErrorI18n('gymMemberIdRequired', 400, request);
+    }
+
+    const tenantAuth = await requireTenantApiContext(request);
+    if ('response' in tenantAuth) {
+      return tenantAuth.response;
+    }
+
+    target = await resolveExpenseCategoryImageTarget(
+      categoryId,
+      tenantAuth.context.organizationId,
+      tenantAuth.context.role,
+      request,
+    );
+  } else if (targetType === 'gym_member') {
     if (typeof gymMemberId !== 'string' || !gymMemberId) {
       return apiErrorI18n('gymMemberIdRequired', 400, request);
     }

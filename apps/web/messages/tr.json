@@ -774,6 +774,22 @@
         "CARD": "Kart",
         "TRANSFER": "Havale"
       }
+    },
+    "store": {
+      "showInStore": "Mobil mağazada göster",
+      "addToStore": "Mağazaya Ekle",
+      "removeFromStore": "Mağazadan Kaldır",
+      "inStoreBadge": "Mağazada",
+      "changePhoto": "Değiştir",
+      "addPhoto": "Fotoğraf ekle",
+      "uploading": "…",
+      "uploadError": "Fotoğraf yüklenemedi.",
+      "pendingDeliveriesTitle": "Bekleyen Teslimatlar",
+      "pendingDeliveriesSubtitle": "Mobil mağazadan sipariş verilmiş, resepsiyonda henüz elden teslim edilmemiş ürünler.",
+      "markDelivered": "Teslim Edildi",
+      "paid": "Ödendi",
+      "paymentPending": "Ödeme bekliyor",
+      "preparing": "Hazırlanıyor"
     }
   },
   "marketing": {

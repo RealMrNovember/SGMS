@@ -1352,6 +1352,14 @@ model ExpenseCategory {
   lowStockThreshold Int?  @map("low_stock_threshold")
   sortOrder      Int      @default(0) @map("sort_order")
   isActive       Boolean  @default(true) @map("is_active")
+  /// Faz 40 — sporcu mobil mağazasında gösterilecek ürün fotoğrafı (R2, avatar
+  /// yükleme deseniyle). Boşsa mağazada varsayılan ikon gösterilir.
+  imageUrl       String?  @map("image_url")
+  /// Faz 40 — true ise ve stockQuantity > 0 ise bu kategori mobil "Mağaza"
+  /// ekranında listelenir. Varsayılan false: yalnızca salon sahibinin bilerek
+  /// işaretlediği kategoriler ("Su", "Protein Tozu") sporcuya görünür —
+  /// "Ekipman hasar ücreti" gibi dahili kategoriler asla mağazada görünmez.
+  isStoreVisible Boolean  @default(false) @map("is_store_visible")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -1383,6 +1391,11 @@ model Expense {
   createdById    String        @map("created_by_id")
   paidAt         DateTime?     @map("paid_at")
   voidedAt       DateTime?     @map("voided_at")
+  /// Faz 40 — mobil mağaza siparişi personel tarafından fiziksel olarak teslim
+  /// edildiğinde doldurulur. POS'tan elden yapılan satışlarda hep null kalır
+  /// (o anda zaten elden teslim edilmiş sayılır) — yalnızca online mağaza
+  /// siparişlerinin "Bekleyen Teslimatlar" kuyruğunda görünmesi için kullanılır.
+  deliveredAt    DateTime?     @map("delivered_at")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -1726,6 +1739,16 @@ model TenantCheckoutSession {
   renewalPlanId             String?   @map("renewal_plan_id")
   renewalMembershipStartsAt DateTime? @map("renewal_membership_starts_at")
   renewalMembershipEndsAt   DateTime? @map("renewal_membership_ends_at")
+
+  /// Faz 40 — bu checkout bir mobil mağaza sepeti ise, sepetteki her satır için
+  /// önceden (OPEN durumda) açılmış `Expense` id'leri burada tutulur. `expenseId`
+  /// (tekil) alanı yalnızca TEK borç hedefleyen akışlar (üyelik yenileme, açık
+  /// bakiye ödeme) için var — sepette birden çok ürün olabileceğinden mağaza
+  /// checkout'u bunun yerine bu diziyi kullanır. Ödeme onaylanınca `settle`
+  /// yalnızca bu id'leri PAID işaretler; genel FIFO borç kapama akışına
+  /// (`applyPaymentToExpenses`) karışmaz — sporcunun ilgisiz başka bir açık
+  /// borcu yanlışlıkla bu ödemeyle kapanmaz.
+  storeExpenseIds String[] @default([]) @map("store_expense_ids")
 
   createdAt DateTime @default(now()) @map("created_at")
 
