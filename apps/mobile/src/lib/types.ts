@@ -139,3 +139,25 @@ export type UpdateInfo = {
   downloadUrl: string;
   notes?: string;
 };
+
+export type TrainerProfile = {
+  id: string;
+  userId: string;
+  name: string;
+  email: string;
+  avatarUrl: string | null;
+  bio: string | null;
+  specialties: string[];
+  maxMembers: number | null;
+  memberCount: number;
+  isAtCapacity: boolean;
+};
+
+export type TrainerRequest = {
+  id: string;
+  requestType: 'ASSIGN' | 'CHANGE' | 'REMOVE';
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED';
+  preferredTrainerId: string | null;
+  gymMember?: { trainerId: string | null };
+  preferredTrainer?: { name: string } | null;
+};

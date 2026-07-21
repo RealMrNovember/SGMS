@@ -33,6 +33,7 @@
     "plans": "Планы",
     "programs": "Программы",
     "trainers": "Эффективность тренеров",
+    "trainerRequests": "Trainer requests",
     "messages": "Сообщения",
     "checkIn": "Вход",
     "team": "Персонал",
@@ -587,7 +588,8 @@
       "measurements": "Измерения",
       "programs": "Программы",
       "messages": "Сообщения",
-      "account": "Счёт"
+      "account": "Счёт",
+      "trainers": "Trainers"
     },
     "pages": {
       "measurements": "История измерений",
@@ -638,7 +640,9 @@
       "newPassword": "Новый пароль",
       "newPasswordConfirmation": "Подтвердите новый пароль",
       "changePassword": "Изменить пароль"
-    }
+    },
+    "trainerRequestPending": "Your request is under review",
+    "manageTrainer": "Trainer request / list"
   },
   "expenses": {
     "title": "Лицевой счёт",
@@ -1303,6 +1307,7 @@
     "footer": "Этот модуль — часть нашего пути к тому, чтобы превратить ваш зал в полноценную операционную систему. Мы уведомим вас, как только он станет доступен.",
     "features": {
       "trainers": {
+        "trainerRequests": "Trainer requests",
         "title": "Эффективность и комиссии тренеров",
         "description": "Количество занятий в месяц, отработанные часы, выручка, комиссия и процент отмен/неявок для каждого тренера — автоматически рассчитывается на одном экране."
       },
@@ -1401,6 +1406,7 @@
     "deniedHint": "Уведомления заблокированы в вашем браузере. Проверьте разрешения сайта, чтобы включить их."
   },
   "trainers": {
+    "trainerRequests": "Trainer requests",
     "title": "Эффективность тренеров",
     "subtitle": "{month} — количество занятий, отработанные часы, выручка и комиссия каждого тренера на одном экране.",
     "noProfile": "Комиссия не задана",
@@ -2010,5 +2016,75 @@
     "discrepancyBadge": "Discrepancy {amount}",
     "balanced": "Balanced",
     "zReport": "Z report (payment breakdown)"
+  },
+  "faz42": {
+    "back": "← Trainer performance",
+    "title": "Trainer requests",
+    "subtitle": "Member requests to assign, change, or remove a trainer. Reason is visible to OWNER/ADMIN only.",
+    "athleteBack": "← Home",
+    "athleteTitle": "Trainers",
+    "athleteSubtitle": "Browse salon trainers and submit a trainer request.",
+    "currentTrainer": "Your current trainer",
+    "listTitle": "Salon trainers",
+    "listEmpty": "No active trainers with a public profile yet.",
+    "atCapacityBadge": "At capacity",
+    "capacity": "{count}/{max} members",
+    "queue": {
+      "title": "Pending requests",
+      "hint": "Approval updates assignment immediately; the athlete gets a neutral notification without the reason.",
+      "empty": "No pending trainer requests.",
+      "currentTrainer": "Current trainer",
+      "none": "None",
+      "preferred": "Preferred",
+      "noPreference": "No preference stated",
+      "reason": "Reason",
+      "assignTrainer": "Trainer to assign",
+      "selectTrainer": "Select trainer",
+      "approve": "Approve",
+      "reject": "Reject",
+      "types": {
+        "ASSIGN": "Initial assignment",
+        "CHANGE": "Change",
+        "REMOVE": "Remove"
+      },
+      "status": {
+        "PENDING": "Pending",
+        "APPROVED": "Approved",
+        "REJECTED": "Rejected",
+        "CANCELLED": "Cancelled"
+      }
+    },
+    "request": {
+      "assignTitle": "Request a trainer",
+      "changeTitle": "Request a trainer change",
+      "privacyHint": "Your reason is visible to management only; your trainer cannot see it.",
+      "pendingTitle": "Your request is under review",
+      "pendingHint": "Front desk is reviewing your request.",
+      "pendingBadge": "Pending",
+      "cancel": "Cancel request",
+      "typeLabel": "Request type",
+      "preferredLabel": "Preferred trainer (optional)",
+      "noPreference": "Assign whoever fits best",
+      "reasonLabel": "Reason (optional)",
+      "reasonPlaceholder": "Optional — management only",
+      "submit": "Submit request",
+      "submitting": "Submitting…",
+      "atCapacity": "at capacity",
+      "types": {
+        "ASSIGN": "Assign trainer",
+        "CHANGE": "Change trainer",
+        "REMOVE": "Remove trainer"
+      }
+    },
+    "profile": {
+      "title": "Athlete portal profile",
+      "hint": "Bio and specialty tags appear on the athlete portal.",
+      "bioLabel": "Bio",
+      "specialtiesLabel": "Specialties (comma-separated)",
+      "specialtiesPlaceholder": "Weight loss, Strength training",
+      "maxMembersLabel": "Max member capacity (optional)",
+      "saving": "Saving…",
+      "submit": "Save profile"
+    }
   }
 }

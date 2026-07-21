@@ -8,6 +8,8 @@ import type {
   MeResponse,
   MemberStatement,
   MembershipRenewalResponse,
+  TrainerProfile,
+  TrainerRequest,
   TrainingProgram,
 } from './types';
 
@@ -158,5 +160,42 @@ export async function changePassword(
     method: 'POST',
     headers: authHeaders(accessToken),
     body: JSON.stringify(input),
+  });
+}
+
+export async function fetchTrainerProfiles(
+  accessToken: string,
+): Promise<{ trainers: TrainerProfile[]; count: number }> {
+  return apiFetch('/api/v1/trainers', { headers: authHeaders(accessToken) });
+}
+
+export async function fetchTrainerRequests(
+  accessToken: string,
+): Promise<{ requests: TrainerRequest[]; count: number }> {
+  return apiFetch('/api/v1/trainer-requests', { headers: authHeaders(accessToken) });
+}
+
+export async function createTrainerRequest(
+  accessToken: string,
+  input: {
+    requestType: 'ASSIGN' | 'CHANGE' | 'REMOVE';
+    preferredTrainerId?: string;
+    reason?: string;
+  },
+): Promise<{ message?: string; request: TrainerRequest | null }> {
+  return apiFetch('/api/v1/trainer-requests', {
+    method: 'POST',
+    headers: authHeaders(accessToken),
+    body: JSON.stringify(input),
+  });
+}
+
+export async function cancelTrainerRequest(
+  accessToken: string,
+  requestId: string,
+): Promise<{ message?: string }> {
+  return apiFetch(`/api/v1/trainer-requests/${requestId}/cancel`, {
+    method: 'POST',
+    headers: authHeaders(accessToken),
   });
 }

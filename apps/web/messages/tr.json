@@ -33,6 +33,7 @@
     "plans": "Planlar",
     "programs": "Programlar",
     "trainers": "PT Performansı",
+    "trainerRequests": "Antrenör Talepleri",
     "messages": "Mesajlar",
     "checkIn": "Giriş",
     "team": "Personel",
@@ -588,7 +589,8 @@
       "programs": "Program",
       "messages": "Mesaj",
       "account": "Hesap",
-      "classes": "Dersler"
+      "classes": "Dersler",
+      "trainers": "Antrenörler"
     },
     "pages": {
       "measurements": "Ölçüm Geçmişi",
@@ -615,6 +617,8 @@
     "noPrograms": "Aktif program atanmamış.",
     "trainer": "Antrenörünüz",
     "noTrainer": "Atanmamış",
+    "trainerRequestPending": "Talebiniz inceleniyor",
+    "manageTrainer": "Antrenör talebi / listesi",
     "apiHint": "Mobil uygulama için POST /api/v1/auth/login ile Bearer token alın.",
     "fields": {
       "date": "Tarih",
@@ -2046,6 +2050,76 @@
       "templateHint": "PDF sözleşmede kullanılacak metin. Değişkenler otomatik doldurulur.",
       "varsHint": "Değişkenler: {uyeAdi}, {planAdi}, {tarih}, {fiyat}, {salonAdi}, {rizaTarihi}, {rizaKullanici}",
       "saveTemplate": "Şablonu kaydet"
+    }
+  },
+  "faz42": {
+    "back": "← PT Performansı",
+    "title": "Antrenör Talepleri",
+    "subtitle": "Sporcuların antrenör atama, değişiklik ve kaldırma talepleri. Gerekçe yalnızca OWNER/ADMIN tarafından görülür.",
+    "athleteBack": "← Ana sayfa",
+    "athleteTitle": "Antrenörler",
+    "athleteSubtitle": "Salondaki PT'leri inceleyin ve antrenör talebi oluşturun.",
+    "currentTrainer": "Mevcut antrenörünüz",
+    "listTitle": "Salon antrenörleri",
+    "listEmpty": "Henüz tanıtım profili olan aktif antrenör yok.",
+    "atCapacityBadge": "Kapasite dolu",
+    "capacity": "{count}/{max} üye",
+    "queue": {
+      "title": "Bekleyen talepler",
+      "hint": "Onay sonrası atama anında güncellenir; sporcuya gerekçesiz bildirim gider.",
+      "empty": "Bekleyen antrenör talebi yok.",
+      "currentTrainer": "Mevcut antrenör",
+      "none": "Yok",
+      "preferred": "Tercih",
+      "noPreference": "Tercih belirtilmedi",
+      "reason": "Gerekçe",
+      "assignTrainer": "Atanacak antrenör",
+      "selectTrainer": "Antrenör seçin",
+      "approve": "Onayla",
+      "reject": "Reddet",
+      "types": {
+        "ASSIGN": "İlk atama",
+        "CHANGE": "Değişiklik",
+        "REMOVE": "Kaldırma"
+      },
+      "status": {
+        "PENDING": "Bekliyor",
+        "APPROVED": "Onaylandı",
+        "REJECTED": "Reddedildi",
+        "CANCELLED": "İptal"
+      }
+    },
+    "request": {
+      "assignTitle": "Antrenör talep et",
+      "changeTitle": "Antrenör değişikliği talep et",
+      "privacyHint": "Gerekçeniz yalnızca salon yönetimine görünür; antrenörünüz göremez.",
+      "pendingTitle": "Talebiniz inceleniyor",
+      "pendingHint": "Resepsiyon talebinizi değerlendiriyor.",
+      "pendingBadge": "Bekliyor",
+      "cancel": "Talebi iptal et",
+      "typeLabel": "Talep türü",
+      "preferredLabel": "Tercih edilen antrenör (opsiyonel)",
+      "noPreference": "Uygun olanı siz atayın",
+      "reasonLabel": "Gerekçe (opsiyonel)",
+      "reasonPlaceholder": "İsteğe bağlı — yalnızca yönetim görür",
+      "submit": "Talebi gönder",
+      "submitting": "Gönderiliyor…",
+      "atCapacity": "kapasite dolu",
+      "types": {
+        "ASSIGN": "Antrenör ata",
+        "CHANGE": "Antrenör değiştir",
+        "REMOVE": "Antrenörü kaldır"
+      }
+    },
+    "profile": {
+      "title": "Sporcu portalı profili",
+      "hint": "Bio ve uzmanlık etiketleri sporcu portalında görünür.",
+      "bioLabel": "Tanıtım metni",
+      "specialtiesLabel": "Uzmanlıklar (virgülle ayırın)",
+      "specialtiesPlaceholder": "Kilo Verme, Güç Antrenmanı",
+      "maxMembersLabel": "Maks. üye kapasitesi (opsiyonel)",
+      "saving": "Kaydediliyor…",
+      "submit": "Profili kaydet"
     }
   }
 }

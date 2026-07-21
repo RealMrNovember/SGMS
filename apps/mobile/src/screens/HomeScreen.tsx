@@ -8,7 +8,7 @@ import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { PressableScale } from '../components/ui/PressableScale';
-import { fetchMe, fetchMeasurements } from '../lib/api';
+import { fetchMe, fetchMeasurements, fetchTrainerRequests } from '../lib/api';
 import { colors, gradients, radius, shadow, spacing, typography } from '../lib/theme';
 import type { AthleteSession, HealthMeasurement, MeResponse } from '../lib/types';
 import type { TabKey } from '../components/TabBar';
@@ -23,23 +23,28 @@ const STATUS_LABEL: Record<string, string> = {
 export function HomeScreen({
   session,
   onNavigate,
+  onOpenTrainers,
 }: {
   session: AthleteSession;
   onNavigate: (tab: TabKey) => void;
+  onOpenTrainers: () => void;
 }) {
   const [me, setMe] = useState<MeResponse | null>(null);
   const [latestMeasurement, setLatestMeasurement] = useState<HealthMeasurement | null>(null);
+  const [hasPendingTrainerRequest, setHasPendingTrainerRequest] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [qrVisible, setQrVisible] = useState(false);
 
   const loadAll = useCallback(async () => {
     try {
-      const [meData, measurementsData] = await Promise.all([
+      const [meData, measurementsData, trainerRequests] = await Promise.all([
         fetchMe(session.accessToken),
         fetchMeasurements(session.accessToken),
+        fetchTrainerRequests(session.accessToken),
       ]);
       setMe(meData);
       setLatestMeasurement(measurementsData.measurements[0] ?? null);
+      setHasPendingTrainerRequest(trainerRequests.requests.some((r) => r.status === 'PENDING'));
     } catch {
       // sessiz — sayfa zaten kısmi verilerle çalışabilir
     }
@@ -142,20 +147,24 @@ export function HomeScreen({
         ) : null}
 
         <Card>
-          <SectionTitle icon="person-outline" label="Antrenörünüz" />
+          <View style={styles.trainerHeader}>
+            <SectionTitle icon="person-outline" label="Antrenörünüz" />
+            {hasPendingTrainerRequest ? <Badge label="İnceleniyor" tone="gold" /> : null}
+          </View>
           <Text style={styles.trainerName}>
             {me?.gymMember.trainer?.name ?? me?.gymMember.trainer?.email ?? 'Atanmış antrenör yok'}
           </Text>
-          {me?.gymMember.trainer ? (
-            <View style={{ marginTop: spacing.md }}>
+          <View style={{ marginTop: spacing.md, gap: spacing.sm }}>
+            <Button label="Antrenörler / Talep" variant="secondary" icon="people-outline" onPress={onOpenTrainers} />
+            {me?.gymMember.trainer ? (
               <Button
                 label="Mesaj Gönder"
                 variant="secondary"
                 icon="chatbubble-outline"
                 onPress={() => onNavigate('messages')}
               />
-            </View>
-          ) : null}
+            ) : null}
+          </View>
         </Card>
       </ScrollView>
 
@@ -248,6 +257,7 @@ const styles = StyleSheet.create({
   statLabel: { ...typography.tiny, color: colors.faint },
   sectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: spacing.sm },
   sectionTitle: { ...typography.subheading, color: colors.text },
+  trainerHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: spacing.sm },
   trainerName: { ...typography.body, color: colors.muted },
   measurementGrid: { flexDirection: 'row', justifyContent: 'space-between' },
   measurementItem: { alignItems: 'center', flex: 1 },
