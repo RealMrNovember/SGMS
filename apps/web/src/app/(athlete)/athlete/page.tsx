@@ -17,18 +17,24 @@ export default async function AthleteHomePage() {
   const locale = await getLocale();
   const dateLocale = intlLocaleFor(locale);
 
-  const member = await prisma.gymMember.findFirst({
-    where: {
-      id: session.user.gymMemberId,
-      organizationId: session.user.organizationId,
-    },
-    include: {
-      plan: { select: { name: true } },
-      trainer: { select: { name: true, email: true } },
-      healthMeasurements: { orderBy: { measuredAt: 'desc' }, take: 1 },
-      trainingPrograms: { where: { isActive: true }, orderBy: { startDate: 'desc' }, take: 3 },
-    },
-  });
+  const [member, pendingRequest] = await Promise.all([
+    prisma.gymMember.findFirst({
+      where: {
+        id: session.user.gymMemberId,
+        organizationId: session.user.organizationId,
+      },
+      include: {
+        plan: { select: { name: true } },
+        trainer: { select: { name: true, email: true } },
+        healthMeasurements: { orderBy: { measuredAt: 'desc' }, take: 1 },
+        trainingPrograms: { where: { isActive: true }, orderBy: { startDate: 'desc' }, take: 3 },
+      },
+    }),
+    prisma.trainerRequest.findFirst({
+      where: { gymMemberId: session.user.gymMemberId, status: 'PENDING' },
+      select: { id: true },
+    }),
+  ]);
 
   if (!member) {
     redirect('/login');
@@ -144,10 +150,16 @@ export default async function AthleteHomePage() {
       </section>
 
       <section className="card p-5">
-        <h3 className="font-semibold">{t('trainer')}</h3>
+        <div className="flex items-center justify-between gap-3">
+          <h3 className="font-semibold">{t('trainer')}</h3>
+          {pendingRequest ? <span className="badge text-[10px]">{t('trainerRequestPending')}</span> : null}
+        </div>
         <p className="muted mt-2 text-sm">
           {member.trainer?.name ?? member.trainer?.email ?? t('noTrainer')}
         </p>
+        <Link href="/athlete/trainers" className="button mt-4 inline-block px-4 py-2 text-sm">
+          {t('manageTrainer')}
+        </Link>
       </section>
 
       <p className="muted text-center text-xs leading-5">{t('apiHint')}</p>

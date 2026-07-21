@@ -1,6 +1,7 @@
 import { PtSessionActions } from '@/components/trainers/pt-session-actions';
 import { ScheduleSessionForm } from '@/components/trainers/schedule-session-form';
 import { TrainerCommissionForm } from '@/components/trainers/trainer-commission-form';
+import { TrainerProfileBioForm } from '@/components/trainers/trainer-profile-bio-form';
 import { auth } from '@/lib/auth';
 import { intlLocaleFor } from '@/lib/format-locale';
 import { prisma } from '@/lib/prisma';
@@ -67,6 +68,7 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
   }
 
   const canManageProfile = role ? MANAGER_ROLES.has(role) : false;
+  const canEditBio = canManageProfile || isSelf;
   const monthLabel = new Intl.DateTimeFormat(dateLocale, { month: 'long', year: 'numeric' }).format(new Date());
 
   return (
@@ -121,6 +123,15 @@ export default async function TrainerDetailPage({ params }: { params: Promise<{ 
         <div className="card p-5 text-sm">
           <p className="muted">{t('noProfileHint')}</p>
         </div>
+      ) : null}
+
+      {canEditBio ? (
+        <TrainerProfileBioForm
+          trainerUserId={id}
+          bio={profile?.bio ?? null}
+          specialties={profile?.specialties ?? []}
+          maxMembers={profile?.maxMembers ?? null}
+        />
       ) : null}
 
       {canSchedule ? (

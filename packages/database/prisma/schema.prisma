@@ -442,6 +442,10 @@ model User {
   cashShiftsOpened            CashRegisterShift[]      @relation("CashShiftOpenedBy")
   cashShiftsClosed            CashRegisterShift[]      @relation("CashShiftClosedBy")
   measurementPhotosUploaded   MeasurementPhoto[]       @relation("MeasurementPhotoUploadedBy")
+  trainerRequestsPreferred    TrainerRequest[]         @relation("TrainerRequestPreferred")
+  trainerRequestsRequested    TrainerRequest[]         @relation("TrainerRequestRequestedBy")
+  trainerRequestsDecided      TrainerRequest[]         @relation("TrainerRequestDecidedBy")
+  trainerRequestsResulting    TrainerRequest[]         @relation("TrainerRequestResulting")
 
   @@index([status])
   @@index([isSuperAdmin])
@@ -510,6 +514,10 @@ model TrainerProfile {
   baseCommissionRate Decimal           @default(0) @map("base_commission_rate") @db.Decimal(7, 2)
   hourlyRate         Decimal?          @map("hourly_rate") @db.Decimal(10, 2)
   isActive           Boolean           @default(true) @map("is_active")
+  /// Faz 42 — sporcu portalı tanıtım alanları
+  bio                String?           @db.Text
+  specialties        String[]          @default([])
+  maxMembers         Int?              @map("max_members")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -827,6 +835,7 @@ model Organization {
   equipmentServiceLogs    EquipmentServiceLog[]
   maintenanceSchedules    MaintenanceSchedule[]
   cashRegisterShifts      CashRegisterShift[]
+  trainerRequests         TrainerRequest[]
 
   @@index([status])
   @@index([centralLicenseStatus])
@@ -1139,6 +1148,7 @@ model GymMember {
   transfersTo         MembershipTransfer[] @relation("MembershipTransferTo")
   classBookings       ClassBooking[]
   hostedGuestPasses   GuestPass[]          @relation("GuestPassHost")
+  trainerRequests     TrainerRequest[]
   discountRedemptions DiscountRedemption[]
 
   @@unique([organizationId, nationalId])
@@ -2569,4 +2579,50 @@ model CashRegisterShift {
   @@index([organizationId, openedAt])
   @@index([organizationId, closedAt])
   @@map("cash_register_shifts")
+}
+
+// ---------------------------------------------------------------------------
+// Faz 42 — Antrenör atama / değişiklik talebi
+// ---------------------------------------------------------------------------
+
+enum TrainerRequestType {
+  ASSIGN
+  CHANGE
+  REMOVE
+}
+
+enum TrainerRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+model TrainerRequest {
+  id                  String               @id @default(cuid())
+  organizationId      String               @map("organization_id")
+  gymMemberId         String               @map("gym_member_id")
+  requestType         TrainerRequestType   @map("request_type")
+  preferredTrainerId  String?              @map("preferred_trainer_id")
+  /// Yalnızca OWNER/ADMIN görür — PT'ye asla gösterilmez
+  reason              String?              @db.Text
+  status              TrainerRequestStatus @default(PENDING)
+  requestedById       String               @map("requested_by_id")
+  decidedById         String?              @map("decided_by_id")
+  decidedAt           DateTime?            @map("decided_at")
+  resultingTrainerId  String?              @map("resulting_trainer_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  organization     Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  gymMember        GymMember    @relation(fields: [gymMemberId], references: [id], onDelete: Cascade)
+  preferredTrainer User?        @relation("TrainerRequestPreferred", fields: [preferredTrainerId], references: [id], onDelete: SetNull)
+  requestedBy      User         @relation("TrainerRequestRequestedBy", fields: [requestedById], references: [id], onDelete: Cascade)
+  decidedBy        User?        @relation("TrainerRequestDecidedBy", fields: [decidedById], references: [id], onDelete: SetNull)
+  resultingTrainer User?        @relation("TrainerRequestResulting", fields: [resultingTrainerId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, status, createdAt])
+  @@index([gymMemberId, status])
+  @@map("trainer_requests")
 }

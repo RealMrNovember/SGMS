@@ -81,6 +81,7 @@ export default async function TenantDashboardLayout({ children }: { children: Re
       });
 
   const canViewReports = session.user.role === 'OWNER' || session.user.role === 'ADMIN';
+  const canReviewTrainerRequests = session.user.role === 'OWNER' || session.user.role === 'ADMIN';
   const canViewEnterprise = session.user.isHierarchyMember === true;
   // Aday takibi resepsiyon/satış görevi — TRAINER kapsam dışı (Faz 17.0, bkz. Faz 36.5 gerekçesi).
   const canManageLeads =
@@ -125,6 +126,9 @@ export default async function TenantDashboardLayout({ children }: { children: Re
           items: [
             { href: '/dashboard/programs', label: t('programs'), icon: <ClipboardList /> },
             { href: '/dashboard/trainers', label: t('trainers'), icon: <Dumbbell /> },
+            ...(canReviewTrainerRequests
+              ? [{ href: '/dashboard/trainer-requests', label: t('trainerRequests'), icon: <ClipboardList /> }]
+              : []),
             { href: '/dashboard/team', label: t('team'), icon: <IdCard /> },
             ...(canViewHr ? [{ href: '/dashboard/hr', label: t('hr'), icon: <UsersRound /> }] : []),
             { href: '/dashboard/plans', label: t('plans'), icon: <Layers /> },
