@@ -270,6 +270,11 @@ export async function unfreezeMembership(gymMemberId: string): Promise<Lifecycle
     return { error: context.error };
   }
 
+  const writeBlock = await getTenantWriteBlockReason(context.organizationId);
+  if (writeBlock) {
+    return { error: writeBlock };
+  }
+
   const member = await prisma.gymMember.findFirst({
     where: { id: gymMemberId, organizationId: context.organizationId, status: 'FROZEN' },
   });

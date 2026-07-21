@@ -27,6 +27,15 @@ async function generateInvoiceNumber(
   const d = String(today.getDate()).padStart(2, '0');
   const prefix = `INV-${y}${m}${d}`;
 
+  // İki eşzamanlı ödeme (ör. POS nakit + kart webhook'u) aynı organizasyon için
+  // aynı gün içinde aynı anda fatura numarası üretmeye çalışırsa, salt count()
+  // tabanlı üretim aynı numarayı iki kez döndürüp unique constraint'i patlatabilir
+  // ve bu da (tx bir üst çağıranın transaction'ıysa) zaten tahsil edilmiş bir
+  // ödemenin kaydını sessizce rollback eder. Aynı org+gün için transaction-scoped
+  // advisory lock ile üretim ve okuma serileştirilir — şema değişikliği gerekmez,
+  // kilit transaction bitince otomatik serbest kalır.
+  await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${organizationId + prefix}))`;
+
   const count = await tx.invoice.count({
     where: {
       organizationId,

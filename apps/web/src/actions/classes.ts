@@ -424,6 +424,11 @@ export async function markAttendance(
     return { error: context.error };
   }
 
+  const writeBlock = await getTenantWriteBlockReason(context.organizationId);
+  if (writeBlock) {
+    return { error: writeBlock };
+  }
+
   const booking = await prisma.classBooking.findFirst({
     where: {
       id: bookingId,

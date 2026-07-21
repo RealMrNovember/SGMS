@@ -200,7 +200,7 @@ export async function reviewTrainerRequest(input: {
   }
 
   const writeBlock = await getTenantWriteBlockReason(context.organizationId);
-  if (writeBlock && input.decision === 'APPROVE') {
+  if (writeBlock) {
     return { error: writeBlock };
   }
 
