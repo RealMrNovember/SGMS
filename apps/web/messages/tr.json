@@ -790,7 +790,12 @@
       "markDelivered": "Teslim Edildi",
       "paid": "Ödendi",
       "paymentPending": "Ödeme bekliyor",
-      "preparing": "Hazırlanıyor"
+      "preparing": "Hazırlanıyor",
+      "restockTitle": "Stok Ekle",
+      "restockSubtitle": "Depoya yeni ürün geldiğinde stok sayacını buradan artırabilirsiniz.",
+      "restockPlaceholder": "Adet",
+      "restockButton": "Ekle",
+      "stockUntracked": "Stok takibi yok"
     }
   },
   "marketing": {

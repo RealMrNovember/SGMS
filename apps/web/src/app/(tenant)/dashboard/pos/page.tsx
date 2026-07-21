@@ -1,6 +1,7 @@
 import { CashShiftPanel } from '@/components/cash-shift-panel';
 import { ExpenseCategoryManager } from '@/components/expense-category-manager';
 import { PendingStoreDeliveries } from '@/components/pending-store-deliveries';
+import { RestockPanel } from '@/components/restock-panel';
 import { ContextualHelpButton } from '@/components/help/contextual-help-button';
 import { PosTerminal } from '@/components/pos-terminal';
 import { getOpenCashShift } from '@/actions/cash-register';
@@ -41,7 +42,7 @@ export default async function PosPage() {
   const locale = await getLocale();
   const dateLocale = intlLocaleFor(locale);
 
-  const [members, categories, allCategories, summary, openShift, pendingDeliveries] = await Promise.all([
+  const [members, categories, allCategories, summary, openShift, pendingDeliveries, restockItems] = await Promise.all([
     prisma.gymMember.findMany({
       where: { organizationId, status: 'ACTIVE' },
       orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
@@ -89,6 +90,14 @@ export default async function PosPage() {
         gymMember: { select: { firstName: true, lastName: true } },
         category: { select: { name: true, imageUrl: true } },
       },
+    }),
+    // Faz 40 — kasiyer/resepsiyon dahil herkesin (kategori yönetimi gibi
+    // idari değil, operasyonel bir görev olduğu için) yeni gelen malı stoğa
+    // işleyebilmesi için mağazada görünen ürünlerin sade listesi.
+    prisma.expenseCategory.findMany({
+      where: { organizationId, isActive: true, isStoreVisible: true },
+      orderBy: { sortOrder: 'asc' },
+      select: { id: true, name: true, stockQuantity: true },
     }),
   ]);
 
@@ -195,6 +204,14 @@ export default async function PosPage() {
           }))}
         />
       ) : null}
+
+      <RestockPanel
+        items={restockItems.map((c) => ({
+          id: c.id,
+          name: c.name,
+          stockQuantity: c.stockQuantity,
+        }))}
+      />
 
       {canManageCategories ? (
         <ExpenseCategoryManager

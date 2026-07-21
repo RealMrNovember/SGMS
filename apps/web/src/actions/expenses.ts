@@ -776,6 +776,58 @@ export async function markStoreOrderDelivered(expenseId: string): Promise<Expens
   return { success: 'Sipariş teslim edildi olarak işaretlendi.' };
 }
 
+/**
+ * Faz 40 — resepsiyona yeni ürün geldiğinde (ör. bir kasa su) stok sayacını
+ * artırmak için. Kategori yönetiminin aksine OWNER/ADMIN/STAFF hepsi
+ * kullanabilir — bu idari bir fiyat/görünürlük kararı değil, günlük bir
+ * operasyon (patron yokken kasiyer de gelen malı sisteme işleyebilmeli).
+ * `stockQuantity` NULL (stok takibi hiç başlamamış) olsa bile doğru çalışır
+ * — COALESCE ile 0'dan başlatılır. Aynı anda bir satışın azaltma işlemiyle
+ * çakışmaması için veritabanı seviyesinde atomik `UPDATE ... SET x = x + N`
+ * kullanılır, "oku-hesapla-yaz" yapılmaz.
+ */
+export async function restockExpenseCategory(
+  categoryId: string,
+  quantity: number,
+): Promise<ExpenseActionState> {
+  const context = await getExpenseContext();
+  if ('error' in context) {
+    return { error: context.error };
+  }
+
+  if (!Number.isInteger(quantity) || quantity <= 0 || quantity > 100_000) {
+    return { error: 'Geçersiz miktar.' };
+  }
+
+  const category = await prisma.expenseCategory.findFirst({
+    where: { id: categoryId, organizationId: context.organizationId },
+    select: { id: true, name: true },
+  });
+  if (!category) {
+    return { error: 'Kategori bulunamadı.' };
+  }
+
+  await prisma.$executeRaw`
+    UPDATE expense_categories
+    SET stock_quantity = COALESCE(stock_quantity, 0) + ${quantity}
+    WHERE id = ${categoryId} AND organization_id = ${context.organizationId}
+  `;
+
+  await prisma.auditLog.create({
+    data: {
+      actorId: context.userId,
+      organizationId: context.organizationId,
+      action: 'EXPENSE_ADDED',
+      entityType: 'expense_category',
+      entityId: category.id,
+      metadata: { kind: 'store_restock', quantity },
+    },
+  });
+
+  revalidatePath('/dashboard/pos');
+  return { success: `"${category.name}" stoğuna ${quantity} adet eklendi.` };
+}
+
 export async function getMemberPosSnapshot(gymMemberId: string) {
   const session = await auth();
   if (!session?.user?.organizationId) {

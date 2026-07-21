@@ -790,7 +790,12 @@
       "markDelivered": "Mark as Delivered",
       "paid": "Paid",
       "paymentPending": "Payment pending",
-      "preparing": "Preparing"
+      "preparing": "Preparing",
+      "restockTitle": "Add Stock",
+      "restockSubtitle": "When new stock arrives, increase the count here.",
+      "restockPlaceholder": "Quantity",
+      "restockButton": "Add",
+      "stockUntracked": "Not tracked"
     }
   },
   "marketing": {

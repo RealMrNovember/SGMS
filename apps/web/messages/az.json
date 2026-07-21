@@ -759,7 +759,12 @@
       "markDelivered": "Təhvil verildi",
       "paid": "Ödənildi",
       "paymentPending": "Ödəniş gözlənilir",
-      "preparing": "Hazırlanır"
+      "preparing": "Hazırlanır",
+      "restockTitle": "Stok Əlavə Et",
+      "restockSubtitle": "Anbara yeni məhsul gələndə sayı buradan artıra bilərsiniz.",
+      "restockPlaceholder": "Say",
+      "restockButton": "Əlavə et",
+      "stockUntracked": "Stok izlənmir"
     }
   },
   "marketing": {

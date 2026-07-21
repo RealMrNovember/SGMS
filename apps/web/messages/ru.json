@@ -759,7 +759,12 @@
       "markDelivered": "Отметить как выдано",
       "paid": "Оплачено",
       "paymentPending": "Ожидает оплаты",
-      "preparing": "Готовится"
+      "preparing": "Готовится",
+      "restockTitle": "Пополнить склад",
+      "restockSubtitle": "Когда приходит новый товар, увеличьте счётчик здесь.",
+      "restockPlaceholder": "Количество",
+      "restockButton": "Добавить",
+      "stockUntracked": "Учёт не ведётся"
     }
   },
   "marketing": {

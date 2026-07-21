@@ -759,7 +759,12 @@
       "markDelivered": "Marcar como entregado",
       "paid": "Pagado",
       "paymentPending": "Pago pendiente",
-      "preparing": "Preparando"
+      "preparing": "Preparando",
+      "restockTitle": "Añadir stock",
+      "restockSubtitle": "Cuando llegue mercancía nueva, aumente aquí el contador.",
+      "restockPlaceholder": "Cantidad",
+      "restockButton": "Añadir",
+      "stockUntracked": "Sin seguimiento"
     }
   },
   "marketing": {
