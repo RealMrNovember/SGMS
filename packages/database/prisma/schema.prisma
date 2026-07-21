@@ -448,6 +448,7 @@ model User {
   trainerRequestsResulting    TrainerRequest[]         @relation("TrainerRequestResulting")
   athleteGoalsCreated         AthleteGoal[]            @relation("AthleteGoalCreatedBy")
   gymEventsCreated            GymEvent[]               @relation("GymEventCreatedBy")
+  foodLogEntriesCreated       FoodLogEntry[]           @relation("FoodLogEntryCreatedBy")
 
   @@index([status])
   @@index([isSuperAdmin])
@@ -841,6 +842,7 @@ model Organization {
   athleteGoals            AthleteGoal[]
   gymEvents               GymEvent[]
   gymEventRsvps           GymEventRsvp[]
+  foodLogEntries          FoodLogEntry[]
 
   @@index([status])
   @@index([centralLicenseStatus])
@@ -1157,6 +1159,7 @@ model GymMember {
   discountRedemptions    DiscountRedemption[]
   athleteGoals           AthleteGoal[]
   gymEventRsvps          GymEventRsvp[]
+  foodLogEntries         FoodLogEntry[]
 
   @@unique([organizationId, nationalId])
   @@unique([organizationId, passportNumber])
@@ -2774,4 +2777,45 @@ model GymEventRsvp {
   @@index([organizationId, gymEventId])
   @@index([gymMemberId])
   @@map("gym_event_rsvps")
+}
+
+// ---------------------------------------------------------------------------
+// Faz 41 — Beslenme & Kalori Takibi (FoodLogEntry)
+// ---------------------------------------------------------------------------
+
+enum MealType {
+  BREAKFAST
+  LUNCH
+  DINNER
+  SNACK
+}
+
+/// v1 kapsam kararı: barkod/gıda-veritabanı entegrasyonu yok (bkz. roadmap.md Faz 41) —
+/// sporcu yemek adını serbest metin girer, biliyorsa kalori/makro değerini kendisi yazar.
+/// Günlük özet ayrı bir tabloda tutulmaz, sorgu zamanında toplanır (veri tutarsızlığı riski yaratmaz).
+model FoodLogEntry {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  gymMemberId    String   @map("gym_member_id")
+  loggedAt       DateTime @map("logged_at")
+  mealType       MealType @map("meal_type")
+  foodName       String   @map("food_name")
+  calories       Int?
+  proteinG       Decimal? @map("protein_g") @db.Decimal(6, 1)
+  carbsG         Decimal? @map("carbs_g") @db.Decimal(6, 1)
+  fatG           Decimal? @map("fat_g") @db.Decimal(6, 1)
+  notes          String?  @db.Text
+  photoUrl       String?  @map("photo_url")
+  createdById    String   @map("created_by_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  gymMember    GymMember    @relation(fields: [gymMemberId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation("FoodLogEntryCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, gymMemberId, loggedAt])
+  @@index([gymMemberId, loggedAt])
+  @@map("food_log_entries")
 }

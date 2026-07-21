@@ -10,6 +10,8 @@ import type {
   MeResponse,
   MemberStatement,
   MembershipRenewalResponse,
+  MealType,
+  NutritionOverview,
   StoreCheckoutResponse,
   StoreOrder,
   StoreProduct,
@@ -275,5 +277,38 @@ export async function rsvpEvent(
     method: 'POST',
     headers: authHeaders(accessToken),
     body: JSON.stringify({ going }),
+  });
+}
+
+export async function fetchNutritionOverview(accessToken: string): Promise<NutritionOverview> {
+  return apiFetch('/api/v1/nutrition', { headers: authHeaders(accessToken) });
+}
+
+export type CreateFoodLogEntryInput = {
+  mealType: MealType;
+  foodName: string;
+  loggedAt?: string;
+  calories?: number;
+  proteinG?: number;
+  carbsG?: number;
+  fatG?: number;
+  notes?: string;
+};
+
+export async function createFoodLogEntry(
+  accessToken: string,
+  input: CreateFoodLogEntryInput,
+): Promise<{ message?: string }> {
+  return apiFetch('/api/v1/nutrition', {
+    method: 'POST',
+    headers: authHeaders(accessToken),
+    body: JSON.stringify(input),
+  });
+}
+
+export async function deleteFoodLogEntry(accessToken: string, entryId: string): Promise<{ message?: string }> {
+  return apiFetch(`/api/v1/nutrition/${entryId}`, {
+    method: 'DELETE',
+    headers: authHeaders(accessToken),
   });
 }

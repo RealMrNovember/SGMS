@@ -8,7 +8,7 @@ import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { PressableScale } from '../components/ui/PressableScale';
-import { fetchGoals, fetchMe, fetchMeasurements, fetchTrainerRequests } from '../lib/api';
+import { fetchGoals, fetchMe, fetchMeasurements, fetchNutritionOverview, fetchTrainerRequests } from '../lib/api';
 import { colors, gradients, radius, shadow, spacing, typography } from '../lib/theme';
 import type { AthleteGoal, AthleteSession, HealthMeasurement, MeResponse } from '../lib/types';
 import type { TabKey } from '../components/TabBar';
@@ -29,6 +29,10 @@ const STATUS_LABEL: Record<string, string> = {
   SUSPENDED: 'Askıda',
 };
 
+function todayKeyIstanbul(): string {
+  return new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Istanbul' });
+}
+
 export function HomeScreen({
   session,
   onNavigate,
@@ -36,6 +40,7 @@ export function HomeScreen({
   onOpenStore,
   onOpenGoals,
   onOpenEvents,
+  onOpenNutrition,
 }: {
   session: AthleteSession;
   onNavigate: (tab: TabKey) => void;
@@ -43,26 +48,31 @@ export function HomeScreen({
   onOpenStore: () => void;
   onOpenGoals: () => void;
   onOpenEvents: () => void;
+  onOpenNutrition: () => void;
 }) {
   const [me, setMe] = useState<MeResponse | null>(null);
   const [latestMeasurement, setLatestMeasurement] = useState<HealthMeasurement | null>(null);
   const [hasPendingTrainerRequest, setHasPendingTrainerRequest] = useState(false);
   const [activeGoal, setActiveGoal] = useState<AthleteGoal | null>(null);
+  const [todayCalories, setTodayCalories] = useState<number | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [qrVisible, setQrVisible] = useState(false);
 
   const loadAll = useCallback(async () => {
     try {
-      const [meData, measurementsData, trainerRequests, goalsData] = await Promise.all([
+      const [meData, measurementsData, trainerRequests, goalsData, nutritionData] = await Promise.all([
         fetchMe(session.accessToken),
         fetchMeasurements(session.accessToken),
         fetchTrainerRequests(session.accessToken),
         fetchGoals(session.accessToken),
+        fetchNutritionOverview(session.accessToken),
       ]);
       setMe(meData);
       setLatestMeasurement(measurementsData.measurements[0] ?? null);
       setHasPendingTrainerRequest(trainerRequests.requests.some((r) => r.status === 'PENDING'));
       setActiveGoal(goalsData.goals.find((g) => g.status === 'ACTIVE') ?? null);
+      const todayKey = todayKeyIstanbul();
+      setTodayCalories(nutritionData.days.find((d) => d.dateKey === todayKey)?.totalCalories ?? 0);
     } catch {
       // sessiz — sayfa zaten kısmi verilerle çalışabilir
     }
@@ -147,6 +157,12 @@ export function HomeScreen({
           />
           <StatCard icon="bag-outline" value="Aç" label="Mağaza" onPress={onOpenStore} />
           <StatCard icon="calendar-outline" value="Aç" label="Etkinlik" onPress={onOpenEvents} />
+          <StatCard
+            icon="restaurant-outline"
+            value={todayCalories != null ? `${todayCalories}` : '—'}
+            label="Kalori"
+            onPress={onOpenNutrition}
+          />
         </View>
 
         <PressableScale onPress={onOpenGoals} haptic>

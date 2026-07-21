@@ -3,6 +3,7 @@ import { AvatarUpload } from '@/components/avatar-upload';
 import { GoalAssignPanel } from '@/components/goal-assign-panel';
 import { MemberAccountPanel } from '@/components/member-account-panel';
 import { MemberHealthHistoryTable } from '@/components/member-health-history-table';
+import { MemberNutritionLogView } from '@/components/member-nutrition-log-view';
 import { MemberRfidForm } from '@/components/member-rfid-form';
 import { MembershipRenewalPanel } from '@/components/membership-renewal-panel';
 import { MembershipLifecyclePanel } from '@/components/membership/membership-lifecycle-panel';
@@ -12,6 +13,7 @@ import { auth } from '@/lib/auth';
 import { intlLocaleFor } from '@/lib/format-locale';
 import { listAthleteGoalsWithProgress } from '@/lib/goals/list';
 import { decimalToNumber, getMemberAccountSummary } from '@/lib/member-balance';
+import { getNutritionOverviewForMember } from '@/lib/nutrition/list';
 import { memberCountryLabel } from '@/lib/member-countries';
 import { getMemberPaymentPlans } from '@/lib/payment-plans';
 import { prisma } from '@/lib/prisma';
@@ -55,7 +57,7 @@ export default async function MemberDetailPage({
   const locale = await getLocale();
   const dateLocale = intlLocaleFor(locale);
 
-  const [member, accountSummary, expenseCategories, paymentPlans, membershipPlans, pendingFreezes, allMembers, athleteGoals] = await Promise.all([
+  const [member, accountSummary, expenseCategories, paymentPlans, membershipPlans, pendingFreezes, allMembers, athleteGoals, nutritionOverview] = await Promise.all([
     prisma.gymMember.findFirst({
       where: { id, organizationId },
       include: {
@@ -99,6 +101,7 @@ export default async function MemberDetailPage({
       take: 300,
     }),
     listAthleteGoalsWithProgress(organizationId, id),
+    canManageMeasurements ? getNutritionOverviewForMember(organizationId, id) : Promise.resolve(null),
   ]);
 
   if (!member) {
@@ -337,6 +340,23 @@ export default async function MemberDetailPage({
       <AddMeasurementForm gymMemberId={member.id} canManage={canManageMeasurements} />
 
       <MemberHealthHistoryTable measurements={member.healthMeasurements} />
+
+      {nutritionOverview ? (
+        <MemberNutritionLogView
+          days={nutritionOverview.days.map((day) => ({
+            dateKey: day.dateKey,
+            totalCalories: day.totalCalories,
+            entries: day.entries.map((entry) => ({
+              id: entry.id,
+              mealType: entry.mealType,
+              foodName: entry.foodName,
+              calories: entry.calories,
+            })),
+          }))}
+          plannedDailyCalories={nutritionOverview.plannedDailyCalories}
+          activeProgramTitle={nutritionOverview.activeProgramTitle}
+        />
+      ) : null}
 
       <section className="card overflow-hidden">
         <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-4">

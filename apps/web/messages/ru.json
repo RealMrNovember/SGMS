@@ -271,6 +271,12 @@
         "MISSED": "Пропущена",
         "CANCELLED": "Отменена"
       }
+    },
+    "nutrition": {
+      "title": "Дневник питания",
+      "planned": "Цель {calories} ккал/день",
+      "dayTotal": "{calories} ккал",
+      "noEntries": "Спортсмен пока не записал приёмы пищи."
     }
   },
   "measurements": {
@@ -713,6 +719,40 @@
       "title": "Мероприятия",
       "hasUpcoming": "{count} ближайших мероприятий",
       "empty": "Нет ближайших мероприятий"
+    },
+    "nutrition": {
+      "title": "Питание",
+      "createButton": "Добавить приём пищи",
+      "createTitle": "Новый приём пищи",
+      "submit": "Сохранить",
+      "submitting": "Сохранение…",
+      "cancel": "Отменить",
+      "delete": "Удалить",
+      "noEntries": "Пока нет записей о приёмах пищи.",
+      "noCalories": "Калории не указаны",
+      "todayTotal": "Итого за сегодня",
+      "planComparison": "Цель {planned} ккал · Факт {actual} ккал",
+      "noPlan": "Ваш тренер пока не установил цель по питанию.",
+      "dayTotal": "{calories} ккал",
+      "fields": {
+        "mealType": "Приём пищи",
+        "foodName": "Еда/напиток",
+        "calories": "Калории (ккал)",
+        "proteinG": "Белки (г)",
+        "carbsG": "Углеводы (г)",
+        "fatG": "Жиры (г)",
+        "notes": "Заметка"
+      },
+      "mealTypes": {
+        "BREAKFAST": "Завтрак",
+        "LUNCH": "Обед",
+        "DINNER": "Ужин",
+        "SNACK": "Перекус"
+      }
+    },
+    "nutritionCard": {
+      "title": "Питание",
+      "todayTotal": "Сегодня: {calories} ккал"
     }
   },
   "expenses": {

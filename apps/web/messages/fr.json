@@ -271,6 +271,12 @@
         "MISSED": "Manqué",
         "CANCELLED": "Annulé"
       }
+    },
+    "nutrition": {
+      "title": "Journal nutritionnel",
+      "planned": "Objectif {calories} kcal/jour",
+      "dayTotal": "{calories} kcal",
+      "noEntries": "L'athlète n'a pas encore enregistré de repas."
     }
   },
   "measurements": {
@@ -713,6 +719,40 @@
       "title": "Événements",
       "hasUpcoming": "{count} événement(s) à venir",
       "empty": "Aucun événement à venir"
+    },
+    "nutrition": {
+      "title": "Nutrition",
+      "createButton": "Ajouter un repas",
+      "createTitle": "Nouveau repas",
+      "submit": "Enregistrer",
+      "submitting": "Enregistrement…",
+      "cancel": "Annuler",
+      "delete": "Supprimer",
+      "noEntries": "Aucun repas enregistré pour le moment.",
+      "noCalories": "Aucune calorie indiquée",
+      "todayTotal": "Total d'aujourd'hui",
+      "planComparison": "Objectif {planned} kcal · Réel {actual} kcal",
+      "noPlan": "Votre coach n'a pas encore défini d'objectif nutritionnel.",
+      "dayTotal": "{calories} kcal",
+      "fields": {
+        "mealType": "Repas",
+        "foodName": "Aliment/boisson",
+        "calories": "Calories (kcal)",
+        "proteinG": "Protéines (g)",
+        "carbsG": "Glucides (g)",
+        "fatG": "Lipides (g)",
+        "notes": "Remarque"
+      },
+      "mealTypes": {
+        "BREAKFAST": "Petit-déjeuner",
+        "LUNCH": "Déjeuner",
+        "DINNER": "Dîner",
+        "SNACK": "Collation"
+      }
+    },
+    "nutritionCard": {
+      "title": "Nutrition",
+      "todayTotal": "Aujourd'hui : {calories} kcal"
     }
   },
   "expenses": {

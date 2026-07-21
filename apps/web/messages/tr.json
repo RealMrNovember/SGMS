@@ -271,6 +271,12 @@
         "MISSED": "Kaçırıldı",
         "CANCELLED": "İptal"
       }
+    },
+    "nutrition": {
+      "title": "Beslenme Günlüğü",
+      "planned": "Hedef {calories} kcal/gün",
+      "dayTotal": "{calories} kcal",
+      "noEntries": "Sporcu henüz öğün kaydetmemiş."
     }
   },
   "measurements": {
@@ -714,6 +720,40 @@
       "title": "Etkinlikler",
       "hasUpcoming": "{count} yaklaşan etkinlik",
       "empty": "Yaklaşan etkinlik yok"
+    },
+    "nutrition": {
+      "title": "Beslenme",
+      "createButton": "Öğün ekle",
+      "createTitle": "Yeni öğün",
+      "submit": "Kaydet",
+      "submitting": "Kaydediliyor…",
+      "cancel": "İptal et",
+      "delete": "Sil",
+      "noEntries": "Henüz öğün kaydı yok.",
+      "noCalories": "Kalori girilmedi",
+      "todayTotal": "Bugünkü toplam",
+      "planComparison": "Hedef {planned} kcal · Gerçekleşen {actual} kcal",
+      "noPlan": "PT'iniz henüz bir beslenme hedefi belirlemedi.",
+      "dayTotal": "{calories} kcal",
+      "fields": {
+        "mealType": "Öğün",
+        "foodName": "Yiyecek/içecek",
+        "calories": "Kalori (kcal)",
+        "proteinG": "Protein (g)",
+        "carbsG": "Karbonhidrat (g)",
+        "fatG": "Yağ (g)",
+        "notes": "Not"
+      },
+      "mealTypes": {
+        "BREAKFAST": "Kahvaltı",
+        "LUNCH": "Öğle Yemeği",
+        "DINNER": "Akşam Yemeği",
+        "SNACK": "Ara Öğün"
+      }
+    },
+    "nutritionCard": {
+      "title": "Beslenme",
+      "todayTotal": "Bugün {calories} kcal"
     }
   },
   "expenses": {

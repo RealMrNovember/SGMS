@@ -218,3 +218,34 @@ export type GymEvent = {
   goingCount: number;
   myStatus: 'GOING' | 'CANCELLED' | null;
 };
+
+export type MealType = 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK';
+
+export type FoodLogEntry = {
+  id: string;
+  loggedAt: string;
+  mealType: MealType;
+  foodName: string;
+  calories: number | null;
+  proteinG: number | null;
+  carbsG: number | null;
+  fatG: number | null;
+  notes: string | null;
+  photoUrl: string | null;
+};
+
+export type NutritionDay = {
+  dateKey: string;
+  totalCalories: number;
+  totalProteinG: number;
+  totalCarbsG: number;
+  totalFatG: number;
+  entryCount: number;
+  entries: FoodLogEntry[];
+};
+
+export type NutritionOverview = {
+  plannedDailyCalories: number | null;
+  activeProgramTitle: string | null;
+  days: NutritionDay[];
+};

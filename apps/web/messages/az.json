@@ -271,6 +271,12 @@
         "MISSED": "Buraxıldı",
         "CANCELLED": "Ləğv edildi"
       }
+    },
+    "nutrition": {
+      "title": "Qidalanma Jurnalı",
+      "planned": "Hədəf {calories} kcal/gün",
+      "dayTotal": "{calories} kcal",
+      "noEntries": "İdmançı hələ yemək qeyd etməyib."
     }
   },
   "measurements": {
@@ -713,6 +719,40 @@
       "title": "Tədbirlər",
       "hasUpcoming": "{count} yaxınlaşan tədbir",
       "empty": "Yaxınlaşan tədbir yoxdur"
+    },
+    "nutrition": {
+      "title": "Qidalanma",
+      "createButton": "Yemək əlavə et",
+      "createTitle": "Yeni yemək",
+      "submit": "Yadda saxla",
+      "submitting": "Saxlanılır…",
+      "cancel": "Ləğv et",
+      "delete": "Sil",
+      "noEntries": "Hələ yemək qeydi yoxdur.",
+      "noCalories": "Kalori daxil edilməyib",
+      "todayTotal": "Bugünkü cəmi",
+      "planComparison": "Hədəf {planned} kcal · Gerçək {actual} kcal",
+      "noPlan": "PT-niz hələ qidalanma hədəfi təyin etməyib.",
+      "dayTotal": "{calories} kcal",
+      "fields": {
+        "mealType": "Yemək",
+        "foodName": "Yemək/içki",
+        "calories": "Kalori (kcal)",
+        "proteinG": "Protein (q)",
+        "carbsG": "Karbohidrat (q)",
+        "fatG": "Yağ (q)",
+        "notes": "Qeyd"
+      },
+      "mealTypes": {
+        "BREAKFAST": "Səhər yeməyi",
+        "LUNCH": "Nahar",
+        "DINNER": "Şam yeməyi",
+        "SNACK": "Ara qəlyanaltı"
+      }
+    },
+    "nutritionCard": {
+      "title": "Qidalanma",
+      "todayTotal": "Bu gün {calories} kcal"
     }
   },
   "expenses": {

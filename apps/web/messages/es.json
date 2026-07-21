@@ -271,6 +271,12 @@
         "MISSED": "No alcanzado",
         "CANCELLED": "Cancelado"
       }
+    },
+    "nutrition": {
+      "title": "Registro de nutrición",
+      "planned": "Objetivo {calories} kcal/día",
+      "dayTotal": "{calories} kcal",
+      "noEntries": "El deportista aún no ha registrado comidas."
     }
   },
   "measurements": {
@@ -713,6 +719,40 @@
       "title": "Eventos",
       "hasUpcoming": "{count} evento(s) próximo(s)",
       "empty": "No hay eventos próximos"
+    },
+    "nutrition": {
+      "title": "Nutrición",
+      "createButton": "Añadir comida",
+      "createTitle": "Nueva comida",
+      "submit": "Guardar",
+      "submitting": "Guardando…",
+      "cancel": "Cancelar",
+      "delete": "Eliminar",
+      "noEntries": "Aún no hay comidas registradas.",
+      "noCalories": "Sin calorías indicadas",
+      "todayTotal": "Total de hoy",
+      "planComparison": "Objetivo {planned} kcal · Real {actual} kcal",
+      "noPlan": "Tu entrenador aún no ha fijado un objetivo nutricional.",
+      "dayTotal": "{calories} kcal",
+      "fields": {
+        "mealType": "Comida",
+        "foodName": "Alimento/bebida",
+        "calories": "Calorías (kcal)",
+        "proteinG": "Proteína (g)",
+        "carbsG": "Carbohidratos (g)",
+        "fatG": "Grasa (g)",
+        "notes": "Nota"
+      },
+      "mealTypes": {
+        "BREAKFAST": "Desayuno",
+        "LUNCH": "Almuerzo",
+        "DINNER": "Cena",
+        "SNACK": "Refrigerio"
+      }
+    },
+    "nutritionCard": {
+      "title": "Nutrición",
+      "todayTotal": "Hoy: {calories} kcal"
     }
   },
   "expenses": {

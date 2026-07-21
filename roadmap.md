@@ -76,7 +76,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 38 | Mobil Hesap Yönetimi (Self-Servis Profil) | ✅ Tamamlandı | 100% (2026-07-20) |
 | 39 | Hedef Takip & Motivasyon Sistemi | ✅ Tamamlandı | 100% (hedef modeli, ilerleme hesaplama, web+mobil UI — 2026-07-21) |
 | 40 | Sporcu Self-Servis Mağaza (Mobil Alışveriş) | ✅ Tamamlandı | 100% (mağaza sipariş akışı, web+mobil UI — 2026-07-21) |
-| 41 | Beslenme & Kalori Takibi | 🔲 Planlandı | 0% (2026-07-20'de tasarlandı) |
+| 41 | Beslenme & Kalori Takibi | ✅ Tamamlandı | 100% (FoodLogEntry, günlük özet, plan-vs-gerçekleşen, web+mobil UI — 2026-07-21) |
 | 42 | Antrenör (PT) Atama & Değişiklik Talebi | ✅ Tamamlandı | 100% (2026-07-21) |
 
 > Fazlar 6/9/10'un durum özeti önceki revizyonlarda detay bölümleriyle **çelişiyordu** (özet tablo güncellenmeden unutulmuştu). Bu revizyon koda göre (tüm alt maddeler `[x]`, gerçek commit geçmişi) düzeltilmiştir.
@@ -1610,23 +1610,28 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ---
 
-## 🔲 Faz 41 — Beslenme & Kalori Takibi (Öncelik: P2)
+## ✅ Faz 41 — Beslenme & Kalori Takibi (Öncelik: P2) — tamamlandı, 2026-07-21
 
 > **Kullanıcı talebi (2026-07-20):** *"Sporcu kendi uygulaması içerisinden evde/dışarıda tükettiği gıdaları günlük olarak ekleyebilmeli, PT'si ve kendisi takip edebilmeli (kalori kontrol sistemi)."*
 >
 > **Senaryo:** Sporcu akşam yediği yemeği telefonundan kaydeder, PT'si haftalık beslenme programına ne kadar uyduğunu görür.
 >
 > **Kapsam kararı (gerçekçilik):** Tam bir barkod/gıda-veritabanı entegrasyonu (MyFitnessPal tarzı) 3. parti bir API (ör. Open Food Facts) gerektirir ve tek başına ayrı bir faz büyüklüğündedir — **v1 kapsamı dışı**. v1'de sporcu yemek adını serbest metin olarak girer, biliyorsa kalori/makro değerlerini kendisi yazar; gıda veritabanı entegrasyonu v2'ye not düşülür.
-- [ ] Yeni `FoodLogEntry` modeli — `gymMemberId`, `loggedAt`, `mealType` (`BREAKFAST`/`LUNCH`/`DINNER`/`SNACK`), `foodName`, `calories` (opsiyonel), `proteinG`/`carbsG`/`fatG` (opsiyonel), `notes`, `photoUrl` (opsiyonel, R2 — Faz 37'deki fotoğraf yükleme deseniyle)
-- [ ] Günlük özet: gün bazlı toplam kalori/makro (sorgu zamanında toplanır, ayrı bir "günlük özet" tablosu tutulmaz — veri tutarsızlığı riski yaratmaz)
-- [ ] `TrainingProgram`'ın zaten desteklediği `ProgramType.NUTRITION` (mevcut, kullanımda) ile ilişkilendirilir — PT'nin belirlediği hedef kalori/makro (program içeriğinde serbest JSON olarak zaten tutulabiliyor) ile sporcunun gerçekleşen `FoodLogEntry` toplamı **yan yana** gösterilir (plan vs. gerçekleşen)
-- [ ] Mobil: yeni "Beslenme" ekranı — öğün ekleme formu, günlük özet, geçmiş gün listesi
-- [ ] Web: PT/salon tarafında sporcunun beslenme günlüğü salt-okunur görünüm (`/dashboard/members/[id]`)
-- [ ] **Tasarım notu — alt menü yoğunluğu:** Mobilde şu an 5 sekme var (Ana Sayfa/Program/Ölçüm/Mesaj/Hesabım); Faz 39-41 ile birlikte "Hedef", "Mağaza", "Beslenme" eklenirse alt menü 8 sekmeye çıkar — bu, başparmakla ulaşılabilirlik açısından pratik sınırın (5-6) üzerinde. **Öneri:** Mağaza/Beslenme/Hedef ayrı sekme değil, Ana Sayfa'daki kart/kısayollar olarak sunulsun (Salon Girişi kartı gibi) — TabBar 5 sekmede sabit kalır
+- [x] Yeni `FoodLogEntry` modeli — `gymMemberId`, `loggedAt`, `mealType` (`BREAKFAST`/`LUNCH`/`DINNER`/`SNACK`), `foodName`, `calories` (opsiyonel), `proteinG`/`carbsG`/`fatG` (opsiyonel), `notes`, `photoUrl` (şema alanı v1'de ayrılmış — bkz. aşağıdaki bilinçli sapma notu), `createdById`
+- [x] Günlük özet: gün bazlı toplam kalori/makro sorgu zamanında toplanır (`lib/nutrition/summary.ts::groupFoodLogEntriesByDay`, saf fonksiyon, `lib/reports/bucketing.ts`'teki salon-saat-dilimi yaklaşımıyla aynı desen) — ayrı bir "günlük özet" tablosu **yok**, veri tutarsızlığı riski yaratmaz
+- [x] `TrainingProgram`'ın zaten desteklediği `ProgramType.NUTRITION` ile ilişkilendirilir — aktif beslenme programındaki öğünlerin (`content.meals[].calories`) toplamı "hedef günlük kalori" olarak alınır, sporcunun gerçekleşen `FoodLogEntry` toplamıyla **yan yana** gösterilir (`sumPlannedCaloriesFromProgramContent`) — hem web sporcu portalında hem mobilde hem de PT'nin salt-okunur görünümünde
+- [x] Mobil: yeni "Beslenme" ekranı (`NutritionScreen`, Ana Sayfa kısayol kartı üzerinden açılır — bkz. aşağıdaki alt menü kararı) — öğün ekleme formu (öğün türü/ad/kalori/makro/not), bugünkü toplam + hedef karşılaştırması, geçmiş 14 günün listesi, kayıt silme
+- [x] Web: sporcu portalında `/athlete/nutrition` (`NutritionLogPanel`, oluşturma/silme) · PT/salon tarafında **salt-okunur** görünüm `/dashboard/members/[id]` (`MemberNutritionLogView`, ölçüm yönetme yetkisiyle aynı role seti — OWNER/ADMIN/STAFF/TRAINER) — roadmap'teki karara uygun olarak kayıt ekleme/silme yalnızca sporcunun kendisine ait
+- [x] **Uygulama detayı (bilinçli sapma):** `photoUrl` alanı şemada var ama v1'de yükleme UI'ı **bağlanmadı** — kabul kriterinde fotoğraf geçmiyor, kapsamı gereksiz büyütmemek için ayrı bir yükleme endpoint'i (Faz 37 `MeasurementPhoto` deseni) şimdilik eklenmedi; alan v2'de aynı deseni kullanarak doldurulabilir
+- [x] **Tasarım notu — alt menü yoğunluğu (roadmap'teki karar uygulandı):** "Beslenme" ayrı bir TabBar sekmesi değil, Ana Sayfa'daki "Kalori" istatistik kartı + kısayol olarak eklendi (Hedef/Mağaza/Etkinlik ile aynı desen) — TabBar 5 sekmede sabit kaldı
 
-**Kabul kriteri:** 🔲 Sporcu güne ait öğünlerini kaydedip günlük toplam kaloriyi görebiliyor · 🔲 PT sporcusunun beslenme günlüğünü görebiliyor · 🔲 `NUTRITION` programındaki hedefle karşılaştırma yapılabiliyor
+**Kabul kriteri:** ✅ Sporcu güne ait öğünlerini kaydedip günlük toplam kaloriyi görebiliyor (mobil + web `/athlete/nutrition`) · ✅ PT/salon sporcunun beslenme günlüğünü salt-okunur görebiliyor (`/dashboard/members/[id]`) · ✅ aktif `NUTRITION` programındaki hedef kaloriyle karşılaştırma yapılabiliyor — gerçek Postgres'e karşı senaryo scriptiyle uçtan uca doğrulandı (gün gruplama, plan-vs-gerçekleşen toplamı, organizasyon izolasyonu, cascade delete)
 
-**Bağımlılık:** Faz 37 (fotoğraf yükleme deseni) · mevcut `TrainingProgram`/`ProgramType.NUTRITION` ✅
+**Doğrulama:** `pnpm typecheck` (web+cloud-client) + `npx tsc --noEmit` (mobil) + ESLint (yeni uyarı yok) + Vitest 83/83 (8 yeni test: `lib/nutrition/summary.test.ts`) + gerçek yerel Postgres'e (portable, UTF8, 48 migration) karşı tek seferlik senaryo scripti (öğün oluşturma → gün gruplama toplamları → aktif NUTRITION programıyla plan karşılaştırması → çapraz-organizasyon izolasyonu → kayıt silme → `GymMember` cascade delete) başarıyla çalıştırıldı ve silindi.
+
+**Dosyalar:** migration `20260721060000_faz41_food_log_entries`, `lib/nutrition/{summary,list}.ts` (yeni), `actions/nutrition.ts` (yeni), `api/v1/nutrition/{route,[id]/route}.ts` (yeni), `components/{nutrition-log-panel,member-nutrition-log-view}.tsx` (yeni), `app/(athlete)/athlete/{page,nutrition/page}.tsx`, `app/(tenant)/dashboard/members/[id]/page.tsx`, `messages/*.json` (6 dil, `athlete.nutrition`/`athlete.nutritionCard`/`members.nutrition` namespace'leri), `apps/mobile/src/screens/NutritionScreen.tsx` (yeni), `apps/mobile/App.tsx`, `apps/mobile/src/screens/HomeScreen.tsx`, `apps/mobile/src/lib/{api,types}.ts`
+
+**Bağımlılık:** mevcut `TrainingProgram`/`ProgramType.NUTRITION` ✅ · Faz 39 (aynı sporcu-self-servis `request` parametresi deseni, `athlete-goal-panel`/`goals.ts` ile birebir aynı iskelet) ✅
 
 ---
 

@@ -271,6 +271,12 @@
         "MISSED": "Missed",
         "CANCELLED": "Cancelled"
       }
+    },
+    "nutrition": {
+      "title": "Nutrition Log",
+      "planned": "Target {calories} kcal/day",
+      "dayTotal": "{calories} kcal",
+      "noEntries": "The athlete has not logged any meals yet."
     }
   },
   "measurements": {
@@ -714,6 +720,40 @@
       "title": "Events",
       "hasUpcoming": "{count} upcoming event(s)",
       "empty": "No upcoming events"
+    },
+    "nutrition": {
+      "title": "Nutrition",
+      "createButton": "Add a meal",
+      "createTitle": "New meal",
+      "submit": "Save",
+      "submitting": "Saving…",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "noEntries": "No meals logged yet.",
+      "noCalories": "No calories entered",
+      "todayTotal": "Today's total",
+      "planComparison": "Target {planned} kcal · Actual {actual} kcal",
+      "noPlan": "Your trainer hasn't set a nutrition target yet.",
+      "dayTotal": "{calories} kcal",
+      "fields": {
+        "mealType": "Meal",
+        "foodName": "Food/drink",
+        "calories": "Calories (kcal)",
+        "proteinG": "Protein (g)",
+        "carbsG": "Carbs (g)",
+        "fatG": "Fat (g)",
+        "notes": "Note"
+      },
+      "mealTypes": {
+        "BREAKFAST": "Breakfast",
+        "LUNCH": "Lunch",
+        "DINNER": "Dinner",
+        "SNACK": "Snack"
+      }
+    },
+    "nutritionCard": {
+      "title": "Nutrition",
+      "todayTotal": "Today: {calories} kcal"
     }
   },
   "expenses": {

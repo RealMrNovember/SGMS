@@ -12,6 +12,7 @@ import { HomeScreen } from './src/screens/HomeScreen';
 import { LoginScreen } from './src/screens/LoginScreen';
 import { MeasurementsScreen } from './src/screens/MeasurementsScreen';
 import { MessagesScreen } from './src/screens/MessagesScreen';
+import { NutritionScreen } from './src/screens/NutritionScreen';
 import { ProgramsScreen } from './src/screens/ProgramsScreen';
 import { StoreScreen } from './src/screens/StoreScreen';
 import { TrainersScreen } from './src/screens/TrainersScreen';
@@ -31,6 +32,7 @@ function AppShell() {
   const [storeOpen, setStoreOpen] = useState(false);
   const [goalsOpen, setGoalsOpen] = useState(false);
   const [eventsOpen, setEventsOpen] = useState(false);
+  const [nutritionOpen, setNutritionOpen] = useState(false);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [update, setUpdate] = useState<UpdateInfo | null>(null);
 
@@ -108,7 +110,7 @@ function AppShell() {
   // çift boşluk oluşmasın diye tek bir yerden (burada) yönetiliyor. Alt boşluk ise
   // TabBar kendi güvenli alan payını zaten ayırdığı için ekranlara eklenmiyor.
   const screenTopInset = update ? 0 : insets.top;
-  const anyOverlayOpen = trainersOpen || storeOpen || goalsOpen || eventsOpen;
+  const anyOverlayOpen = trainersOpen || storeOpen || goalsOpen || eventsOpen || nutritionOpen;
 
   return (
     <View style={styles.app}>
@@ -120,6 +122,7 @@ function AppShell() {
         {storeOpen ? <StoreScreen session={session} onBack={() => setStoreOpen(false)} /> : null}
         {goalsOpen ? <GoalsScreen session={session} onBack={() => setGoalsOpen(false)} /> : null}
         {eventsOpen ? <EventsScreen session={session} onBack={() => setEventsOpen(false)} /> : null}
+        {nutritionOpen ? <NutritionScreen session={session} onBack={() => setNutritionOpen(false)} /> : null}
         {!anyOverlayOpen && activeTab === 'home' ? (
           <HomeScreen
             session={session}
@@ -128,6 +131,7 @@ function AppShell() {
             onOpenStore={() => setStoreOpen(true)}
             onOpenGoals={() => setGoalsOpen(true)}
             onOpenEvents={() => setEventsOpen(true)}
+            onOpenNutrition={() => setNutritionOpen(true)}
           />
         ) : null}
         {!anyOverlayOpen && activeTab === 'programs' ? <ProgramsScreen session={session} /> : null}

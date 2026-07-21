@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { UserAvatar } from '@/components/user-avatar';
 import { auth } from '@/lib/auth';
 import { intlLocaleFor } from '@/lib/format-locale';
+import { groupFoodLogEntriesByDay } from '@/lib/nutrition/summary';
 import { prisma } from '@/lib/prisma';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
@@ -17,7 +18,7 @@ export default async function AthleteHomePage() {
   const locale = await getLocale();
   const dateLocale = intlLocaleFor(locale);
 
-  const [member, pendingRequest, activeGoalsCount, upcomingEventsCount] = await Promise.all([
+  const [member, pendingRequest, activeGoalsCount, upcomingEventsCount, todayCalories] = await Promise.all([
     prisma.gymMember.findFirst({
       where: {
         id: session.user.gymMemberId,
@@ -44,6 +45,14 @@ export default async function AthleteHomePage() {
     prisma.gymEvent.count({
       where: { organizationId: session.user.organizationId, startsAt: { gte: new Date() } },
     }),
+    prisma.foodLogEntry.findMany({
+      where: {
+        organizationId: session.user.organizationId,
+        gymMemberId: session.user.gymMemberId,
+        loggedAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+      },
+      select: { loggedAt: true, mealType: true, foodName: true, calories: true, proteinG: true, carbsG: true, fatG: true, notes: true, photoUrl: true, id: true },
+    }),
   ]);
 
   if (!member) {
@@ -60,6 +69,16 @@ export default async function AthleteHomePage() {
 
   const fullName = `${member.firstName} ${member.lastName}`;
   const latestMeasurement = member.healthMeasurements[0] ?? null;
+  const todayKey = new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Istanbul' });
+  const todayNutritionDay = groupFoodLogEntriesByDay(
+    todayCalories.map((entry) => ({
+      ...entry,
+      proteinG: entry.proteinG != null ? Number(entry.proteinG) : null,
+      carbsG: entry.carbsG != null ? Number(entry.carbsG) : null,
+      fatG: entry.fatG != null ? Number(entry.fatG) : null,
+    })),
+  ).find((day) => day.dateKey === todayKey);
+  const todayCaloriesTotal = todayNutritionDay?.totalCalories ?? 0;
 
   return (
     <div className="space-y-6">
@@ -184,6 +203,10 @@ export default async function AthleteHomePage() {
           <p className="muted mt-1 text-xs">
             {upcomingEventsCount > 0 ? t('eventsCard.hasUpcoming', { count: upcomingEventsCount }) : t('eventsCard.empty')}
           </p>
+        </Link>
+        <Link href="/athlete/nutrition" className="card col-span-2 p-4 transition hover:bg-white/5">
+          <p className="font-semibold">{t('nutritionCard.title')}</p>
+          <p className="muted mt-1 text-xs">{t('nutritionCard.todayTotal', { calories: todayCaloriesTotal })}</p>
         </Link>
       </div>
 
