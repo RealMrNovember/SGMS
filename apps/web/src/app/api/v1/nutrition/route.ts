@@ -19,6 +19,7 @@ export async function GET(request: Request) {
   return apiOk({
     plannedDailyCalories: overview.plannedDailyCalories,
     activeProgramTitle: overview.activeProgramTitle,
+    timeZone: overview.timeZone,
     days: overview.days.map((day) => ({
       dateKey: day.dateKey,
       totalCalories: day.totalCalories,

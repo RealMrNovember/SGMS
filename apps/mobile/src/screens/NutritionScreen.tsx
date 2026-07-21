@@ -15,8 +15,10 @@ const MEAL_TYPE_LABEL: Record<MealType, string> = {
 
 const MEAL_TYPES: MealType[] = ['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK'];
 
-function todayKeyIstanbul(): string {
-  return new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Istanbul' });
+// Salonun kendi saat dilimini kullanır (backend'den `overview.timeZone` ile gelir) —
+// Istanbul dışındaki bir şubede gece geç saatte girilen bir öğün yanlış güne sayılmasın.
+function todayKeyInTimeZone(timeZone: string): string {
+  return new Date().toLocaleDateString('en-CA', { timeZone });
 }
 
 export function NutritionScreen({ session, onBack }: { session: AthleteSession; onBack: () => void }) {
@@ -111,7 +113,9 @@ export function NutritionScreen({ session, onBack }: { session: AthleteSession; 
     );
   }
 
-  const todayTotal = overview?.days.find((d) => d.dateKey === todayKeyIstanbul())?.totalCalories ?? 0;
+  const todayTotal = overview
+    ? (overview.days.find((d) => d.dateKey === todayKeyInTimeZone(overview.timeZone))?.totalCalories ?? 0)
+    : 0;
 
   return (
     <ScrollView

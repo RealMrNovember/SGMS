@@ -29,6 +29,7 @@ export default async function AthleteHomePage() {
         trainer: { select: { name: true, email: true } },
         healthMeasurements: { orderBy: { measuredAt: 'desc' }, take: 1 },
         trainingPrograms: { where: { isActive: true }, orderBy: { startDate: 'desc' }, take: 3 },
+        organization: { select: { timezone: true } },
       },
     }),
     prisma.trainerRequest.findFirst({
@@ -69,7 +70,9 @@ export default async function AthleteHomePage() {
 
   const fullName = `${member.firstName} ${member.lastName}`;
   const latestMeasurement = member.healthMeasurements[0] ?? null;
-  const todayKey = new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Istanbul' });
+  // Salonun kendi saat dilimi kullanılmalı — bkz. lib/nutrition/list.ts'teki aynı düzeltme.
+  const timeZone = member.organization.timezone;
+  const todayKey = new Date().toLocaleDateString('en-CA', { timeZone });
   const todayNutritionDay = groupFoodLogEntriesByDay(
     todayCalories.map((entry) => ({
       ...entry,
@@ -77,6 +80,7 @@ export default async function AthleteHomePage() {
       carbsG: entry.carbsG != null ? Number(entry.carbsG) : null,
       fatG: entry.fatG != null ? Number(entry.fatG) : null,
     })),
+    timeZone,
   ).find((day) => day.dateKey === todayKey);
   const todayCaloriesTotal = todayNutritionDay?.totalCalories ?? 0;
 

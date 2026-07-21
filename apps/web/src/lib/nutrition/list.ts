@@ -8,6 +8,8 @@ export type NutritionOverview = {
   /** Aktif `NUTRITION` programındaki öğünlerden toplanan günlük hedef kalori — yoksa `null`. */
   plannedDailyCalories: number | null;
   activeProgramTitle: string | null;
+  /** Salonun kendi saat dilimi — çağıranların "bugün" hesabını aynı dilimle yapması için dışa açılır. */
+  timeZone: string;
 };
 
 /** Sporcunun son 14 güne ait öğün kayıtlarını günlere gruplayıp, varsa aktif beslenme
@@ -20,7 +22,7 @@ export async function getNutritionOverviewForMember(
   const since = new Date();
   since.setDate(since.getDate() - HISTORY_DAYS);
 
-  const [entries, activeNutritionProgram] = await Promise.all([
+  const [entries, activeNutritionProgram, organization] = await Promise.all([
     prisma.foodLogEntry.findMany({
       where: { organizationId, gymMemberId, loggedAt: { gte: since } },
       orderBy: { loggedAt: 'desc' },
@@ -29,7 +31,13 @@ export async function getNutritionOverviewForMember(
       where: { organizationId, gymMemberId, type: 'NUTRITION', isActive: true },
       orderBy: { startDate: 'desc' },
     }),
+    prisma.organization.findUnique({ where: { id: organizationId }, select: { timezone: true } }),
   ]);
+
+  // Salonun kendi saat dilimi kullanılmalı — aksi halde farklı bir bölgedeki
+  // (Istanbul dışı) bir şubede gece geç saatte girilen bir öğün yanlış güne
+  // sayılır (bkz. lib/reports/bucketing.ts'teki aynı yaklaşım/kaynak).
+  const timeZone = organization?.timezone ?? 'Europe/Istanbul';
 
   const days = groupFoodLogEntriesByDay(
     entries.map((entry) => ({
@@ -44,6 +52,7 @@ export async function getNutritionOverviewForMember(
       notes: entry.notes,
       photoUrl: entry.photoUrl,
     })),
+    timeZone,
   );
 
   return {
@@ -52,5 +61,6 @@ export async function getNutritionOverviewForMember(
       ? sumPlannedCaloriesFromProgramContent(activeNutritionProgram.content)
       : null,
     activeProgramTitle: activeNutritionProgram?.title ?? null,
+    timeZone,
   };
 }

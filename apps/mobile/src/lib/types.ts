@@ -247,5 +247,6 @@ export type NutritionDay = {
 export type NutritionOverview = {
   plannedDailyCalories: number | null;
   activeProgramTitle: string | null;
+  timeZone: string;
   days: NutritionDay[];
 };
