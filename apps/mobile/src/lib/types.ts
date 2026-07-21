@@ -182,3 +182,39 @@ export type StoreOrder = {
 };
 
 export type StoreCheckoutResponse = { checkoutUrl: string };
+
+export type GoalTargetType =
+  | 'WEIGHT_LOSS'
+  | 'WEIGHT_GAIN'
+  | 'BODY_FAT_REDUCTION'
+  | 'MEASUREMENT_CHANGE'
+  | 'WORKOUT_FREQUENCY'
+  | 'CUSTOM';
+
+export type AthleteGoal = {
+  id: string;
+  createdByType: 'SELF' | 'TRAINER';
+  targetType: GoalTargetType;
+  measurementField: string | null;
+  direction: 'INCREASE' | 'DECREASE' | null;
+  targetValue: string | null;
+  startValue: string | null;
+  targetDate: string | null;
+  status: 'ACTIVE' | 'ACHIEVED' | 'MISSED' | 'CANCELLED';
+  notes: string | null;
+  achievedAt: string | null;
+  createdAt: string;
+  progressPercent: number | null;
+  currentValue: number | null;
+};
+
+export type GymEvent = {
+  id: string;
+  title: string;
+  description: string | null;
+  eventType: 'WALK' | 'RUN' | 'SPORT' | 'OTHER';
+  startsAt: string;
+  location: string | null;
+  goingCount: number;
+  myStatus: 'GOING' | 'CANCELLED' | null;
+};

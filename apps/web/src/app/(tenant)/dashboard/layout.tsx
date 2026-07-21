@@ -118,6 +118,7 @@ export default async function TenantDashboardLayout({ children }: { children: Re
             ...(canManageLeads ? [{ href: '/dashboard/leads', label: t('leads'), icon: <UserPlus /> }] : []),
             { href: '/dashboard/pos', label: t('pos'), icon: <CreditCard /> },
             { href: '/dashboard/payment-plans', label: t('paymentPlans'), icon: <CalendarClock /> },
+            { href: '/dashboard/events', label: t('events'), icon: <CalendarDays /> },
             { href: '/dashboard/messages', label: t('messages'), icon: <MessageSquare />, badge: unreadMessages },
           ],
         },

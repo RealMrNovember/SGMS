@@ -61,7 +61,8 @@
     "discounts": "Discounts",
     "guestPasses": "Guest Passes",
     "equipment": "Equipment",
-    "hr": "HR & Staff"
+    "hr": "HR & Staff",
+    "events": "Events"
   },
   "auth": {
     "login": "Sign In",
@@ -226,6 +227,50 @@
       "step1": "Personal Info",
       "step2": "Membership",
       "step3": "Notes & Confirm"
+    },
+    "goals": {
+      "assignTitle": "Assign Goal",
+      "assignSubtitle": "Assign a concrete goal to the athlete; progress is calculated automatically.",
+      "activeGoalsTitle": "Goals",
+      "noGoals": "No goal assigned yet.",
+      "targetType": "Goal type",
+      "measurementField": "Measurement field",
+      "direction": "Direction",
+      "directionIncrease": "Increase",
+      "directionDecrease": "Decrease",
+      "targetValue": "Target value",
+      "targetValueWorkoutHint": "Weekly workout count",
+      "targetDate": "Target date (optional)",
+      "notes": "Note (optional)",
+      "submit": "Assign goal",
+      "submitting": "Assigning…",
+      "cancelGoal": "Cancel",
+      "createdBySelf": "Self-assigned",
+      "createdByTrainer": "Assigned by trainer",
+      "progressLabel": "{percent}% complete",
+      "currentValueLabel": "Current: {value}",
+      "noPermission": "Assigning goals requires OWNER, ADMIN, or trainer permission.",
+      "targetTypes": {
+        "WEIGHT_LOSS": "Weight loss",
+        "WEIGHT_GAIN": "Weight gain",
+        "BODY_FAT_REDUCTION": "Body fat reduction",
+        "MEASUREMENT_CHANGE": "Measurement change",
+        "WORKOUT_FREQUENCY": "Workout frequency",
+        "CUSTOM": "Custom goal"
+      },
+      "measurementFields": {
+        "waistCm": "Waist (cm)",
+        "chestCm": "Chest (cm)",
+        "hipCm": "Hip (cm)",
+        "armCm": "Arm (cm)",
+        "thighCm": "Thigh (cm)"
+      },
+      "statusLabels": {
+        "ACTIVE": "Active",
+        "ACHIEVED": "Achieved",
+        "MISSED": "Missed",
+        "CANCELLED": "Cancelled"
+      }
     }
   },
   "measurements": {
@@ -643,6 +688,32 @@
       "newPassword": "New password",
       "newPasswordConfirmation": "Confirm new password",
       "changePassword": "Change password"
+    },
+    "goals": {
+      "title": "My Goals",
+      "createButton": "Set a new goal",
+      "createTitle": "New goal",
+      "noGoals": "You don't have a goal yet. Your trainer can assign one, or set your own.",
+      "cancel": "Cancel",
+      "submit": "Create goal",
+      "submitting": "Creating…"
+    },
+    "events": {
+      "title": "Events",
+      "noEvents": "No upcoming events right now.",
+      "going": "I'm going",
+      "cancelRsvp": "Cancel RSVP",
+      "goingCount": "{count} people going"
+    },
+    "goalsCard": {
+      "title": "My Goals",
+      "hasActive": "{count} active goal(s)",
+      "empty": "No goal set yet"
+    },
+    "eventsCard": {
+      "title": "Events",
+      "hasUpcoming": "{count} upcoming event(s)",
+      "empty": "No upcoming events"
     }
   },
   "expenses": {
@@ -2141,6 +2212,31 @@
       "maxMembersLabel": "Max member capacity (optional)",
       "saving": "Saving…",
       "submit": "Save profile"
+    }
+  },
+  "events": {
+    "title": "Events",
+    "subtitle": "Create gym motivation events; all active members get notified.",
+    "createTitle": "New event",
+    "fields": {
+      "title": "Title",
+      "description": "Description (optional)",
+      "eventType": "Type",
+      "startsAt": "Date / time",
+      "location": "Location (optional)"
+    },
+    "submit": "Create event",
+    "submitting": "Creating…",
+    "listTitle": "Upcoming Events",
+    "noEvents": "No events created yet.",
+    "goingCount": "{count} people going",
+    "cancelEvent": "Delete event",
+    "noPermission": "Creating events requires OWNER, ADMIN, or STAFF permission.",
+    "eventTypes": {
+      "WALK": "Walk",
+      "RUN": "Run",
+      "SPORT": "Sport event",
+      "OTHER": "Other"
     }
   }
 }

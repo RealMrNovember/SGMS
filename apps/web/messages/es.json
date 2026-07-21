@@ -61,7 +61,8 @@
     "discounts": "Cupones",
     "guestPasses": "Pases de invitado",
     "hr": "RRHH",
-    "equipment": "Equipos"
+    "equipment": "Equipos",
+    "events": "Eventos"
   },
   "auth": {
     "login": "Iniciar sesión",
@@ -226,6 +227,50 @@
       "reasonPlaceholder": "e.g. goodwill / management approval",
       "extending": "Extending…",
       "extendSubmit": "Ampliar membresía"
+    },
+    "goals": {
+      "assignTitle": "Asignar objetivo",
+      "assignSubtitle": "Asigna un objetivo concreto al atleta; el progreso se calcula automáticamente.",
+      "activeGoalsTitle": "Objetivos",
+      "noGoals": "Aún no se ha asignado un objetivo.",
+      "targetType": "Tipo de objetivo",
+      "measurementField": "Campo de medida",
+      "direction": "Dirección",
+      "directionIncrease": "Aumentar",
+      "directionDecrease": "Disminuir",
+      "targetValue": "Valor objetivo",
+      "targetValueWorkoutHint": "Entrenamientos semanales",
+      "targetDate": "Fecha objetivo (opcional)",
+      "notes": "Nota (opcional)",
+      "submit": "Asignar objetivo",
+      "submitting": "Asignando…",
+      "cancelGoal": "Cancelar",
+      "createdBySelf": "Creado por el atleta",
+      "createdByTrainer": "Asignado por el entrenador",
+      "progressLabel": "{percent}% completado",
+      "currentValueLabel": "Actual: {value}",
+      "noPermission": "Asignar un objetivo requiere permisos de OWNER, ADMIN o entrenador.",
+      "targetTypes": {
+        "WEIGHT_LOSS": "Pérdida de peso",
+        "WEIGHT_GAIN": "Aumento de peso",
+        "BODY_FAT_REDUCTION": "Reducción de grasa corporal",
+        "MEASUREMENT_CHANGE": "Cambio de medida",
+        "WORKOUT_FREQUENCY": "Frecuencia de entrenamiento",
+        "CUSTOM": "Objetivo personalizado"
+      },
+      "measurementFields": {
+        "waistCm": "Cintura (cm)",
+        "chestCm": "Pecho (cm)",
+        "hipCm": "Cadera (cm)",
+        "armCm": "Brazo (cm)",
+        "thighCm": "Muslo (cm)"
+      },
+      "statusLabels": {
+        "ACTIVE": "Activo",
+        "ACHIEVED": "Logrado",
+        "MISSED": "No alcanzado",
+        "CANCELLED": "Cancelado"
+      }
     }
   },
   "measurements": {
@@ -642,7 +687,33 @@
       "changePassword": "Cambiar contraseña"
     },
     "trainerRequestPending": "Your request is under review",
-    "manageTrainer": "Trainer request / list"
+    "manageTrainer": "Trainer request / list",
+    "goals": {
+      "title": "Mis objetivos",
+      "createButton": "Establecer un nuevo objetivo",
+      "createTitle": "Nuevo objetivo",
+      "noGoals": "Aún no tienes un objetivo. Tu entrenador puede asignarte uno, o puedes crear el tuyo.",
+      "cancel": "Cancelar",
+      "submit": "Crear objetivo",
+      "submitting": "Creando…"
+    },
+    "events": {
+      "title": "Eventos",
+      "noEvents": "No hay eventos próximos por ahora.",
+      "going": "Voy a asistir",
+      "cancelRsvp": "Cancelar asistencia",
+      "goingCount": "{count} personas asisten"
+    },
+    "goalsCard": {
+      "title": "Mis objetivos",
+      "hasActive": "{count} objetivo(s) activo(s)",
+      "empty": "Aún no hay objetivo"
+    },
+    "eventsCard": {
+      "title": "Eventos",
+      "hasUpcoming": "{count} evento(s) próximo(s)",
+      "empty": "No hay eventos próximos"
+    }
   },
   "expenses": {
     "title": "Cuenta corriente",
@@ -2109,6 +2180,31 @@
       "maxMembersLabel": "Max member capacity (optional)",
       "saving": "Saving…",
       "submit": "Save profile"
+    }
+  },
+  "events": {
+    "title": "Eventos",
+    "subtitle": "Crea eventos de motivación del gimnasio; todos los miembros activos serán notificados.",
+    "createTitle": "Nuevo evento",
+    "fields": {
+      "title": "Título",
+      "description": "Descripción (opcional)",
+      "eventType": "Tipo",
+      "startsAt": "Fecha / hora",
+      "location": "Ubicación (opcional)"
+    },
+    "submit": "Crear evento",
+    "submitting": "Creando…",
+    "listTitle": "Próximos eventos",
+    "noEvents": "Aún no se han creado eventos.",
+    "goingCount": "{count} personas asisten",
+    "cancelEvent": "Eliminar evento",
+    "noPermission": "Crear un evento requiere permisos de OWNER, ADMIN o STAFF.",
+    "eventTypes": {
+      "WALK": "Caminata",
+      "RUN": "Carrera",
+      "SPORT": "Evento deportivo",
+      "OTHER": "Otro"
     }
   }
 }

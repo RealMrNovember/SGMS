@@ -2,6 +2,7 @@
 
 import { isAthleteContext, resolveApiContext } from '@/lib/api/auth-context';
 import { auth } from '@/lib/auth';
+import { reevaluateGoalsForMember } from '@/lib/goals/reevaluate';
 import { prisma } from '@/lib/prisma';
 import { readProgressPhotoBuffer, uploadProgressPhoto } from '@/lib/storage';
 import { getTenantWriteBlockReason } from '@/lib/tenant-access';
@@ -176,6 +177,10 @@ async function createHealthMeasurementRecord(input: {
   revalidatePath(`/dashboard/members/${input.revalidateGymMemberId}`);
   revalidatePath(`/dashboard/members/${input.revalidateGymMemberId}/measurements`);
   revalidatePath('/athlete/measurements');
+
+  // Faz 39 — bu ölçüm bir hedefi tamamlamış olabilir (ör. kilo hedefine ulaşıldı);
+  // ana akışı asla bloklamaz/bozmaz (reevaluateGoalsForMember kendi try/catch'ine sahip).
+  void reevaluateGoalsForMember(input.organizationId, input.gymMemberId, 'measurement');
 
   return measurement;
 }

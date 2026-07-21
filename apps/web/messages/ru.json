@@ -61,7 +61,8 @@
     "discounts": "Купоны",
     "guestPasses": "Гостевые пропуска",
     "hr": "HR",
-    "equipment": "Оборудование"
+    "equipment": "Оборудование",
+    "events": "Мероприятия"
   },
   "auth": {
     "login": "Войти",
@@ -226,6 +227,50 @@
       "reasonPlaceholder": "e.g. goodwill / management approval",
       "extending": "Extending…",
       "extendSubmit": "Продлить членство"
+    },
+    "goals": {
+      "assignTitle": "Назначить цель",
+      "assignSubtitle": "Назначьте спортсмену конкретную цель; прогресс рассчитывается автоматически.",
+      "activeGoalsTitle": "Цели",
+      "noGoals": "Цель пока не назначена.",
+      "targetType": "Тип цели",
+      "measurementField": "Поле измерения",
+      "direction": "Направление",
+      "directionIncrease": "Увеличить",
+      "directionDecrease": "Уменьшить",
+      "targetValue": "Целевое значение",
+      "targetValueWorkoutHint": "Кол-во тренировок в неделю",
+      "targetDate": "Целевая дата (опционально)",
+      "notes": "Заметка (опционально)",
+      "submit": "Назначить цель",
+      "submitting": "Назначение…",
+      "cancelGoal": "Отменить",
+      "createdBySelf": "Поставлена самим",
+      "createdByTrainer": "Назначена тренером",
+      "progressLabel": "Выполнено {percent}%",
+      "currentValueLabel": "Сейчас: {value}",
+      "noPermission": "Для назначения цели нужны права OWNER, ADMIN или тренера.",
+      "targetTypes": {
+        "WEIGHT_LOSS": "Похудение",
+        "WEIGHT_GAIN": "Набор веса",
+        "BODY_FAT_REDUCTION": "Снижение % жира",
+        "MEASUREMENT_CHANGE": "Изменение измерения",
+        "WORKOUT_FREQUENCY": "Частота тренировок",
+        "CUSTOM": "Свободная цель"
+      },
+      "measurementFields": {
+        "waistCm": "Талия (см)",
+        "chestCm": "Грудь (см)",
+        "hipCm": "Бёдра (см)",
+        "armCm": "Рука (см)",
+        "thighCm": "Бедро (см)"
+      },
+      "statusLabels": {
+        "ACTIVE": "Активна",
+        "ACHIEVED": "Достигнута",
+        "MISSED": "Пропущена",
+        "CANCELLED": "Отменена"
+      }
     }
   },
   "measurements": {
@@ -642,7 +687,33 @@
       "changePassword": "Изменить пароль"
     },
     "trainerRequestPending": "Your request is under review",
-    "manageTrainer": "Trainer request / list"
+    "manageTrainer": "Trainer request / list",
+    "goals": {
+      "title": "Мои цели",
+      "createButton": "Поставить новую цель",
+      "createTitle": "Новая цель",
+      "noGoals": "У вас пока нет цели. Тренер может назначить её, или вы можете поставить свою.",
+      "cancel": "Отменить",
+      "submit": "Создать цель",
+      "submitting": "Создание…"
+    },
+    "events": {
+      "title": "Мероприятия",
+      "noEvents": "Сейчас нет ближайших мероприятий.",
+      "going": "Я иду",
+      "cancelRsvp": "Отменить участие",
+      "goingCount": "{count} человек участвует"
+    },
+    "goalsCard": {
+      "title": "Мои цели",
+      "hasActive": "{count} активных целей",
+      "empty": "Цель пока не поставлена"
+    },
+    "eventsCard": {
+      "title": "Мероприятия",
+      "hasUpcoming": "{count} ближайших мероприятий",
+      "empty": "Нет ближайших мероприятий"
+    }
   },
   "expenses": {
     "title": "Лицевой счёт",
@@ -2109,6 +2180,31 @@
       "maxMembersLabel": "Max member capacity (optional)",
       "saving": "Saving…",
       "submit": "Save profile"
+    }
+  },
+  "events": {
+    "title": "Мероприятия",
+    "subtitle": "Создавайте мотивационные мероприятия зала; все активные участники получают уведомление.",
+    "createTitle": "Новое мероприятие",
+    "fields": {
+      "title": "Название",
+      "description": "Описание (опционально)",
+      "eventType": "Тип",
+      "startsAt": "Дата / время",
+      "location": "Место (опционально)"
+    },
+    "submit": "Создать мероприятие",
+    "submitting": "Создание…",
+    "listTitle": "Ближайшие мероприятия",
+    "noEvents": "Мероприятия пока не созданы.",
+    "goingCount": "{count} человек участвует",
+    "cancelEvent": "Удалить мероприятие",
+    "noPermission": "Для создания мероприятия нужны права OWNER, ADMIN или STAFF.",
+    "eventTypes": {
+      "WALK": "Прогулка",
+      "RUN": "Бег",
+      "SPORT": "Спортивное мероприятие",
+      "OTHER": "Другое"
     }
   }
 }

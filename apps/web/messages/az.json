@@ -61,7 +61,8 @@
     "discounts": "Kuponlar",
     "guestPasses": "Qonaq keçidləri",
     "hr": "HR / Personal",
-    "equipment": "Avadanlıq"
+    "equipment": "Avadanlıq",
+    "events": "Tədbirlər"
   },
   "auth": {
     "login": "Daxil ol",
@@ -226,6 +227,50 @@
       "reasonPlaceholder": "e.g. goodwill / management approval",
       "extending": "Extending…",
       "extendSubmit": "Müddəti uzat"
+    },
+    "goals": {
+      "assignTitle": "Hədəf Təyin Et",
+      "assignSubtitle": "Sporçuya konkret hədəf təyin edin; irəliləyiş avtomatik hesablanır.",
+      "activeGoalsTitle": "Hədəflər",
+      "noGoals": "Hələ hədəf təyin edilməyib.",
+      "targetType": "Hədəf növü",
+      "measurementField": "Ölçü sahəsi",
+      "direction": "İstiqamət",
+      "directionIncrease": "Artır",
+      "directionDecrease": "Azalt",
+      "targetValue": "Hədəf dəyər",
+      "targetValueWorkoutHint": "Həftəlik məşq sayı",
+      "targetDate": "Hədəf tarix (isteğe bağlı)",
+      "notes": "Qeyd (isteğe bağlı)",
+      "submit": "Hədəfi təyin et",
+      "submitting": "Təyin edilir…",
+      "cancelGoal": "Ləğv et",
+      "createdBySelf": "Sporçu özü qoydu",
+      "createdByTrainer": "PT tərəfindən təyin edildi",
+      "progressLabel": "%{percent} tamamlandı",
+      "currentValueLabel": "Hazırda: {value}",
+      "noPermission": "Hədəf təyin etmək üçün OWNER, ADMIN və ya PT icazəsi lazımdır.",
+      "targetTypes": {
+        "WEIGHT_LOSS": "Çəki vermə",
+        "WEIGHT_GAIN": "Çəki alma",
+        "BODY_FAT_REDUCTION": "Piy nisbətinin azaldılması",
+        "MEASUREMENT_CHANGE": "Ölçü dəyişikliyi",
+        "WORKOUT_FREQUENCY": "Məşq tezliyi",
+        "CUSTOM": "Sərbəst hədəf"
+      },
+      "measurementFields": {
+        "waistCm": "Bel (sm)",
+        "chestCm": "Döş (sm)",
+        "hipCm": "Bel-omba (sm)",
+        "armCm": "Qol (sm)",
+        "thighCm": "Bud (sm)"
+      },
+      "statusLabels": {
+        "ACTIVE": "Aktiv",
+        "ACHIEVED": "Əldə edildi",
+        "MISSED": "Buraxıldı",
+        "CANCELLED": "Ləğv edildi"
+      }
     }
   },
   "measurements": {
@@ -642,7 +687,33 @@
       "changePassword": "Parolu dəyiş"
     },
     "trainerRequestPending": "Your request is under review",
-    "manageTrainer": "Trainer request / list"
+    "manageTrainer": "Trainer request / list",
+    "goals": {
+      "title": "Hədəflərim",
+      "createButton": "Yeni hədəf qoy",
+      "createTitle": "Yeni hədəf",
+      "noGoals": "Hələ hədəfin yoxdur. PT sənə hədəf təyin edə bilər və ya özün qoya bilərsən.",
+      "cancel": "Ləğv et",
+      "submit": "Hədəf yarat",
+      "submitting": "Yaradılır…"
+    },
+    "events": {
+      "title": "Tədbirlər",
+      "noEvents": "Hazırda yaxınlaşan tədbir yoxdur.",
+      "going": "Qatılıram",
+      "cancelRsvp": "Qatılımı ləğv et",
+      "goingCount": "{count} nəfər qatılır"
+    },
+    "goalsCard": {
+      "title": "Hədəflərim",
+      "hasActive": "{count} aktiv hədəf",
+      "empty": "Hələ hədəf qoyulmayıb"
+    },
+    "eventsCard": {
+      "title": "Tədbirlər",
+      "hasUpcoming": "{count} yaxınlaşan tədbir",
+      "empty": "Yaxınlaşan tədbir yoxdur"
+    }
   },
   "expenses": {
     "title": "Cari hesab",
@@ -2109,6 +2180,31 @@
       "maxMembersLabel": "Max member capacity (optional)",
       "saving": "Saving…",
       "submit": "Save profile"
+    }
+  },
+  "events": {
+    "title": "Tədbirlər",
+    "subtitle": "Zal motivasiya tədbirləri yaradın; bütün aktiv üzvlərə bildiriş göndərilir.",
+    "createTitle": "Yeni tədbir",
+    "fields": {
+      "title": "Başlıq",
+      "description": "Açıqlama (isteğe bağlı)",
+      "eventType": "Növ",
+      "startsAt": "Tarix / saat",
+      "location": "Məkan (isteğe bağlı)"
+    },
+    "submit": "Tədbir yarat",
+    "submitting": "Yaradılır…",
+    "listTitle": "Yaxınlaşan Tədbirlər",
+    "noEvents": "Hələ tədbir yaradılmayıb.",
+    "goingCount": "{count} nəfər qatılır",
+    "cancelEvent": "Tədbiri sil",
+    "noPermission": "Tədbir yaratmaq üçün OWNER, ADMIN və ya STAFF icazəsi lazımdır.",
+    "eventTypes": {
+      "WALK": "Gəzinti",
+      "RUN": "Qaçış",
+      "SPORT": "İdman tədbiri",
+      "OTHER": "Digər"
     }
   }
 }

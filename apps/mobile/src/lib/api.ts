@@ -1,8 +1,10 @@
 import { SGMS_API_BASE_URL } from './constants';
 import type {
+  AthleteGoal,
   AthleteSession,
   CheckInQrData,
   DirectMessage,
+  GymEvent,
   HealthMeasurement,
   MeasurementPhoto,
   MeResponse,
@@ -221,5 +223,57 @@ export async function startStoreCheckout(
     method: 'POST',
     headers: authHeaders(accessToken),
     body: JSON.stringify({ items }),
+  });
+}
+
+export async function fetchGoals(accessToken: string): Promise<{ goals: AthleteGoal[] }> {
+  return apiFetch('/api/v1/goals', { headers: authHeaders(accessToken) });
+}
+
+export type CreateGoalInput = {
+  targetType: GoalTargetTypeInput;
+  measurementField?: string;
+  direction?: 'INCREASE' | 'DECREASE';
+  targetValue?: number;
+  targetDate?: string;
+  notes?: string;
+};
+
+type GoalTargetTypeInput =
+  | 'WEIGHT_LOSS'
+  | 'WEIGHT_GAIN'
+  | 'BODY_FAT_REDUCTION'
+  | 'MEASUREMENT_CHANGE'
+  | 'WORKOUT_FREQUENCY'
+  | 'CUSTOM';
+
+export async function createGoal(accessToken: string, input: CreateGoalInput): Promise<{ message?: string }> {
+  return apiFetch('/api/v1/goals', {
+    method: 'POST',
+    headers: authHeaders(accessToken),
+    body: JSON.stringify(input),
+  });
+}
+
+export async function cancelGoal(accessToken: string, goalId: string): Promise<{ message?: string }> {
+  return apiFetch(`/api/v1/goals/${goalId}/cancel`, {
+    method: 'POST',
+    headers: authHeaders(accessToken),
+  });
+}
+
+export async function fetchEvents(accessToken: string): Promise<{ events: GymEvent[] }> {
+  return apiFetch('/api/v1/events', { headers: authHeaders(accessToken) });
+}
+
+export async function rsvpEvent(
+  accessToken: string,
+  eventId: string,
+  going: boolean,
+): Promise<{ message?: string }> {
+  return apiFetch(`/api/v1/events/${eventId}/rsvp`, {
+    method: 'POST',
+    headers: authHeaders(accessToken),
+    body: JSON.stringify({ going }),
   });
 }

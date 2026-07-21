@@ -1557,7 +1557,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ---
 
-## 🔲 Faz 39 — Hedef Takip & Motivasyon Sistemi (Öncelik: P1 — farklılaştırıcı özellik)
+## ✅ Faz 39 — Hedef Takip & Motivasyon Sistemi (Öncelik: P1 — farklılaştırıcı özellik) — tamamlandı, 2026-07-21
 
 > **Kullanıcı talebi (2026-07-20):** *"Sporcu hedef kontrol sistemi. Belirli bir hedef ya da PT'si tarafından atanacak. Aynı zamanda hedef motivasyon etkinlikleri (yürüyüş, spor etkinlikleri gibi)."*
 >
@@ -1565,18 +1565,23 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 >
 > **Senaryo B (motivasyon etkinliği):** Salon "Cumartesi sabahı grup yürüyüşü" gibi bir etkinlik düzenler, tüm üyelere bildirim gider, katılmak isteyenler tek dokunuşla RSVP verir — bu bir "hedef" değil, salonun topluluk/bağlılık aracı.
 
-- [ ] Yeni `AthleteGoal` modeli — `gymMemberId`, `createdByType` (`SELF`/`TRAINER`), `createdById`, `targetType` (`WEIGHT_LOSS`/`WEIGHT_GAIN`/`BODY_FAT_REDUCTION`/`MEASUREMENT_CHANGE`/`WORKOUT_FREQUENCY`/`CUSTOM`), `targetValue`, `startValue` (hedef konulduğu andaki ölçüm — ilerleme yüzdesi buradan hesaplanır), `targetDate`, `status` (`ACTIVE`/`ACHIEVED`/`MISSED`/`CANCELLED`), `notes`
-- [ ] İlerleme hesaplama: ölçüm bazlı hedefler Faz 37'deki `HealthMeasurement` geçmişinden, antrenman sıklığı hedefleri `CheckIn`/`ExerciseSetLog` geçmişinden **otomatik** türetilir — sporcu ilerlemeyi elle girmez (yanlış/unutulan giriş riski olmasın diye)
-- [ ] `/dashboard/members/[id]` → "Hedef Ata" paneli (PT/OWNER/ADMIN) — mevcut `MembershipRenewalPanel` deseniyle tutarlı bir form
-- [ ] Mobil: HomeScreen'e hedef ilerleme kartı (`% XX tamamlandı` progress bar) — sporcu kendi hedefini de burada oluşturabilir
-- [ ] Yeni `GymEvent` modeli — `title`, `description`, `eventType` (`WALK`/`RUN`/`SPORT`/`OTHER`), `startsAt`, `location`, `createdById`; `GymEventRsvp` (üye + katılım durumu)
-- [ ] `/dashboard/events` — salon etkinlik oluşturma + katılımcı listesi; oluşturulunca **tüm aktif üyelere Faz 27.1 Web Push bildirimi** otomatik gider (mevcut push altyapısı yeniden kullanılır, yeni bir bildirim kanalı icat edilmez)
-- [ ] Mobil: "Etkinlikler" listesi + tek dokunuşla RSVP
-- [ ] Hedef süresine 3 gün kala veya hedefe ulaşılınca push bildirimi (Faz 27.1 altyapısı)
+- [x] Yeni `AthleteGoal` modeli — `gymMemberId`, `createdByType` (`SELF`/`TRAINER`), `createdById`, `targetType` (`WEIGHT_LOSS`/`WEIGHT_GAIN`/`BODY_FAT_REDUCTION`/`MEASUREMENT_CHANGE`/`WORKOUT_FREQUENCY`/`CUSTOM`), `targetValue`, `startValue` (hedef konulduğu andaki ölçüm — ilerleme yüzdesi buradan hesaplanır), `targetDate`, `status` (`ACTIVE`/`ACHIEVED`/`MISSED`/`CANCELLED`), `notes`
+- [x] İlerleme hesaplama (`lib/goals/progress.ts::computeGoalProgress`, saf fonksiyon, 14 birim testi): ölçüm bazlı hedefler Faz 37'deki `HealthMeasurement` geçmişinden, antrenman sıklığı hedefleri `CheckIn` geçmişinden (son 7 gün) **otomatik** türetilir — sporcu ilerlemeyi elle girmez, kalıcı bir "ilerleme" alanı da tutulmaz (her okumada yeniden hesaplanır)
+- [x] `/dashboard/members/[id]` → "Hedef Ata" paneli (`GoalAssignPanel`, PT/OWNER/ADMIN) — mevcut `MembershipRenewalPanel` deseniyle tutarlı bir form; aktif hedef listesi + iptal butonu tüm görüntüleyen roller için görünür
+- [x] Mobil: HomeScreen'e hedef ilerleme kartı (`% XX tamamlandı` progress bar) — dokununca açılan `GoalsScreen`'de sporcu kendi hedefini de oluşturabilir/iptal edebilir. Web sporcu portalında da aynı işlev: `/athlete/goals` (`AthleteGoalPanel`)
+- [x] Yeni `GymEvent` modeli — `title`, `description`, `eventType` (`WALK`/`RUN`/`SPORT`/`OTHER`), `startsAt`, `location`, `createdById`; `GymEventRsvp` (üye + katılım durumu, `@@unique([gymEventId, gymMemberId])`)
+- [x] `/dashboard/events` — salon etkinlik oluşturma (OWNER/ADMIN/STAFF) + silme (OWNER/ADMIN) + katılımcı sayısı; oluşturulunca **tüm aktif üyelere Faz 27.1 Web Push bildirimi** otomatik gider (mevcut `sendPushToUsers` yeniden kullanıldı, yeni bir bildirim kanalı icat edilmedi)
+- [x] Mobil: "Etkinlikler" listesi (`EventsScreen`) + tek dokunuşla RSVP; web sporcu portalında `/athlete/events` (`AthleteEventList`) aynı akış
+- [x] Hedefe ulaşılınca push bildirimi (sporcuya + PT tarafından atanmışsa PT'ye) — Faz 27.1 altyapısı yeniden kullanıldı
+- [ ] **Kapsam kararı (bilinçli sapma):** "Hedef süresine 3 gün kala" zamana bağlı (cron) hatırlatma **yapılmadı** — bu proje henüz bir zamanlanmış iş/kuyruk motoruna (Faz 27.3) sahip değil. Bunun yerine olay-tetiklemeli tasarım seçildi: her yeni ölçüm/check-in kaydında (`actions/measurements.ts`, `lib/check-in/process.ts` → `reevaluateGoalsForMember`) o anda "hedefe ulaşıldı mı" kontrol edilir. Süre bazlı hatırlatma Faz 27.3 sonrasına not düşüldü. Süresi geçmiş hedefler ise okuma anında best-effort `MISSED` işaretlenir (`lib/goals/list.ts::expireOverdueGoals`).
 
-**Kabul kriteri:** 🔲 PT bir sporcuya 3 aylık kilo hedefi atayabiliyor, sporcu telefonunda ilerlemesini otomatik hesaplanmış olarak görüyor · 🔲 sporcu kendi hedefini koyabiliyor · 🔲 salon bir yürüyüş etkinliği oluşturup tüm üyelere bildirim gönderebiliyor, üyeler RSVP verebiliyor
+**Kabul kriteri:** ✅ PT bir sporcuya kilo hedefi atayabiliyor, sporcu telefonunda ilerlemesini otomatik hesaplanmış olarak görüyor · ✅ sporcu kendi hedefini koyabiliyor (PT'si olsun ya da olmasın) · ✅ salon bir yürüyüş etkinliği oluşturup tüm üyelere bildirim gönderebiliyor, üyeler RSVP verebiliyor — gerçek Postgres'e karşı senaryo scriptiyle uçtan uca doğrulandı (startValue otomatik alma, ilerleme %, ACHIEVED tetiklenmesi, WORKOUT_FREQUENCY check-in tetiklemesi, hedef iptali, etkinlik+RSVP round-trip)
 
-**Bağımlılık:** Faz 37 (ölçüm bazlı ilerleme hesabı için) · Faz 27.1 (Web Push — bildirim için) ✅ · `CheckIn`/`ExerciseSetLog` (antrenman sıklığı hedefleri için) ✅
+**Doğrulama:** `pnpm typecheck` (web+cloud-client) + `npx tsc --noEmit` (mobil) + ESLint (yeni uyarı yok) + Vitest 75/75 (14 yeni test: `lib/goals/progress.test.ts`) + gerçek yerel Postgres'e (portable, UTF8, 46 migration) karşı tek seferlik senaryo scripti (yukarıdaki kabul kriteri detayları) başarıyla çalıştırıldı ve silindi.
+
+**Dosyalar:** migration `20260721020000_faz39_athlete_goals_and_events`, `lib/goals/{progress,list,reevaluate,create}.ts` (yeni), `actions/{goals,gym-events}.ts` (yeni), `actions/measurements.ts` + `lib/check-in/process.ts` (reevaluate hook'u eklendi), `api/v1/goals/{route,[id]/cancel/route}.ts` + `api/v1/events/{route,[id]/rsvp/route}.ts` (yeni), `components/{goal-assign-panel,gym-event-panel,athlete-goal-panel,athlete-event-list}.tsx` (yeni), `app/(tenant)/dashboard/members/[id]/page.tsx` + `app/(tenant)/dashboard/events/page.tsx` (yeni) + `app/(tenant)/dashboard/layout.tsx` (nav), `app/(athlete)/athlete/{page,goals/page,events/page}.tsx`, `messages/*.json` (6 dil, `events`/`members.goals`/`athlete.goals`/`athlete.events`/`athlete.goalsCard`/`athlete.eventsCard` namespace'leri), `apps/mobile/src/screens/{GoalsScreen,EventsScreen}.tsx` (yeni), `apps/mobile/src/screens/HomeScreen.tsx`, `apps/mobile/App.tsx`, `apps/mobile/src/lib/{api,types}.ts`
+
+**Bağımlılık:** Faz 37 (ölçüm bazlı ilerleme hesabı için) ✅ · Faz 27.1 (Web Push — bildirim için) ✅ · `CheckIn` (antrenman sıklığı hedefleri için) ✅
 
 ---
 

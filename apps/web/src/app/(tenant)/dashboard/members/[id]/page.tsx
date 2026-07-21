@@ -1,5 +1,6 @@
 import { AddMeasurementForm } from '@/components/add-measurement-form';
 import { AvatarUpload } from '@/components/avatar-upload';
+import { GoalAssignPanel } from '@/components/goal-assign-panel';
 import { MemberAccountPanel } from '@/components/member-account-panel';
 import { MemberHealthHistoryTable } from '@/components/member-health-history-table';
 import { MemberRfidForm } from '@/components/member-rfid-form';
@@ -9,6 +10,7 @@ import { HealthConsentForm } from '@/components/membership/health-consent-form';
 import { ProgramContentView } from '@/components/program-content-view';
 import { auth } from '@/lib/auth';
 import { intlLocaleFor } from '@/lib/format-locale';
+import { listAthleteGoalsWithProgress } from '@/lib/goals/list';
 import { decimalToNumber, getMemberAccountSummary } from '@/lib/member-balance';
 import { memberCountryLabel } from '@/lib/member-countries';
 import { getMemberPaymentPlans } from '@/lib/payment-plans';
@@ -24,6 +26,7 @@ const ACCOUNT_ROLES = new Set<OrganizationRole>(['OWNER', 'ADMIN', 'STAFF']);
 const MEMBER_MANAGER_ROLES = new Set<OrganizationRole>(['OWNER', 'ADMIN', 'STAFF']);
 const VOID_ROLES = new Set<OrganizationRole>(['OWNER', 'ADMIN']);
 const FREE_EXTEND_ROLES = new Set<OrganizationRole>(['OWNER', 'ADMIN']);
+const GOAL_MANAGER_ROLES = new Set<OrganizationRole>(['OWNER', 'ADMIN', 'TRAINER']);
 
 export default async function MemberDetailPage({
   params,
@@ -46,12 +49,13 @@ export default async function MemberDetailPage({
   const canManageMember = role ? MEMBER_MANAGER_ROLES.has(role) : false;
   const canSellMembership = role ? MEMBER_MANAGER_ROLES.has(role) : false;
   const canExtendFree = role ? FREE_EXTEND_ROLES.has(role) : false;
+  const canManageGoals = role ? GOAL_MANAGER_ROLES.has(role) : false;
 
   const t = await getTranslations('members');
   const locale = await getLocale();
   const dateLocale = intlLocaleFor(locale);
 
-  const [member, accountSummary, expenseCategories, paymentPlans, membershipPlans, pendingFreezes, allMembers] = await Promise.all([
+  const [member, accountSummary, expenseCategories, paymentPlans, membershipPlans, pendingFreezes, allMembers, athleteGoals] = await Promise.all([
     prisma.gymMember.findFirst({
       where: { id, organizationId },
       include: {
@@ -94,6 +98,7 @@ export default async function MemberDetailPage({
       select: { id: true, firstName: true, lastName: true },
       take: 300,
     }),
+    listAthleteGoalsWithProgress(organizationId, id),
   ]);
 
   if (!member) {
@@ -260,6 +265,24 @@ export default async function MemberDetailPage({
           }))}
         />
       ) : null}
+
+      <GoalAssignPanel
+        gymMemberId={member.id}
+        canManage={canManageGoals}
+        goals={athleteGoals.map((goal) => ({
+          id: goal.id,
+          createdByType: goal.createdByType,
+          targetType: goal.targetType,
+          measurementField: goal.measurementField,
+          targetValue: goal.targetValue?.toString() ?? null,
+          startValue: goal.startValue?.toString() ?? null,
+          targetDate: goal.targetDate?.toISOString() ?? null,
+          status: goal.status,
+          notes: goal.notes,
+          progressPercent: goal.progress.progressPercent,
+          currentValue: goal.progress.currentValue,
+        }))}
+      />
 
       {member.notes ? (
         <section className="card p-6">

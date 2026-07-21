@@ -17,7 +17,7 @@ export default async function AthleteHomePage() {
   const locale = await getLocale();
   const dateLocale = intlLocaleFor(locale);
 
-  const [member, pendingRequest] = await Promise.all([
+  const [member, pendingRequest, activeGoalsCount, upcomingEventsCount] = await Promise.all([
     prisma.gymMember.findFirst({
       where: {
         id: session.user.gymMemberId,
@@ -33,6 +33,16 @@ export default async function AthleteHomePage() {
     prisma.trainerRequest.findFirst({
       where: { gymMemberId: session.user.gymMemberId, status: 'PENDING' },
       select: { id: true },
+    }),
+    prisma.athleteGoal.count({
+      where: {
+        organizationId: session.user.organizationId,
+        gymMemberId: session.user.gymMemberId,
+        status: 'ACTIVE',
+      },
+    }),
+    prisma.gymEvent.count({
+      where: { organizationId: session.user.organizationId, startsAt: { gte: new Date() } },
     }),
   ]);
 
@@ -161,6 +171,21 @@ export default async function AthleteHomePage() {
           {t('manageTrainer')}
         </Link>
       </section>
+
+      <div className="grid grid-cols-2 gap-3">
+        <Link href="/athlete/goals" className="card p-4 transition hover:bg-white/5">
+          <p className="font-semibold">{t('goalsCard.title')}</p>
+          <p className="muted mt-1 text-xs">
+            {activeGoalsCount > 0 ? t('goalsCard.hasActive', { count: activeGoalsCount }) : t('goalsCard.empty')}
+          </p>
+        </Link>
+        <Link href="/athlete/events" className="card p-4 transition hover:bg-white/5">
+          <p className="font-semibold">{t('eventsCard.title')}</p>
+          <p className="muted mt-1 text-xs">
+            {upcomingEventsCount > 0 ? t('eventsCard.hasUpcoming', { count: upcomingEventsCount }) : t('eventsCard.empty')}
+          </p>
+        </Link>
+      </div>
 
       <p className="muted text-center text-xs leading-5">{t('apiHint')}</p>
     </div>

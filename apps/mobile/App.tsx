@@ -6,6 +6,8 @@ import * as Updates from 'expo-updates';
 import { TabBar, type TabKey } from './src/components/TabBar';
 import { UpdateBanner } from './src/components/UpdateBanner';
 import { AccountScreen } from './src/screens/AccountScreen';
+import { EventsScreen } from './src/screens/EventsScreen';
+import { GoalsScreen } from './src/screens/GoalsScreen';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { LoginScreen } from './src/screens/LoginScreen';
 import { MeasurementsScreen } from './src/screens/MeasurementsScreen';
@@ -27,6 +29,8 @@ function AppShell() {
   const [activeTab, setActiveTab] = useState<TabKey>('home');
   const [trainersOpen, setTrainersOpen] = useState(false);
   const [storeOpen, setStoreOpen] = useState(false);
+  const [goalsOpen, setGoalsOpen] = useState(false);
+  const [eventsOpen, setEventsOpen] = useState(false);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [update, setUpdate] = useState<UpdateInfo | null>(null);
 
@@ -104,6 +108,7 @@ function AppShell() {
   // çift boşluk oluşmasın diye tek bir yerden (burada) yönetiliyor. Alt boşluk ise
   // TabBar kendi güvenli alan payını zaten ayırdığı için ekranlara eklenmiyor.
   const screenTopInset = update ? 0 : insets.top;
+  const anyOverlayOpen = trainersOpen || storeOpen || goalsOpen || eventsOpen;
 
   return (
     <View style={styles.app}>
@@ -113,22 +118,26 @@ function AppShell() {
           <TrainersScreen session={session} onBack={() => setTrainersOpen(false)} />
         ) : null}
         {storeOpen ? <StoreScreen session={session} onBack={() => setStoreOpen(false)} /> : null}
-        {!trainersOpen && !storeOpen && activeTab === 'home' ? (
+        {goalsOpen ? <GoalsScreen session={session} onBack={() => setGoalsOpen(false)} /> : null}
+        {eventsOpen ? <EventsScreen session={session} onBack={() => setEventsOpen(false)} /> : null}
+        {!anyOverlayOpen && activeTab === 'home' ? (
           <HomeScreen
             session={session}
             onNavigate={setActiveTab}
             onOpenTrainers={() => setTrainersOpen(true)}
             onOpenStore={() => setStoreOpen(true)}
+            onOpenGoals={() => setGoalsOpen(true)}
+            onOpenEvents={() => setEventsOpen(true)}
           />
         ) : null}
-        {!trainersOpen && !storeOpen && activeTab === 'programs' ? <ProgramsScreen session={session} /> : null}
-        {!trainersOpen && !storeOpen && activeTab === 'measurements' ? <MeasurementsScreen session={session} /> : null}
-        {!trainersOpen && !storeOpen && activeTab === 'messages' ? <MessagesScreen session={session} /> : null}
-        {!trainersOpen && !storeOpen && activeTab === 'account' ? (
+        {!anyOverlayOpen && activeTab === 'programs' ? <ProgramsScreen session={session} /> : null}
+        {!anyOverlayOpen && activeTab === 'measurements' ? <MeasurementsScreen session={session} /> : null}
+        {!anyOverlayOpen && activeTab === 'messages' ? <MessagesScreen session={session} /> : null}
+        {!anyOverlayOpen && activeTab === 'account' ? (
           <AccountScreen session={session} onLogout={handleLogout} />
         ) : null}
       </View>
-      {!trainersOpen && !storeOpen ? (
+      {!anyOverlayOpen ? (
         <TabBar active={activeTab} onChange={setActiveTab} badges={{ messages: unreadMessages }} />
       ) : null}
       <StatusBar style="light" />

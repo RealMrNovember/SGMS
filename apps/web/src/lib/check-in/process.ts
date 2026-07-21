@@ -6,6 +6,7 @@ import {
 } from '@/lib/check-in/guest-qr';
 import { publishCheckInEvent, type CheckInCreatedPayload } from '@/lib/realtime/hub';
 import { sendPushToUsers } from '@/lib/push/send';
+import { reevaluateGoalsForMember } from '@/lib/goals/reevaluate';
 import { prisma } from '@/lib/prisma';
 import { consumeRateLimit } from '@/lib/rate-limit';
 import type { AccessDirection, AccessSubjectType, CheckInMethod, OrganizationRole } from '@sgms/database';
@@ -564,6 +565,10 @@ export async function processCheckIn(input: ProcessCheckInInput): Promise<Proces
 
   if (subject.subjectType === 'GYM_MEMBER') {
     void notifyReceptionOfCheckIn(input.organizationId, payload);
+    // Faz 39 — haftalık antrenman sıklığı hedefleri bu check-in'le tamamlanmış olabilir.
+    if (direction === 'ENTRY') {
+      void reevaluateGoalsForMember(input.organizationId, subject.gymMemberId!, 'checkin');
+    }
   }
 
   return {

@@ -61,7 +61,8 @@
     "discounts": "Kuponlar",
     "guestPasses": "Misafir Kartları",
     "equipment": "Ekipman",
-    "hr": "Personel Yönetimi"
+    "hr": "Personel Yönetimi",
+    "events": "Etkinlikler"
   },
   "auth": {
     "login": "Giriş Yap",
@@ -226,6 +227,50 @@
       "step1": "Kişisel Bilgiler",
       "step2": "Üyelik",
       "step3": "Notlar & Onay"
+    },
+    "goals": {
+      "assignTitle": "Hedef Ata",
+      "assignSubtitle": "Sporcuya somut bir hedef atayın; ilerleme otomatik hesaplanır.",
+      "activeGoalsTitle": "Hedefler",
+      "noGoals": "Henüz hedef atanmamış.",
+      "targetType": "Hedef türü",
+      "measurementField": "Ölçüm alanı",
+      "direction": "Yön",
+      "directionIncrease": "Büyüt",
+      "directionDecrease": "Azalt",
+      "targetValue": "Hedef değer",
+      "targetValueWorkoutHint": "Haftalık antrenman sayısı",
+      "targetDate": "Hedef tarih (opsiyonel)",
+      "notes": "Not (opsiyonel)",
+      "submit": "Hedefi ata",
+      "submitting": "Atanıyor…",
+      "cancelGoal": "İptal et",
+      "createdBySelf": "Sporcu kendi koydu",
+      "createdByTrainer": "PT tarafından atandı",
+      "progressLabel": "%{percent} tamamlandı",
+      "currentValueLabel": "Şu an: {value}",
+      "noPermission": "Hedef atamak için OWNER, ADMIN veya PT yetkisi gerekir.",
+      "targetTypes": {
+        "WEIGHT_LOSS": "Kilo verme",
+        "WEIGHT_GAIN": "Kilo alma",
+        "BODY_FAT_REDUCTION": "Yağ oranı düşürme",
+        "MEASUREMENT_CHANGE": "Ölçüm değişimi",
+        "WORKOUT_FREQUENCY": "Antrenman sıklığı",
+        "CUSTOM": "Serbest hedef"
+      },
+      "measurementFields": {
+        "waistCm": "Bel (cm)",
+        "chestCm": "Göğüs (cm)",
+        "hipCm": "Kalça (cm)",
+        "armCm": "Kol (cm)",
+        "thighCm": "Bacak (cm)"
+      },
+      "statusLabels": {
+        "ACTIVE": "Aktif",
+        "ACHIEVED": "Ulaşıldı",
+        "MISSED": "Kaçırıldı",
+        "CANCELLED": "İptal"
+      }
     }
   },
   "measurements": {
@@ -643,6 +688,32 @@
       "newPassword": "Yeni parola",
       "newPasswordConfirmation": "Yeni parola (tekrar)",
       "changePassword": "Parolayı değiştir"
+    },
+    "goals": {
+      "title": "Hedeflerim",
+      "createButton": "Yeni hedef koy",
+      "createTitle": "Yeni hedef",
+      "noGoals": "Henüz bir hedefin yok. PT'in atayabilir ya da kendin koyabilirsin.",
+      "cancel": "İptal et",
+      "submit": "Hedefi oluştur",
+      "submitting": "Oluşturuluyor…"
+    },
+    "events": {
+      "title": "Etkinlikler",
+      "noEvents": "Şu an yaklaşan bir etkinlik yok.",
+      "going": "Katılıyorum",
+      "cancelRsvp": "Katılımı iptal et",
+      "goingCount": "{count} kişi katılıyor"
+    },
+    "goalsCard": {
+      "title": "Hedeflerim",
+      "hasActive": "{count} aktif hedef",
+      "empty": "Henüz hedef koyulmadı"
+    },
+    "eventsCard": {
+      "title": "Etkinlikler",
+      "hasUpcoming": "{count} yaklaşan etkinlik",
+      "empty": "Yaklaşan etkinlik yok"
     }
   },
   "expenses": {
@@ -2144,6 +2215,31 @@
       "maxMembersLabel": "Maks. üye kapasitesi (opsiyonel)",
       "saving": "Kaydediliyor…",
       "submit": "Profili kaydet"
+    }
+  },
+  "events": {
+    "title": "Etkinlikler",
+    "subtitle": "Salon motivasyon etkinlikleri oluşturun; tüm aktif üyelere bildirim gider.",
+    "createTitle": "Yeni etkinlik",
+    "fields": {
+      "title": "Başlık",
+      "description": "Açıklama (opsiyonel)",
+      "eventType": "Tür",
+      "startsAt": "Tarih / saat",
+      "location": "Konum (opsiyonel)"
+    },
+    "submit": "Etkinliği oluştur",
+    "submitting": "Oluşturuluyor…",
+    "listTitle": "Yaklaşan Etkinlikler",
+    "noEvents": "Henüz etkinlik oluşturulmadı.",
+    "goingCount": "{count} kişi katılıyor",
+    "cancelEvent": "Etkinliği sil",
+    "noPermission": "Etkinlik oluşturmak için OWNER, ADMIN veya STAFF yetkisi gerekir.",
+    "eventTypes": {
+      "WALK": "Yürüyüş",
+      "RUN": "Koşu",
+      "SPORT": "Spor Etkinliği",
+      "OTHER": "Diğer"
     }
   }
 }

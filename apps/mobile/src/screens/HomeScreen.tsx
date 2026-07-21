@@ -8,10 +8,19 @@ import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { PressableScale } from '../components/ui/PressableScale';
-import { fetchMe, fetchMeasurements, fetchTrainerRequests } from '../lib/api';
+import { fetchGoals, fetchMe, fetchMeasurements, fetchTrainerRequests } from '../lib/api';
 import { colors, gradients, radius, shadow, spacing, typography } from '../lib/theme';
-import type { AthleteSession, HealthMeasurement, MeResponse } from '../lib/types';
+import type { AthleteGoal, AthleteSession, HealthMeasurement, MeResponse } from '../lib/types';
 import type { TabKey } from '../components/TabBar';
+
+const GOAL_TARGET_TYPE_LABEL: Record<AthleteGoal['targetType'], string> = {
+  WEIGHT_LOSS: 'Kilo Verme',
+  WEIGHT_GAIN: 'Kilo Alma',
+  BODY_FAT_REDUCTION: 'Yağ Oranı Düşürme',
+  MEASUREMENT_CHANGE: 'Ölçüm Değişimi',
+  WORKOUT_FREQUENCY: 'Antrenman Sıklığı',
+  CUSTOM: 'Serbest Hedef',
+};
 
 const STATUS_LABEL: Record<string, string> = {
   ACTIVE: 'Aktif Üye',
@@ -25,28 +34,35 @@ export function HomeScreen({
   onNavigate,
   onOpenTrainers,
   onOpenStore,
+  onOpenGoals,
+  onOpenEvents,
 }: {
   session: AthleteSession;
   onNavigate: (tab: TabKey) => void;
   onOpenTrainers: () => void;
   onOpenStore: () => void;
+  onOpenGoals: () => void;
+  onOpenEvents: () => void;
 }) {
   const [me, setMe] = useState<MeResponse | null>(null);
   const [latestMeasurement, setLatestMeasurement] = useState<HealthMeasurement | null>(null);
   const [hasPendingTrainerRequest, setHasPendingTrainerRequest] = useState(false);
+  const [activeGoal, setActiveGoal] = useState<AthleteGoal | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [qrVisible, setQrVisible] = useState(false);
 
   const loadAll = useCallback(async () => {
     try {
-      const [meData, measurementsData, trainerRequests] = await Promise.all([
+      const [meData, measurementsData, trainerRequests, goalsData] = await Promise.all([
         fetchMe(session.accessToken),
         fetchMeasurements(session.accessToken),
         fetchTrainerRequests(session.accessToken),
+        fetchGoals(session.accessToken),
       ]);
       setMe(meData);
       setLatestMeasurement(measurementsData.measurements[0] ?? null);
       setHasPendingTrainerRequest(trainerRequests.requests.some((r) => r.status === 'PENDING'));
+      setActiveGoal(goalsData.goals.find((g) => g.status === 'ACTIVE') ?? null);
     } catch {
       // sessiz — sayfa zaten kısmi verilerle çalışabilir
     }
@@ -130,7 +146,34 @@ export function HomeScreen({
             onPress={() => onNavigate('messages')}
           />
           <StatCard icon="bag-outline" value="Aç" label="Mağaza" onPress={onOpenStore} />
+          <StatCard icon="calendar-outline" value="Aç" label="Etkinlik" onPress={onOpenEvents} />
         </View>
+
+        <PressableScale onPress={onOpenGoals} haptic>
+          <Card>
+            <View style={styles.trainerHeader}>
+              <SectionTitle icon="flag-outline" label="Hedeflerim" />
+              {activeGoal ? <Badge label={`%${Math.round(activeGoal.progressPercent ?? 0)}`} tone="gold" /> : null}
+            </View>
+            {activeGoal ? (
+              <>
+                <Text style={styles.trainerName}>{GOAL_TARGET_TYPE_LABEL[activeGoal.targetType]}</Text>
+                {activeGoal.progressPercent != null ? (
+                  <View style={styles.progressTrack}>
+                    <View
+                      style={[
+                        styles.progressFill,
+                        { width: `${Math.min(100, Math.max(0, activeGoal.progressPercent))}%` },
+                      ]}
+                    />
+                  </View>
+                ) : null}
+              </>
+            ) : (
+              <Text style={styles.trainerName}>Henüz bir hedefin yok, dokunup oluştur</Text>
+            )}
+          </Card>
+        </PressableScale>
 
         {latestMeasurement ? (
           <Card>
@@ -245,8 +288,8 @@ const styles = StyleSheet.create({
   qrCtaTextWrap: { flex: 1 },
   qrCtaTitle: { ...typography.heading, color: colors.text },
   qrCtaSubtitle: { ...typography.caption, color: colors.muted, marginTop: 2 },
-  statsRow: { flexDirection: 'row', gap: spacing.sm },
-  statCardWrap: { flex: 1 },
+  statsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  statCardWrap: { flexBasis: '30%', flexGrow: 1 },
   statCard: {
     backgroundColor: colors.card,
     borderRadius: radius.md,
@@ -262,6 +305,14 @@ const styles = StyleSheet.create({
   sectionTitle: { ...typography.subheading, color: colors.text },
   trainerHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: spacing.sm },
   trainerName: { ...typography.body, color: colors.muted },
+  progressTrack: {
+    marginTop: spacing.sm,
+    height: 8,
+    borderRadius: radius.pill,
+    backgroundColor: colors.border,
+    overflow: 'hidden',
+  },
+  progressFill: { height: '100%', borderRadius: radius.pill, backgroundColor: colors.gold },
   measurementGrid: { flexDirection: 'row', justifyContent: 'space-between' },
   measurementItem: { alignItems: 'center', flex: 1 },
   faint: { ...typography.caption, color: colors.faint },
