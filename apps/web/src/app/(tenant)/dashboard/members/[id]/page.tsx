@@ -19,7 +19,7 @@ import { memberCountryLabel } from '@/lib/member-countries';
 import { getMemberPaymentPlans } from '@/lib/payment-plans';
 import { prisma } from '@/lib/prisma';
 import { trainerScopedMemberWhere } from '@/lib/trainers/member-scope';
-import { suggestCancelRefund } from '@/actions/membership-lifecycle';
+import { suggestCancelRefund } from '@/lib/membership/dates';
 import type { OrganizationRole } from '@sgms/database';
 import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';

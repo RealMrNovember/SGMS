@@ -646,21 +646,3 @@ export async function cancelMembership(
   };
 }
 
-/** Oranlı iade önerisi: plan fiyatı × (kalan gün / paket süresi). */
-export function suggestCancelRefund(params: {
-  planPrice: number | null;
-  durationDays: number | null;
-  membershipEndsAt: Date | null;
-  now?: Date;
-}): number {
-  const { planPrice, durationDays, membershipEndsAt, now = new Date() } = params;
-  if (planPrice == null || !durationDays || durationDays <= 0 || !membershipEndsAt) {
-    return 0;
-  }
-  const remaining = remainingMembershipDays(membershipEndsAt, now);
-  if (remaining <= 0) {
-    return 0;
-  }
-  return Math.round(planPrice * (Math.min(remaining, durationDays) / durationDays) * 100) / 100;
-}
-
