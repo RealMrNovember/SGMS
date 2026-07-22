@@ -11,7 +11,7 @@
 | **Legacy (kullanımdan kalktı)** | `license.cicibyte.com` — SGMS artık bu servisi kullanmıyor (bkz. Faz 13). Sunucu diğer istemciler (GarageLedger vb.) için ayakta kalmaya devam ediyor, SGMS'in ona bağımlılığı yok. |
 | **Kaynak doküman** | `sgms.cicibyte.com - readme.md` (teknik günlük/arşiv), `CiCiByte_SGMS_Ultimate_Enterprise_Blueprint.docx` |
 
-**Son güncelleme:** 2026-07-19 · **Bu dosya artık tek doğru kaynaktır** (`readme.md` sadece hızlı başlangıç talimatlarını barındırır, faz/durum takibi burada yapılır).
+**Son güncelleme:** 2026-07-22 · **Bu dosya artık tek doğru kaynaktır** (`readme.md` sadece hızlı başlangıç talimatlarını barındırır, faz/durum takibi burada yapılır).
 
 ---
 
@@ -38,7 +38,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 0 | Altyapı & Monorepo | ✅ Tamamlandı | 100% |
 | 1 | Veritabanı & Web Paneli | ✅ Tamamlandı | 100% |
 | 2 | Multi-Tenant Core & API v1 | ✅ Tamamlandı | 100% |
-| 3 | Production & Operasyon | ✅ Tamamlandı | 100% |
+| 3 | Production & Operasyon | ✅ Tamamlandı | 100% (+ 3.4 veri yaşam döngüsü / 3.5 felaket kurtarma — 🔲 yapılacak, 2026-07-22) |
 | 4 | Tenant UI — Core İş Mantığı (CRM) | ✅ Tamamlandı | 100% |
 | 5 | ~~Merkezi Lisans Entegrasyonu (license.cicibyte.com)~~ | 🗑️ Emekli (bkz. Faz 13) | — |
 | 6 | Uluslararasılaşma (i18n) & Medya/Kimlik | 🔄 Devam ediyor | ~95% (6 dil + medya/kimlik + küresel lokasyon veritabanı tamamlandı; yalnızca İtalyanca/Portekizce — Faz 6.3 — sırada) |
@@ -52,7 +52,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 14 | Demo Hesap Güvenliği & Master Admin Geçişi | ✅ Tamamlandı | 100% (Demo PT girişi — 2026-07-19 kapatıldı) |
 | 15 | Kimlik, Onboarding & Uyum Sertleştirme | ✅ Tamamlandı | ~95% (proaktif hatırlatma + 6 dil çevirisi kaldı) |
 | 16 | CiciByte Cloud Ticari Entegrasyonu (Ödeme, Referans/Komisyon, Release) | 🔄 Devam ediyor | ~90% (Platform Ödeme Ayarları paneli — iyzico/PayTR/EFT — 2026-07-19'da eklendi; gerçek anahtarlar bekleniyor) |
-| 17 | Üyelik Senaryoları & Ders/Sınıf Yönetimi | ✅ Tamamlandı | 100% (17.0–17.7 — Lead, dondurma/devir, grup üyelik, ders/yoklama/QR, kupon, POS stok, Guest Pass — 2026-07-19) |
+| 17 | Üyelik Senaryoları & Ders/Sınıf Yönetimi | ✅ Tamamlandı | 100% (17.0–17.7); **17.8 tedarikçi/COGS — 🔲 yapılacak** (2026-07-22) |
 | 18 | Uyumluluk & Sağlamlaştırma (2FA, GDPR, E2E, Invoice) | ✅ Tamamlandı | 100% (GDPR self-servis, sağlık rızası, Invoice, 18.1 sözleşme PDF; 2FA+E2E önceden — 2026-07-19) |
 | 19 | SGMS Masaüstü Yeniden Yapılandırma | 🔄 Devam ediyor | 0% (ikon/arayüz/otomatik güncelleme/offline — 2026-07-19 başlandı) |
 | 20 | SGMS Mobil Uygulama (React Native) | 🔄 Devam ediyor | 0% (Cursor'da başlıyor — 2026-07-19) |
@@ -63,12 +63,12 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 25 | Kasa Yönetimi (Vardiya, X/Z Raporu) | ✅ Tamamlandı | 100% (CashRegisterShift, X/Z, nakit kilidi — 2026-07-19) |
 | 26 | Dijital Üyelik Kartı (Wallet/NFC) | 🔲 Planlandı | 0% |
 | 27 | Bildirim Merkezi (Push/SMS/WhatsApp/Mail) | 🔄 Devam ediyor | ~35% (tarayıcı Web Push tamamlandı) |
-| 28 | İleri Raporlama & Business Intelligence | ✅ Tamamlandı | ~80% (ARR, churn-anketi, Excel/PDF export v2'ye ertelendi) |
-| 29 | Yapay Zeka Öngörüleri | 🔲 Planlandı | 0% |
-| 30 | Kurumsal Hiyerarşi & Çoklu Şube/Bölge Yönetimi | ✅ Tamamlandı | v1 (branch pricing/finans-İK rolleri v2'ye ertelendi) |
+| 28 | İleri Raporlama & Business Intelligence | ✅ Tamamlandı | ~80% (ARR/Excel/PDF v2; **28.1 NPS & otomatik memnuniyet — 🔲 yapılacak**, 2026-07-22) |
+| 29 | Yapay Zeka Öngörüleri | 🔲 Planlandı | 0% (NPS skorları — Faz 28.1 — churn/AI için veri kaynağı olarak not edildi) |
+| 30 | Kurumsal Hiyerarşi & Çoklu Şube/Bölge Yönetimi | ✅ Tamamlandı | v1 (branch pricing/finans-İK + **SLA/DR garantileri — Faz 3.5**, v2) |
 | 31 | Entegrasyon Pazaryeri | 🔲 Planlandı | 0% |
 | 32 | Ticarileştirme: Paket & Ek Kapasite Satışı | 🔲 Planlandı | 0% |
-| 33 | Dinamik Rol Bazlı Kullanım Kılavuzu + Ayarlar Modernizasyonu | ✅ Tamamlandı | 100% (HelpArticle, /help, bağlamsal ?, Master Admin CRUD, ayarlar sekmeleri — 2026-07-19) |
+| 33 | Dinamik Rol Bazlı Kullanım Kılavuzu + Ayarlar Modernizasyonu | ✅ Tamamlandı | 100% (+ **33.2 SaaS destek bileti — 🔲 yapılacak**, 2026-07-22) |
 | 34 | Tam Responsive Tasarım Sistemi | ✅ Tamamlandı | ~97% (sol menü/tema/ikon + mobil tablo/kart + mesajlaşma + profil özyönetimi + interaktif program görünümü tamamlandı — yalnızca video desteği/ilerleme geçmişi Tier 2'ye ertelendi) |
 | 35 | Temsilci (Partner) Portalı | ✅ Tamamlandı | 100% |
 | 36 | Kritik İş Mantığı Denetimi & Sağlamlaştırma (2026-07-19 canlıya alma denetimi) | ✅ Tamamlandı | 100% (36.1–36.11 tamamı kapatıldı — 2026-07-19) |
@@ -166,6 +166,32 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 ### 3.3 Gözlemlenebilirlik
 - [x] PM2 log rotasyonu
 - [x] Docker healthcheck cron
+
+### 3.4 Veri Büyümesi & Arşivleme Stratejisi (Data Lifecycle Management) — 🔲 yapılacak (2026-07-22 eklendi)
+
+> **Durum:** Faz 10 (IoT/turnike `CheckIn`), Faz 12 (`AuditLog`), Faz 9 (`DirectMessage`), Faz 37 (`HealthMeasurement` / fotoğraflar) ve Faz 41 (`FoodLogEntry`) ile birlikte sistem uzun vadede **devasa** satır hacmi üretecek. Bugün büyüme için partitioning / soğuk depo / saklama politikası yok — maliyet ve sorgu gecikmesi doğrudan etkilenir.
+>
+> **Eksik / düzeltilecek:** Aktif OLTP tablolarının zamana göre bölümlendirilmesi veya belirli yaştan eski kayıtların soğuk depoya taşınması / özetlenmesi.
+
+- [ ] Saklama politikası dokümantasyonu — tablo bazlı hedef (ör. `CheckIn` ham log 24–36 ay sıcak, sonrası soğuk; `AuditLog` yasal/uyum süresi; mesajlar / ölçümler / beslenme günlüğü için ayrı SLA)
+- [ ] PostgreSQL **partitioning** (tercihen `RANGE` on `created_at` / `activityAt`) — öncelik: `CheckIn`, `AuditLog`, `HealthMeasurement`, `DirectMessage`, `FoodLogEntry`, `GymMemberActivity`
+- [ ] Soğuk depo (cold storage) hattı — 3+ yıl eski check-in / audit satırlarının object storage’a (R2/S3) arşivlenmesi veya özet tabloya rollup; sıcak DB’den silme/ayırma cron’u
+- [ ] Tenant / Master Admin’de “arşiv durumu” görünürlüğü (opsiyonel) — raporların arşiv kırılımını doğru okuması
+- [ ] Performans kabul kriteri: 10M+ `CheckIn` satırında son-30-gün dashboard sorgularının p95’i bozulmadan kalır
+
+**Bağımlılık / çapraz referans:** Faz 10.2 · Faz 12.2 · Faz 37 · Faz 41 · Faz 9.2 · üretim yedekleme (Faz 3.5)
+
+### 3.5 Felaket Kurtarma (Disaster Recovery) Protokolü — 🔲 yapılacak (2026-07-22 eklendi)
+
+> **Durum:** Faz 0/3 ile Docker + PostgreSQL + Redis + PM2 ayakta; **eksik:** off-site yedek sıklığı, RTO/RPO hedefleri ve kurumsal zincirlerin (Faz 30) SLA sözleşmesinde görmek istediği felaket senaryoları yazılı değil.
+
+- [ ] Off-site (farklı bulut / bölge) PostgreSQL yedekleme — sıklık (ör. günlük full + sürekli WAL / PITR), saklama süresi, şifreleme
+- [ ] Redis / kritik config / medya (R2) için yedekleme kapsamı netleştirilir
+- [ ] **RTO / RPO** hedeflerinin yazılı SLA’sı (ör. RPO ≤ 24s / RTO ≤ 4s — değerler ürün kararı; dokümante edilmeli)
+- [ ] Yılda en az bir kez restore tatbikatı (yedekten boş ortama ayağa kaldırma) + sonuç kaydı
+- [ ] Franchise / kurumsal müşteriler için SLA maddesi taslağı — bkz. Faz 30 v2 notu
+
+**Bağımlılık:** Faz 0 · Faz 3.1–3.3 · Faz 30 (kurumsal satışta talep)
 
 ---
 
@@ -420,6 +446,8 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 **Kabul kriteri:** ✅ PT mesaj gönderir → sporcu paneli anında güncellenir (<2 sn)
 
+> **Uzun vadeli (yapılacak):** `DirectMessage` hacmi → **Faz 3.4 Veri Yaşam Döngüsü**.
+
 ---
 
 ## ✅ Faz 10 — IoT, Kapı, Turnike Sistemleri & SGMS Resepsiyon (Tamamlandı)
@@ -447,6 +475,8 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 - [x] Web panelinden indirme linkleri (`reception-download-promo.tsx`)
 
 **Kabul kriteri:** ✅ Offline check-in kuyruğu → online sync → `AuditLog` + üye giriş kaydı · SGMS Resepsiyon v0.5.0 ile tam resepsiyon masası akışı
+
+> **Uzun vadeli (yapılacak):** `CheckIn` / `GymAccessLog` satır büyümesi → **Faz 3.4 Veri Yaşam Döngüsü** (partitioning + soğuk depo). Bu fazın v1 kapsamı dışıydı.
 
 ---
 
@@ -501,6 +531,12 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 **Kabul kriteri:** karşılandı — Master Admin tek panelden tüm organizasyonları, abonelikleri, planları ve audit geçmişini yönetebiliyor · sahte/test organizasyonlar isim-doğrulamalı onaylı bir akışla kalıcı olarak silinebiliyor
 
 **Dosyalar:** `packages/database/prisma/schema.prisma` (`ORGANIZATION_DELETED`), migration `20260719080000_add_organization_deleted_audit_action`, `actions/admin-organizations.ts`, `components/admin/organization-hard-delete-button.tsx`, `app/(super-admin)/admin/organizations/[id]/page.tsx`, `lib/admin/audit-labels.ts`
+
+### 12.5 AuditLog saklama / arşiv — 🔲 yapılacak (çapraz → Faz 3.4)
+
+> Platform audit feed’i büyüdükçe export ve filtre sorguları yavaşlar. Hard-delete (12.4) org bazlı temizlik sağlar; **zaman bazlı arşiv** ayrı bir iştir.
+
+- [ ] `AuditLog` için saklama süresi + partitioning / soğuk depo — **Faz 3.4** kapsamında öncelikli tablolardan biri
 
 ---
 
@@ -721,11 +757,27 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 - [x] `/dashboard/guest-passes` — oluşturma + anlık QR; iptal
 - [x] `/api/v1/check-in/guest` + process hook — süresi dolmuş/geçersiz misafir için net uyarı
 
-**Kabul kriteri:** ✅ Karşılandı — dondurma/devir · grup/kurumsal pano · ders rezervasyonu + bekleme + yoklama/QR · Lead (17.0) · Guest Pass · POS stok KPI
+### 17.8 Tedarikçi & Maliyet (COGS) Yönetimi — 🔲 yapılacak (2026-07-22 eklendi)
+
+> **Durum:** Faz 17.6 (POS stok) + Faz 40 (self-servis mağaza) ile satış ve stok düşümü var. **Eksik:** toptancıdan alım (Purchase Order), tedarikçi cari hesabı ve Satılan Malın Maliyeti (COGS) — brüt kâr ve “hangi toptancıya ne borçluyuz” sorusu yanıtlanamıyor.
+>
+> **Senaryo:** Salon sahibi protein tozundan ne kadar brüt kâr ettiğini ve tedarikçi X’e ne kadar borcu olduğunu panelden görmek ister.
+
+- [ ] `Supplier` (tedarikçi) modeli — unvan, vergi no, iletişim, para birimi
+- [ ] `PurchaseOrder` / `PurchaseOrderLine` — sipariş → teslimat → stok artırımı (`ExpenseCategory.stockQuantity` ile **aynı** sayaç; Faz 40 tek-kaynak kararı bozulmaz)
+- [ ] Tedarikçi cari: alım borçları + ödemeler (mevcut `Expense`/`Transaction` desenine uyumlu veya ayrı `SupplierLedger` — ürün kararı)
+- [ ] Ürün/kategori bazlı **birim maliyet** (weighted average veya son alış) + satış anında COGS kaydı
+- [ ] Rapor: kategori/ürün brüt kâr (ciro − COGS), tedarikçi bakiyesi — `/dashboard/reports` veya POS altı (Faz 28 ile bütünleşir)
+- [ ] Düşük stok uyarısından “yeniden sipariş öner” (opsiyonel, Faz 27 bildirimi)
+
+**Bağımlılık (17.8):** Faz 17.6 ✅ · Faz 40 ✅ · Faz 8 (cari/kasa deseni) ✅ · Faz 28 (rapor yüzeyi)
+
+**Kabul kriteri (17.0–17.7):** ✅ Karşılandı — dondurma/devir · grup/kurumsal pano · ders rezervasyonu + bekleme + yoklama/QR · Lead (17.0) · Guest Pass · POS stok KPI  
+*(17.8 COGS: tedarikçi borcu + ürün brüt kârı panelde görünür — henüz karşılanmadı)*
 
 **Dosyalar (17.1–17.7):** migration `20260719080000_faz17_membership_scenarios`, `actions/membership-lifecycle|membership-groups|classes|discount-codes|guest-passes.ts`, dashboard/athlete sayfaları, `lib/check-in/guest-qr.ts`, messages (6 dil)
 
-**Bağımlılık:** Faz 15 · Faz 27 (bekleme listesi SMS/push — bilinçli olarak kapsam dışı) · Faz 10 (QR)
+**Bağımlılık (17.0–17.7):** Faz 15 · Faz 27 (bekleme listesi SMS/push — bilinçli olarak kapsam dışı) · Faz 10 (QR)
 
 ---
 
@@ -1005,11 +1057,25 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 - [x] Dışa aktarma: her rapor tablosu için tek tıkla CSV indirme (UTF-8 BOM'lu, Excel'de Türkçe karakter sorunu yaşanmaz)
 - [x] Birim testli saf bucketing fonksiyonu (`lib/reports/bucketing.ts`) — 7 test, zaman dilimi doğruluğu dahil
 
-**Ertelendi (v2):** ARR, churn-nedeni anketi (üyelik iptalinde "neden ayrılıyorsunuz" formu — GymMember modeline yeni alan gerektirir), Excel/PDF export, zamanlanmış haftalık e-posta raporu (Faz 27'nin tam Bildirim Merkezi'ni bekliyor)
+**Ertelendi (v2):** ARR, Excel/PDF export, zamanlanmış haftalık e-posta raporu (Faz 27'nin tam Bildirim Merkezi'ni bekliyor). Churn-nedeni anketi → **28.1** altında genişletildi (yalnızca iptal anı değil, proaktif NPS).
 
-**Kabul kriteri:** ✅ Salon sahibi son 30 günün en yoğun saatini, en çok satan PT'yi ve yenileme oranını tek ekrandan görebiliyor
+### 28.1 Otomatize Geri Bildirim & NPS (Net Promoter Score) — 🔲 yapılacak (2026-07-22 eklendi)
 
-**Bağımlılık:** Faz 21 (PT verisi) ✅ · Faz 25 (kasa) ✅ · Faz 27 (zamanlanmış e-posta raporları için, v2)
+> **Durum:** Churn-nedeni anketi v2’ye ertelenmişti. **Eksik:** Üye iptal etmeden önce memnuniyeti ölçen otomatik yapı yok. Tek soruluk (0–10) NPS; Faz 29 AI churn skorları için güçlü bir sinyal kaynağıdır.
+>
+> **Tetikleyiciler (örnek):** yeni üyelikte ~30. gün; Faz 42 PT atama/değişiklik onayından N gün sonra; üyelik iptali / dondurma talebi öncesi (opsiyonel).
+
+- [ ] `NpsSurvey` / `NpsResponse` modeli — skor (0–10), serbest metin (opsiyonel), tetikleyici türü, `gymMemberId`, anonimleştirme politikası
+- [ ] Otomatik gönderim — Faz 27 (push/e-posta) üzerinden; mobil + sporcu web
+- [ ] Tenant özet: dönemsel NPS, detractor listesi (OWNER/ADMIN) — `/dashboard/reports` veya Insights
+- [ ] İptal akışına isteğe bağlı “neden ayrılıyorsunuz” (eski churn-anketi) — NPS ile birleştirilebilir
+- [ ] Faz 29 churn modeline özellik olarak `lastNpsScore` / trend bağlanır
+
+**Bağımlılık (28.1):** Faz 27 (bildirim) · Faz 42 (PT değişikliği tetikleyicisi) ✅ · Faz 29 (tüketici)
+
+**Kabul kriteri (28.0):** ✅ Salon sahibi son 30 günün en yoğun saatini, en çok satan PT'yi ve yenileme oranını tek ekrandan görebiliyor
+
+**Bağımlılık (28.0):** Faz 21 (PT verisi) ✅ · Faz 25 (kasa) ✅ · Faz 27 (zamanlanmış e-posta raporları için, v2)
 
 ---
 
@@ -1018,7 +1084,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 > **Vizyon:** *"AI; son 30 günde gelmeyen üyeleri tespit etti → otomatik kampanya öner → bu üye üyeliğini iptal edecek gibi → bu PT'nin performansı düştü → bu ay protein satışları arttı → fiyatı %5 artırırsanız geliriniz artabilir."* Bu, SGMS'i rakiplerinden ayıracak katman.
 
 - [ ] **Devamsızlık tespiti:** son N günde check-in yapmamış aktif üyelerin otomatik listelenmesi + "geri kazanma" kampanya önerisi (indirim kodu/mesaj taslağı)
-- [ ] **Churn tahmini (basit model, kural tabanlı başlangıç):** check-in sıklığı düşüşü + ödeme gecikmesi + PT seans iptal oranı gibi sinyallerin ağırlıklı skoru — "bu üye önümüzdeki 30 gün içinde ayrılma riski taşıyor" etiketi (gelişmiş ML modeli fast-follow; ilk sürüm açıklanabilir kural tabanlı skor olmalı — "kara kutu" değil)
+- [ ] **Churn tahmini (basit model, kural tabanlı başlangıç):** check-in sıklığı düşüşü + ödeme gecikmesi + PT seans iptal oranı + **(Faz 28.1 varsa) düşük/düşen NPS** gibi sinyallerin ağırlıklı skoru — "bu üye önümüzdeki 30 gün içinde ayrılma riski taşıyor" etiketi (gelişmiş ML modeli fast-follow; ilk sürüm açıklanabilir kural tabanlı skor olmalı — "kara kutu" değil)
 - [ ] **PT performans anomali tespiti:** bir PT'nin aylık ders/ciro trendinde ani düşüş tespit edilirse OWNER'a bildirim
 - [ ] **Satış trend analizi:** POS verisinden ürün bazlı trend ("bu ay protein satışları %20 arttı")
 - [ ] **Fiyatlandırma önerisi (bilgilendirici, otomatik uygulanmaz):** talep/doluluk verisine göre "plan fiyatını %X artırırsanız, geçmiş trend baz alındığında geliriniz artabilir" — **öneri sunar, karar her zaman salon sahibine aittir**
@@ -1026,7 +1092,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 **Kabul kriteri:** Sistem 30 gündür gelmeyen üyeleri otomatik listeleyip bir kampanya taslağı önerebiliyor · churn riski taşıyan üyeler önceden işaretleniyor
 
-**Bağımlılık:** Faz 28 (raporlama altyapısı — AI, ham veri üzerine değil, zaten hesaplanmış metrikler üzerine kurulur)
+**Bağımlılık:** Faz 28 (raporlama altyapısı — AI, ham veri üzerine değil, zaten hesaplanmış metrikler üzerine kurulur) · **Faz 28.1 (NPS)** — churn/AI için önerilen sinyal kaynağı (yapılacak)
 
 ---
 
@@ -1040,11 +1106,11 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 - [x] Master Admin UI: `admin/organizations/[id]` sayfasına ebeveyn organizasyon atama (döngü koruması ile) ve `HierarchyMember` atama/kaldırma paneli eklendi
 - [x] Ağaç gezinimi Prisma'nın recursive CTE desteklememesi nedeniyle JS tarafında seviye seviye yapılır (`lib/enterprise/hierarchy.ts`) — gerçekçi hiyerarşi boyutları (~100 şube) için yeterli
 
-**Ertelendi (v2):** `BRANCH_MANAGER` rol değişimi (mevcut OWNER zaten bu işlevi görüyor), şube bazlı fiyatlandırma/tek merkezi faturaya konsolidasyon, Finans/İK'ya özel fonksiyonel roller (Faz 22 HR'a bağımlı)
+**Ertelendi (v2):** `BRANCH_MANAGER` rol değişimi (mevcut OWNER zaten bu işlevi görüyor), şube bazlı fiyatlandırma/tek merkezi faturaya konsolidasyon, Finans/İK'ya özel fonksiyonel roller (Faz 22 HR'a bağımlı), **kurumsal SLA maddeleri** (uptime / RTO-RPO — **Faz 3.5 Felaket Kurtarma** dokümantasyonu tamamlanmadan sözleşme metnine yazılamaz)
 
 **Kabul kriteri:** ✅ Bir `COMPANY_ADMIN`/`REGIONAL_MANAGER` ataması olan kullanıcı, atandığı düğümün altındaki tüm şubelerin konsolide üye/personel/ciro/ziyaret verisini `/dashboard/enterprise`'da görebiliyor; Master Admin organizasyonları hiyerarşiye bağlayıp yetki atayabiliyor
 
-**Bağımlılık:** Faz 28 (raporlama, konsolidasyonun üzerine kurulduğu temel) ✅ · mevcut Franchise planı (Faz 1'den beri satılıyor, bu fazla ilk kez gerçek bir mimari karşılığı kazandı)
+**Bağımlılık:** Faz 28 (raporlama, konsolidasyonun üzerine kurulduğu temel) ✅ · mevcut Franchise planı (Faz 1'den beri satılıyor, bu fazla ilk kez gerçek bir mimari karşılığı kazandı) · Faz 3.5 (SLA/DR — yapılacak)
 
 ---
 
@@ -1146,6 +1212,20 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 **Dosyalar:** migration `20260719070000_help_articles`, `lib/help/*`, `app/help/*`, `admin/help/*`, `components/settings/settings-workspace.tsx`, `pnpm --filter @sgms/database help:seed`
 
 **Bağımlılık:** yok — Faz 32 coming-soon bayraklarıyla `relatedFeatureFlag` üzerinden bütünleşir
+
+### 33.2 SaaS Destek Bileti (Ticketing) — 🔲 yapılacak (2026-07-22 eklendi)
+
+> **Durum:** Faz 33 ile rol bazlı Help Center tamam. **Eksik:** Salon sahibi / yöneticinin platform içinden CiciByte’a “Destek Talebi / Ticket” açması — B2B SaaS standardı; iletişim formu veya e-posta zorunluluğu olmamalı.
+>
+> **Senaryo:** OWNER bir ödeme/webhook hatası görür → `/dashboard/support` → ticket açar → durumunu “Destek Taleplerim”den takip eder; Master Admin tarafında kuyruk.
+
+- [ ] `SupportTicket` + `SupportTicketMessage` (veya eşdeğeri) — konu, öncelik, durum (`OPEN`/`WAITING`/`RESOLVED`/`CLOSED`), tenant `organizationId`, oluşturan kullanıcı
+- [ ] Tenant UI: `/dashboard/support` — “Yeni talep” + “Taleplerim” listesi/detay (OWNER/ADMIN; isteğe bağlı STAFF read)
+- [ ] Master Admin: `/admin/support` — tüm tenant ticket kuyruğu, atama, yanıt, durum değiştirme
+- [ ] Bildirim: yeni yanıt / durum değişince tenant’a (Faz 27 Web Push + e-posta)
+- [ ] Help Center bağlamsal `?` → “Bu konuda destek talebi aç” kısayolu (opsiyonel, `HelpArticle` ile bağ)
+
+**Bağımlılık:** Faz 33 Help Center ✅ · Faz 12 Master Admin ✅ · Faz 27 (bildirim)
 
 ---
 
@@ -1532,6 +1612,8 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 **Bağımlılık:** Faz 6.2 ✅ · Faz 7 mobil API ✅
 
+> **Uzun vadeli (yapılacak):** `HealthMeasurement` + `MeasurementPhoto` hacmi → **Faz 3.4 Veri Yaşam Döngüsü**.
+
 ---
 
 ## ✅ Faz 38 — Mobil Hesap Yönetimi (Self-Servis Profil) — tamamlandı, 2026-07-20 (Öncelik: P1)
@@ -1608,6 +1690,8 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 **Bağımlılık:** Faz 17.6 (`ExpenseCategory.stockQuantity`) ✅ · Faz 8.7/8.7.1 (kartla ödeme altyapısı) ✅ · Faz 6.2 (avatar yükleme deseni) ✅
 
+> **Sonraki (yapılacak):** Satış/stok var; alım + tedarikçi cari + COGS yok → **Faz 17.8**.
+
 ---
 
 ## ✅ Faz 41 — Beslenme & Kalori Takibi (Öncelik: P2) — tamamlandı, 2026-07-21
@@ -1633,6 +1717,8 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 **Bağımlılık:** mevcut `TrainingProgram`/`ProgramType.NUTRITION` ✅ · Faz 39 (aynı sporcu-self-servis `request` parametresi deseni, `athlete-goal-panel`/`goals.ts` ile birebir aynı iskelet) ✅
 
+> **Uzun vadeli (yapılacak):** `FoodLogEntry` günlük yazım hacmi → **Faz 3.4 Veri Yaşam Döngüsü**.
+
 ---
 
 ## ✅ Faz 42 — Antrenör (PT) Atama & Değişiklik Talebi (Öncelik: P1) — tamamlandı, 2026-07-21
@@ -1657,6 +1743,8 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 **Dosyalar:** `actions/trainer-requests.ts`, `api/v1/trainer{s,-requests}/**`, `api/v1/trainer-requests/[id]/{review,cancel}/route.ts`, `components/trainers/{trainer-request-form,trainer-request-queue,trainer-profile-bio-form}.tsx`, `app/(athlete)/athlete/trainers/page.tsx`, `app/(tenant)/dashboard/trainer-requests/page.tsx`, `lib/trainers/profiles.ts`, `apps/mobile/src/screens/TrainersScreen.tsx` (commit `d622c0a`)
 
 **Bağımlılık:** `MembershipFreeze` talep/onay deseni (Faz 17.1) ✅ — aynı iskelet yeniden kullanıldı · Faz 27.1 (push bildirim) ✅ · Faz 21 (`TrainerProfile`, PT komisyon altyapısı) ✅
+
+> **Sonraki (yapılacak):** PT atama/değişiklik sonrası otomatik tek soruluk NPS → **Faz 28.1** tetikleyicisi.
 
 ---
 
@@ -1917,19 +2005,24 @@ Faz 38 tamamlandı (2026-07-20 — kullanıcı talebi, düşük risk/hızlı kaz
 Sıradaki (Faz 36 sonrası — profesyonel değerlendirme, P0 en önce):
   Faz 32     Ticarileştirme: paket + ek kapasite satışı          ← P0, gelir modeli (kullanıcı onayı gerekli)
 
-  Faz 42     Antrenör (PT) atama & değişiklik talebi              ← P1, kullanıcı talebi (2026-07-20), Faz 17.1
-             dondurma talep/onay deseni yeniden kullanılıyor — düşük risk
-  Faz 37     Gelişmiş vücut ölçümleri & ilerleme takibi          ← P1, kullanıcı talebi (2026-07-20)
-  Faz 39     Hedef takip & motivasyon sistemi                    ← P1, kullanıcı talebi, Faz 37'ye bağımlı
-  Faz 40     Sporcu self-servis mağaza (mobil alışveriş)         ← P1, kullanıcı talebi, Faz 8.7 üzerine kurulu
+  Faz 33.2   SaaS destek bileti (ticketing)                      ← P1, B2B standart; Help Center üzerine (2026-07-22)
+  Faz 17.8   Tedarikçi / Purchase Order / COGS                   ← P1, POS+mağaza brüt kâr (2026-07-22)
+  Faz 28.1   Otomatize NPS & memnuniyet anketleri                ← P1, churn/AI veri kaynağı (2026-07-22)
+  Faz 3.5    Felaket kurtarma (off-site yedek, RTO/RPO, SLA)     ← P1, kurumsal/Franchise satış (2026-07-22)
+  Faz 3.4    Veri yaşam döngüsü (partitioning / cold storage)    ← P2, ölçek maliyeti (2026-07-22)
+
+  Faz 42     Antrenör (PT) atama & değişiklik talebi              ← ✅ tamamlandı (2026-07-21)
+  Faz 37     Gelişmiş vücut ölçümleri & ilerleme takibi          ← ✅ tamamlandı
+  Faz 39     Hedef takip & motivasyon sistemi                    ← ✅ tamamlandı
+  Faz 40     Sporcu self-servis mağaza (mobil alışveriş)         ← ✅ tamamlandı
   Faz 27.3   Serverless kuyruk motoru (QStash/Inngest)           ← P1, Faz 27.2'nin önkoşulu
   Faz 6.3    Dil genişletmesi (İtalyanca/Portekizce)             ← P1, pazar genişletme — Country
              çevirileri zaten hazır (bkz. Faz 6.4), yalnızca messages/*.json + it/pt kaldı
 
-  Faz 41     Beslenme & kalori takibi                             ← P2, kullanıcı talebi, Faz 37'ye bağımlı
+  Faz 41     Beslenme & kalori takibi                             ← ✅ tamamlandı
   Faz 34.6   İnteraktif antrenman programı görünümü              ← P2
   Faz 26     Dijital üyelik kartı (Wallet/NFC)                   ← P2, Apple/Google Wallet imzalama sertifikası gerekli (henüz yok)
-  Faz 29     Yapay Zeka öngörüleri                                ← P2, Faz 28 verisine dayanır
+  Faz 29     Yapay Zeka öngörüleri                                ← P2, Faz 28 + 28.1 NPS verisine dayanır
   Faz 31     Entegrasyon Pazaryeri + 31.0 donanım API v2/RFID     ← P2, Faz 27 soyutlamasına dayanır
   Faz 24     Temizlik yönetimi                                    ← P3
 
