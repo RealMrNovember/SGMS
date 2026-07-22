@@ -35,7 +35,7 @@ export async function MobileAthleteShowcase() {
           <MarketingReveal>
             <div className="mobile-showcase__brand-row">
               <Image
-                src="/marketing/sgms-sporcu/icon-192.png"
+                src="/marketing/sgms-sporcu/icon-192.webp"
                 alt=""
                 width={56}
                 height={56}
@@ -91,7 +91,7 @@ export async function MobileAthleteShowcase() {
         <MarketingReveal delay={80} variant="slide-right" className="mobile-showcase__stage">
           <div className="mobile-showcase__feature" aria-hidden>
             <Image
-              src="/marketing/sgms-sporcu/feature-graphic.png"
+              src="/marketing/sgms-sporcu/feature-graphic.webp"
               alt=""
               width={1024}
               height={500}
