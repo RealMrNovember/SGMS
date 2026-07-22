@@ -928,7 +928,8 @@
     },
     "appsSection": {
       "kicker": "Desktop and Mobile",
-      "title": "Download our apps for your gym"
+      "title": "Download our apps for your gym",
+      "subtitle": "Reception desktop and SGMS Sporcu mobile — same platform, different roles."
     },
     "hero": {
       "kicker": "Digital Gym Operating System",
@@ -1378,21 +1379,42 @@
     "footerLink": "SGMS Reception (Windows)"
   },
   "mobileAthlete": {
-    "badge": "Android Mobile App",
-    "title": "SGMS Athlete",
-    "subtitle": "Athletes check in at the turnstile in seconds with a QR code on their phone; entries show up in your dashboard instantly.",
-    "download": "Download for Android (v{version})",
+    "badge": "Google Play · Android",
+    "title": "SGMS Sporcu",
+    "subtitle": "Membership, programs, measurements, messaging and secure payments — in your athletes’ pocket.",
+    "download": "Download APK (v{version})",
     "size": "{size} · {platform}",
     "features": {
-      "qr": "Auto-refreshing QR check-in code",
-      "fast": "Fast, passwordless return sign-in",
-      "light": "Lightweight, low data usage"
+      "qr": "On-demand QR check-in",
+      "fast": "Membership renewal & store",
+      "light": "Programs, metrics & messaging"
     },
     "loginHint": "Athlete mobile app",
-    "loginHintText": "Download the Android app so athletes can check in with a QR code. Sign in with your athlete account after install.",
-    "checkInHint": "Athletes scan their phone's QR code at the turnstile to check in within seconds.",
-    "footerLink": "SGMS Athlete (Android)",
-    "unsignedNotice": "Not yet on Google Play — installing requires allowing \"unknown sources\" on the device."
+    "loginHintText": "With SGMS Sporcu, members manage QR check-in, programs and accounts. Available via Google Play closed testing or APK.",
+    "checkInHint": "Membership, programs, measurements, messaging and secure checkout — in one app.",
+    "footerLink": "SGMS Sporcu (Android)",
+    "unsignedNotice": "On Google Play closed testing. If you’re not on the list, you can still install via APK.",
+    "showcase": {
+      "kicker": "Athlete mobile app",
+      "subtitle": "Manage membership, workouts, body metrics and payments in one app — now in Google Play closed testing.",
+      "ctaPlay": "Open on Google Play",
+      "playHint": "Closed testing: only invited testers can install from Play. Everyone can download the APK.",
+      "trialLink": "Don’t have a gym yet? Start a 14-day free trial →",
+      "highlights": {
+        "membership": "Membership status, statement and card renewal",
+        "programs": "Training programs, goals and nutrition",
+        "checkin": "On-demand QR for gym entry",
+        "store": "Gym store and trainer messaging"
+      },
+      "shots": {
+        "login": "SGMS Sporcu login screen",
+        "home": "Home overview",
+        "programs": "Training programs",
+        "measurements": "Body measurements",
+        "account": "Account and statement",
+        "messages": "Messaging"
+      }
+    }
   },
   "checkIn": {
     "title": "Gym Check-in",

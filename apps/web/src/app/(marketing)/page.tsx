@@ -2,6 +2,7 @@ import { auth } from '@/lib/auth';
 import { siteConfig } from '@/lib/site-config';
 import { ReceptionDownloadPromo } from '@/components/reception/reception-download-promo';
 import { MobileDownloadPromo } from '@/components/reception/mobile-download-promo';
+import { MobileAthleteShowcase } from '@/components/marketing/mobile-athlete-showcase';
 import {
   MarketingHeroScene,
   MarketingReveal,
@@ -109,11 +110,14 @@ export default async function ShowcaseHomePage() {
         </MarketingStagger>
       </section>
 
+      <MobileAthleteShowcase />
+
       <section id="app-downloads" className="mx-auto max-w-6xl px-4 py-12 sm:px-5 sm:py-16 lg:px-8">
         <MarketingReveal variant="scale-in">
           <div className="text-center">
             <p className="marketing-kicker">{t('appsSection.kicker')}</p>
             <h2 className="mt-4 text-2xl font-semibold tracking-tight sm:text-3xl">{t('appsSection.title')}</h2>
+            <p className="muted mx-auto mt-3 max-w-xl text-sm leading-7">{t('appsSection.subtitle')}</p>
           </div>
           <div className="mt-8 grid gap-5 sm:grid-cols-2">
             <ReceptionDownloadPromo variant="duo" />

@@ -42,3 +42,8 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# Play Store local artefacts (keep images/README; ignore huge AAB + emulator logs)
+play-store/*.aab
+play-store/*.log
+play-store/*.log.err

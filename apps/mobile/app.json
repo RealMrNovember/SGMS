@@ -2,7 +2,7 @@
   "expo": {
     "name": "SGMS Sporcu",
     "slug": "sgms-sporcu",
-    "version": "0.4.2",
+    "version": "0.4.3",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -13,7 +13,7 @@
     },
     "android": {
       "package": "com.cicibyte.sgms.athlete",
-      "versionCode": 7,
+      "versionCode": 8,
       "adaptiveIcon": {
         "backgroundColor": "#0b1220",
         "foregroundImage": "./assets/android-icon-foreground.png",

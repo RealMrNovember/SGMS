@@ -25,7 +25,7 @@ export async function MarketingHeader() {
           <a href="#roadmap" className="marketing-nav-link">
             {t('roadmap')}
           </a>
-          <a href="#app-downloads" className="marketing-nav-link">
+          <a href="#sgms-sporcu" className="marketing-nav-link">
             {t('apps')}
           </a>
           <a href="#contact" className="marketing-nav-link">

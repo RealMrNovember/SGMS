@@ -897,7 +897,8 @@
     },
     "appsSection": {
       "kicker": "Masaüstü və Mobil",
-      "title": "Salonunuz üçün tətbiqlərimizi yükləyin"
+      "title": "Salonunuz üçün tətbiqlərimizi yükləyin",
+      "subtitle": "Resepsiya masaüstü tətbiqi və SGMS Sporcu mobil — eyni platforma, fərqli rollar."
     },
     "hero": {
       "kicker": "Digital Gym Operating System",
@@ -1344,21 +1345,42 @@
     "footerLink": "SGMS Reception (Windows)"
   },
   "mobileAthlete": {
-    "badge": "Android Mobil Tətbiq",
-    "title": "SGMS İdmançı",
-    "subtitle": "İdmançılar telefonlarındakı QR kodla saniyələr içində qapıdan keçir; giriş məlumatları panelinizdə dərhal görünür.",
-    "download": "Android üçün yüklə (v{version})",
+    "badge": "Google Play · Android",
+    "title": "SGMS Sporcu",
+    "subtitle": "Üzvlük, proqram, ölçülər, mesajlaşma və təhlükəsiz ödəniş — idmançınızın cibində.",
+    "download": "APK yüklə (v{version})",
     "size": "{size} · {platform}",
     "features": {
-      "qr": "Avtomatik yenilənən QR check-in kodu",
-      "fast": "Parolsuz sürətli yenidən giriş",
-      "light": "Yüngül, az data istifadə edən tətbiq"
+      "qr": "Tələbə görə QR check-in",
+      "fast": "Üzvlük yeniləmə və mağaza",
+      "light": "Proqram, ölçülər və mesajlaşma"
     },
     "loginHint": "İdmançı mobil tətbiqi",
-    "loginHintText": "İdmançılarınızın QR kodla giriş edə bilməsi üçün Android tətbiqini yükləyin və idmançı hesabınızla daxil olun.",
-    "checkInHint": "İdmançılar telefonlarındakı QR kodu qapıya oxudaraq saniyələr içində daxil olur.",
-    "footerLink": "SGMS İdmançı (Android)",
-    "unsignedNotice": "Hələ Google Play-də deyil; quraşdırma zamanı cihazda \"naməlum mənbələr\"ə icazə vermək lazımdır."
+    "loginHintText": "SGMS Sporcu ilə üzvlər QR giriş, proqram və hesablarını idarə edir. Google Play qapalı test və ya APK.",
+    "checkInHint": "Üzvlük, proqram, ölçülər, mesajlaşma və təhlükəsiz ödəniş — bir tətbiqdə.",
+    "footerLink": "SGMS Sporcu (Android)",
+    "unsignedNotice": "Google Play qapalı testdə. Siyahıda deyilsinizsə APK ilə quraşdıra bilərsiniz.",
+    "showcase": {
+      "kicker": "İdmançı mobil tətbiqi",
+      "subtitle": "Üzvlüyü, məşqləri, ölçüləri və ödənişləri bir tətbiqdə idarə edin — Google Play qapalı testdə.",
+      "ctaPlay": "Google Play-də aç",
+      "playHint": "Qapalı test: yalnız dəvətli testerlər Play-dən yükləyə bilər. Hər kəs APK yükləyə bilər.",
+      "trialLink": "Salonunuz yoxdur? 14 günlük pulsuz sınaq →",
+      "highlights": {
+        "membership": "Üzvlük statusu, çıxarış və kartla yeniləmə",
+        "programs": "Məşq proqramları, hədəflər və qidalanma",
+        "checkin": "Zala giriş üçün tələbə görə QR",
+        "store": "Zal mağazası və məşqçi mesajlaşması"
+      },
+      "shots": {
+        "login": "Giriş ekranı",
+        "home": "Ana səhifə",
+        "programs": "Proqramlar",
+        "measurements": "Ölçülər",
+        "account": "Hesab",
+        "messages": "Mesajlar"
+      }
+    }
   },
   "checkIn": {
     "title": "Zala giriş",

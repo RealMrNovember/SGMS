@@ -108,7 +108,7 @@ export function MarketingStagger({
   );
 }
 
-const SECTION_IDS = ['features', 'how-it-works', 'why-sgms', 'reception-desktop', 'contact'] as const;
+const SECTION_IDS = ['features', 'sgms-sporcu', 'app-downloads', 'how-it-works', 'why-sgms', 'reception-desktop', 'contact'] as const;
 
 export function MarketingScrollBridge() {
   useEffect(() => {

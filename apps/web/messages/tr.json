@@ -928,7 +928,8 @@
     },
     "appsSection": {
       "kicker": "Masaüstü ve Mobil",
-      "title": "Salonunuz için uygulamalarımızı indirin"
+      "title": "Salonunuz için uygulamalarımızı indirin",
+      "subtitle": "Resepsiyon masaüstü uygulaması ve SGMS Sporcu mobil — aynı platform, farklı roller."
     },
     "hero": {
       "kicker": "Dijital Spor Salonu İşletim Sistemi",
@@ -1381,21 +1382,42 @@
     "footerLink": "SGMS Resepsiyon (Windows)"
   },
   "mobileAthlete": {
-    "badge": "Android Mobil Uygulama",
+    "badge": "Google Play · Android",
     "title": "SGMS Sporcu",
-    "subtitle": "Sporcularınız telefonlarındaki QR kodla turnikeden saniyeler içinde giriş yapsın; giriş bilgileri panelinizde anında görünür.",
-    "download": "Android İndir (v{version})",
+    "subtitle": "Üyelik, program, ölçüm, mesajlaşma ve güvenli ödeme — sporcunuzun cebinde.",
+    "download": "APK İndir (v{version})",
     "size": "{size} · {platform}",
     "features": {
-      "qr": "Otomatik yenilenen QR check-in kodu",
-      "fast": "Parolasız hızlı yeniden giriş",
-      "light": "Hafif, düşük veri kullanımlı uygulama"
+      "qr": "Talebe bağlı QR check-in",
+      "fast": "Üyelik yenileme ve mağaza",
+      "light": "Program, ölçüm ve mesajlaşma"
     },
     "loginHint": "Sporcu mobil uygulaması",
-    "loginHintText": "Sporcularınızın QR ile giriş yapabilmesi için Android uygulamasını indirin ve sporcu hesabıyla giriş yapın.",
-    "checkInHint": "Sporcularınız telefonlarındaki QR kodu turnikeye okutarak saniyeler içinde giriş yapar.",
+    "loginHintText": "SGMS Sporcu ile üyeleriniz QR giriş, program ve hesaplarını yönetir. Google Play kapalı testte veya APK ile kurun.",
+    "checkInHint": "Üyelik, program, ölçüm, mesajlaşma ve güvenli ödeme — tek uygulamada.",
     "footerLink": "SGMS Sporcu (Android)",
-    "unsignedNotice": "Uygulama henüz Play Store'da değil; kurulum sırasında \"bilinmeyen kaynaklara izin ver\" onayı gerekir."
+    "unsignedNotice": "Google Play kapalı testte. Listede değilseniz APK ile de kurabilirsiniz.",
+    "showcase": {
+      "kicker": "Sporcu mobil uygulaması",
+      "subtitle": "Salon üyeliğinizi, antrenman programlarınızı, ölçümlerinizi ve ödemelerinizi tek uygulamadan yönetin — Google Play kapalı testte.",
+      "ctaPlay": "Google Play’de aç",
+      "playHint": "Kapalı test: yalnızca davetli test kullanıcıları Play’den yükleyebilir. Herkes APK indirebilir.",
+      "trialLink": "Salonunuz yok mu? 14 gün ücretsiz deneyin →",
+      "highlights": {
+        "membership": "Üyelik durumu, ekstre ve kartla yenileme",
+        "programs": "Antrenman programları, hedefler ve beslenme",
+        "checkin": "Salona giriş için talep üzerine QR",
+        "store": "Salon mağazası ve antrenör mesajlaşması"
+      },
+      "shots": {
+        "login": "SGMS Sporcu giriş ekranı",
+        "home": "Ana sayfa özeti",
+        "programs": "Antrenman programları",
+        "measurements": "Vücut ölçümleri",
+        "account": "Hesap ve ekstre",
+        "messages": "Mesajlaşma"
+      }
+    }
   },
   "checkIn": {
     "title": "Salon Girişi",

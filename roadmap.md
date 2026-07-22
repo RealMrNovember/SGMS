@@ -11,7 +11,7 @@
 | **Legacy (kullanımdan kalktı)** | `license.cicibyte.com` — SGMS artık bu servisi kullanmıyor (bkz. Faz 13). Sunucu diğer istemciler (GarageLedger vb.) için ayakta kalmaya devam ediyor, SGMS'in ona bağımlılığı yok. |
 | **Kaynak doküman** | `sgms.cicibyte.com - readme.md` (teknik günlük/arşiv), `CiCiByte_SGMS_Ultimate_Enterprise_Blueprint.docx` |
 
-**Son güncelleme:** 2026-07-22 · **Bu dosya artık tek doğru kaynaktır** (`readme.md` sadece hızlı başlangıç talimatlarını barındırır, faz/durum takibi burada yapılır).
+**Son güncelleme:** 2026-07-22 (Google Play kapalı test Alpha — `0.4.3` / versionCode 8 incelemeye gönderildi) · **Bu dosya artık tek doğru kaynaktır** (`readme.md` sadece hızlı başlangıç talimatlarını barındırır, faz/durum takibi burada yapılır).
 
 ---
 
@@ -55,7 +55,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 | 17 | Üyelik Senaryoları & Ders/Sınıf Yönetimi | ✅ Tamamlandı | 100% (17.0–17.7); **17.8 tedarikçi/COGS — 🔲 yapılacak** (2026-07-22) |
 | 18 | Uyumluluk & Sağlamlaştırma (2FA, GDPR, E2E, Invoice) | ✅ Tamamlandı | 100% (GDPR self-servis, sağlık rızası, Invoice, 18.1 sözleşme PDF; 2FA+E2E önceden — 2026-07-19) |
 | 19 | SGMS Masaüstü Yeniden Yapılandırma | 🔄 Devam ediyor | 0% (ikon/arayüz/otomatik güncelleme/offline — 2026-07-19 başlandı) |
-| 20 | SGMS Mobil Uygulama (React Native) | 🔄 Devam ediyor | 0% (Cursor'da başlıyor — 2026-07-19) |
+| 20 | SGMS Mobil Uygulama (React Native) | 🔄 Devam ediyor | ~85% (v0.4.3 AAB — Google Play **Kapalı test / Alpha** incelemeye gönderildi, 2026-07-22; iOS + mağaza i18n kaldı) |
 | 21 | PT Performans, Komisyon & Prim Yönetimi | ✅ Tamamlandı | 100% (CSV export ve POS entegrasyonu v2'ye ertelendi) |
 | 22 | Personel Yönetimi / HR | ✅ Tamamlandı | 100% (izin, vardiya, performans, disiplin, maaş CSV, /dashboard/hr — 2026-07-19) |
 | 23 | Ekipman Yönetimi & Bakım Planları | ✅ Tamamlandı | 100% (envanter, servis, bakım rozetleri, QR — 2026-07-19) |
@@ -653,9 +653,10 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 ### 15.5 Hukuki uyumluluk
 - [x] `/privacy` (KVKK aydınlatma metni) ve `/terms` (Kullanım Şartları) sayfaları — Türkçe, footer'dan bağlantılı
 - [x] `/trial` kayıt formuna zorunlu açık rıza onay kutusu (Gizlilik Politikası + Kullanım Şartları linkli)
+- [x] `/account-deletion` — Google Play hesap/veri silme URL’si (adımlar, silinen vs saklanan veriler, kısmi silme; middleware’de public; production 200) — 2026-07-22
 - [ ] 6 dilde tam çeviri — şu an yalnızca Türkçe (diğer diller `tr` içeriğe düşer, hukuki metin niteliği gereği makine çevirisi yerine profesyonel çeviri önerilir)
 
-**Kabul kriteri:** ✅ Bir kullanıcı şifresini unutup e-posta ile sıfırlayabiliyor · üye listesinde arama yapılabiliyor · dashboard günün özetini gösteriyor · KVKK sayfaları yayında
+**Kabul kriteri:** ✅ Bir kullanıcı şifresini unutup e-posta ile sıfırlayabiliyor · üye listesinde arama yapılabiliyor · dashboard günün özetini gösteriyor · KVKK sayfaları yayında · Play hesap silme URL’si public
 
 **Bağımlılık:** cloud.cicibyte.com mail API — ✅ kullanıcı onayıyla eklendi ve production'da doğrulandı
 
@@ -853,7 +854,7 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 ---
 
-## 🟡 Faz 20 — SGMS Mobil Uygulama (React Native) (Öncelik: P1) — v0.2.0 yayınlandı, 2026-07-19
+## 🔄 Faz 20 — SGMS Mobil Uygulama (React Native) (Öncelik: P1) — Play Kapalı test Alpha incelemede, 2026-07-22
 
 > **Kullanıcı talebi (2026-07-19, ilk plan):** *"Mobil uygulama hiç yazmadık ama şu süreçte imzasız apk dosyası yazabiliriz ve sitemiz içerisinden direk indirme linki koyabiliriz."*
 > **Kullanıcı talebi (2026-07-19, uygulama günü):** *"Panelde desktop app'in olduğu yere android app de eklememiz lazım... showroom sayfasına da eklememiz lazım... Desktop app ve mobil app'in güncel ve çalışır olduklarına emin ol ve yayınla."* → v0.1.0 minimal MVP (giriş + QR check-in) yayınlandı.
@@ -901,9 +902,62 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 **Kabul kriteri:** ✅ Sporcu web sitesinden (showroom, giriş gerektirmeden) veya panelden APK'yı indirip kurabiliyor, sporcu hesabıyla giriş yapabiliyor, "Salona Giriş Yap" butonuna dokununca QR ile check-in yapabiliyor, programlarını/ölçümlerini görebiliyor, antrenörüyle mesajlaşabiliyor, bakiye/ödeme geçmişini görebiliyor, yeni sürüm çıkınca uygulama içinden haberdar oluyor.
 
-**Ertelendi (v3):** Çoklu dil, Play Store süreci + push bildirim (imzasız bir uygulamada Firebase/APNs sertifikasyon riski yüksek), iOS sürümü, EAS Build'e geçiş (CI'da otomatik APK üretimi için gerekebilir), interaktif antrenman (set/tekrar işaretleme), gerçek zamanlı mesajlaşma (Pusher/Soketi), yeni imzasız APK derleyip GitHub Releases'e yayınlama (bu oturumda Android build araçları kurulmadı — kod hazır, derleme ayrı adım).
+### 20.5 Google Play — Kapalı test (Alpha) + mağaza uyumu — 🔄 incelemede, 2026-07-22
 
-**Dosyalar:** `apps/mobile/` (Expo projesi, kendi `package-lock.json`'ı ile pnpm workspace dışında) — `App.tsx`, `src/components/{TabBar,UpdateBanner,CheckInQrModal}.tsx`, `src/components/ui/{PressableScale,Card,Avatar,Badge,Button,EmptyState}.tsx`, `src/screens/{Home,Programs,Measurements,Messages,Account,Login}Screen.tsx`, `src/lib/{api,types,theme,storage,update-check,constants}.ts`; `pnpm-workspace.yaml` (`!apps/mobile` hariç tutma); `apps/web/src/app/api/v1/me/statement/route.ts` (yeni); `apps/web/src/lib/mobile-app.ts`, `apps/web/src/components/reception/mobile-download-promo.tsx`, `apps/web/src/app/(marketing)/page.tsx` + `marketing-header.tsx` + `(tenant)/dashboard/page.tsx` + `(tenant)/dashboard/check-in/page.tsx`, `messages/*.json` (6 dil)
+> **Hedef:** İmzasız sideload dağıtımdan **imzalı AAB + Google Play Kapalı test**’e geçiş; mağaza politikası formları, Data Safety, sağlık/finans beyanları ve yayın özeti tamamlandı. Üretim (Production track) henüz açılmadı — önce Alpha incelemesi.
+
+#### Paket & imza
+- [x] Uygulama adı: **SGMS Sporcu** · paket: `com.cicibyte.sgms.athlete`
+- [x] Upload keystore (`credentials/sgms-upload.keystore`, alias `sgms-upload`) — gitignore; `android/key.properties` ile release imza
+- [x] İlk AAB debug imzalı olduğu için Play reddetti → upload key + `rootProject.file(storeFile)` ile düzeltildi
+- [x] Kapalı teste gönderilen sürüm: **`0.4.3` / versionCode `8`** (önceki deneme `0.4.2` / 7)
+- [x] Yerel üretim: `expo prebuild -p android --clean` → release signing patch → `gradlew bundleRelease`
+- [x] Artefakt: `apps/mobile/play-store/app-release-0.4.3-vc8.aab` (+ `android/.../app-release.aab`)
+- [x] Mapping/R8 uyarısı bilinçli (minify kapalı) — engel değil, yalnızca uyarı
+
+#### Play Console — uygulama içeriği & beyanlar
+- [x] Gizlilik politikası: `https://sgms.cicibyte.com/privacy`
+- [x] Hesap silme URL: `https://sgms.cicibyte.com/account-deletion` (public)
+- [x] Oturum açma bilgileri — inceleme hesabı + talimat (kısıtlı özellikler notu)
+- [x] Reklam beyanı: reklam yok
+- [x] Reklam kimliği (AD_ID): **Hayır**
+- [x] İçerik derecelendirme anketi
+- [x] Hedef kitle: **18+** (çocuklara yönelik değil)
+- [x] Veri güvenliği (Data Safety) — toplanan türler + kullanım/işleme formları dolduruldu
+- [x] Resmi kurum uygulamaları: hayır
+- [x] Finans özellikleri: **Diğer** (üyelik/mağaza → hosted iyzico checkout; banka/cüzdan/kripto yok)
+- [x] Sağlık uygulamaları: **Aktivite ve fitness** + **Beslenme ve kilo yönetimi** (tıbbi cihaz/klinik karar yok)
+- [x] Kategori: **Sağlık ve Fitness** · iletişim: `support@cicibyte.com` / `+90 535 489 50 50` / `https://sgms.cicibyte.com`
+
+#### Mağaza girişi (tr-TR varsayılan)
+- [x] Kısa + tam açıklama (TR)
+- [x] Simge 512×512, özellik grafiği 1024×500, telefon ekran görüntüleri (6 adet) — `apps/mobile/play-store/`
+- [x] Sürüm notları 6 dil: `tr-TR`, `en-US`, `az-AZ`, `es-ES`, `fr-FR`, `ru-RU` (web i18n dilleriyle hizalı)
+
+#### Kapalı test kanalı (Alpha) — yayın özeti
+- [x] Yönetilen yayınlama **devre dışı**
+- [x] Ülke/bölge: **Türkiye**
+- [x] Test kullanıcıları: e-posta listesi (**Liste 1**)
+- [x] Değişiklikler incelemeye gönderildi — Play “sık karşılaşılan sorunlar” otomatik kontrolü (~14 dk) sonrası insan incelemesi
+- [ ] İnceleme **onayı** bekleniyor (2026-07-22)
+- [ ] Test kullanıcılarının listeye eklenip indirme doğrulaması
+- [ ] Production track / açık test — Alpha yeşil olduktan sonra
+
+#### Play öncesi ürün / production hattı (aynı oturum, 2026-07-22)
+Kapalı teste çıkmadan önce para/veri riski ve ürün güveni maddeleri kapatıldı; VDS’te migrate + `deploy.sh` uygulandı:
+- [x] PT `trainerId` yetki sınırı · mağaza checkout’ta stok/borç yalnızca ödeme sonrası · `renewMembership` advisory lock · erken unfreeze gün clawback · multi-currency KPI toplama
+- [x] Sporcu self-signup + ilk plan · native push (`expo-notifications` + `DeviceToken`) · üyelik iptali/proration UI · PT seansı ↔ Expense · dashboard uyarı merkezi · `BusinessExpense` P&L
+- [x] Sporcu ↔ mesaideki resepsiyon mesajlaşması (`CashRegisterShift.openedById`)
+- [x] Migration’lar prod: `20260722160000_store_checkout_defer_cart`, `20260722170000_business_expense_and_device_token`
+- [x] `suggestCancelRefund` server-actions build hatası düzeltildi (production web build)
+
+**Kabul kriteri (20.5):** 🔲 Play Kapalı test incelemesi onaylanır · test kullanıcısı AAB’yi yükleyip giriş yapar · Production’a çıkış ayrı karar
+
+**Dosyalar (20.5):** `apps/mobile/app.json` (0.4.3 / versionCode 8), `apps/mobile/credentials/*` (gitignore), `apps/mobile/play-store/*`, `apps/web/src/app/(marketing)/account-deletion/page.tsx`, `apps/web/src/middleware.ts` (public path)
+
+**Ertelendi (sonraki mobil sürümler):** Çoklu dil (uygulama UI hâlâ TR sabit), iOS, EAS Build CI, R8 minify + mapping yükleme, gerçek cihaz screenshot’larıyla mağaza görsellerini değiştirme, Production track, interaktif antrenman (set/tekrar), Soketi native real-time
+
+**Dosyalar (20.1–20.4):** `apps/mobile/` (Expo projesi, kendi `package-lock.json`'ı ile pnpm workspace dışında) — `App.tsx`, `src/components/{TabBar,UpdateBanner,CheckInQrModal}.tsx`, `src/components/ui/{PressableScale,Card,Avatar,Badge,Button,EmptyState}.tsx`, `src/screens/{Home,Programs,Measurements,Messages,Account,Login,Signup}Screen.tsx`, `src/lib/{api,types,theme,storage,update-check,constants,push}.ts`; `pnpm-workspace.yaml` (`!apps/mobile` hariç tutma); `apps/web/src/app/api/v1/me/statement/route.ts`; `apps/web/src/lib/mobile-app.ts`, `apps/web/src/components/reception/mobile-download-promo.tsx`, `apps/web/src/app/(marketing)/page.tsx` + `marketing-header.tsx` + `(tenant)/dashboard/page.tsx` + `(tenant)/dashboard/check-in/page.tsx`, `messages/*.json` (6 dil)
 
 **Bağımlılık:** yok — API v1 zaten hazır (Faz 7), bu faz web/masaüstünden tamamen bağımsız başlatıldı
 
@@ -1828,18 +1882,17 @@ SGMS; spor salonunun **fiziksel** (turnike, RFID, check-in) ve **dijital** (CRM,
 
 **Bağımlılık:** `AuditLog` modeli ve yazma noktaları zaten var ✅ (Faz 12/14) — yalnızca tenant tarafı okuma eksik
 
-### 43.8 Mobilde Push Bildirim Altyapısı Hiç Yok
+### 43.8 Mobilde Push Bildirim Altyapısı — ✅ 2026-07-22 (Play öncesi paket)
 
-> **Senaryo:** Faz 42'nin "antrenör talebi sonuçlanınca sporcuya bildirim gider" vaadi, aslında Faz 27.1'deki **tarayıcı** Web Push altyapısını (VAPID/Push API) kullanıyor — bu mobil uygulamaya hiç ulaşmıyor. `apps/mobile/package.json`'da `expo-notifications` bağımlılığı bile yok. Sporcu, talebinin sonucunu öğrenmek için uygulamayı elle açıp bakmak zorunda; kapalıyken hiçbir şey almaz.
+> **Senaryo:** Faz 42'nin "antrenör talebi sonuçlanınca sporcuya bildirim gider" vaadi, aslında Faz 27.1'deki **tarayıcı** Web Push altyapısını (VAPID/Push API) kullanıyordu — mobil uygulamaya ulaşmıyordu.
 >
-> **Durum:** 🔲 Backlog — **büyük kapsamlı iş**, canlı cihaz testi olmadan aceleyle yapılmaması bilinçli bir tercih.
+> **Durum:** ✅ Kod yolu tamamlandı (Play Kapalı test paketiyle aynı oturum). Canlı cihazda FCM/Expo credentials + izin onayı ile uçtan uca doğrulama hâlâ önerilir.
 
-- [ ] `expo-notifications` kurulumu + izin akışı (uygulama ilk açıldığında bildirim izni istenir, reddedilirse akış bozulmamalı)
-- [ ] Push token kaydı — `GymMember`/`User`'a bağlı bir `DeviceToken` (veya benzeri) modeli, mobil açılışta backend'e kaydedilir
-- [ ] Backend gönderim — Expo Push API üzerinden (FCM/APNs arkasında Expo'nun kendi servisi), Faz 42 (antrenör talebi sonucu) ve üyelik bitiş yaklaşması gibi mevcut tetikleyicilerin mobil tarafa da gitmesi
-- [ ] **Not:** Faz 27.1'deki Web Push altyapısı bu iş için yeniden kullanılamaz — farklı bir teslimat kanalı (native push vs. tarayıcı push), sıfırdan kurulmalı
+- [x] `expo-notifications` kurulumu + izin akışı (`apps/mobile/src/lib/push.ts`)
+- [x] `DeviceToken` modeli + `POST /api/v1/device-tokens` + Expo Push gönderimi (`lib/push/send.ts`)
+- [ ] Production’da gerçek cihazda push teslimatı doğrulama (Expo/FCM proje kimlik bilgileri)
 
-**Bağımlılık:** Faz 42 (bildirim tetikleyicileri zaten var, yalnızca mobil teslimat kanalı eksik) ✅
+**Bağımlılık:** Faz 42 (bildirim tetikleyicileri) ✅ · Faz 20.5 (Play paketi) 🔄
 
 ### 43.9 POS / Check-in Üye Seçici 200 Kayıtla Sınırlı, Arama Yok
 
@@ -1869,7 +1922,7 @@ Bu maddelerin her biri kendi başına küçük ama toplamda göz ardı edilmemel
 - [ ] **Üyelik dondurma onayı tek imzayla STAFF'e açık** — kasıtlı olabilir (patron yokken işlesin diye), ürün kararı olarak teyit edilmeli
 - [ ] **TRAINER kendi müşterisi olmayana da program yazabiliyor** — kısıtlamak meslektaş yardımlaşmasını engelleyebilir, önce ürün kararı gerekiyor
 
-**Kabul kriteri:** 🔲 43.7/43.8/43.9 kapandığında OWNER kendi audit log'unu görebiliyor, sporcu telefonuna gerçek push bildirim düşüyor, 200+ üyeli bir salonda POS/check-in aranabiliyor olacak.
+**Kabul kriteri:** 🔲 43.7/43.9 kapandığında OWNER kendi audit log'unu görebiliyor ve 200+ üyeli bir salonda POS/check-in aranabiliyor olacak. 43.8 native push kodu ✅ (canlı cihaz doğrulama ayrı).
 
 ---
 
@@ -2003,6 +2056,9 @@ Faz 38 tamamlandı (2026-07-20 — kullanıcı talebi, düşük risk/hızlı kaz
              action'ı Bearer token da kabul edecek şekilde genişletildi, kod tekrarı yok
 
 Sıradaki (Faz 36 sonrası — profesyonel değerlendirme, P0 en önce):
+  Faz 20.5   Google Play Kapalı test (Alpha) 0.4.3 — 🔄 incelemede (2026-07-22);
+             onay → test kullanıcı doğrulama → Production kararı
+
   Faz 32     Ticarileştirme: paket + ek kapasite satışı          ← P0, gelir modeli (kullanıcı onayı gerekli)
 
   Faz 33.2   SaaS destek bileti (ticketing)                      ← P1, B2B standart; Help Center üzerine (2026-07-22)
@@ -2015,6 +2071,7 @@ Sıradaki (Faz 36 sonrası — profesyonel değerlendirme, P0 en önce):
   Faz 37     Gelişmiş vücut ölçümleri & ilerleme takibi          ← ✅ tamamlandı
   Faz 39     Hedef takip & motivasyon sistemi                    ← ✅ tamamlandı
   Faz 40     Sporcu self-servis mağaza (mobil alışveriş)         ← ✅ tamamlandı
+  Faz 43.8   Native mobil push (DeviceToken + expo-notifications) ← ✅ kod (2026-07-22); canlı cihaz doğrulama kaldı
   Faz 27.3   Serverless kuyruk motoru (QStash/Inngest)           ← P1, Faz 27.2'nin önkoşulu
   Faz 6.3    Dil genişletmesi (İtalyanca/Portekizce)             ← P1, pazar genişletme — Country
              çevirileri zaten hazır (bkz. Faz 6.4), yalnızca messages/*.json + it/pt kaldı

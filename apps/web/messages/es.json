@@ -897,7 +897,8 @@
     },
     "appsSection": {
       "kicker": "Escritorio y Móvil",
-      "title": "Descargue nuestras aplicaciones para su gimnasio"
+      "title": "Descargue nuestras aplicaciones para su gimnasio",
+      "subtitle": "Escritorio de recepción y móvil SGMS Sporcu — misma plataforma, roles distintos."
     },
     "hero": {
       "kicker": "Digital Gym Operating System",
@@ -1344,21 +1345,42 @@
     "footerLink": "SGMS Reception (Windows)"
   },
   "mobileAthlete": {
-    "badge": "Aplicación Android",
-    "title": "SGMS Deportista",
-    "subtitle": "Los deportistas registran su entrada en el torniquete en segundos con un código QR en su teléfono; los registros aparecen al instante en su panel.",
-    "download": "Descargar para Android (v{version})",
+    "badge": "Google Play · Android",
+    "title": "SGMS Sporcu",
+    "subtitle": "Membresía, programas, medidas, mensajes y pagos seguros — en el bolsillo del deportista.",
+    "download": "Descargar APK (v{version})",
     "size": "{size} · {platform}",
     "features": {
-      "qr": "Código QR de check-in que se renueva automáticamente",
-      "fast": "Inicio de sesión rápido sin contraseña",
-      "light": "Aplicación ligera, bajo consumo de datos"
+      "qr": "Check-in QR bajo demanda",
+      "fast": "Renovación y tienda",
+      "light": "Programas, métricas y mensajes"
     },
-    "loginHint": "Aplicación móvil del deportista",
-    "loginHintText": "Descargue la aplicación Android para que los deportistas puedan registrar su entrada con un código QR. Inicien sesión con su cuenta de deportista tras la instalación.",
-    "checkInHint": "Los deportistas escanean el código QR de su teléfono en el torniquete para registrar su entrada en segundos.",
-    "footerLink": "SGMS Deportista (Android)",
-    "unsignedNotice": "Aún no está en Google Play; la instalación requiere permitir \"orígenes desconocidos\" en el dispositivo."
+    "loginHint": "App móvil del deportista",
+    "loginHintText": "Con SGMS Sporcu los socios gestionan QR, programas y cuenta. Google Play (prueba cerrada) o APK.",
+    "checkInHint": "Membresía, programas, medidas, mensajes y pago seguro — en una app.",
+    "footerLink": "SGMS Sporcu (Android)",
+    "unsignedNotice": "En prueba cerrada de Google Play. Si no estás en la lista, instala el APK.",
+    "showcase": {
+      "kicker": "App móvil del deportista",
+      "subtitle": "Gestiona membresía, entrenos, métricas y pagos en una app — prueba cerrada en Google Play.",
+      "ctaPlay": "Abrir en Google Play",
+      "playHint": "Prueba cerrada: solo testers invitados instalan desde Play. Todos pueden descargar el APK.",
+      "trialLink": "¿Sin gimnasio? Prueba 14 días gratis →",
+      "highlights": {
+        "membership": "Estado, extracto y renovación con tarjeta",
+        "programs": "Programas, objetivos y nutrición",
+        "checkin": "QR bajo demanda para entrar",
+        "store": "Tienda del gym y mensajes con el entrenador"
+      },
+      "shots": {
+        "login": "Pantalla de acceso",
+        "home": "Inicio",
+        "programs": "Programas",
+        "measurements": "Medidas",
+        "account": "Cuenta",
+        "messages": "Mensajes"
+      }
+    }
   },
   "checkIn": {
     "title": "Entrada al gimnasio",
