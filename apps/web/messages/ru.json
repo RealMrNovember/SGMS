@@ -903,22 +903,22 @@
     "hero": {
       "kicker": "Digital Gym Operating System",
       "title": "Run your gym on one platform.",
-      "subtitle": "CiCiByte SGMS brings member CRM, PT programs, POS & accounts, and athlete mobile experience into a premium, international, scalable SaaS.",
+      "subtitle": "CiCiByte SGMS объединяет CRM, жизненный цикл членства, PT и комиссии, POS/кассу, турникеты, HR, оборудование, отчёты, realtime-чат и мобильное приложение SGMS Sporcu в одном SaaS.",
       "ctaTrial": "Start {days}-Day Free Trial",
       "ctaLogin": "Sign in to console"
     },
     "stats": {
       "members": {
-        "value": "CRM+",
-        "label": "Members & PT ops"
+        "value": "360°",
+        "label": "Member → cash → door"
       },
       "languages": {
         "value": "6 Lang",
         "label": "Global gym experience"
       },
       "uptime": {
-        "value": "Cloud",
-        "label": "SaaS-ready infrastructure"
+        "value": "Play+",
+        "label": "Mobile in closed testing"
       },
       "trial": {
         "value": "14 Days",
@@ -927,53 +927,88 @@
     },
     "features": {
       "kicker": "Platform capabilities",
-      "title": "Physical gym + digital operations together",
-      "subtitle": "From front desk to coach to athlete app — one shared data layer for your team.",
+      "title": "Полная ОС спортивного зала",
+      "subtitle": "От CRM до турникета, от кассы до комиссий PT и приложения спортсмена — возможности уже в проде.",
       "items": {
         "crm": {
           "icon": "👥",
-          "title": "Member CRM & Metrics",
-          "description": "Profiles, avatars, health measurements and membership plans with a clear staff view."
+          "title": "Member CRM & Lifecycle",
+          "description": "Profiles, health consent, freeze/transfer/cancel, groups and guest passes — front desk and PT share one member record."
+        },
+        "membership": {
+          "icon": "🪪",
+          "title": "Plans, Classes & Sales",
+          "description": "Membership plans, class booking, discount codes, installments, and athlete self-renewal with card checkout."
         },
         "programs": {
           "icon": "🏋",
-          "title": "Workout & Nutrition",
-          "description": "PT assignments, workout and nutrition programs with instant athlete portal access."
+          "title": "Programs, Goals & Nutrition",
+          "description": "Workout/nutrition plans, interactive sets, goal tracking and calorie logs — on web and mobile."
+        },
+        "measurements": {
+          "icon": "📏",
+          "title": "Advanced Metrics & Progress",
+          "description": "Circumference, BMI, body composition, sparklines and progress photos shared with the trainer."
         },
         "pt": {
           "icon": "🥇",
-          "title": "PT Performance & Commission",
-          "description": "Monthly session count, hours, revenue, and commission calculated automatically for every trainer — cancellation and no-show rate included."
+          "title": "PT Performance & Pay",
+          "description": "Session scheduling, commission models, no-shows, trainer change requests and monthly scorecards."
         },
         "pos": {
           "icon": "💳",
-          "title": "POS & Member Accounts",
-          "description": "Market, café and extra session charges. Collections, daily cash summary and balances."
+          "title": "POS, Ledger & Online Pay",
+          "description": "Store/café charges, FIFO collections, payment plans; Iyzico/PayTR hosted checkout for renewals and shop."
+        },
+        "cash": {
+          "icon": "💵",
+          "title": "Cash Shifts (X/Z)",
+          "description": "Open/close shifts, cash counts, over/short and X/Z reports — on-duty reception visible to athletes."
+        },
+        "checkin": {
+          "icon": "🚪",
+          "title": "Turnstile, QR & RFID",
+          "description": "Device management, QR/RFID check-in, live feed, offline sync and the SGMS Reception desktop app."
+        },
+        "hr": {
+          "icon": "🗂️",
+          "title": "Staff / HR",
+          "description": "Leave requests, shift schedules, reviews, discipline records and salary CSV exports."
+        },
+        "equipment": {
+          "icon": "🛠️",
+          "title": "Equipment & Maintenance",
+          "description": "Inventory, warranty, service history, schedules and QR-based fault reporting."
         },
         "reports": {
           "icon": "📊",
-          "title": "Расширенная аналитика и BI",
-          "description": "Тренды посещаемости, часы пик, самые продаваемые тренеры/товары и метрики вроде MRR, LTV и доли продлений."
-        },
-        "enterprise": {
-          "icon": "🏢",
-          "title": "Корпоративная иерархия филиалов",
-          "description": "Постройте дерево компания/регион/филиал и просматривайте консолидированные данные о участниках, персонале, доходах и посещениях всех филиалов на одном экране."
-        },
-        "i18n": {
-          "icon": "🌍",
-          "title": "6 Languages",
-          "description": "TR, EN, RU, FR, ES, AZ — ready for expat members and international chains."
-        },
-        "mobile": {
-          "icon": "📱",
-          "title": "Mobile API & Athlete Portal",
-          "description": "Bearer token API and self-service for measurements, programs and messages."
+          "title": "Reporting, P&L & Alerts",
+          "description": "Revenue, MRR/LTV, occupancy, Excel/PDF; business expenses for net profit and a “watch today” alert center."
         },
         "realtime": {
           "icon": "⚡",
-          "title": "Real-time Messaging",
-          "description": "Coach ↔ athlete communication with SSE live updates and tenant-safe channels."
+          "title": "Messaging & Notifications",
+          "description": "PT ↔ athlete and on-duty reception chat (Soketi); browser Web Push and native mobile push."
+        },
+        "mobile": {
+          "icon": "📱",
+          "title": "SGMS Sporcu (Android)",
+          "description": "Google Play closed testing + APK: membership, programs, metrics, store, messaging, signup and secure pay."
+        },
+        "security": {
+          "icon": "🔐",
+          "title": "Security & Compliance",
+          "description": "RBAC, 2FA, audit logs, privacy/account-deletion pages and locked demo accounts."
+        },
+        "i18n": {
+          "icon": "🌍",
+          "title": "6 Languages & Locations",
+          "description": "TR, EN, RU, FR, ES, AZ UI plus country → city → district data for international gyms."
+        },
+        "enterprise": {
+          "icon": "🏢",
+          "title": "Multi-branch & Partners",
+          "description": "Org hierarchy, consolidated branch views and a partner portal for referral growth."
         }
       }
     },
@@ -995,7 +1030,7 @@
         },
         "athlete": {
           "title": "Athlete expectations",
-          "description": "Members expect digital access to programs, metrics and balance. SGMS delivers via the athlete portal."
+          "description": "Members expect programs, metrics, shop and payments on mobile. SGMS Sporcu delivers that."
         }
       }
     },
@@ -1013,14 +1048,14 @@
         },
         "operate": {
           "title": "Run daily operations",
-          "description": "Check-in, metrics, programs, payments and messaging — one platform, any device."
+          "description": "Check-in, metrics, programs, cash, HR, equipment, collections and chat — one platform."
         }
       }
     },
     "roadmap": {
       "kicker": "Дорожная карта",
-      "title": "SGMS продолжает расти",
-      "subtitle": "Поверх CRM, кассы, обмена сообщениями и мобильной основы, которыми вы уже пользуетесь, мы создаём модули, которые превратят ваш зал в полноценную операционную систему. Функции ниже находятся в разработке и будут поочерёдно появляться в вашей панели."
+      "title": "Что дальше?",
+      "subtitle": "Ниже — ещё в плане/разработке. Многие модули, которые казались «скоро» (HR, оборудование, касса, PT), уже в сетке выше."
     },
     "cta": {
       "title": "Try every feature for {days} days",
@@ -1367,10 +1402,10 @@
       "playHint": "Закрытый тест: из Play ставят только приглашённые. APK доступен всем.",
       "trialLink": "Ещё нет зала? 14 дней бесплатно →",
       "highlights": {
-        "membership": "Статус, выписка и продление картой",
-        "programs": "Программы, цели и питание",
-        "checkin": "QR по запросу для входа",
-        "store": "Магазин зала и переписка с тренером"
+        "membership": "Membership, statement, self-signup and card renewal",
+        "programs": "Programs, goals, nutrition and measurement history",
+        "checkin": "On-demand QR check-in",
+        "store": "Store, messaging and optional push"
       },
       "shots": {
         "login": "Экран входа",
@@ -1477,40 +1512,44 @@
         "description": "QR-код, статус гарантии, история обслуживания и график техобслуживания для каждого оборудования. Сообщите о поломке одним касанием."
       },
       "cleaning": {
-        "title": "Управление уборкой",
-        "description": "Чек-листы уборки по сменам с фотоподтверждением и цифровой подписью."
+        "title": "Cleaning Management",
+        "description": "Shift checklists, photo proof and digital sign-off."
       },
       "cashShifts": {
         "title": "Управление кассовыми сменами",
         "description": "Открытие/закрытие смены, подсчёт наличных, выявление недостачи/излишка и отчёты X/Z."
       },
       "digitalCard": {
-        "title": "Цифровая карта участника",
-        "description": "Apple Wallet, Google Wallet и NFC — вход в зал одним касанием со смартфона."
+        "title": "Digital Membership Card",
+        "description": "Apple Wallet, Google Wallet and NFC tap-to-enter."
       },
       "notifications": {
-        "title": "Центр уведомлений",
-        "description": "Push, SMS, WhatsApp, email и Telegram — все уведомления управляются из одного места."
+        "title": "SMS / WhatsApp Channels",
+        "description": "Web & native push are live; SMS, WhatsApp Business and campaign templates are next."
       },
       "reports": {
         "title": "Расширенная аналитика и BI",
         "description": "Часы пиковой нагрузки, лучшие тренеры по продажам, выручка и пожизненная ценность клиента (LTV), показатели продления и оттока."
       },
       "insights": {
-        "title": "Аналитика на основе ИИ",
-        "description": "Заранее выявляйте участников с риском оттока и получайте автоматические предложения кампаний по их возврату."
+        "title": "AI Insights",
+        "description": "Churn risk, win-back suggestions and automated NPS surveys."
       },
       "enterprise": {
         "title": "Корпоративная иерархия и сеть филиалов",
         "description": "Консолидированная отчётность на уровне филиала, региона и компании — создано для крупных сетей."
       },
       "integrations": {
-        "title": "Маркетплейс интеграций",
-        "description": "Подключайте Apple Health, Google Fit, провайдеров SMS/WhatsApp, бухгалтерские программы и многое другое."
+        "title": "Integrations Marketplace",
+        "description": "Apple Health, Google Fit, accounting tools and SMS providers."
       },
       "helpCenter": {
         "title": "Справочный центр по ролям",
         "description": "Подробные руководства для тренеров, ресепшена, участников и владельцев залов."
+      },
+      "ticketing": {
+        "title": "SaaS Support Tickets",
+        "description": "Gyms open tickets to platform support on top of the Help Center."
       }
     }
   },

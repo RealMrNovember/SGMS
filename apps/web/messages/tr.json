@@ -934,22 +934,22 @@
     "hero": {
       "kicker": "Dijital Spor Salonu İşletim Sistemi",
       "title": "Salonunuzu tek platformda yönetin.",
-      "subtitle": "CiCiByte SGMS; üye CRM’inden PT programlarına, kasa ve cari hesaptan sporcu mobil deneyimine kadar salon operasyonunuzu dijital çağa taşır. Uluslararası, premium ve ölçeklenebilir.",
+      "subtitle": "CiCiByte SGMS; üye CRM, üyelik yaşam döngüsü, PT & prim, POS/kasa, turnike, HR, ekipman, raporlama, gerçek zamanlı mesajlaşma ve SGMS Sporcu mobil uygulamasını tek SaaS çatısında birleştirir.",
       "ctaTrial": "{days} Gün Ücretsiz Deneyin",
       "ctaLogin": "Panele Giriş"
     },
     "stats": {
       "members": {
-        "value": "CRM+",
-        "label": "Üye & PT yönetimi"
+        "value": "360°",
+        "label": "Üye → kasa → turnike"
       },
       "languages": {
         "value": "6 Dil",
         "label": "Global salon deneyimi"
       },
       "uptime": {
-        "value": "Cloud",
-        "label": "SaaS altyapı · VDS hazır"
+        "value": "Play+",
+        "label": "Mobil kapalı testte"
       },
       "trial": {
         "value": "14 Gün",
@@ -958,53 +958,88 @@
     },
     "features": {
       "kicker": "Platform yetenekleri",
-      "title": "Fiziksel salon + dijital operasyon bir arada",
-      "subtitle": "Resepsiyondan antrenöre, kasadan sporcu uygulamasına — tüm ekip aynı veri üzerinde çalışır.",
+      "title": "Salon işletim sisteminin tamamı",
+      "subtitle": "CRM’den turnikeye, kasadan PT primine, sporcu uygulamasından çoklu şubeye — bugün canlıda olan yetenekler.",
       "items": {
         "crm": {
           "icon": "👥",
-          "title": "Üye CRM & Ölçüm",
-          "description": "Profil, avatar, sağlık ölçümleri ve üyelik planları. Resepsiyon ve PT için net görünüm."
+          "title": "Üye CRM & Yaşam Döngüsü",
+          "description": "Profil, avatar, sağlık rızası, dondurma/aktarım/iptal, üyelik grupları ve konuk geçişleri — resepsiyon ile PT aynı üyeyi görür."
+        },
+        "membership": {
+          "icon": "🪪",
+          "title": "Plan, Ders & Paket Satışı",
+          "description": "Salon üyelik planları, sınıf/ders rezervasyonu, indirim kodları, taksitli tahsilat ve sporcunun kendi kartıyla yenilemesi."
         },
         "programs": {
           "icon": "🏋",
-          "title": "Antrenman & Beslenme",
-          "description": "PT atamaları, workout ve nutrition programları. Sporcu portalında anında erişim."
+          "title": "Program, Hedef & Beslenme",
+          "description": "Antrenman/beslenme programları, interaktif set-tekrar, hedef takibi ve kalori günlüğü — web ve mobilde."
+        },
+        "measurements": {
+          "icon": "📏",
+          "title": "Gelişmiş Ölçüm & İlerleme",
+          "description": "Çevre ölçüleri, BMI, yağ/kas, sparkline trendler ve ilerleme fotoğrafları — PT ve sporcu aynı geçmişi izler."
         },
         "pt": {
           "icon": "🥇",
-          "title": "PT Performans & Prim Yönetimi",
-          "description": "Antrenörlerin aylık seans sayısı, saati, cirosu ve komisyonu otomatik hesaplanır — iptal ve no-show oranıyla birlikte."
+          "title": "PT Performans & Prim",
+          "description": "Seans planlama, komisyon modelleri, no-show oranı, PT atama/değişiklik talepleri ve aylık performans karnesi."
         },
         "pos": {
           "icon": "💳",
-          "title": "POS & Cari Hesap",
-          "description": "Market, kafe, ekstra ders borçları. Tahsilat, kasa özeti ve üye bakiyesi tek ekranda."
+          "title": "POS, Cari & Online Ödeme",
+          "description": "Market/kafe borçları, FIFO tahsilat, ödeme planları; Iyzico/PayTR hosted checkout ile üyelik ve mağaza ödemesi."
+        },
+        "cash": {
+          "icon": "💵",
+          "title": "Kasa Vardiyası (X/Z)",
+          "description": "Vardiya aç/kapa, nakit sayımı, açık-fazla tespiti ve X/Z raporları — mesaideki resepsiyon sporcuya görünür."
+        },
+        "checkin": {
+          "icon": "🚪",
+          "title": "Turnike, QR & RFID",
+          "description": "Cihaz yönetimi, QR/RFID check-in, canlı giriş akışı, offline senkron ve SGMS Resepsiyon masaüstü uygulaması."
+        },
+        "hr": {
+          "icon": "🗂️",
+          "title": "Personel / HR",
+          "description": "İzin talepleri, vardiya çizelgesi, performans ve disiplin kayıtları, maaş özeti CSV — ekibi panelden yönetin."
+        },
+        "equipment": {
+          "icon": "🛠️",
+          "title": "Ekipman & Bakım",
+          "description": "Envanter, garanti, servis geçmişi, bakım takvimi ve ekipman QR’si ile arıza bildirimi."
         },
         "reports": {
           "icon": "📊",
-          "title": "İleri Raporlama & İş Zekası",
-          "description": "Ziyaretçi trendi, yoğunluk saatleri, en çok satan PT/ürün ve MRR/LTV/yenileme oranı gibi üyelik iş metrikleri."
-        },
-        "enterprise": {
-          "icon": "🏢",
-          "title": "Kurumsal Hiyerarşi & Çoklu Şube",
-          "description": "Şirket/bölge/şube ağacı kurun; tüm şubelerin üye, personel, gelir ve ziyaret verilerini tek konsolide ekranda görün."
-        },
-        "i18n": {
-          "icon": "🌍",
-          "title": "6 Dil Desteği",
-          "description": "TR, EN, RU, FR, ES, AZ — expat üyeler ve uluslararası zincirler için hazır."
-        },
-        "mobile": {
-          "icon": "📱",
-          "title": "Mobil API & Sporcu Portalı",
-          "description": "Bearer token API, ölçüm/program/mesaj self-service. Mobil uygulama için hazır altyapı."
+          "title": "Raporlama, P&L & Uyarılar",
+          "description": "Ciro, MRR/LTV, yoğunluk, Excel/PDF; işletme giderleri ile net kâr ve “bugün dikkat et” uyarı merkezi."
         },
         "realtime": {
           "icon": "⚡",
-          "title": "Anlık Mesajlaşma",
-          "description": "PT ↔ sporcu iletişimi. WebSocket (Soketi) ile anlık güncelleme; yapılandırılmazsa SSE yedek kanal."
+          "title": "Mesajlaşma & Bildirim",
+          "description": "PT ↔ sporcu ve mesaideki resepsiyon sohbeti (Soketi); tarayıcı Web Push ve sporcu uygulamasında native push."
+        },
+        "mobile": {
+          "icon": "📱",
+          "title": "SGMS Sporcu (Android)",
+          "description": "Google Play kapalı test + APK: üyelik, program, ölçüm, mağaza, mesajlaşma, self-signup ve güvenli ödeme."
+        },
+        "security": {
+          "icon": "🔐",
+          "title": "Güvenlik & Uyum",
+          "description": "RBAC, 2FA, denetim (audit) kayıtları, KVKK gizlilik/hesap silme sayfaları ve demo hesap koruması."
+        },
+        "i18n": {
+          "icon": "🌍",
+          "title": "6 Dil & Küresel Lokasyon",
+          "description": "TR, EN, RU, FR, ES, AZ arayüz; ülke → şehir → ilçe veritabanı ile uluslararası salonlar için hazır."
+        },
+        "enterprise": {
+          "icon": "🏢",
+          "title": "Çoklu Şube & Partner",
+          "description": "Kurumsal hiyerarşi, şube konsolidasyonu ve temsilci (partner) portalı ile zincir/franchise büyütme."
         }
       }
     },
@@ -1026,7 +1061,7 @@
         },
         "athlete": {
           "title": "Sporcu beklentisi",
-          "description": "Üyeleriniz program, ölçüm ve borç bilgisine dijital erişim ister. SGMS sporcu portalı ile bunu sunar."
+          "description": "Üyeleriniz program, ölçüm, mağaza ve ödemeyi mobilden ister. SGMS Sporcu ile bunu sunarsınız."
         }
       }
     },
@@ -1044,14 +1079,14 @@
         },
         "operate": {
           "title": "Günlük operasyonu yönetin",
-          "description": "Check-in, ölçüm, program, tahsilat ve mesajlaşma — tek platformdan, her cihazdan."
+          "description": "Check-in, ölçüm, program, kasa, HR, ekipman, tahsilat ve mesajlaşma — tek platformdan."
         }
       }
     },
     "roadmap": {
       "kicker": "Yol Haritası",
-      "title": "SGMS büyümeye devam ediyor",
-      "subtitle": "Bugün kullandığınız CRM, POS, mesajlaşma ve mobil altyapının üzerine; salonunuzu tam kapsamlı bir işletim sistemine dönüştürecek yeni modülleri inşa ediyoruz. Aşağıdaki özellikler geliştirme aşamasında ve panelinize sırasıyla eklenecek."
+      "title": "Sırada ne var?",
+      "subtitle": "Aşağıdakiler henüz geliştirme / plan aşamasında. Canlıdaki özellikler üstteki grid’de — “çok yakında” sandığınız birçok modül (HR, ekipman, kasa, PT) zaten yayında."
     },
     "cta": {
       "title": "{days} gün boyunca tüm özellikleri deneyin",
@@ -1404,10 +1439,10 @@
       "playHint": "Kapalı test: yalnızca davetli test kullanıcıları Play’den yükleyebilir. Herkes APK indirebilir.",
       "trialLink": "Salonunuz yok mu? 14 gün ücretsiz deneyin →",
       "highlights": {
-        "membership": "Üyelik durumu, ekstre ve kartla yenileme",
-        "programs": "Antrenman programları, hedefler ve beslenme",
-        "checkin": "Salona giriş için talep üzerine QR",
-        "store": "Salon mağazası ve antrenör mesajlaşması"
+        "membership": "Üyelik, ekstre, self-signup ve kartla yenileme",
+        "programs": "Program, hedef, beslenme ve ölçüm geçmişi",
+        "checkin": "Talebe bağlı QR check-in",
+        "store": "Mağaza, mesajlaşma ve isteğe bağlı push"
       },
       "shots": {
         "login": "SGMS Sporcu giriş ekranı",
@@ -1514,7 +1549,7 @@
       },
       "cleaning": {
         "title": "Temizlik Yönetimi",
-        "description": "Vardiya bazlı temizlik kontrol listeleri, fotoğraflı kayıt ve dijital onay imzası."
+        "description": "Vardiya bazlı temizlik kontrol listeleri, fotoğraflı kayıt ve dijital onay."
       },
       "cashShifts": {
         "title": "Kasa Vardiya Yönetimi",
@@ -1522,11 +1557,11 @@
       },
       "digitalCard": {
         "title": "Dijital Üyelik Kartı",
-        "description": "Apple Wallet, Google Wallet ve NFC ile telefonunuzdan tek dokunuşla salona giriş."
+        "description": "Apple Wallet, Google Wallet ve NFC ile telefondan tek dokunuşla salona giriş."
       },
       "notifications": {
-        "title": "Bildirim Merkezi",
-        "description": "Push, SMS, WhatsApp, e-posta ve Telegram bildirimleri tek yerden yönetilsin."
+        "title": "SMS / WhatsApp Bildirimleri",
+        "description": "Web ve native push hazır; sırada SMS, WhatsApp Business ve şablonlı kampanya kanalları."
       },
       "reports": {
         "title": "İleri Raporlama & İş Zekası",
@@ -1534,7 +1569,7 @@
       },
       "insights": {
         "title": "Yapay Zeka Öngörüleri",
-        "description": "Ayrılma riski taşıyan üyeleri önceden tespit edin, otomatik geri kazanma kampanyaları önerileri alın."
+        "description": "Churn riski, geri kazanma önerileri ve otomatik memnuniyet (NPS) anketleri."
       },
       "enterprise": {
         "title": "Kurumsal Hiyerarşi & Çoklu Şube",
@@ -1542,11 +1577,15 @@
       },
       "integrations": {
         "title": "Entegrasyon Pazaryeri",
-        "description": "Apple Health, Google Fit, SMS/WhatsApp servisleri, muhasebe yazılımları ve daha fazlasıyla bağlanın."
+        "description": "Apple Health, Google Fit, muhasebe yazılımları ve üçüncü taraf SMS sağlayıcıları."
       },
       "helpCenter": {
         "title": "Rol Bazlı Kullanım Kılavuzu",
         "description": "PT, resepsiyon, sporcu ve salon sahibi için ayrı ayrı hazırlanmış detaylı kullanım rehberleri."
+      },
+      "ticketing": {
+        "title": "SaaS Destek Bileti",
+        "description": "Salonların platform desteğine ticket açması — Help Center üzerine ticketing."
       }
     }
   },
