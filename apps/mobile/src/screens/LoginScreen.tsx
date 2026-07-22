@@ -17,7 +17,13 @@ import { login } from '../lib/api';
 import { colors, gradients, radius, spacing, typography } from '../lib/theme';
 import type { AthleteSession } from '../lib/types';
 
-export function LoginScreen({ onSuccess }: { onSuccess: (session: AthleteSession) => void }) {
+export function LoginScreen({
+  onSuccess,
+  onGoSignup,
+}: {
+  onSuccess: (session: AthleteSession) => void;
+  onGoSignup: () => void;
+}) {
   const insets = useSafeAreaInsets();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -108,6 +114,10 @@ export function LoginScreen({ onSuccess }: { onSuccess: (session: AthleteSession
           <View style={{ marginTop: spacing.sm }}>
             <Button label="Giriş Yap" onPress={handleSubmit} loading={loading} icon="log-in-outline" />
           </View>
+
+          <TouchableOpacity onPress={onGoSignup} style={styles.switch}>
+            <Text style={styles.switchText}>Hesabım yok — Kayıt ol</Text>
+          </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
     </LinearGradient>
@@ -148,4 +158,6 @@ const styles = StyleSheet.create({
   },
   errorRow: { flexDirection: 'row', alignItems: 'center', gap: 6, justifyContent: 'center' },
   error: { ...typography.caption, color: colors.danger },
+  switch: { alignItems: 'center', paddingVertical: spacing.sm, marginTop: spacing.xs },
+  switchText: { ...typography.caption, color: colors.gold },
 });

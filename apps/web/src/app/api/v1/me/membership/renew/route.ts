@@ -7,6 +7,8 @@ import { startMembershipRenewalCheckout } from '@/lib/membership/renewal-checkou
  * `startAthleteMembershipRenewal` server action'ıyla aynı ortak kütüphaneyi
  * kullanır, yalnızca sonucu `redirect()` yerine JSON döner (mobil, dönen
  * checkoutUrl'i sistem tarayıcısında açar).
+ *
+ * Body (opsiyonel): `{ "planId": "..." }` — ilk üyelik satışı veya paket seçimi.
  */
 export async function POST(request: Request) {
   const authResult = await requireAthleteApiContext(request);
@@ -16,8 +18,22 @@ export async function POST(request: Request) {
 
   const { organizationId, gymMemberId } = authResult.context;
 
+  let planId: string | undefined;
   try {
-    const result = await startMembershipRenewalCheckout({ organizationId, gymMemberId });
+    const body = (await request.json()) as { planId?: unknown };
+    if (typeof body.planId === 'string' && body.planId.trim()) {
+      planId = body.planId.trim();
+    }
+  } catch {
+    // Body yoksa mevcut plan yenilenir.
+  }
+
+  try {
+    const result = await startMembershipRenewalCheckout({
+      organizationId,
+      gymMemberId,
+      planId,
+    });
 
     if (!result.ok) {
       return apiError(result.error, 400);

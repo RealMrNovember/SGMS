@@ -6,6 +6,7 @@ import { reevaluateGoalsForMember } from '@/lib/goals/reevaluate';
 import { prisma } from '@/lib/prisma';
 import { readProgressPhotoBuffer, uploadProgressPhoto } from '@/lib/storage';
 import { getTenantWriteBlockReason } from '@/lib/tenant-access';
+import { trainerScopedMemberWhere } from '@/lib/trainers/member-scope';
 import type { MeasurementPhotoAngle, OrganizationRole } from '@sgms/database';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
@@ -99,6 +100,7 @@ async function getMeasurementContext() {
   return {
     organizationId,
     actorId: session.user.id,
+    role: actorRole,
   };
 }
 
@@ -217,11 +219,15 @@ export async function addHealthMeasurement(
 
   const data = parsed.data;
   const gymMember = await prisma.gymMember.findFirst({
-    where: { id: data.gymMemberId, organizationId: context.organizationId },
+    where: {
+      id: data.gymMemberId,
+      organizationId: context.organizationId,
+      ...trainerScopedMemberWhere(context.role, context.actorId),
+    },
   });
 
   if (!gymMember) {
-    return { error: 'Sporcu bu salonda bulunamadı.' };
+    return { error: 'Sporcu bulunamadı veya size atanmamış.' };
   }
 
   const values = parseMeasurementValues(data);
@@ -324,11 +330,15 @@ export async function uploadMeasurementPhoto(
       : 'OTHER';
 
   const gymMember = await prisma.gymMember.findFirst({
-    where: { id: gymMemberId, organizationId: context.organizationId },
+    where: {
+      id: gymMemberId,
+      organizationId: context.organizationId,
+      ...trainerScopedMemberWhere(context.role, context.actorId),
+    },
   });
 
   if (!gymMember) {
-    return { error: 'Sporcu bu salonda bulunamadı.' };
+    return { error: 'Sporcu bulunamadı veya size atanmamış.' };
   }
 
   const healthMeasurementId =

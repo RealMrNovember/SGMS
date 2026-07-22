@@ -9,10 +9,12 @@ import { TextField } from '../components/ui/TextField';
 import {
   changePassword,
   fetchMe,
+  fetchPublicGym,
   fetchStatement,
   logout,
   startMembershipRenewal,
   updateProfile,
+  type PublicGymPlan,
 } from '../lib/api';
 import { clearSession } from '../lib/storage';
 import { colors, spacing, typography } from '../lib/theme';
@@ -35,6 +37,9 @@ export function AccountScreen({ session, onLogout }: { session: AthleteSession; 
   const [loggingOut, setLoggingOut] = useState(false);
   const [renewing, setRenewing] = useState(false);
   const [renewError, setRenewError] = useState<string | null>(null);
+  const [availablePlans, setAvailablePlans] = useState<PublicGymPlan[]>([]);
+  const [plansLoading, setPlansLoading] = useState(false);
+  const [buyingPlanId, setBuyingPlanId] = useState<string | null>(null);
 
   const seededRef = useRef(false);
   const [editName, setEditName] = useState('');
@@ -75,6 +80,18 @@ export function AccountScreen({ session, onLogout }: { session: AthleteSession; 
     void load();
   }, [load]);
 
+  useEffect(() => {
+    if (!me || me.gymMember.plan) {
+      setAvailablePlans([]);
+      return;
+    }
+    setPlansLoading(true);
+    fetchPublicGym(me.organization.slug)
+      .then((data) => setAvailablePlans(data.plans))
+      .catch(() => setAvailablePlans([]))
+      .finally(() => setPlansLoading(false));
+  }, [me]);
+
   async function handleRefresh() {
     setRefreshing(true);
     await load();
@@ -88,21 +105,23 @@ export function AccountScreen({ session, onLogout }: { session: AthleteSession; 
     onLogout();
   }
 
-  async function handleRenew() {
+  async function handleRenew(planId?: string) {
     setRenewing(true);
+    setBuyingPlanId(planId ?? null);
     setRenewError(null);
     try {
-      const result = await startMembershipRenewal(session.accessToken);
+      const result = await startMembershipRenewal(session.accessToken, planId);
       if ('renewedImmediately' in result) {
-        Alert.alert('Üyelik yenilendi', 'Ücretsiz paketiniz uzatıldı.');
+        Alert.alert(planId ? 'Üyelik aktif' : 'Üyelik yenilendi', 'Paketiniz başarıyla işlendi.');
         await load();
       } else {
         await Linking.openURL(result.checkoutUrl);
       }
     } catch (err) {
-      setRenewError(err instanceof Error ? err.message : 'Yenileme başlatılamadı');
+      setRenewError(err instanceof Error ? err.message : 'İşlem başlatılamadı');
     } finally {
       setRenewing(false);
+      setBuyingPlanId(null);
     }
   }
 
@@ -189,14 +208,33 @@ export function AccountScreen({ session, onLogout }: { session: AthleteSession; 
             <View style={styles.renewBlock}>
               <Button
                 label="Üyeliğimi Yenile"
-                onPress={handleRenew}
+                onPress={() => handleRenew()}
                 loading={renewing}
                 variant="secondary"
                 icon="refresh-outline"
               />
               {renewError ? <Text style={styles.renewError}>{renewError}</Text> : null}
             </View>
-          ) : null}
+          ) : (
+            <View style={styles.renewBlock}>
+              <Text style={styles.muted}>Henüz paketiniz yok — aşağıdan seçip satın alın.</Text>
+              {plansLoading ? <ActivityIndicator color={colors.gold} /> : null}
+              {availablePlans.map((plan) => (
+                <Button
+                  key={plan.id}
+                  label={`${plan.name} · ${money(plan.price, plan.currency)} · ${plan.durationDays} gün`}
+                  onPress={() => handleRenew(plan.id)}
+                  loading={buyingPlanId === plan.id}
+                  variant="secondary"
+                  icon="cart-outline"
+                />
+              ))}
+              {!plansLoading && availablePlans.length === 0 ? (
+                <Text style={styles.renewError}>Bu salon için satışta paket yok.</Text>
+              ) : null}
+              {renewError ? <Text style={styles.renewError}>{renewError}</Text> : null}
+            </View>
+          )}
         </Card>
       ) : (
         <ActivityIndicator color={colors.gold} style={{ marginTop: 24 }} />

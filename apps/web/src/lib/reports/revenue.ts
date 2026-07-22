@@ -119,7 +119,9 @@ export async function getRevenueForPeriod(
   };
 }
 
-/** Kurumsal konsolidasyon: şube bazında net tahsilat (PAYMENT − REFUND). */
+/** Kurumsal konsolidasyon: şube bazında net tahsilat (PAYMENT − REFUND).
+ *  Farklı para birimleri toplanmaz — her şube için birincil (TRY tercih) tutar döner.
+ */
 export async function getCollectedRevenueByOrganization(
   organizationIds: string[],
   range: DateRange,
@@ -130,7 +132,7 @@ export async function getCollectedRevenueByOrganization(
 
   const [payments, refunds] = await Promise.all([
     prisma.transaction.groupBy({
-      by: ['organizationId'],
+      by: ['organizationId', 'currency'],
       where: {
         organizationId: { in: organizationIds },
         type: 'PAYMENT',
@@ -139,7 +141,7 @@ export async function getCollectedRevenueByOrganization(
       _sum: { amount: true },
     }),
     prisma.transaction.groupBy({
-      by: ['organizationId'],
+      by: ['organizationId', 'currency'],
       where: {
         organizationId: { in: organizationIds },
         type: 'REFUND',
@@ -149,18 +151,30 @@ export async function getCollectedRevenueByOrganization(
     }),
   ]);
 
-  const map = new Map<string, number>();
+  const byOrgCurrency = new Map<string, Map<string, number>>();
   for (const id of organizationIds) {
-    map.set(id, 0);
+    byOrgCurrency.set(id, new Map());
   }
+
   for (const row of payments) {
-    map.set(row.organizationId, decimalToNumber(row._sum.amount));
+    const currency = (row.currency || 'TRY').toUpperCase();
+    const orgMap = byOrgCurrency.get(row.organizationId) ?? new Map();
+    orgMap.set(currency, decimalToNumber(row._sum.amount));
+    byOrgCurrency.set(row.organizationId, orgMap);
   }
   for (const row of refunds) {
-    map.set(
-      row.organizationId,
-      round2((map.get(row.organizationId) ?? 0) - decimalToNumber(row._sum.amount)),
-    );
+    const currency = (row.currency || 'TRY').toUpperCase();
+    const orgMap = byOrgCurrency.get(row.organizationId) ?? new Map();
+    orgMap.set(currency, round2((orgMap.get(currency) ?? 0) - decimalToNumber(row._sum.amount)));
+    byOrgCurrency.set(row.organizationId, orgMap);
+  }
+
+  const map = new Map<string, number>();
+  for (const id of organizationIds) {
+    const orgMap = byOrgCurrency.get(id) ?? new Map();
+    const primary =
+      orgMap.has('TRY') ? 'TRY' : [...orgMap.keys()].sort((a, b) => a.localeCompare(b))[0];
+    map.set(id, primary ? (orgMap.get(primary) ?? 0) : 0);
   }
   return map;
 }

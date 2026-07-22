@@ -33,7 +33,11 @@ export default async function ProgramsPage({
 
   const [members, trainers, programs] = await Promise.all([
     prisma.gymMember.findMany({
-      where: { organizationId, status: { not: 'INACTIVE' } },
+      where: {
+        organizationId,
+        status: { not: 'INACTIVE' },
+        ...(role === 'TRAINER' ? { trainerId: userId } : {}),
+      },
       orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
       select: { id: true, firstName: true, lastName: true },
       take: 100,

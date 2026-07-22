@@ -31,6 +31,8 @@ export type MembershipRenewalResult =
 export async function startMembershipRenewalCheckout(params: {
   organizationId: string;
   gymMemberId: string;
+  /** İlk paket satışı veya paket değiştirme — yoksa mevcut plan yenilenir. */
+  planId?: string;
 }): Promise<MembershipRenewalResult> {
   const { organizationId, gymMemberId } = params;
 
@@ -54,18 +56,24 @@ export async function startMembershipRenewalCheckout(params: {
   if (!member.userId) {
     return { ok: false, error: 'Hesabınız üyelik yenilemesi için uygun değil. Lütfen resepsiyona başvurun.' };
   }
-  if (!member.planId) {
-    return { ok: false, error: 'Üyeliğinize atanmış bir paket yok. Lütfen resepsiyona başvurun.' };
+
+  const targetPlanId = params.planId ?? member.planId;
+  if (!targetPlanId) {
+    return {
+      ok: false,
+      error: 'Henüz bir paket seçmediniz. Lütfen bir üyelik paketi seçip satın alın.',
+    };
   }
 
   const plan = await prisma.gymMembershipPlan.findFirst({
-    where: { id: member.planId, organizationId, isActive: true },
+    where: { id: targetPlanId, organizationId, isActive: true },
   });
 
   if (!plan) {
     return { ok: false, error: 'Paketiniz artık satışta değil. Lütfen resepsiyona başvurun.' };
   }
 
+  const isFirstPurchase = !member.planId;
   const period = computeRenewalPeriod({
     currentEndsAt: member.membershipEndsAt,
     durationDays: plan.durationDays,
@@ -73,7 +81,9 @@ export async function startMembershipRenewalCheckout(params: {
 
   const planPrice = Number(plan.price.toString());
   const currency = plan.currency || 'TRY';
-  const description = `Üyelik yenileme: ${plan.name} (${plan.durationDays} gün)`;
+  const description = isFirstPurchase
+    ? `İlk üyelik: ${plan.name} (${plan.durationDays} gün)`
+    : `Üyelik yenileme: ${plan.name} (${plan.durationDays} gün)`;
 
   // Ücretsiz paket — ödeme sağlayıcısına hiç gerek yok, doğrudan uzatılır.
   if (planPrice <= 0) {
@@ -81,6 +91,7 @@ export async function startMembershipRenewalCheckout(params: {
       await tx.gymMember.update({
         where: { id: gymMemberId },
         data: {
+          planId: plan.id,
           status: 'ACTIVE',
           ...(period.periodStartsAt ? { membershipStartsAt: period.periodStartsAt } : {}),
           membershipEndsAt: period.membershipEndsAt,
@@ -95,7 +106,7 @@ export async function startMembershipRenewalCheckout(params: {
           entityType: 'gym_member',
           entityId: gymMemberId,
           metadata: {
-            kind: 'membership_renewed',
+            kind: isFirstPurchase ? 'membership_first_purchase' : 'membership_renewed',
             planId: plan.id,
             planName: plan.name,
             durationDays: plan.durationDays,

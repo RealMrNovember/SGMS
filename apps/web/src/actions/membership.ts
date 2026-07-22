@@ -102,123 +102,141 @@ export async function renewMembership(
     }
   }
 
-  const period = computeRenewalPeriod({
-    currentEndsAt: member.membershipEndsAt,
-    durationDays: plan.durationDays,
-  });
-
   const planPrice = Number(plan.price.toString());
   const currency = plan.currency || 'TRY';
   const description =
     parsed.data.notes?.trim() ||
     `Üyelik yenileme: ${plan.name} (${plan.durationDays} gün)`;
 
-  await prisma.$transaction(async (tx) => {
-    await tx.gymMember.update({
-      where: { id: member.id },
-      data: {
-        planId: plan.id,
-        status: 'ACTIVE',
-        ...(period.periodStartsAt ? { membershipStartsAt: period.periodStartsAt } : {}),
-        membershipEndsAt: period.membershipEndsAt,
-        lastReminderSentAt: null,
-      },
-    });
+  // Eşzamanlı yenileme / çift tıklama çift ücretlendirmesini engellemek için
+  // üye-bazlı advisory lock + transaction içinde yeniden okuma.
+  let period: ReturnType<typeof computeRenewalPeriod>;
+  try {
+    period = await prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`renew:${member.id}`}))`;
 
-    const expense = await tx.expense.create({
-      data: {
-        organizationId: context.organizationId,
-        gymMemberId: member.id,
-        amount: planPrice,
-        currency,
-        description,
-        status: 'OPEN',
-        dueDate: period.membershipEndsAt,
-        createdById: context.userId,
-      },
-    });
+      const lockedMember = await tx.gymMember.findFirst({
+        where: { id: member.id, organizationId: context.organizationId },
+      });
+      if (!lockedMember) {
+        throw new Error('Üye bulunamadı.');
+      }
 
-    await tx.auditLog.create({
-      data: {
-        actorId: context.userId,
-        organizationId: context.organizationId,
-        action: 'EXPENSE_ADDED',
-        entityType: 'expense',
-        entityId: expense.id,
-        metadata: {
-          gymMemberId: member.id,
-          amount: planPrice,
-          currency,
-          source: 'membership_renewal',
-          planId: plan.id,
-          planName: plan.name,
-        },
-      },
-    });
+      const nextPeriod = computeRenewalPeriod({
+        currentEndsAt: lockedMember.membershipEndsAt,
+        durationDays: plan.durationDays,
+      });
 
-    if (parsed.data.paymentMode === 'pay_now' && planPrice > 0) {
-      const paymentMethod = parsed.data.paymentMethod as PaymentMethod;
-      const transaction = await tx.transaction.create({
+      await tx.gymMember.update({
+        where: { id: lockedMember.id },
         data: {
-          organizationId: context.organizationId,
-          gymMemberId: member.id,
-          expenseId: expense.id,
-          amount: planPrice,
-          currency,
-          type: 'PAYMENT',
-          paymentMethod,
-          notes: description,
-          createdById: context.userId,
+          planId: plan.id,
+          status: 'ACTIVE',
+          ...(nextPeriod.periodStartsAt ? { membershipStartsAt: nextPeriod.periodStartsAt } : {}),
+          membershipEndsAt: nextPeriod.membershipEndsAt,
+          lastReminderSentAt: null,
         },
       });
 
-      await applyPaymentToExpenses(tx, {
-        organizationId: context.organizationId,
-        gymMemberId: member.id,
-        amount: planPrice,
-        currency,
-        targetExpenseId: expense.id,
+      const expense = await tx.expense.create({
+        data: {
+          organizationId: context.organizationId,
+          gymMemberId: lockedMember.id,
+          amount: planPrice,
+          currency,
+          description,
+          status: 'OPEN',
+          dueDate: nextPeriod.membershipEndsAt,
+          createdById: context.userId,
+        },
       });
 
       await tx.auditLog.create({
         data: {
           actorId: context.userId,
           organizationId: context.organizationId,
-          action: 'PAYMENT_RECORDED',
-          entityType: 'transaction',
-          entityId: transaction.id,
+          action: 'EXPENSE_ADDED',
+          entityType: 'expense',
+          entityId: expense.id,
           metadata: {
-            gymMemberId: member.id,
+            gymMemberId: lockedMember.id,
             amount: planPrice,
             currency,
             source: 'membership_renewal',
+            planId: plan.id,
+            planName: plan.name,
           },
         },
       });
-    }
 
-    await tx.auditLog.create({
-      data: {
-        actorId: context.userId,
-        organizationId: context.organizationId,
-        action: 'MEMBER_UPDATED',
-        entityType: 'gym_member',
-        entityId: member.id,
-        metadata: {
-          kind: 'membership_renewed',
-          planId: plan.id,
-          planName: plan.name,
-          durationDays: plan.durationDays,
-          previousEndsAt: member.membershipEndsAt?.toISOString() ?? null,
-          newEndsAt: period.membershipEndsAt.toISOString(),
-          stacked: period.stacked,
-          paymentMode: parsed.data.paymentMode,
+      if (parsed.data.paymentMode === 'pay_now' && planPrice > 0) {
+        const paymentMethod = parsed.data.paymentMethod as PaymentMethod;
+        const transaction = await tx.transaction.create({
+          data: {
+            organizationId: context.organizationId,
+            gymMemberId: lockedMember.id,
+            expenseId: expense.id,
+            amount: planPrice,
+            currency,
+            type: 'PAYMENT',
+            paymentMethod,
+            notes: description,
+            createdById: context.userId,
+          },
+        });
+
+        await applyPaymentToExpenses(tx, {
+          organizationId: context.organizationId,
+          gymMemberId: lockedMember.id,
           amount: planPrice,
           currency,
+          targetExpenseId: expense.id,
+        });
+
+        await tx.auditLog.create({
+          data: {
+            actorId: context.userId,
+            organizationId: context.organizationId,
+            action: 'PAYMENT_RECORDED',
+            entityType: 'transaction',
+            entityId: transaction.id,
+            metadata: {
+              gymMemberId: lockedMember.id,
+              amount: planPrice,
+              currency,
+              source: 'membership_renewal',
+            },
+          },
+        });
+      }
+
+      await tx.auditLog.create({
+        data: {
+          actorId: context.userId,
+          organizationId: context.organizationId,
+          action: 'MEMBER_UPDATED',
+          entityType: 'gym_member',
+          entityId: lockedMember.id,
+          metadata: {
+            kind: 'membership_renewed',
+            planId: plan.id,
+            planName: plan.name,
+            durationDays: plan.durationDays,
+            previousEndsAt: lockedMember.membershipEndsAt?.toISOString() ?? null,
+            newEndsAt: nextPeriod.membershipEndsAt.toISOString(),
+            stacked: nextPeriod.stacked,
+            paymentMode: parsed.data.paymentMode,
+            amount: planPrice,
+            currency,
+          },
         },
-      },
+      });
+
+      return nextPeriod;
     });
-  });
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : 'Yenileme başarısız.' };
+  }
 
   revalidatePath(`/dashboard/members/${member.id}`);
   revalidatePath('/dashboard/members');

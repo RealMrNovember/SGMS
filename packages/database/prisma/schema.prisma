@@ -449,6 +449,8 @@ model User {
   athleteGoalsCreated         AthleteGoal[]            @relation("AthleteGoalCreatedBy")
   gymEventsCreated            GymEvent[]               @relation("GymEventCreatedBy")
   foodLogEntriesCreated       FoodLogEntry[]           @relation("FoodLogEntryCreatedBy")
+  businessExpensesCreated     BusinessExpense[]        @relation("BusinessExpenseCreatedBy")
+  deviceTokens                DeviceToken[]
 
   @@index([status])
   @@index([isSuperAdmin])
@@ -843,6 +845,7 @@ model Organization {
   gymEvents               GymEvent[]
   gymEventRsvps           GymEventRsvp[]
   foodLogEntries          FoodLogEntry[]
+  businessExpenses        BusinessExpense[]
 
   @@index([status])
   @@index([centralLicenseStatus])
@@ -1758,7 +1761,16 @@ model TenantCheckoutSession {
   /// yalnızca bu id'leri PAID işaretler; genel FIFO borç kapama akışına
   /// (`applyPaymentToExpenses`) karışmaz — sporcunun ilgisiz başka bir açık
   /// borcu yanlışlıkla bu ödemeyle kapanmaz.
+  ///
+  /// 2026-07-22 düzeltmesi: yeni checkout'lar stok/borç oluşturmayı settle'a
+  /// erteler; sepet `storeCartJson`'da tutulur. `storeExpenseIds` yalnızca
+  /// (a) eski in-flight oturumlar veya (b) settle sırasında oluşturulduktan
+  /// sonra doldurulur.
   storeExpenseIds String[] @default([]) @map("store_expense_ids")
+
+  /// Mağaza sepeti snapshot'ı — ödeme onaylanana kadar stok düşülmez / borç açılmaz.
+  /// Örn: [{ "categoryId": "...", "quantity": 2 }]
+  storeCartJson Json? @map("store_cart_json")
 
   createdAt DateTime @default(now()) @map("created_at")
 
@@ -2818,4 +2830,56 @@ model FoodLogEntry {
   @@index([organizationId, gymMemberId, loggedAt])
   @@index([gymMemberId, loggedAt])
   @@map("food_log_entries")
+}
+
+// ---------------------------------------------------------------------------
+// İşletme gideri (P&L) — üye alacağı (Expense) ile karıştırılmaz.
+// ---------------------------------------------------------------------------
+
+enum BusinessExpenseCategory {
+  RENT
+  UTILITIES
+  SALARY
+  SUPPLIES
+  MARKETING
+  OTHER
+}
+
+model BusinessExpense {
+  id             String                  @id @default(cuid())
+  organizationId String                  @map("organization_id")
+  category       BusinessExpenseCategory
+  amount         Decimal                 @db.Decimal(12, 2)
+  currency       String                  @default("TRY")
+  description    String?
+  incurredAt     DateTime                @map("incurred_at")
+  createdById    String                  @map("created_by_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation("BusinessExpenseCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, incurredAt])
+  @@index([organizationId, category])
+  @@map("business_expenses")
+}
+
+// ---------------------------------------------------------------------------
+// Native mobil push (Expo Push) — tarayıcı Web Push'tan ayrı kanal.
+// ---------------------------------------------------------------------------
+
+model DeviceToken {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  token     String   @unique
+  platform  String   @default("android")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("device_tokens")
 }

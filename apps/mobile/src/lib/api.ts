@@ -43,6 +43,36 @@ export async function login(email: string, password: string): Promise<AthleteSes
   });
 }
 
+export async function signup(input: {
+  organizationSlug: string;
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+}): Promise<AthleteSession> {
+  return apiFetch<AthleteSession>('/api/v1/auth/signup', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export type PublicGymPlan = {
+  id: string;
+  name: string;
+  description: string | null;
+  durationDays: number;
+  price: number;
+  currency: string;
+};
+
+export async function fetchPublicGym(slug: string): Promise<{
+  organization: { id: string; name: string; slug: string };
+  plans: PublicGymPlan[];
+}> {
+  return apiFetch(`/api/v1/public/gyms/${encodeURIComponent(slug)}`);
+}
+
 export async function logout(accessToken: string): Promise<void> {
   await fetch(`${SGMS_API_BASE_URL}/api/v1/auth/logout`, {
     method: 'POST',
@@ -141,10 +171,14 @@ export async function fetchStatement(accessToken: string): Promise<MemberStateme
   return apiFetch('/api/v1/me/statement', { headers: authHeaders(accessToken) });
 }
 
-export async function startMembershipRenewal(accessToken: string): Promise<MembershipRenewalResponse> {
+export async function startMembershipRenewal(
+  accessToken: string,
+  planId?: string,
+): Promise<MembershipRenewalResponse> {
   return apiFetch('/api/v1/me/membership/renew', {
     method: 'POST',
     headers: authHeaders(accessToken),
+    body: JSON.stringify(planId ? { planId } : {}),
   });
 }
 

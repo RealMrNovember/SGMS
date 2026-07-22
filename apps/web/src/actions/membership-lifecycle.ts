@@ -288,17 +288,66 @@ export async function unfreezeMembership(gymMemberId: string): Promise<Lifecycle
   });
 
   const now = new Date();
+  let clawedBackDays = 0;
+  let nextEndsAt = member.membershipEndsAt;
+
   if (activeFreeze && activeFreeze.endDate > now) {
-    // Erken çözme — personel onayı
+    // Erken çözme: approve sırasında tam dondurma süresi kadar uzatılmıştı;
+    // kullanılmayan günleri membershipEndsAt'ten geri al.
+    clawedBackDays = remainingMembershipDays(activeFreeze.endDate, now);
+    if (clawedBackDays > 0 && nextEndsAt) {
+      const adjusted = new Date(nextEndsAt);
+      adjusted.setDate(adjusted.getDate() - clawedBackDays);
+      // Üyelik bitişi "şimdi"nin altına düşmesin — en az bugün kalsın.
+      nextEndsAt = adjusted.getTime() < now.getTime() ? now : adjusted;
+    }
   }
 
-  await prisma.gymMember.update({
-    where: { id: member.id },
-    data: { status: 'ACTIVE' },
+  await prisma.$transaction(async (tx) => {
+    await tx.gymMember.update({
+      where: { id: member.id },
+      data: {
+        status: 'ACTIVE',
+        ...(nextEndsAt ? { membershipEndsAt: nextEndsAt } : {}),
+      },
+    });
+
+    if (activeFreeze) {
+      await tx.membershipFreeze.update({
+        where: { id: activeFreeze.id },
+        data: {
+          // Erken çözüldüyse freeze kaydını "fiilen bitti" diye işaretle —
+          // aynı APPROVED kaydı tekrar clawback tetiklemesin.
+          endDate: now < activeFreeze.endDate ? now : activeFreeze.endDate,
+        },
+      });
+    }
+
+    await tx.auditLog.create({
+      data: {
+        actorId: context.actorId,
+        organizationId: context.organizationId,
+        action: 'MEMBER_UPDATED',
+        entityType: 'gym_member',
+        entityId: member.id,
+        metadata: {
+          kind: 'membership_unfrozen',
+          clawedBackDays,
+          previousEndsAt: member.membershipEndsAt?.toISOString() ?? null,
+          newEndsAt: nextEndsAt?.toISOString() ?? null,
+          freezeId: activeFreeze?.id ?? null,
+        },
+      },
+    });
   });
 
   revalidatePath(`/dashboard/members/${gymMemberId}`);
   revalidatePath('/athlete/account');
+  if (clawedBackDays > 0) {
+    return {
+      success: `Üyelik tekrar aktif edildi. Kullanılmayan ${clawedBackDays} dondurma günü geri alındı.`,
+    };
+  }
   return { success: 'Üyelik tekrar aktif edildi.' };
 }
 
@@ -496,3 +545,122 @@ export async function creditRemainingRights(
   revalidatePath('/athlete/account');
   return { success: 'Kalan hak kredisi kaydedildi.' };
 }
+
+const cancelSchema = z.object({
+  gymMemberId: z.string().cuid(),
+  refundAmount: z.coerce.number().min(0).max(1_000_000).optional(),
+  notes: z.string().max(1000).optional(),
+});
+
+/** Üyeliği iptal eder (INACTIVE). Opsiyonel oranlı iade tutarı ADJUSTMENT olarak kaydedilir. */
+export async function cancelMembership(
+  _prev: LifecycleActionState,
+  formData: FormData,
+): Promise<LifecycleActionState> {
+  const context = await getStaffContext();
+  if ('error' in context) {
+    return { error: context.error };
+  }
+
+  const writeBlock = await getTenantWriteBlockReason(context.organizationId);
+  if (writeBlock) {
+    return { error: writeBlock };
+  }
+
+  const parsed = cancelSchema.safeParse({
+    gymMemberId: formData.get('gymMemberId'),
+    refundAmount: formData.get('refundAmount') || undefined,
+    notes: formData.get('notes') || undefined,
+  });
+
+  if (!parsed.success) {
+    return { error: 'İptal formu geçersiz.' };
+  }
+
+  const member = await prisma.gymMember.findFirst({
+    where: { id: parsed.data.gymMemberId, organizationId: context.organizationId },
+    include: { plan: { select: { name: true, price: true, durationDays: true, currency: true } } },
+  });
+  if (!member) {
+    return { error: 'Üye bulunamadı.' };
+  }
+  if (member.status === 'INACTIVE') {
+    return { error: 'Üyelik zaten pasif.' };
+  }
+
+  const remainingDays = remainingMembershipDays(member.membershipEndsAt);
+  const refundAmount = parsed.data.refundAmount ?? 0;
+  const currency = member.plan?.currency || 'TRY';
+  const noteText =
+    parsed.data.notes?.trim() ||
+    `Üyelik iptali${remainingDays > 0 ? ` (kalan ~${remainingDays} gün)` : ''}`;
+
+  await prisma.$transaction(async (tx) => {
+    await tx.gymMember.update({
+      where: { id: member.id },
+      data: { status: 'INACTIVE' },
+    });
+
+    if (refundAmount > 0) {
+      await tx.transaction.create({
+        data: {
+          organizationId: context.organizationId,
+          gymMemberId: member.id,
+          amount: refundAmount,
+          currency,
+          type: 'ADJUSTMENT',
+          paymentMethod: 'CASH',
+          notes: `İptal iadesi / mahsup: ${noteText}`,
+          createdById: context.actorId,
+        },
+      });
+    }
+
+    await tx.auditLog.create({
+      data: {
+        actorId: context.actorId,
+        organizationId: context.organizationId,
+        action: 'MEMBER_UPDATED',
+        entityType: 'gym_member',
+        entityId: member.id,
+        metadata: {
+          kind: 'membership_cancelled',
+          remainingDays,
+          refundAmount,
+          currency,
+          planId: member.planId,
+          previousStatus: member.status,
+        },
+      },
+    });
+  });
+
+  revalidatePath(`/dashboard/members/${member.id}`);
+  revalidatePath('/dashboard/members');
+  revalidatePath('/athlete/account');
+  return {
+    success:
+      refundAmount > 0
+        ? `Üyelik iptal edildi. ${refundAmount.toFixed(2)} ${currency} mahsup/iade kaydı oluşturuldu.`
+        : 'Üyelik iptal edildi (pasife alındı).',
+  };
+}
+
+/** Oranlı iade önerisi: plan fiyatı × (kalan gün / paket süresi). */
+export function suggestCancelRefund(params: {
+  planPrice: number | null;
+  durationDays: number | null;
+  membershipEndsAt: Date | null;
+  now?: Date;
+}): number {
+  const { planPrice, durationDays, membershipEndsAt, now = new Date() } = params;
+  if (planPrice == null || !durationDays || durationDays <= 0 || !membershipEndsAt) {
+    return 0;
+  }
+  const remaining = remainingMembershipDays(membershipEndsAt, now);
+  if (remaining <= 0) {
+    return 0;
+  }
+  return Math.round(planPrice * (Math.min(remaining, durationDays) / durationDays) * 100) / 100;
+}
+

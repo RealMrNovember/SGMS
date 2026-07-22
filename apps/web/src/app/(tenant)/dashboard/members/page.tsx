@@ -28,6 +28,8 @@ export default async function MembersPage({
   }
 
   const organizationId = session.user.organizationId;
+  const role = session.user.role;
+  const userId = session.user.id;
   const t = await getTranslations('members');
   const locale = await getLocale();
   const dateLocale = intlLocaleFor(locale);
@@ -39,6 +41,7 @@ export default async function MembersPage({
 
   const where: Prisma.GymMemberWhereInput = {
     organizationId,
+    ...(role === 'TRAINER' ? { trainerId: userId } : {}),
     ...(statusFilter ? { status: statusFilter } : {}),
     ...(query
       ? {

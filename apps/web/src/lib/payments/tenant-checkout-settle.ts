@@ -2,6 +2,73 @@ import { issueInvoiceFromPayment } from '@/actions/invoices';
 import { applyPaymentToExpenses, applyPaymentToSpecificExpenses } from '@/lib/billing/settle-payment';
 import { decimalToNumber } from '@/lib/member-balance';
 import { prisma } from '@/lib/prisma';
+import { createCategorySaleExpense } from '@/lib/store/category-sale';
+import type { Prisma } from '@sgms/database';
+
+type StoreCartLine = { categoryId: string; quantity: number };
+
+function parseStoreCart(value: unknown): StoreCartLine[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  const lines: StoreCartLine[] = [];
+  for (const row of value) {
+    if (
+      row &&
+      typeof row === 'object' &&
+      typeof (row as StoreCartLine).categoryId === 'string' &&
+      Number.isInteger((row as StoreCartLine).quantity) &&
+      (row as StoreCartLine).quantity >= 1
+    ) {
+      lines.push({
+        categoryId: (row as StoreCartLine).categoryId,
+        quantity: (row as StoreCartLine).quantity,
+      });
+    }
+  }
+  return lines;
+}
+
+/** Terk edilmiş / başarısız mağaza checkout'unda erken açılmış OPEN borçları geri al. */
+async function rollbackStoreExpenses(
+  tx: Prisma.TransactionClient,
+  params: { organizationId: string; expenseIds: string[] },
+): Promise<void> {
+  if (params.expenseIds.length === 0) {
+    return;
+  }
+
+  const expenses = await tx.expense.findMany({
+    where: {
+      id: { in: params.expenseIds },
+      organizationId: params.organizationId,
+      status: 'OPEN',
+    },
+    select: { id: true, categoryId: true, description: true },
+  });
+
+  for (const expense of expenses) {
+    if (expense.categoryId) {
+      // description "Name xN" veya "Name" — adetten stoğu geri ekle
+      const match = /x(\d+)\s*$/i.exec(expense.description ?? '');
+      const quantity = match ? Number.parseInt(match[1], 10) : 1;
+      if (Number.isFinite(quantity) && quantity > 0) {
+        await tx.expenseCategory.updateMany({
+          where: {
+            id: expense.categoryId,
+            organizationId: params.organizationId,
+            stockQuantity: { not: null },
+          },
+          data: { stockQuantity: { increment: quantity } },
+        });
+      }
+    }
+    await tx.expense.update({
+      where: { id: expense.id },
+      data: { status: 'VOID' },
+    });
+  }
+}
 
 /**
  * iyzico/PayTR webhook'ları bu ortak yolu çağırır. Atomik "claim" (updateMany +
@@ -16,8 +83,10 @@ import { prisma } from '@/lib/prisma';
  *
  * Faz 8.7.1 — `renewalPlanId` doluysa (üyelik yenileme checkout'u), ödeme
  * onaylandıktan SONRA `GymMember.planId`/`membershipEndsAt` de güncellenir.
- * Bilinçli sıralama: tarih uzatma ödeme başarısından ÖNCE değil SONRA olur —
- * aksi halde yarıda bırakılan bir online ödeme üyeliği bedavaya uzatırdı.
+ *
+ * Faz 40 (2026-07-22) — mağaza sepeti `storeCartJson` ile gelir; stok/borç
+ * yalnızca burada, ödeme başarılıysa oluşturulur. Eski in-flight oturumlar
+ * `storeExpenseIds` ile gelir; başarısız olursa VOID + stok geri alınır.
  */
 export async function settleTenantCheckoutSession(
   checkoutSessionId: string,
@@ -41,6 +110,14 @@ export async function settleTenantCheckoutSession(
   }
 
   if (!paymentSuccessful) {
+    if (checkoutSession.storeExpenseIds.length > 0) {
+      await prisma.$transaction(async (tx) => {
+        await rollbackStoreExpenses(tx, {
+          organizationId: checkoutSession.organizationId,
+          expenseIds: checkoutSession.storeExpenseIds,
+        });
+      });
+    }
     await prisma.tenantCheckoutSession.update({
       where: { id: checkoutSessionId },
       data: { status: 'failed' },
@@ -54,7 +131,14 @@ export async function settleTenantCheckoutSession(
   });
 
   if (!member?.userId) {
-    // Beklenmedik durum: /athlete'e erişebilen her üyenin bağlı bir User'ı olmalı.
+    if (checkoutSession.storeExpenseIds.length > 0) {
+      await prisma.$transaction(async (tx) => {
+        await rollbackStoreExpenses(tx, {
+          organizationId: checkoutSession.organizationId,
+          expenseIds: checkoutSession.storeExpenseIds,
+        });
+      });
+    }
     await prisma.tenantCheckoutSession.update({
       where: { id: checkoutSessionId },
       data: { status: 'failed' },
@@ -63,9 +147,50 @@ export async function settleTenantCheckoutSession(
   }
 
   const amount = decimalToNumber(checkoutSession.amount);
+  const cartLines = parseStoreCart(checkoutSession.storeCartJson);
 
   try {
     await prisma.$transaction(async (tx) => {
+      let storeExpenseIds = [...checkoutSession.storeExpenseIds];
+
+      // Yeni akış: sepet snapshot'ından stok + OPEN borç ancak şimdi oluşur.
+      if (storeExpenseIds.length === 0 && cartLines.length > 0) {
+        const categoryIds = [...new Set(cartLines.map((l) => l.categoryId))];
+        const categories = await tx.expenseCategory.findMany({
+          where: {
+            id: { in: categoryIds },
+            organizationId: checkoutSession.organizationId,
+            isActive: true,
+            isStoreVisible: true,
+          },
+        });
+        if (categories.length !== categoryIds.length) {
+          throw new Error('Sepetteki ürünlerden biri artık mağazada mevcut değil.');
+        }
+
+        const createdIds: string[] = [];
+        for (const line of cartLines) {
+          const category = categories.find((c) => c.id === line.categoryId);
+          if (!category) {
+            throw new Error('Sepetteki ürünlerden biri artık mağazada mevcut değil.');
+          }
+          const created = await createCategorySaleExpense(tx, {
+            organizationId: checkoutSession.organizationId,
+            gymMemberId: checkoutSession.gymMemberId,
+            category,
+            createdById: member.userId!,
+            quantity: line.quantity,
+            channel: 'self_service',
+          });
+          createdIds.push(created.id);
+        }
+        storeExpenseIds = createdIds;
+        await tx.tenantCheckoutSession.update({
+          where: { id: checkoutSessionId },
+          data: { storeExpenseIds },
+        });
+      }
+
       const transaction = await tx.transaction.create({
         data: {
           organizationId: checkoutSession.organizationId,
@@ -80,15 +205,13 @@ export async function settleTenantCheckoutSession(
         },
       });
 
-      if (checkoutSession.storeExpenseIds.length > 0) {
-        // Faz 40 — mağaza sepeti: yalnızca bu checkout'un açtığı Expense
-        // satırlarını kapat, sporcunun ilgisiz başka açık borcuna dokunma.
+      if (storeExpenseIds.length > 0) {
         await applyPaymentToSpecificExpenses(tx, {
           organizationId: checkoutSession.organizationId,
           gymMemberId: checkoutSession.gymMemberId,
           amount,
           currency: checkoutSession.currency,
-          expenseIds: checkoutSession.storeExpenseIds,
+          expenseIds: storeExpenseIds,
         });
       } else {
         await applyPaymentToExpenses(tx, {
@@ -107,8 +230,7 @@ export async function settleTenantCheckoutSession(
           amount,
           currency: checkoutSession.currency,
           issuedById: member.userId!,
-          description:
-            checkoutSession.storeExpenseIds.length > 0 ? 'Mağaza siparişi (online)' : 'Kartla ödeme (online)',
+          description: storeExpenseIds.length > 0 ? 'Mağaza siparişi (online)' : 'Kartla ödeme (online)',
         },
         tx,
       );
@@ -129,12 +251,10 @@ export async function settleTenantCheckoutSession(
             gymMemberId: checkoutSession.gymMemberId,
             amount,
             currency: checkoutSession.currency,
-            source: checkoutSession.storeExpenseIds.length > 0 ? 'tenant_store_checkout' : 'tenant_card_checkout',
+            source: storeExpenseIds.length > 0 ? 'tenant_store_checkout' : 'tenant_card_checkout',
             provider: checkoutSession.provider,
             checkoutSessionId,
-            ...(checkoutSession.storeExpenseIds.length > 0
-              ? { storeExpenseIds: checkoutSession.storeExpenseIds }
-              : {}),
+            ...(storeExpenseIds.length > 0 ? { storeExpenseIds } : {}),
           },
         },
       });
@@ -179,6 +299,14 @@ export async function settleTenantCheckoutSession(
       data: { status: 'completed' },
     });
   } catch {
+    if (checkoutSession.storeExpenseIds.length > 0) {
+      await prisma.$transaction(async (tx) => {
+        await rollbackStoreExpenses(tx, {
+          organizationId: checkoutSession.organizationId,
+          expenseIds: checkoutSession.storeExpenseIds,
+        });
+      }).catch(() => undefined);
+    }
     await prisma.tenantCheckoutSession.update({
       where: { id: checkoutSessionId },
       data: { status: 'failed' },

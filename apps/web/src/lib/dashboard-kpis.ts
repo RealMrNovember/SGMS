@@ -71,19 +71,17 @@ export async function getDashboardKpis(organizationId: string, now = new Date())
       }),
     ]);
 
-  // Tüm para birimlerinin net tahsilat toplamı (dashboard tek rakam gösteriyor; TRY ağırlıklı)
-  const collectedAll = revenue.byCurrency.reduce((sum, c) => sum + c.collected, 0);
-  const billedAll = revenue.byCurrency.reduce((sum, c) => sum + c.billed, 0);
   const lowStockCount = lowStockCategories.filter((c) => {
     const qty = c.stockQuantity ?? 0;
     const threshold = c.lowStockThreshold ?? 5;
     return qty <= threshold;
   }).length;
 
+  // Birincil para birimi (TRY tercih) — farklı para birimlerini toplamak yanıltıcıdır.
   return {
     checkInsToday,
-    revenueThisMonth: collectedAll,
-    billedThisMonth: billedAll,
+    revenueThisMonth: revenue.collected,
+    billedThisMonth: revenue.billed,
     membershipsExpiringSoonCount,
     overdueInstallmentCount,
     lowStockCount,

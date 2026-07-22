@@ -1,3 +1,5 @@
+import { sumBusinessExpenses } from '@/actions/business-expenses';
+import { BusinessExpenseForm } from '@/components/business-expense-form';
 import { ReportsExportButton } from '@/components/reports/reports-export-button';
 import { auth } from '@/lib/auth';
 import { intlLocaleFor } from '@/lib/format-locale';
@@ -47,11 +49,14 @@ export default async function ReportsPage({
   const dateLocale = intlLocaleFor(locale);
   const organizationId = session.user.organizationId;
 
-  const [operational, membership, revenue] = await Promise.all([
+  const primaryCurrency = 'TRY';
+  const [operational, membership, revenue, operatingCosts] = await Promise.all([
     getOperationalReport(organizationId, range),
     getMembershipMetrics(organizationId, range),
     getRevenueForPeriod(organizationId, range),
+    sumBusinessExpenses(organizationId, range, primaryCurrency),
   ]);
+  const netProfit = revenue.collected - operatingCosts;
 
   const maxDailyVisitor = Math.max(1, ...operational.dailyVisitors.map((d) => d.count));
   const maxHour = Math.max(1, ...operational.busiestHours.map((h) => h.count));
@@ -121,7 +126,25 @@ export default async function ReportsPage({
             </p>
             <p className="muted mt-1 text-xs">{t('revenue.billedHint')}</p>
           </article>
-          <article className="rounded-xl border border-[var(--border)] bg-white/5 p-4 sm:col-span-2">
+          <article className="rounded-xl border border-[var(--border)] bg-white/5 p-4">
+            <p className="muted text-sm">İşletme giderleri</p>
+            <p className="mt-2 text-2xl font-semibold tabular-nums text-rose-300">
+              {money(operatingCosts, primaryCurrency)}
+            </p>
+            <p className="muted mt-1 text-xs">Kira, maaş, fatura vb. (seçili dönem)</p>
+          </article>
+          <article className="rounded-xl border border-[var(--border)] bg-white/5 p-4">
+            <p className="muted text-sm">Net kâr (P&amp;L)</p>
+            <p
+              className={`mt-2 text-2xl font-semibold tabular-nums ${
+                netProfit >= 0 ? 'text-emerald-300' : 'text-rose-300'
+              }`}
+            >
+              {money(netProfit, primaryCurrency)}
+            </p>
+            <p className="muted mt-1 text-xs">Tahsilat − işletme giderleri ({primaryCurrency})</p>
+          </article>
+          <article className="rounded-xl border border-[var(--border)] bg-white/5 p-4 sm:col-span-2 xl:col-span-4">
             <p className="muted text-sm">{t('revenue.byCurrency')}</p>
             {revenue.byCurrency.length === 0 ? (
               <p className="muted mt-2 text-sm">{t('empty')}</p>
@@ -146,6 +169,8 @@ export default async function ReportsPage({
           </article>
         </div>
       </section>
+
+      <BusinessExpenseForm />
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <article className="card p-5">

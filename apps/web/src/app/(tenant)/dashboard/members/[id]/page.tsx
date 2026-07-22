@@ -1,3 +1,4 @@
+import { AthletePortalAccessForm } from '@/components/athlete-portal-access-form';
 import { AddMeasurementForm } from '@/components/add-measurement-form';
 import { AvatarUpload } from '@/components/avatar-upload';
 import { GoalAssignPanel } from '@/components/goal-assign-panel';
@@ -17,6 +18,8 @@ import { getNutritionOverviewForMember } from '@/lib/nutrition/list';
 import { memberCountryLabel } from '@/lib/member-countries';
 import { getMemberPaymentPlans } from '@/lib/payment-plans';
 import { prisma } from '@/lib/prisma';
+import { trainerScopedMemberWhere } from '@/lib/trainers/member-scope';
+import { suggestCancelRefund } from '@/actions/membership-lifecycle';
 import type { OrganizationRole } from '@sgms/database';
 import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
@@ -59,7 +62,11 @@ export default async function MemberDetailPage({
 
   const [member, accountSummary, expenseCategories, paymentPlans, membershipPlans, pendingFreezes, allMembers, athleteGoals, nutritionOverview] = await Promise.all([
     prisma.gymMember.findFirst({
-      where: { id, organizationId },
+      where: {
+        id,
+        organizationId,
+        ...trainerScopedMemberWhere(role, session.user.id),
+      },
       include: {
         plan: true,
         trainer: { select: { id: true, name: true, email: true } },
@@ -231,6 +238,14 @@ export default async function MemberDetailPage({
       ) : null}
 
       {canManageMember ? (
+        <AthletePortalAccessForm
+          gymMemberId={member.id}
+          defaultEmail={member.email ?? member.user?.email ?? ''}
+          hasPortalAccess={Boolean(member.userId)}
+        />
+      ) : null}
+
+      {canManageMember ? (
         <MembershipLifecyclePanel
           gymMemberId={member.id}
           memberName={fullName}
@@ -249,6 +264,11 @@ export default async function MemberDetailPage({
             label: `${m.firstName} ${m.lastName}`,
           }))}
           canManage={canManageMember}
+          suggestedCancelRefund={suggestCancelRefund({
+            planPrice: member.plan ? decimalToNumber(member.plan.price) : null,
+            durationDays: member.plan?.durationDays ?? null,
+            membershipEndsAt: member.membershipEndsAt,
+          })}
         />
       ) : null}
 

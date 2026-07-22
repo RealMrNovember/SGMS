@@ -4,6 +4,7 @@ import { UploadMeasurementPhotoForm } from '@/components/upload-measurement-phot
 import { auth } from '@/lib/auth';
 import { intlLocaleFor } from '@/lib/format-locale';
 import { prisma } from '@/lib/prisma';
+import { trainerScopedMemberWhere } from '@/lib/trainers/member-scope';
 import type { OrganizationRole } from '@sgms/database';
 import { getLocale, getTranslations } from 'next-intl/server';
 import Image from 'next/image';
@@ -50,7 +51,11 @@ export default async function MemberMeasurementsPage({
   const dateLocale = intlLocaleFor(locale);
 
   const member = await prisma.gymMember.findFirst({
-    where: { id, organizationId },
+    where: {
+      id,
+      organizationId,
+      ...trainerScopedMemberWhere(role, session.user.id),
+    },
     select: {
       id: true,
       firstName: true,

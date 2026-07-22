@@ -2,6 +2,7 @@
 
 import {
   approveMembershipFreeze,
+  cancelMembership,
   creditRemainingRights,
   rejectMembershipFreeze,
   requestMembershipFreeze,
@@ -37,6 +38,7 @@ export function MembershipLifecyclePanel({
   memberOptions,
   canManage,
   isAthleteView = false,
+  suggestedCancelRefund = 0,
 }: {
   gymMemberId: string;
   memberName: string;
@@ -45,11 +47,13 @@ export function MembershipLifecyclePanel({
   memberOptions: MemberOption[];
   canManage: boolean;
   isAthleteView?: boolean;
+  suggestedCancelRefund?: number;
 }) {
   const t = useTranslations('faz17.freezes');
   const [freezeState, freezeAction, freezePending] = useActionState(requestMembershipFreeze, initial);
   const [transferState, transferAction, transferPending] = useActionState(transferMembership, initial);
   const [creditState, creditAction, creditPending] = useActionState(creditRemainingRights, initial);
+  const [cancelState, cancelAction, cancelPending] = useActionState(cancelMembership, initial);
   const [pending, startTransition] = useTransition();
 
   return (
@@ -219,6 +223,51 @@ export function MembershipLifecyclePanel({
               </button>
             </form>
           </section>
+
+          {memberStatus !== 'INACTIVE' ? (
+            <section className="card space-y-4 border-rose-500/30 p-6">
+              <h3 className="text-lg font-semibold text-rose-100">Üyeliği İptal Et</h3>
+              <p className="muted text-sm">
+                Üye pasife alınır. Önerilen oranlı iade: {suggestedCancelRefund.toFixed(2)} ₺ (isteğe bağlı —
+                0 bırakırsanız yalnızca iptal edilir).
+              </p>
+              {cancelState.error ? <p className="text-sm text-rose-300">{cancelState.error}</p> : null}
+              {cancelState.success ? <p className="text-sm text-emerald-300">{cancelState.success}</p> : null}
+              <form
+                action={cancelAction}
+                className="grid gap-4 md:grid-cols-2"
+                onSubmit={(e) => {
+                  if (!window.confirm(`${memberName} üyeliğini iptal etmek istediğinize emin misiniz?`)) {
+                    e.preventDefault();
+                  }
+                }}
+              >
+                <input type="hidden" name="gymMemberId" value={gymMemberId} />
+                <div className="space-y-2">
+                  <label className="muted text-sm">İade / mahsup tutarı (₺)</label>
+                  <input
+                    type="number"
+                    name="refundAmount"
+                    className="input"
+                    min={0}
+                    step="0.01"
+                    defaultValue={suggestedCancelRefund > 0 ? suggestedCancelRefund : 0}
+                  />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <label className="muted text-sm">{t('notes')}</label>
+                  <textarea name="notes" className="input min-h-[60px]" />
+                </div>
+                <button
+                  type="submit"
+                  className="button border-rose-400/50 bg-rose-500/20 md:col-span-2"
+                  disabled={cancelPending}
+                >
+                  Üyeliği İptal Et
+                </button>
+              </form>
+            </section>
+          ) : null}
         </>
       ) : null}
     </div>

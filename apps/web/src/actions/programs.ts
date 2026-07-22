@@ -8,6 +8,7 @@ import {
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { getTenantWriteBlockReason } from '@/lib/tenant-access';
+import { trainerScopedMemberWhere } from '@/lib/trainers/member-scope';
 import type { OrganizationRole, Prisma, ProgramType } from '@sgms/database';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
@@ -101,11 +102,19 @@ export async function createTrainingProgram(
 
   const data = parsed.data;
   const gymMember = await prisma.gymMember.findFirst({
-    where: { id: data.gymMemberId, organizationId: context.organizationId },
+    where: {
+      id: data.gymMemberId,
+      organizationId: context.organizationId,
+      ...trainerScopedMemberWhere(context.role, context.userId),
+    },
   });
 
   if (!gymMember) {
-    return { error: 'Sporcu bu salonda bulunamadı.' };
+    return { error: 'Sporcu bulunamadı veya size atanmamış.' };
+  }
+
+  if (context.role === 'TRAINER' && gymMember.trainerId !== context.userId) {
+    return { error: 'Yalnızca kendi sporcularınıza program yazabilirsiniz.' };
   }
 
   const trainerId =

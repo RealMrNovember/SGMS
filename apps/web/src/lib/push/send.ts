@@ -27,10 +27,14 @@ export type PushPayload = {
 };
 
 /**
- * Bir kullanıcının tüm tarayıcı aboneliklerine push bildirimi gönderir (masaüstü/mobil
- * uygulama şart değil). Geçersiz/süresi dolmuş abonelikler (410/404) otomatik temizlenir.
+ * Bir kullanıcının tüm tarayıcı aboneliklerine + native Expo push token'larına
+ * bildirim gönderir. Geçersiz/süresi dolmuş abonelikler otomatik temizlenir.
  */
 export async function sendPushToUser(userId: string, payload: PushPayload): Promise<void> {
+  await Promise.all([sendWebPushToUser(userId, payload), sendExpoPushToUser(userId, payload)]);
+}
+
+async function sendWebPushToUser(userId: string, payload: PushPayload): Promise<void> {
   if (!ensureConfigured()) {
     return;
   }
@@ -62,6 +66,53 @@ export async function sendPushToUser(userId: string, payload: PushPayload): Prom
       }
     }),
   );
+}
+
+async function sendExpoPushToUser(userId: string, payload: PushPayload): Promise<void> {
+  const tokens = await prisma.deviceToken.findMany({ where: { userId }, select: { id: true, token: true } });
+  if (tokens.length === 0) {
+    return;
+  }
+
+  const messages = tokens.map((row) => ({
+    to: row.token,
+    sound: 'default' as const,
+    title: payload.title,
+    body: payload.body,
+    data: { url: payload.url ?? '/', tag: payload.tag ?? null },
+  }));
+
+  try {
+    const response = await fetch('https://exp.host/--/api/v2/push/send', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Accept-Encoding': 'gzip, deflate',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(messages),
+    });
+    if (!response.ok) {
+      console.error('[push/expo] HTTP', response.status, await response.text().catch(() => ''));
+      return;
+    }
+    const result = (await response.json()) as {
+      data?: Array<{ status?: string; details?: { error?: string } }>;
+    };
+    const rows = Array.isArray(result.data) ? result.data : [];
+    await Promise.all(
+      rows.map(async (ticket, index) => {
+        if (ticket.status === 'error' && ticket.details?.error === 'DeviceNotRegistered') {
+          const tokenId = tokens[index]?.id;
+          if (tokenId) {
+            await prisma.deviceToken.delete({ where: { id: tokenId } }).catch(() => {});
+          }
+        }
+      }),
+    );
+  } catch (error) {
+    console.error('[push/expo] send failed', error);
+  }
 }
 
 /** Aynı bildirim birden fazla kullanıcıya (ör. tüm resepsiyon rolleri) gönderilir. */

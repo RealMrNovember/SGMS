@@ -1,4 +1,5 @@
 import { auth } from '@/lib/auth';
+import { getDashboardAlerts } from '@/lib/dashboard-alerts';
 import { buildDashboardLicenseSummary } from '@/lib/dashboard-license';
 import { getDashboardKpis } from '@/lib/dashboard-kpis';
 import { licenseStatusKey, resolveLicenseCardHint } from '@/lib/license-i18n';
@@ -14,13 +15,13 @@ import { redirect } from 'next/navigation';
 
 const RECEPTION_ROLES = new Set<OrganizationRole>(['OWNER', 'ADMIN', 'STAFF', 'TRAINER']);
 const TEAM_MANAGER_ROLES = new Set<OrganizationRole>(['OWNER', 'ADMIN']);
+const ALERT_ROLES = new Set<OrganizationRole>(['OWNER', 'ADMIN', 'STAFF']);
 
-const COMING_SOON_TEASER_FEATURES = ['digitalCard', 'insights', 'integrations', 'notifications'] as const;
+const COMING_SOON_TEASER_FEATURES = ['digitalCard', 'insights', 'integrations'] as const;
 const COMING_SOON_ICONS: Record<(typeof COMING_SOON_TEASER_FEATURES)[number], string> = {
   digitalCard: '📱',
   insights: '🤖',
   integrations: '🔌',
-  notifications: '🔔',
 };
 
 export default async function DashboardPage() {
@@ -42,7 +43,12 @@ export default async function DashboardPage() {
 
   await refreshDashboardLicense(organizationId);
 
-  const kpis = await getDashboardKpis(organizationId);
+  const [kpis, attentionAlerts] = await Promise.all([
+    getDashboardKpis(organizationId),
+    role && ALERT_ROLES.has(role)
+      ? getDashboardAlerts(organizationId, role)
+      : Promise.resolve([]),
+  ]);
 
   const organization = await prisma.organization.findUnique({
     where: { id: organizationId },
@@ -122,7 +128,38 @@ export default async function DashboardPage() {
         </p>
       </section>
 
-      {license.isOperational && kpis.membershipsExpiringSoonCount > 0 ? (
+      {license.isOperational && attentionAlerts.length > 0 ? (
+        <section className="card space-y-4 p-5">
+          <div>
+            <h3 className="font-semibold">Bugün Dikkat Et</h3>
+            <p className="muted mt-1 text-sm">Öncelikli operasyonel uyarılar tek yerde.</p>
+          </div>
+          <ul className="space-y-3">
+            {attentionAlerts.map((alert) => (
+              <li
+                key={alert.id}
+                className={
+                  alert.severity === 'rose'
+                    ? 'flex flex-col gap-2 rounded-lg border border-rose-500/40 bg-rose-500/5 p-4 sm:flex-row sm:items-center sm:justify-between'
+                    : alert.severity === 'amber'
+                      ? 'flex flex-col gap-2 rounded-lg border border-amber-500/40 bg-amber-500/5 p-4 sm:flex-row sm:items-center sm:justify-between'
+                      : 'flex flex-col gap-2 rounded-lg border border-sky-500/40 bg-sky-500/5 p-4 sm:flex-row sm:items-center sm:justify-between'
+                }
+              >
+                <div>
+                  <p className="font-semibold">{alert.title}</p>
+                  <p className="muted mt-1 text-sm">{alert.subtitle}</p>
+                </div>
+                <Link href={alert.href} className="button shrink-0 px-4 py-2 text-sm whitespace-nowrap">
+                  {alert.cta} →
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {license.isOperational && kpis.membershipsExpiringSoonCount > 0 && attentionAlerts.length === 0 ? (
         <section className="card flex flex-col gap-3 border-amber-500/40 bg-amber-500/5 p-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="font-semibold text-amber-100">
@@ -136,7 +173,7 @@ export default async function DashboardPage() {
         </section>
       ) : null}
 
-      {license.isOperational && kpis.overdueInstallmentCount > 0 ? (
+      {license.isOperational && kpis.overdueInstallmentCount > 0 && attentionAlerts.length === 0 ? (
         <section className="card flex flex-col gap-3 border-rose-500/40 bg-rose-500/5 p-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="font-semibold text-rose-100">

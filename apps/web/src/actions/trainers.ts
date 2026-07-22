@@ -294,6 +294,37 @@ export async function completePtSession(
         },
       });
 
+      // Seans ücreti üye cari hesabına yansır — kasa/POS tahsilatı buradan yapılır.
+      if (revenueAmount > 0 && session.gymMemberId) {
+        const expense = await tx.expense.create({
+          data: {
+            organizationId: context.organizationId,
+            gymMemberId: session.gymMemberId,
+            amount: revenueAmount,
+            currency: 'TRY',
+            description: `PT seansı (${session.scheduledAt.toLocaleDateString('tr-TR')})`,
+            status: 'OPEN',
+            createdById: context.userId,
+          },
+        });
+
+        await tx.auditLog.create({
+          data: {
+            actorId: context.userId,
+            organizationId: context.organizationId,
+            action: 'EXPENSE_ADDED',
+            entityType: 'expense',
+            entityId: expense.id,
+            metadata: {
+              source: 'pt_session',
+              ptSessionId: sessionId,
+              revenueAmount,
+              commissionAmount,
+            },
+          },
+        });
+      }
+
       await tx.auditLog.create({
         data: {
           actorId: context.userId,
@@ -307,7 +338,14 @@ export async function completePtSession(
     });
 
     revalidateTrainerViews(session.trainerUserId);
-    return { success: `Seans tamamlandı — hak edilen prim: ${commissionAmount.toFixed(2)} ₺.` };
+    revalidatePath(`/dashboard/members/${session.gymMemberId}`);
+    revalidatePath('/dashboard/pos');
+    return {
+      success:
+        revenueAmount > 0
+          ? `Seans tamamlandı — ${revenueAmount.toFixed(2)} ₺ üye hesabına işlendi, prim: ${commissionAmount.toFixed(2)} ₺.`
+          : `Seans tamamlandı — hak edilen prim: ${commissionAmount.toFixed(2)} ₺.`,
+    };
   } catch (error) {
     return { error: error instanceof Error ? error.message : 'Seans tamamlanamadı.' };
   }

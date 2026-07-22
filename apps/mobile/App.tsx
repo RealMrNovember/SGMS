@@ -14,9 +14,11 @@ import { MeasurementsScreen } from './src/screens/MeasurementsScreen';
 import { MessagesScreen } from './src/screens/MessagesScreen';
 import { NutritionScreen } from './src/screens/NutritionScreen';
 import { ProgramsScreen } from './src/screens/ProgramsScreen';
+import { SignupScreen } from './src/screens/SignupScreen';
 import { StoreScreen } from './src/screens/StoreScreen';
 import { TrainersScreen } from './src/screens/TrainersScreen';
 import { fetchMe } from './src/lib/api';
+import { registerForPushNotifications } from './src/lib/push';
 import { loadSession, saveSession } from './src/lib/storage';
 import { colors } from './src/lib/theme';
 import { checkForUpdate } from './src/lib/update-check';
@@ -27,6 +29,7 @@ function AppShell() {
   const insets = useSafeAreaInsets();
   const [session, setSession] = useState<AthleteSession | null>(null);
   const [checking, setChecking] = useState(true);
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [activeTab, setActiveTab] = useState<TabKey>('home');
   const [trainersOpen, setTrainersOpen] = useState(false);
   const [storeOpen, setStoreOpen] = useState(false);
@@ -41,18 +44,10 @@ function AppShell() {
       .then(setSession)
       .finally(() => setChecking(false));
 
-    // Native (APK) sürüm kontrolü — yalnızca yeni bir native değişiklik (yeni izin,
-    // native modül, Expo SDK yükseltmesi vb.) olduğunda gerçekten yeni bir APK
-    // gerekiyorsa banner gösterilir. Çoğu JS/TSX değişikliği bunun yerine aşağıdaki
-    // OTA (expo-updates) akışıyla sessizce, APK indirmeden uygulanır.
     checkForUpdate().then((info) => {
       if (info?.available) setUpdate(info);
     });
 
-    // OTA güncelleme — Faz 20.5: JS-only değişiklikler (özellik/hata düzeltmeleri)
-    // arkadaş/test cihazlarına dahil APK kurmadan otomatik ulaşsın diye. `__DEV__`
-    // sırasında (Metro ile geliştirirken) expo-updates devre dışı — yalnızca
-    // derlenmiş release build'de anlamlı.
     if (!__DEV__) {
       Updates.checkForUpdateAsync()
         .then((result) => (result.isAvailable ? Updates.fetchUpdateAsync() : null))
@@ -67,6 +62,7 @@ function AppShell() {
 
   useEffect(() => {
     if (!session) return;
+    void registerForPushNotifications(session.accessToken);
     fetchMe(session.accessToken)
       .then((me) => setUnreadMessages(me.stats.unreadMessages))
       .catch(() => undefined);
@@ -82,6 +78,7 @@ function AppShell() {
     await saveSession(next);
     setSession(next);
     setActiveTab('home');
+    setAuthMode('login');
   }
 
   function handleLogout() {
@@ -100,15 +97,16 @@ function AppShell() {
   if (!session) {
     return (
       <>
-        <LoginScreen onSuccess={handleLoginSuccess} />
+        {authMode === 'signup' ? (
+          <SignupScreen onSuccess={handleLoginSuccess} onBackToLogin={() => setAuthMode('login')} />
+        ) : (
+          <LoginScreen onSuccess={handleLoginSuccess} onGoSignup={() => setAuthMode('signup')} />
+        )}
         <StatusBar style="light" />
       </>
     );
   }
 
-  // Ekranlar kendi üst dolgusunu eklemez — üstteki güncelleme bandı gösterildiğinde
-  // çift boşluk oluşmasın diye tek bir yerden (burada) yönetiliyor. Alt boşluk ise
-  // TabBar kendi güvenli alan payını zaten ayırdığı için ekranlara eklenmiyor.
   const screenTopInset = update ? 0 : insets.top;
   const anyOverlayOpen = trainersOpen || storeOpen || goalsOpen || eventsOpen || nutritionOpen;
 

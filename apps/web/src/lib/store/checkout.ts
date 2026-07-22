@@ -8,7 +8,6 @@ import {
 } from '@/lib/payments/tenant-gateway';
 import { prisma } from '@/lib/prisma';
 import { siteConfig } from '@/lib/site-config';
-import { createCategorySaleExpense } from '@/lib/store/category-sale';
 
 export type StoreCheckoutItem = { categoryId: string; quantity: number };
 
@@ -21,15 +20,9 @@ const MAX_LINE_QUANTITY = 50;
 
 /**
  * Sporcunun mobil mağazadan sepet ile self-servis kartla ödeme başlatması
- * (Faz 40). Faz 8.7.1'deki (`startMembershipRenewalCheckout`) checkout
- * altyapısı (Iyzico/PayTR hosted ödeme, `TenantCheckoutSession`, webhook
- * onayına kadar borç OPEN kalır) hiç kod tekrarı olmadan yeniden kullanılır.
- *
- * **Fark:** üyelik yenilemesi tek bir `Expense` hedefler; sepette birden
- * çok ürün olabileceğinden her sepet satırı için (Faz 17.6'daki
- * `quickAddCategoryExpense` ile birebir aynı stok düşümü/`Expense` oluşturma
- * mantığını kullanan) `createCategorySaleExpense` çağrılır ve tüm id'ler
- * `TenantCheckoutSession.storeExpenseIds`'e yazılır.
+ * (Faz 40). Stok düşümü ve OPEN borç, ödeme webhook onayına kadar
+ * ertelenir (`storeCartJson`); terk edilen sepet hayalet borç/stok kaybı
+ * yaratmaz.
  */
 export async function startStoreCheckout(params: {
   organizationId: string;
@@ -77,11 +70,22 @@ export async function startStoreCheckout(params: {
   if (categories.length !== categoryIds.length) {
     return { ok: false, error: 'Sepetteki ürünlerden biri artık mağazada mevcut değil.' };
   }
-  for (const category of categories) {
-    if (category.defaultAmount == null) {
-      return { ok: false, error: `"${category.name}" için fiyat tanımlı değil. Lütfen resepsiyona başvurun.` };
+
+  let totalAmount = 0;
+  for (const item of items) {
+    const category = categories.find((c) => c.id === item.categoryId);
+    if (!category || category.defaultAmount == null) {
+      return {
+        ok: false,
+        error: `"${category?.name ?? 'Ürün'}" için fiyat tanımlı değil. Lütfen resepsiyona başvurun.`,
+      };
     }
+    if (category.stockQuantity != null && category.stockQuantity < item.quantity) {
+      return { ok: false, error: `"${category.name}" stokta yok.` };
+    }
+    totalAmount += Number(category.defaultAmount) * item.quantity;
   }
+  totalAmount = Math.round(totalAmount * 100) / 100;
 
   const gateway = await getActiveTenantCardGateway(organizationId);
   if (!gateway) {
@@ -93,38 +97,10 @@ export async function startStoreCheckout(params: {
     return { ok: false, error: 'Organizasyon bulunamadı.' };
   }
 
-  let expenseIds: string[];
-  let totalAmount: number;
-  try {
-    const created = await prisma.$transaction(async (tx) => {
-      const results = [];
-      for (const item of items) {
-        const category = categories.find((c) => c.id === item.categoryId);
-        if (!category) {
-          throw new Error('Sepetteki ürünlerden biri artık mağazada mevcut değil.');
-        }
-        results.push(
-          await createCategorySaleExpense(tx, {
-            organizationId,
-            gymMemberId,
-            category,
-            createdById: member.userId!,
-            quantity: item.quantity,
-            channel: 'self_service',
-          }),
-        );
-      }
-      return results;
-    });
-    expenseIds = created.map((r) => r.id);
-    totalAmount = Math.round(created.reduce((sum, r) => sum + r.amount, 0) * 100) / 100;
-  } catch (error) {
-    return { ok: false, error: error instanceof Error ? error.message : 'Sipariş oluşturulamadı.' };
-  }
-
   const currency = 'TRY';
   const checkoutSessionId = randomUUID().replace(/-/g, '');
-  const description = `Mağaza siparişi (${expenseIds.length} ürün)`;
+  const description = `Mağaza siparişi (${items.length} ürün)`;
+  const cartJson = items.map((item) => ({ categoryId: item.categoryId, quantity: item.quantity }));
 
   await prisma.tenantCheckoutSession.create({
     data: {
@@ -135,7 +111,8 @@ export async function startStoreCheckout(params: {
       provider: gateway.provider,
       amount: totalAmount,
       currency,
-      storeExpenseIds: expenseIds,
+      storeCartJson: cartJson,
+      storeExpenseIds: [],
     },
   });
 
