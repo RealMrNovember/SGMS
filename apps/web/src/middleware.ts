@@ -61,6 +61,7 @@ export default auth((request) => {
     pathname.startsWith('/reset-2fa') ||
     pathname.startsWith('/privacy') ||
     pathname.startsWith('/terms') ||
+    pathname.startsWith('/account-deletion') ||
     pathname.startsWith('/api/auth') ||
     pathname.startsWith('/dl/') ||
     pathname === '/';
