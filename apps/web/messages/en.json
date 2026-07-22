@@ -476,6 +476,8 @@
       "backToList": "← Conversations",
       "roleTrainer": "Your trainer",
       "roleStaff": "Gym staff",
+      "roleReceptionOnDuty": "Reception · on duty",
+      "roleReceptionFallback": "Reception",
       "noMessagesYet": "No messages yet — start the chat"
     },
     "report": {

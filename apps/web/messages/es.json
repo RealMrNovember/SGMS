@@ -476,6 +476,8 @@
       "backToList": "← Conversaciones",
       "roleTrainer": "Tu entrenador",
       "roleStaff": "Personal",
+      "roleReceptionOnDuty": "Recepción · de servicio",
+      "roleReceptionFallback": "Recepción",
       "noMessagesYet": "Aún no hay mensajes"
     },
     "markRead": "Marcar como leído",

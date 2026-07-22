@@ -11,6 +11,7 @@ import {
   loadThreadMessages,
   markPeerMessagesRead,
 } from '@/lib/messaging/load-messaging';
+import { resolveOnDutyReception } from '@/lib/messaging/on-duty-reception';
 import { prisma } from '@/lib/prisma';
 import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
@@ -35,17 +36,20 @@ export default async function AthleteMessagesPage({
   const locale = await getLocale();
   const dateLocale = intlLocaleFor(locale);
 
-  const gymMember = await prisma.gymMember.findFirst({
-    where: { id: session.user.gymMemberId, organizationId },
-    include: {
-      trainer: { select: { id: true, name: true, email: true, avatarUrl: true } },
-    },
-  });
+  const [gymMember, org, reception] = await Promise.all([
+    prisma.gymMember.findFirst({
+      where: { id: session.user.gymMemberId, organizationId },
+      include: {
+        trainer: { select: { id: true, name: true, email: true, avatarUrl: true } },
+      },
+    }),
+    prisma.organization.findUnique({
+      where: { id: organizationId },
+      select: { settings: true },
+    }),
+    resolveOnDutyReception(organizationId, userId),
+  ]);
 
-  const org = await prisma.organization.findUnique({
-    where: { id: organizationId },
-    select: { settings: true },
-  });
   const orgSettings = parseOrganizationSettings(org?.settings);
   const enableReports = orgSettings.features?.messageReports !== false;
 
@@ -59,9 +63,38 @@ export default async function AthleteMessagesPage({
     });
   }
 
+  if (reception) {
+    peerMeta.set(reception.userId, {
+      name: reception.name,
+      subtitle:
+        reception.source === 'open_shift'
+          ? tMessages('thread.roleReceptionOnDuty')
+          : tMessages('thread.roleReceptionFallback'),
+      avatarUrl: reception.avatarUrl,
+    });
+  }
+
   const conversations = await loadConversationSummaries(organizationId, userId, peerMeta);
 
   const conversationList = [...conversations];
+
+  if (reception && !conversationList.some((c) => c.peer.id === reception.userId)) {
+    conversationList.unshift({
+      peer: {
+        id: reception.userId,
+        name: reception.name,
+        subtitle:
+          reception.source === 'open_shift'
+            ? tMessages('thread.roleReceptionOnDuty')
+            : tMessages('thread.roleReceptionFallback'),
+        avatarUrl: reception.avatarUrl,
+      },
+      lastMessage: tMessages('thread.noMessagesYet'),
+      lastMessageAt: new Date(0),
+      unreadCount: 0,
+    });
+  }
+
   if (gymMember?.trainer && !conversationList.some((c) => c.peer.id === gymMember.trainer!.id)) {
     conversationList.unshift({
       peer: {
@@ -76,11 +109,23 @@ export default async function AthleteMessagesPage({
     });
   }
 
-  const activePeerId =
-    withPeerId && peerMeta.has(withPeerId) ? withPeerId : undefined;
+  conversationList.sort((a, b) => {
+    const rank = (id: string) => {
+      if (gymMember?.trainer?.id === id) return 0;
+      if (reception?.userId === id) return 1;
+      return 2;
+    };
+    const ra = rank(a.peer.id);
+    const rb = rank(b.peer.id);
+    if (ra !== rb) return ra - rb;
+    return b.lastMessageAt.getTime() - a.lastMessageAt.getTime();
+  });
+
+  const activePeerId = withPeerId && peerMeta.has(withPeerId) ? withPeerId : undefined;
 
   let threadMessages: Awaited<ReturnType<typeof loadThreadMessages>> = [];
-  let activePeer: { id: string; name: string; subtitle?: string; avatarUrl?: string | null } | null = null;
+  let activePeer: { id: string; name: string; subtitle?: string; avatarUrl?: string | null } | null =
+    null;
 
   if (activePeerId) {
     await markPeerMessagesRead(organizationId, userId, activePeerId);
@@ -88,9 +133,16 @@ export default async function AthleteMessagesPage({
 
     const fromConversation = conversations.find((c) => c.peer.id === activePeerId)?.peer;
     const fromDirectory = peerMeta.get(activePeerId);
-    activePeer = fromConversation ?? (fromDirectory
-      ? { id: activePeerId, name: fromDirectory.name, subtitle: fromDirectory.subtitle, avatarUrl: fromDirectory.avatarUrl }
-      : null);
+    activePeer =
+      fromConversation ??
+      (fromDirectory
+        ? {
+            id: activePeerId,
+            name: fromDirectory.name,
+            subtitle: fromDirectory.subtitle,
+            avatarUrl: fromDirectory.avatarUrl,
+          }
+        : null);
   }
 
   const totalUnread = conversationList.reduce((sum, c) => sum + c.unreadCount, 0);
@@ -104,9 +156,7 @@ export default async function AthleteMessagesPage({
         </Link>
         <h2 className="mt-3 text-xl font-semibold">{t('pages.messages')}</h2>
         <p className="muted mt-1 text-sm">
-          {totalUnread > 0
-            ? t('unreadCount', { count: totalUnread })
-            : t('allRead')}
+          {totalUnread > 0 ? t('unreadCount', { count: totalUnread }) : t('allRead')}
         </p>
       </div>
 

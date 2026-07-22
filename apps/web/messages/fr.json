@@ -476,6 +476,8 @@
       "backToList": "← Conversations",
       "roleTrainer": "Votre coach",
       "roleStaff": "Personnel",
+      "roleReceptionOnDuty": "Réception · en service",
+      "roleReceptionFallback": "Réception",
       "noMessagesYet": "Pas encore de messages"
     },
     "markRead": "Marquer comme lu",

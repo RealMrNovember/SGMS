@@ -476,6 +476,8 @@
       "backToList": "← Диалоги",
       "roleTrainer": "Ваш тренер",
       "roleStaff": "Персонал",
+      "roleReceptionOnDuty": "Ресепшен · на смене",
+      "roleReceptionFallback": "Ресепшен",
       "noMessagesYet": "Сообщений пока нет"
     },
     "markRead": "Отметить прочитанным",

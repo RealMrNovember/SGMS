@@ -476,6 +476,8 @@
       "backToList": "← Söhbətlər",
       "roleTrainer": "Məşqçiniz",
       "roleStaff": "Personal",
+      "roleReceptionOnDuty": "Resepsiya · növbədə",
+      "roleReceptionFallback": "Resepsiya",
       "noMessagesYet": "Hələ mesaj yoxdur"
     },
     "markRead": "Oxunmuş kimi işarələ",

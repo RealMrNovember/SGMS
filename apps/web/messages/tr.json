@@ -476,6 +476,8 @@
       "backToList": "← Konuşmalar",
       "roleTrainer": "Antrenörünüz",
       "roleStaff": "Salon personeli",
+      "roleReceptionOnDuty": "Resepsiyon · mesaide",
+      "roleReceptionFallback": "Resepsiyon",
       "noMessagesYet": "Henüz mesaj yok — sohbeti başlatın"
     },
     "report": {

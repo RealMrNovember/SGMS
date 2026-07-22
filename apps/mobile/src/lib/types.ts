@@ -35,6 +35,13 @@ export type MeResponse = {
     plan: { id: string; name: string; durationDays: number; price: unknown; currency: string } | null;
     trainer: { id: string; name: string; email: string } | null;
   };
+  receptionOnDuty: {
+    id: string;
+    name: string;
+    email: string;
+    source: 'open_shift' | 'fallback_staff';
+    role: string;
+  } | null;
   stats: {
     measurements: number;
     activePrograms: number;
