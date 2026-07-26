@@ -11,6 +11,15 @@ export type AthleteSession = {
   };
 };
 
+// /api/v1/auth/signup artık hiçbir doğrulama olmadan token vermiyor — kayıt
+// PENDING_APPROVAL'da oluşur, salon onaylayana kadar giriş yapılamaz
+// (bkz. /api/v1/auth/login'deki status==='ACTIVE' şartı).
+export type SignupResult = {
+  pendingApproval: true;
+  organization: { id: string; name: string; slug: string };
+  gymMemberId: string;
+};
+
 export type CheckInQrData = {
   token: string;
   expiresAt: string;

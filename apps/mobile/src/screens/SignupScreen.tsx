@@ -16,14 +16,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '../components/ui/Button';
 import { signup } from '../lib/api';
 import { colors, gradients, radius, spacing, typography } from '../lib/theme';
-import type { AthleteSession } from '../lib/types';
 
 type Props = {
-  onSuccess: (session: AthleteSession) => void;
   onBackToLogin: () => void;
 };
 
-export function SignupScreen({ onSuccess, onBackToLogin }: Props) {
+export function SignupScreen({ onBackToLogin }: Props) {
   const insets = useSafeAreaInsets();
   const [organizationSlug, setOrganizationSlug] = useState('');
   const [firstName, setFirstName] = useState('');
@@ -33,6 +31,7 @@ export function SignupScreen({ onSuccess, onBackToLogin }: Props) {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pendingMessage, setPendingMessage] = useState<string | null>(null);
 
   async function handleSubmit() {
     if (!organizationSlug.trim() || !firstName.trim() || !lastName.trim() || !email.trim() || password.length < 8) {
@@ -43,7 +42,7 @@ export function SignupScreen({ onSuccess, onBackToLogin }: Props) {
     setLoading(true);
     setError(null);
     try {
-      const session = await signup({
+      const result = await signup({
         organizationSlug: organizationSlug.trim().toLowerCase(),
         firstName: firstName.trim(),
         lastName: lastName.trim(),
@@ -51,13 +50,33 @@ export function SignupScreen({ onSuccess, onBackToLogin }: Props) {
         password,
         phone: phone.trim() || undefined,
       });
-      onSuccess(session);
+      // Hesap PENDING_APPROVAL'da oluşturuldu — salon onaylayana kadar token
+      // verilmez, bu yüzden burada doğrudan uygulamaya giremiyoruz.
+      setPendingMessage(
+        `${result.organization.name} onayladıktan sonra bu e-posta ve parolayla giriş yapabilirsiniz.`,
+      );
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Kayıt başarısız');
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setLoading(false);
     }
+  }
+
+  if (pendingMessage) {
+    return (
+      <LinearGradient colors={gradients.hero} style={styles.container}>
+        <View style={[styles.flex, styles.pendingWrap, { paddingTop: insets.top + spacing.xl }]}>
+          <Ionicons name="time-outline" size={48} color={colors.gold} />
+          <Text style={styles.brand}>Kaydınız alındı</Text>
+          <Text style={[styles.subtitle, styles.pendingText]}>{pendingMessage}</Text>
+          <TouchableOpacity onPress={onBackToLogin} style={styles.switch}>
+            <Text style={styles.switchText}>Giriş ekranına dön</Text>
+          </TouchableOpacity>
+        </View>
+      </LinearGradient>
+    );
   }
 
   return (
@@ -158,6 +177,8 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   flex: { flex: 1 },
   scroll: { paddingHorizontal: spacing.xxl },
+  pendingWrap: { alignItems: 'center', justifyContent: 'center', gap: spacing.md, paddingHorizontal: spacing.xxl },
+  pendingText: { marginBottom: 0 },
   brand: { ...typography.title, fontSize: 24, color: colors.text, textAlign: 'center' },
   subtitle: {
     ...typography.body,

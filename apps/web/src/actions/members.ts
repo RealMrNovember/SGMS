@@ -377,3 +377,99 @@ export async function recordHealthConsent(
 
   return { success: 'Sağlık formu rızası kaydedildi.' };
 }
+
+export type PendingMemberActionState = { error?: string; success?: string };
+
+/**
+ * Mobil self-servis kayıttan (`/api/v1/auth/signup`) gelen, salon slug'ı
+ * dışında hiçbir doğrulaması olmayan bir hesabı gerçek bir üyeye çevirir.
+ * MembershipFreeze/TrainerRequest'teki aynı talep/onay deseni.
+ */
+export async function approvePendingMember(gymMemberId: string): Promise<PendingMemberActionState> {
+  const context = await getMemberManagerContext();
+  if ('error' in context) {
+    return { error: context.error };
+  }
+
+  const writeBlock = await getTenantWriteBlockReason(context.organizationId);
+  if (writeBlock) {
+    return { error: writeBlock };
+  }
+
+  const member = await prisma.gymMember.findFirst({
+    where: { id: gymMemberId, organizationId: context.organizationId, status: 'PENDING_APPROVAL' },
+  });
+  if (!member) {
+    return { error: 'Onay bekleyen kayıt bulunamadı.' };
+  }
+
+  const memberLimitError = await assertWithinMemberLimit(context.organizationId);
+  if (memberLimitError) {
+    return { error: memberLimitError };
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.gymMember.update({
+      where: { id: member.id },
+      data: { status: 'ACTIVE' },
+    });
+
+    await tx.auditLog.create({
+      data: {
+        actorId: context.actorId,
+        organizationId: context.organizationId,
+        action: 'MEMBER_UPDATED',
+        entityType: 'gym_member',
+        entityId: member.id,
+        metadata: { kind: 'self_signup_approved' },
+      },
+    });
+  });
+
+  revalidatePath('/dashboard/members');
+  return { success: `${member.firstName} ${member.lastName} onaylandı, artık giriş yapabilir.` };
+}
+
+/**
+ * Sahte/hatalı bir self-servis kaydı reddeder. Veri silinmez (INACTIVE'e
+ * alınır) — staff isterse geçmişe bakıp elle temizleyebilir.
+ */
+export async function rejectPendingMember(gymMemberId: string): Promise<PendingMemberActionState> {
+  const context = await getMemberManagerContext();
+  if ('error' in context) {
+    return { error: context.error };
+  }
+
+  const writeBlock = await getTenantWriteBlockReason(context.organizationId);
+  if (writeBlock) {
+    return { error: writeBlock };
+  }
+
+  const member = await prisma.gymMember.findFirst({
+    where: { id: gymMemberId, organizationId: context.organizationId, status: 'PENDING_APPROVAL' },
+  });
+  if (!member) {
+    return { error: 'Onay bekleyen kayıt bulunamadı.' };
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.gymMember.update({
+      where: { id: member.id },
+      data: { status: 'INACTIVE' },
+    });
+
+    await tx.auditLog.create({
+      data: {
+        actorId: context.actorId,
+        organizationId: context.organizationId,
+        action: 'MEMBER_UPDATED',
+        entityType: 'gym_member',
+        entityId: member.id,
+        metadata: { kind: 'self_signup_rejected' },
+      },
+    });
+  });
+
+  revalidatePath('/dashboard/members');
+  return { success: `${member.firstName} ${member.lastName} reddedildi.` };
+}

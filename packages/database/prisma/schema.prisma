@@ -229,6 +229,9 @@ enum GymMemberStatus {
   INACTIVE
   SUSPENDED
   FROZEN
+  /// Mobil self-servis kayıt (`/api/v1/auth/signup`) ile oluşturulmuş, salon
+  /// tarafından henüz onaylanmamış hesap — onaylanana kadar giriş yapamaz.
+  PENDING_APPROVAL
 }
 
 enum HelpAudience {

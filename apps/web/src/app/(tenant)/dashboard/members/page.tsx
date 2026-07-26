@@ -1,4 +1,5 @@
 import { AddMemberForm } from '@/components/add-member-form';
+import { PendingMemberApprovals } from '@/components/pending-member-approvals';
 import { UserAvatar } from '@/components/user-avatar';
 import { auth } from '@/lib/auth';
 import { intlLocaleFor } from '@/lib/format-locale';
@@ -42,7 +43,9 @@ export default async function MembersPage({
   const where: Prisma.GymMemberWhereInput = {
     organizationId,
     ...(role === 'TRAINER' ? { trainerId: userId } : {}),
-    ...(statusFilter ? { status: statusFilter } : {}),
+    // Mobil self-servis kayıttan gelen onay bekleyenler ana listeye karışmaz —
+    // ayrı bir "Bekleyen Onaylar" panelinde ele alınır (bkz. aşağıdaki sorgu).
+    ...(statusFilter ? { status: statusFilter } : { status: { not: 'PENDING_APPROVAL' } }),
     ...(query
       ? {
           OR: [
@@ -57,7 +60,9 @@ export default async function MembersPage({
       : {}),
   };
 
-  const [organization, plans, totalCount, members] = await Promise.all([
+  const canManage = session.user.role ? MEMBER_MANAGER_ROLES.has(session.user.role) : false;
+
+  const [organization, plans, totalCount, members, pendingSignups] = await Promise.all([
     prisma.organization.findUnique({
       where: { id: organizationId },
       select: { name: true, slug: true },
@@ -75,14 +80,20 @@ export default async function MembersPage({
       take: PAGE_SIZE,
       skip: (page - 1) * PAGE_SIZE,
     }),
+    canManage
+      ? prisma.gymMember.findMany({
+          where: { organizationId, status: 'PENDING_APPROVAL' },
+          orderBy: { createdAt: 'asc' },
+          take: 50,
+          select: { id: true, firstName: true, lastName: true, email: true, phone: true, createdAt: true },
+        })
+      : Promise.resolve([]),
   ]);
 
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
   const rangeFrom = totalCount === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
   const rangeTo = Math.min(currentPage * PAGE_SIZE, totalCount);
-
-  const canManage = session.user.role ? MEMBER_MANAGER_ROLES.has(session.user.role) : false;
 
   const planOptions = plans.map((plan) => ({
     id: plan.id,
@@ -111,6 +122,19 @@ export default async function MembersPage({
           {t('subtitle', { orgName: organization?.name ?? '—' })}
         </p>
       </div>
+
+      {canManage ? (
+        <PendingMemberApprovals
+          items={pendingSignups.map((m) => ({
+            id: m.id,
+            firstName: m.firstName,
+            lastName: m.lastName,
+            email: m.email,
+            phone: m.phone,
+            createdAt: m.createdAt.toISOString(),
+          }))}
+        />
+      ) : null}
 
       <AddMemberForm canManage={canManage} plans={planOptions} />
 

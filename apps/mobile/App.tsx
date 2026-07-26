@@ -98,7 +98,7 @@ function AppShell() {
     return (
       <>
         {authMode === 'signup' ? (
-          <SignupScreen onSuccess={handleLoginSuccess} onBackToLogin={() => setAuthMode('login')} />
+          <SignupScreen onBackToLogin={() => setAuthMode('login')} />
         ) : (
           <LoginScreen onSuccess={handleLoginSuccess} onGoSignup={() => setAuthMode('signup')} />
         )}

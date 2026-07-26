@@ -12,6 +12,7 @@ import type {
   MembershipRenewalResponse,
   MealType,
   NutritionOverview,
+  SignupResult,
   StoreCheckoutResponse,
   StoreOrder,
   StoreProduct,
@@ -50,8 +51,8 @@ export async function signup(input: {
   firstName: string;
   lastName: string;
   phone?: string;
-}): Promise<AthleteSession> {
-  return apiFetch<AthleteSession>('/api/v1/auth/signup', {
+}): Promise<SignupResult> {
+  return apiFetch<SignupResult>('/api/v1/auth/signup', {
     method: 'POST',
     body: JSON.stringify(input),
   });

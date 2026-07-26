@@ -1,6 +1,4 @@
 import { apiError, apiOk } from '@/lib/api/response';
-import { issueApiToken } from '@/lib/api/token';
-import { writeAuditLog } from '@/lib/audit/logger';
 import { prisma } from '@/lib/prisma';
 import { assertWithinMemberLimit, getTenantWriteBlockReason } from '@/lib/tenant-access';
 import { hash } from 'bcryptjs';
@@ -18,6 +16,14 @@ const signupSchema = z.object({
 /**
  * Sporcu self-signup: salon slug'ı ile hesap + GymMember oluşturur.
  * İlk paket satışı ayrı endpoint (`/me/membership/renew` + planId) ile yapılır.
+ *
+ * **Güvenlik kararı:** Salon slug'ı serbest metin olduğundan (fiziksel bir
+ * QR/kod doğrulaması yok) ve hiçbir e-posta/kimlik doğrulaması yapılmadığından,
+ * hesap doğrudan ACTIVE olarak açılmaz — salonun kendi personeli/sahibi
+ * onaylayana kadar `PENDING_APPROVAL` durumunda kalır ve token verilmez
+ * (`/api/v1/auth/login` zaten yalnızca `status==='ACTIVE'` üyelere token
+ * veriyor — bu akış aynı korumayı en baştan uygular, MembershipFreeze/
+ * TrainerRequest'teki aynı talep/onay desenini yeniden kullanır).
  */
 export async function POST(request: Request) {
   let body: unknown;
@@ -97,7 +103,7 @@ export async function POST(request: Request) {
         lastName,
         email,
         phone,
-        status: 'ACTIVE',
+        status: 'PENDING_APPROVAL',
         locale: 'tr',
       },
     });
@@ -109,48 +115,20 @@ export async function POST(request: Request) {
         action: 'MEMBER_REGISTERED',
         entityType: 'gym_member',
         entityId: gymMember.id,
-        metadata: { kind: 'athlete_self_signup', email, source: 'mobile' },
+        metadata: { kind: 'athlete_self_signup', email, source: 'mobile', status: 'PENDING_APPROVAL' },
       },
     });
 
     return { user, gymMember };
   });
 
-  const issued = await issueApiToken({
-    userId: created.user.id,
-    organizationId: org.id,
-    scope: 'ATHLETE',
-    gymMemberId: created.gymMember.id,
-    role: null,
-    label: 'mobile-signup',
-  });
-
-  void writeAuditLog({
-    actorId: created.user.id,
-    organizationId: org.id,
-    action: 'USER_LOGIN',
-    entityType: 'api_token',
-    entityId: created.user.id,
-    metadata: { scope: 'ATHLETE', source: 'api_v1_auth_signup' },
-  });
-
+  // Token verilmiyor — hesap PENDING_APPROVAL'da; onaylanana kadar
+  // /api/v1/auth/login de zaten reddedecek (status==='ACTIVE' şartı).
   return apiOk(
     {
-      accessToken: issued.accessToken,
-      tokenType: 'Bearer',
-      expiresAt: issued.expiresAt.toISOString(),
-      scope: 'athlete',
-      user: {
-        id: created.user.id,
-        email: created.user.email,
-        name: created.user.name,
-        locale: created.user.locale,
-      },
-      organizationId: org.id,
+      pendingApproval: true,
       organization: { id: org.id, name: org.name, slug: org.slug },
       gymMemberId: created.gymMember.id,
-      role: null,
-      needsMembershipPurchase: true,
     },
     201,
   );
