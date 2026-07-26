@@ -79,6 +79,16 @@ export async function createAthletePortalAccess(
     if (otherLink) {
       return { error: 'Bu e-posta başka bir sporcu hesabına bağlı.' };
     }
+
+    // Bu e-posta bu salonda zaten OWNER/ADMIN/STAFF/TRAINER ise aşağıdaki upsert
+    // onu sessizce VIEWER'a düşürüp panel erişimini kilitlerdi (ör. kendi
+    // salonunda antrenman da yapan bir salon sahibi) — bilinçli olarak engellenir.
+    const existingMembership = await prisma.organizationMember.findUnique({
+      where: { organizationId_userId: { organizationId, userId: existingUser.id } },
+    });
+    if (existingMembership && existingMembership.role !== 'VIEWER') {
+      return { error: 'Bu e-posta bu salonda zaten bir personel hesabına ait. Farklı bir e-posta kullanın.' };
+    }
   }
 
   const temporaryPassword = generateTempPassword();
